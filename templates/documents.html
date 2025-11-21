@@ -1,0 +1,16 @@
+<div class="collection [[ browse:is-writable($context) ]]" data-root="[[ $context?request?parameters?path ]]">
+    [# Receives a list of documents to display in $documents #]
+    <ul class="documents">
+        [% if empty($documents) %]
+        <li class="document card"><h5>No documents</h5></li>
+        [% else %]
+            [% for $doc in $documents %]
+            [% let $options = browse:document-options($doc) %]
+            <li class="document card">
+                <header>[[ browse:header($context, $doc, $options) ]]</header>
+            </li>
+            [% endlet %]
+            [% endfor %]
+        [% endif %]
+    </ul>
+</div>

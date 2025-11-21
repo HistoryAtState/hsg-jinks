@@ -1,0 +1,251 @@
+{
+  "actions" : [ {
+    "description" : "Reindex data",
+    "name" : "reindex"
+  }, {
+    "description" : "Fix ODDs",
+    "name" : "fix-odds"
+  } ],
+  "profiles" : [ "base10", "theme-base10" ],
+  "_lastModified" : null,
+  "label" : "hsg-jinks",
+  "odds" : [ "teipublisher.odd" ],
+  "version" : "1.0.0",
+  "id" : "https://e-editiones.org/apps/hsg-jinks",
+  "_update" : false,
+  "styles" : [ "resources/css/pico-components.css", "https://cdn.jsdelivr.net/npm/theme-toggles@4.10.1/css/classic.min.css", "resources/css/jinks-theme.css" ],
+  "_noDeploy" : false,
+  "template-suffix" : "\\.tpl",
+  "ignore" : [ "repo.xml", "resources/css/components.css" ],
+  "target" : "/db/apps/jinks/temp/hsg-jinks",
+  "menu" : {
+    "language" : true,
+    "delete" : true,
+    "dark-mode" : true,
+    "items" : [ {
+      "url" : "",
+      "id" : "Start"
+    } ],
+    "login" : true,
+    "download" : true,
+    "search" : true
+  },
+  "theme" : {
+    "logo" : {
+      "width" : "140px",
+      "height" : "48px",
+      "dark" : "../images/tei-publisher-logo-contrast-color.svg",
+      "splash" : {
+        "size" : "360px auto",
+        "dark" : "../images/tei-publisher-logo-contrast-color.svg",
+        "light" : "../images/tei-publisher-logo-color.svg"
+      },
+      "light" : "../images/tei-publisher-logo-contrast-color.svg"
+    },
+    "hero" : {
+      "background-position" : "center",
+      "background-color" : "rgba(0, 0, 0, 0.6)",
+      "class" : "row",
+      "text-width" : "50rem",
+      "background-size" : "cover",
+      "background-image" : "../images/typewriter.jpg",
+      "background-repeat" : "no-repeat"
+    },
+    "bottom" : {
+      "background-color" : "rgba(0, 0, 0, 0.4)",
+      "background-size" : "cover",
+      "background-image" : "../images/typewriter-on-books.jpg",
+      "background-repeat" : "no-repeat"
+    },
+    "layout" : {
+      "search" : "before-top",
+      "after-width" : "min(30vw, 356px)",
+      "max-width" : "108rem",
+      "toggle-before" : true,
+      "before-width" : "min(30vw, 356px)",
+      "class" : "fixed-layout"
+    },
+    "breadcrumbs" : {
+      "max" : "40ch"
+    },
+    "header" : {
+      "background-image" : null
+    },
+    "fonts" : {
+      "toc" : {
+        "size" : "1.125rem"
+      },
+      "menubar" : {
+        "size" : "14px"
+      },
+      "footnote" : {
+        "size" : "0.9em"
+      },
+      "base" : {
+        "family" : "'Inter', 'Noto', sans-serif",
+        "line-height" : "140%",
+        "size" : "16px",
+        "weight" : "400"
+      },
+      "heading" : {
+        "family" : "'Inter', 'Noto', sans-serif",
+        "size" : "1.2rem",
+        "weight" : "400"
+      },
+      "breadcrumbs" : {
+        "size" : "0.9rem"
+      },
+      "content" : {
+        "family" : "JunicodeVF, Georgia, 'Times New Roman', serif",
+        "line-height" : "150%",
+        "size" : "1.25rem",
+        "weight" : "400"
+      }
+    },
+    "texture" : {
+      "background-image" : "../images/jinks-images/paper.jpeg"
+    },
+    "colors" : {
+      "palettes" : {
+        "green" : "palette-green.css",
+        "teal" : "palette-teal.css",
+        "neutral" : "palette-neutral.css",
+        "blue" : "palette-blue.css",
+        "beige" : "palette-beige.css"
+      },
+      "menubar" : {
+        "background-color" : "var(--jinks-colors-500)",
+        "color" : "#ffffff",
+        "background-image" : null
+      },
+      "palette" : "blue"
+    }
+  },
+  "features" : {
+    "browse" : {
+      "sort" : {
+        "options" : [ {
+          "label" : "Category",
+          "value" : "category",
+          "key" : "browse.category"
+        }, {
+          "label" : "Title",
+          "value" : "title",
+          "key" : "browse.title"
+        }, {
+          "label" : "Author",
+          "value" : "author",
+          "key" : "browse.author"
+        } ],
+        "default" : "category"
+      },
+      "field" : {
+        "options" : [ {
+          "label" : "Content",
+          "value" : "text",
+          "key" : "search.content"
+        }, {
+          "label" : "Title",
+          "value" : "title",
+          "key" : "search.title"
+        } ],
+        "default" : "text"
+      }
+    },
+    "menubar" : true,
+    "toolbar" : {
+      "zoom" : true,
+      "navigation" : true,
+      "enabled" : true,
+      "progress" : {
+        "subscribe" : "transcription",
+        "enabled" : true
+      }
+    },
+    "toolbar-toggles" : {
+      "toggle-reading" : false,
+      "enabled" : false
+    },
+    "hero" : false,
+    "toc" : {
+      "collapse" : false,
+      "enabled" : false
+    }
+  },
+  "indexing" : {
+    "tei" : {
+      "enable" : true,
+      "context" : "div"
+    },
+    "docbook" : {
+      "enable" : true
+    },
+    "jats" : {
+      "enable" : true
+    }
+  },
+  "pkg" : {
+    "website" : "http://tei-publisher.com",
+    "abbrev" : "hsg-jinks",
+    "version" : "1.0.0",
+    "dependencies" : [ {
+      "semver" : "1",
+      "package" : "http://e-editiones.org/roaster"
+    }, {
+      "semver" : "6",
+      "package" : "http://existsolutions.com/apps/tei-publisher-lib"
+    }, {
+      "semver" : "1",
+      "package" : "http://tei-publisher.com/library/jinks-templates"
+    } ],
+    "permissions" : "rw-r--r--",
+    "user" : {
+      "password" : "simple",
+      "name" : "tei",
+      "group" : "tei"
+    }
+  },
+  "description" : "Includes style defaults",
+  "_dry" : false,
+  "source" : "/db/apps/jinks/profiles/theme-base10",
+  "type" : "theme",
+  "skip" : [ "^doc/.*$", "setup.xql", "config.json" ],
+  "_overwrite" : "quick",
+  "defaults" : {
+    "data" : "/db/apps/frus-data-jinks/data",
+    "address-by-id" : false,
+    "odd-root" : "resources/odd",
+    "data-default" : "Publications",
+    "direction" : "ltr",
+    "view" : "div",
+    "media" : [ "web", "print", "fo", "latex", "epub" ],
+    "template" : "basic.html",
+    "browse" : "browse.html",
+    "search" : "div",
+    "odd" : "teipublisher.odd",
+    "pagination" : {
+      "fill" : 5,
+      "depth" : 10
+    }
+  },
+  "templating" : {
+    "modules" : {
+      "http://teipublisher.com/ns/templates/browse" : {
+        "at" : "modules/templates/browse.xqm",
+        "prefix" : "browse"
+      },
+      "http://teipublisher.com/ns/templates/page" : {
+        "at" : "modules/templates/page.xqm",
+        "prefix" : "page"
+      }
+    }
+  },
+  "script" : {
+    "custom" : [ ],
+    "webcomponents" : "2.26.0-next-3.17",
+    "extra-components" : [ ],
+    "cdn" : "https://cdn.jsdelivr.net/npm/@teipublisher/pb-components"
+  },
+  "order" : 902,
+  "$schema" : "../../schema/jinks.json"
+}

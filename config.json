@@ -1,0 +1,34 @@
+{
+    "$schema": "../../schema/jinks.json",
+    "theme": {
+        "colors": {
+            "palette": "blue"
+        }
+    },
+    "pkg": {
+        "abbrev": "hsg-jinks"
+    },
+    "label": "hsg-jinks",
+    "id": "https://e-editiones.org/apps/hsg-jinks",
+    "defaults": {
+        "data": "/db/apps/frus-data-jinks/data",
+        "data-default": "Publications",
+        "template": "volume-landing.html",
+        "odd": "hsg-jinks.odd"
+    },
+    "odds": [
+        "hsg-jinks.odd"
+    ],
+    "api": [
+        {
+            "spec": "hsg-api.json",
+            "prefix": "hsgapi",
+            "path": "hsg-api.xql",
+            "id": "http://teipublisher.com/api/hsg"
+        }
+    ],
+    "extends": [
+        "base10",
+        "theme-base10"
+    ]
+}

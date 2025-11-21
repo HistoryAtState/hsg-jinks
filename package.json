@@ -1,0 +1,11 @@
+{
+    "name": "hsg-jinks",
+    "version": "1.0.0",
+    "description": "hsg-jinks",
+    "license": "GPL-3.0",
+    "dependencies": {
+        "@teipublisher/pb-components": "^2.26.0-next-3.17",
+        "@jinntec/fore": "^2.4.1",
+        "@picocss/pico": "^2.1.1"
+    }
+}

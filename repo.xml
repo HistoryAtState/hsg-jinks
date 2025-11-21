@@ -1,0 +1,13 @@
+<meta xmlns="http://exist-db.org/xquery/repo" commit-id="@commit-id@" commit-time="@commit-time@">
+    <description>Includes style defaults</description>
+    <author>Wolfgang Meier</author>
+    <website>http://tei-publisher.com</website>
+    <status>stable</status>
+    <license>GPLv3</license>
+    <copyright>true</copyright>
+    <type>application</type>
+    <target>hsg-jinks</target>
+    <prepare>pre-install.xql</prepare>
+    <finish>post-install.xql</finish>
+    <permissions user="tei" group="tei" mode="rw-rw-r--"/>
+<deployed>2025-11-10T18:39:25.34+01:00</deployed></meta>
