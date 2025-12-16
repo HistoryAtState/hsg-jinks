@@ -52,7 +52,6 @@ declare function browse:header($context as map(*), $doc as element(), $config as
                 "doc": if ($config:address-by-id) then config:get-identifier($doc) else $config:context-path || "/" || $config?relpath,
                 "language": $context?language
             }, $config?odd)
-        let $_ := util:log("INFO", $header)
         return
             if ($header) then
                 $header

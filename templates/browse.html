@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <template>
     ---json
     {
@@ -23,7 +24,9 @@
         },
         "theme": {
             "layout": {
-                "toggle-before": false
+                "before": {
+                    "toggle": false
+                }
             }
         }
     }
@@ -47,7 +50,9 @@
     [% if $context?theme?layout?search = 'before-top' %]
     <li>
         <pb-search subscribe="search" value="[[ $request?parameters?query ]]" subforms=".facets,.options" submit-on-load="submit-on-load">
-            <button slot="searchButton"><pb-i18n key="search.search">Search</pb-i18n></button>
+            <button slot="searchButton">
+                <pb-i18n key="search.search">Search</pb-i18n>
+            </button>
             <input type="hidden" name="field" value="text"/>
         </pb-search>
     </li>
@@ -55,19 +60,24 @@
     [% endtemplate %]
     [% template before %]
     <pb-search class="mobile" subscribe="search" value="[[ $request?parameters?query ]]" subforms=".facets,.options" submit-on-load="submit-on-load">
-        <button slot="searchButton"><pb-i18n key="search.search">Search</pb-i18n></button>
+        <button slot="searchButton">
+            <pb-i18n key="search.search">Search</pb-i18n>
+        </button>
         <input type="hidden" name="field" value="text"/>
     </pb-search>
     [% if $context?theme?layout?search = 'before' %]
     <pb-search subscribe="search" value="[[ $request?parameters?query ]]" subforms=".facets,.options" submit-on-load="submit-on-load">
-        <button slot="searchButton"><pb-i18n key="search.search">Search</pb-i18n></button>
+        <button slot="searchButton">
+            <pb-i18n key="search.search">Search</pb-i18n>
+        </button>
         <input type="hidden" name="field" value="text"/>
     </pb-search>
     [% endif %]
     
     <pb-custom-form class="options">
         <fieldset>
-            <label for="search.sort"><pb-i18n key="browse.sort"/>:</label>
+            <label for="search.sort">
+                <pb-i18n key="browse.sort"/>:</label>
             <select name="sort" id="search.sort">
                 [% let $current = page:parameter($context, 'sort', $context?features?browse?sort?default) %]
                 [% for $option in $context?features?browse?sort?options?* %]
@@ -81,7 +91,8 @@
             </select>
         </fieldset>
         <fieldset>
-            <label for="search.field"><pb-i18n key="search.scope"/>:</label>
+            <label for="search.field">
+                <pb-i18n key="search.scope"/>:</label>
             <select name="field" id="search.field">
                 [% let $current = page:parameter($context, 'field', $context?features?browse?field?default) %]
                 [% for $option in $context?features?browse?field?options?* %]

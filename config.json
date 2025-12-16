@@ -1,34 +1,27 @@
 {
-    "$schema": "../../schema/jinks.json",
-    "theme": {
-        "colors": {
-            "palette": "blue"
-        }
-    },
-    "pkg": {
-        "abbrev": "hsg-jinks"
-    },
-    "label": "hsg-jinks",
-    "id": "https://e-editiones.org/apps/hsg-jinks",
-    "defaults": {
-        "data": "/db/apps/frus-data-jinks/data",
-        "data-default": "Publications",
-        "template": "volume-landing.html",
-        "odd": "hsg-jinks.odd"
-    },
-    "odds": [
-        "hsg-jinks.odd"
-    ],
-    "api": [
-        {
-            "spec": "hsg-api.json",
-            "prefix": "hsgapi",
-            "path": "hsg-api.xql",
-            "id": "http://teipublisher.com/api/hsg"
-        }
-    ],
-    "extends": [
-        "base10",
-        "theme-base10"
-    ]
+  "theme" : {
+    "colors" : {
+      "palette" : "blue"
+    }
+  },
+  "pkg" : {
+    "abbrev" : "hsg-jinks"
+  },
+  "label" : "hsg-jinks",
+  "odds" : [ "hsg-jinks.odd" ],
+  "id" : "https://e-editiones.org/apps/hsg-jinks",
+  "defaults" : {
+    "data" : "/db/apps/frus-data-jinks/data",
+    "data-default" : "Publications",
+    "odd" : "hsg-jinks.odd",
+    "template" : "volume-landing.html"
+  },
+  "$schema" : "../../schema/jinks.json",
+  "api" : [ {
+    "spec" : "hsg-api.json",
+    "prefix" : "hsgapi",
+    "id" : "http://teipublisher.com/api/hsg",
+    "path" : "hsg-api.xql"
+  } ],
+  "extends" : [ "base10", "theme-base10" ]
 }

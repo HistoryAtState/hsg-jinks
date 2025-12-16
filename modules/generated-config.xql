@@ -5,12 +5,12 @@ xquery version "3.1";
  :)
 module namespace config="https://e-editiones.org/tei-publisher/generator/config";
 
-declare variable $config:webcomponents := "2.26.0-next-3.17";
+declare variable $config:webcomponents := "2.26.0-next-3.20";
 declare variable $config:webcomponents-cdn := "https://cdn.jsdelivr.net/npm/@teipublisher/pb-components";
 declare variable $config:fore := "";
 
 declare variable $config:default-view := "div";
-declare variable $config:default-template := "basic.html";
+declare variable $config:default-template := "volume-landing.html";
 declare variable $config:default-media := ("web", "print", "fo", "latex", "epub");
 declare variable $config:search-default := "";
 declare variable $config:sort-default := "category";
@@ -28,13 +28,13 @@ declare variable $config:sort-default := "category";
 
 
 declare variable $config:odd-root := $config:app-root || "/resources/odd";
-declare variable $config:default-odd := "teipublisher.odd";
+declare variable $config:default-odd := "hsg-jinks.odd";
 declare variable $config:odd-internal := 
     (  );
 
 declare variable $config:odd-available :=
 
-( "teipublisher.odd" )
+( "teipublisher.odd", "hsg-jinks.odd" )
 ;
 
 declare variable $config:odd-media := ("web", "print", "fo", "latex", "epub");

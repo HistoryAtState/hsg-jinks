@@ -7,17 +7,23 @@
     "name" : "fix-odds"
   } ],
   "profiles" : [ "base10", "theme-base10" ],
-  "_lastModified" : null,
+  "_lastModified" : "2025-12-16T09:38:58.108+01:00",
   "label" : "hsg-jinks",
-  "odds" : [ "teipublisher.odd" ],
+  "odds" : [ "teipublisher.odd", "hsg-jinks.odd" ],
   "version" : "1.0.0",
   "id" : "https://e-editiones.org/apps/hsg-jinks",
-  "_update" : false,
+  "_update" : true,
   "styles" : [ "resources/css/pico-components.css", "https://cdn.jsdelivr.net/npm/theme-toggles@4.10.1/css/classic.min.css", "resources/css/jinks-theme.css" ],
   "_noDeploy" : false,
+  "api" : [ {
+    "spec" : "hsg-api.json",
+    "prefix" : "hsgapi",
+    "id" : "http://teipublisher.com/api/hsg",
+    "path" : "hsg-api.xql"
+  } ],
   "template-suffix" : "\\.tpl",
   "ignore" : [ "repo.xml", "resources/css/components.css" ],
-  "target" : "/db/apps/jinks/temp/hsg-jinks",
+  "target" : "/db/apps/hsg-jinks",
   "menu" : {
     "language" : true,
     "delete" : true,
@@ -58,12 +64,19 @@
       "background-repeat" : "no-repeat"
     },
     "layout" : {
+      "class" : "fixed-layout",
       "search" : "before-top",
-      "after-width" : "min(30vw, 356px)",
-      "max-width" : "108rem",
-      "toggle-before" : true,
-      "before-width" : "min(30vw, 356px)",
-      "class" : "fixed-layout"
+      "after" : {
+        "width" : "min(30vw, 356px)",
+        "hidden" : false,
+        "toggle" : true
+      },
+      "before" : {
+        "width" : "min(30vw, 356px)",
+        "hidden" : false,
+        "toggle" : true
+      },
+      "max-width" : "108rem"
     },
     "breadcrumbs" : {
       "max" : "40ch"
@@ -210,7 +223,7 @@
   "source" : "/db/apps/jinks/profiles/theme-base10",
   "type" : "theme",
   "skip" : [ "^doc/.*$", "setup.xql", "config.json" ],
-  "_overwrite" : "quick",
+  "_overwrite" : "all",
   "defaults" : {
     "data" : "/db/apps/frus-data-jinks/data",
     "address-by-id" : false,
@@ -219,10 +232,10 @@
     "direction" : "ltr",
     "view" : "div",
     "media" : [ "web", "print", "fo", "latex", "epub" ],
-    "template" : "basic.html",
+    "template" : "volume-landing.html",
     "browse" : "browse.html",
     "search" : "div",
-    "odd" : "teipublisher.odd",
+    "odd" : "hsg-jinks.odd",
     "pagination" : {
       "fill" : 5,
       "depth" : 10
@@ -242,7 +255,7 @@
   },
   "script" : {
     "custom" : [ ],
-    "webcomponents" : "2.26.0-next-3.17",
+    "webcomponents" : "2.26.0-next-3.20",
     "extra-components" : [ ],
     "cdn" : "https://cdn.jsdelivr.net/npm/@teipublisher/pb-components"
   },

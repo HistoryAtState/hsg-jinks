@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <template>
     ---json
     {
@@ -7,8 +8,7 @@
     }
     ---
     <p>Interior page for division [[ $context?parameters?divisionId ]]</p>
-    <pb-view class="overflow" src="document1" column-separator=".tei-cb" append-footnotes="append-footnotes"
-        subscribe="transcription" emit="transcription" direction="[[$context?defaults?direction]]">
-        <pb-param name="mode" value="volume-interior" />
+    <pb-view class="overflow" src="document1" column-separator=".tei-cb" append-footnotes="append-footnotes" subscribe="transcription" emit="transcription" direction="[[$context?defaults?direction]]">
+        <pb-param name="mode" value="volume-interior"/>
     </pb-view>
 </template>

@@ -46,7 +46,7 @@ declare function capi:list($request as map(*)) {
                 else
                     error($errors:NOT_FOUND, "HTML file " || $path || " not found")
             let $model := map:merge((vapi:load-config-json($request), map { "documents": $works, "language": $request?parameters?language }))
-            let $output :=
+            return
                 tmpl:process($template, $model, map {
                     "plainText": false(), 
                     "resolver": vapi:resolver#1,
@@ -57,9 +57,6 @@ declare function capi:list($request as map(*)) {
                         }
                     }
                 })
-            let $_ := util:log("INFO", $output)
-            return
-                $output
         else
             router:response(200, "application/json", $works)
     )

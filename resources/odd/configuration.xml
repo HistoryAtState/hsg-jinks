@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
     Defines extension modules to be loaded for a given output mode, optionally limited to a
     specific odd file. Order is important: the first module function matching a given behaviour
@@ -11,7 +12,8 @@
 
     Note: starting with tei-publisher-lib 3.1.0, the module import paths can be relative
     to the modules/ collection.
---><modules>
+-->
+<modules>
     <!-- Import global variables and functions from modules/odd-global.xqm -->
     <module uri="http://e-editiones.org/tei-publisher/odd-global" prefix="global" at="odd-global.xqm"/>
     <!-- General latex extension functions -->

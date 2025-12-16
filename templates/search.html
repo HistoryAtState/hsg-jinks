@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <template>
     ---json
     {
@@ -42,8 +43,14 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul>
-                <li><a href="[[ $context-path ]]/browse.html"><pb-i18n key="breadcrumb.collection-root"/></a></li>
-                <li><pb-i18n key="search.results"/></li>
+                <li>
+                    <a href="[[ $context-path ]]/browse.html">
+                        <pb-i18n key="breadcrumb.collection-root"/>
+                    </a>
+                </li>
+                <li>
+                    <pb-i18n key="search.results"/>
+                </li>
             </ul>
         </nav>
     </li>
@@ -65,7 +72,9 @@
                 Search headings
             </label>
         </div> -->
-        <button slot="searchButton"><pb-i18n key="search.search">Search</pb-i18n></button>
+        <button slot="searchButton">
+            <pb-i18n key="search.search">Search</pb-i18n>
+        </button>
     </pb-search>
     <pb-custom-form class="facets" url="api/search/facets" subscribe="results" event="pb-results-received" emit="search"/>
     [% endtemplate %]

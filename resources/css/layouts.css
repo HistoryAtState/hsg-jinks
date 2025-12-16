@@ -128,7 +128,7 @@
 .fixed-layout > .after.hidden {
     visibility: hidden;
     /* Make sure this is actually hidden and takes no more width */
-    width: 0px !important;
+    width: auto !important;
     padding: 0;
 }
 
@@ -136,7 +136,7 @@
 .fixed-layout > .before-top.hidden {
     background-color: inherit;
     border: none;
-    width: auto;
+    width: auto !important;
 }
 
 .fixed-layout > main {
@@ -248,6 +248,12 @@
 @media (max-width: 1023px) {
     .hidden-mobile {
         display: none;
+    }
+    
+    /* Ensure .before sidebar is hidden on mobile when it has hidden-mobile class */
+    /* This overrides the more specific .fixed-layout > .before { display: flex; } rule */
+    .fixed-layout > .before.hidden-mobile {
+        display: none !important;
     }
 }
 @media (min-width: 1024px) {

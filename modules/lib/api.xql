@@ -13,12 +13,15 @@ import module namespace sapi="http://teipublisher.com/api/search" at "api/search
 import module namespace dts="http://teipublisher.com/api/dts" at "api/dts.xql";
 import module namespace iapi="http://teipublisher.com/api/info" at "api/info.xql";
 import module namespace vapi="http://teipublisher.com/api/view" at "api/view.xql";
-import module namespace iiif="https://e-editiones.org/api/iiif" at "api/iiif.xql";
 import module namespace nlp="http://teipublisher.com/api/nlp" at "api/nlp.xql";
 import module namespace rapi="http://teipublisher.com/api/registers" at "../registers.xql";
 import module namespace custom="http://teipublisher.com/api/custom" at "../custom-api.xql";
 import module namespace action="http://teipublisher.com/api/actions" at "api/actions.xql";
 import module namespace deploy="https://teipublisher.org/api/deploy" at "api/deploy.xql";
+
+
+
+import module namespace hsgapi="http://teipublisher.com/api/hsg" at "../hsg-api.xql";
 
 
 
@@ -38,6 +41,10 @@ let $lookup := function($name as xs:string) {
 }
 let $resp := roaster:route(
     (
+        
+        
+        "modules/hsg-api.json",
+        
         
         "modules/custom-api.json",
         "modules/lib/api.json"

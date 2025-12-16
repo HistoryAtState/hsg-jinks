@@ -8,11 +8,17 @@ import module namespace pm-teipublisher-print="http://www.tei-c.org/pm/models/te
 import module namespace pm-teipublisher-fo="http://www.tei-c.org/pm/models/teipublisher/fo/module" at "../transform/teipublisher-fo-module.xql";
 import module namespace pm-teipublisher-latex="http://www.tei-c.org/pm/models/teipublisher/latex/module" at "../transform/teipublisher-latex-module.xql";
 import module namespace pm-teipublisher-epub="http://www.tei-c.org/pm/models/teipublisher/epub/module" at "../transform/teipublisher-epub-module.xql";
+import module namespace pm-hsg-jinks-web="http://www.tei-c.org/pm/models/hsg-jinks/web/module" at "../transform/hsg-jinks-web-module.xql";
+import module namespace pm-hsg-jinks-print="http://www.tei-c.org/pm/models/hsg-jinks/print/module" at "../transform/hsg-jinks-print-module.xql";
+import module namespace pm-hsg-jinks-fo="http://www.tei-c.org/pm/models/hsg-jinks/fo/module" at "../transform/hsg-jinks-fo-module.xql";
+import module namespace pm-hsg-jinks-latex="http://www.tei-c.org/pm/models/hsg-jinks/latex/module" at "../transform/hsg-jinks-latex-module.xql";
+import module namespace pm-hsg-jinks-epub="http://www.tei-c.org/pm/models/hsg-jinks/epub/module" at "../transform/hsg-jinks-epub-module.xql";
 
 declare variable $pm-config:web-transform := function($xml as node()*, $parameters as map(*)?, $odd as xs:string?) {
     switch ($odd)
     case "teipublisher.odd" return pm-teipublisher-web:transform($xml, $parameters)
-    default return pm-teipublisher-web:transform($xml, $parameters)
+case "hsg-jinks.odd" return pm-hsg-jinks-web:transform($xml, $parameters)
+    default return pm-hsg-jinks-web:transform($xml, $parameters)
             
 
 };
@@ -22,7 +28,8 @@ declare variable $pm-config:web-transform := function($xml as node()*, $paramete
 declare variable $pm-config:print-transform := function($xml as node()*, $parameters as map(*)?, $odd as xs:string?) {
     switch ($odd)
     case "teipublisher.odd" return pm-teipublisher-print:transform($xml, $parameters)
-    default return pm-teipublisher-print:transform($xml, $parameters)
+case "hsg-jinks.odd" return pm-hsg-jinks-print:transform($xml, $parameters)
+    default return pm-hsg-jinks-print:transform($xml, $parameters)
             
 
 };
@@ -32,7 +39,8 @@ declare variable $pm-config:print-transform := function($xml as node()*, $parame
 declare variable $pm-config:fo-transform := function($xml as node()*, $parameters as map(*)?, $odd as xs:string?) {
     switch ($odd)
     case "teipublisher.odd" return pm-teipublisher-fo:transform($xml, $parameters)
-    default return pm-teipublisher-fo:transform($xml, $parameters)
+case "hsg-jinks.odd" return pm-hsg-jinks-fo:transform($xml, $parameters)
+    default return pm-hsg-jinks-fo:transform($xml, $parameters)
             
 
 };
@@ -42,7 +50,8 @@ declare variable $pm-config:fo-transform := function($xml as node()*, $parameter
 declare variable $pm-config:latex-transform := function($xml as node()*, $parameters as map(*)?, $odd as xs:string?) {
     switch ($odd)
     case "teipublisher.odd" return pm-teipublisher-latex:transform($xml, $parameters)
-    default return pm-teipublisher-latex:transform($xml, $parameters)
+case "hsg-jinks.odd" return pm-hsg-jinks-latex:transform($xml, $parameters)
+    default return pm-hsg-jinks-latex:transform($xml, $parameters)
             
 
 };
@@ -52,7 +61,8 @@ declare variable $pm-config:latex-transform := function($xml as node()*, $parame
 declare variable $pm-config:epub-transform := function($xml as node()*, $parameters as map(*)?, $odd as xs:string?) {
     switch ($odd)
     case "teipublisher.odd" return pm-teipublisher-epub:transform($xml, $parameters)
-    default return pm-teipublisher-epub:transform($xml, $parameters)
+case "hsg-jinks.odd" return pm-hsg-jinks-epub:transform($xml, $parameters)
+    default return pm-hsg-jinks-epub:transform($xml, $parameters)
             
 
 };
