@@ -1,0 +1,5 @@
+.fixed-layout > main {
+    max-width: var(--jinks-content-max-width);
+    display: block;
+    margin: var(--s1) auto;
+}

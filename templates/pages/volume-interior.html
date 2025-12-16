@@ -7,8 +7,9 @@
         }
     }
     ---
-    <p>Interior page for division [[ $context?parameters?divisionId ]]</p>
-    <pb-view class="overflow" src="document1" column-separator=".tei-cb" append-footnotes="append-footnotes" subscribe="transcription" emit="transcription" direction="[[$context?defaults?direction]]">
-        <pb-param name="mode" value="volume-interior"/>
-    </pb-view>
+    [% if $doc?content//tei:bibl[@type='frus-division-type']='chapter' %]
+        [[ page:transform($doc?content, map { "mode": "volume-interior" }) ]]
+    [% else %]
+        [[ page:transform($doc?content) ]]
+    [% endif %]
 </template>

@@ -25,6 +25,7 @@ declare function hsgapi:view($request as map(*)) {
 declare function hsgapi:view-interior($request as map(*)) {
     let $publicationId := $request?parameters?publicationId
     let $divisionId := $request?parameters?divisionId
+    let $_ := util:log("INFO", "publicationId: " || $publicationId || " divisionId: " || $divisionId)
     let $doc := collection($config:data-default || "/" || $publicationId)/id($divisionId)
     return
         vapi:view(map:merge((

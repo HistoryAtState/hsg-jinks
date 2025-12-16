@@ -1,4 +1,4 @@
-<TEI xmlns:pb="http://teipublisher.com/1.0" xmlns="http://www.tei-c.org/ns/1.0" xml:lang="en">
+<TEI xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:pb="http://teipublisher.com/1.0" xmlns="http://www.tei-c.org/ns/1.0" xml:lang="en">
     <teiHeader>
         <fileDesc>
             <titleStmt>
@@ -36,9 +36,7 @@
     <text>
         <body>
             <schemaSpec start="TEI teiCorpus" source="teipublisher.odd"> <elementSpec ident="div" mode="change">
-                    <model predicate="$parameters?mode='volume-landing'" behaviour="heading">
-            <param name="content" value="root(.)//titleStmt/title/node()"/>
-        </model>
+                    <model predicate="$parameters?mode=('volume-landing', 'volume-interior')" behaviour="block"/>
                     <model predicate="$parameters?mode = 'register'" behaviour="pass-through">
             <desc>Output register data if register profile is enabled</desc>
             <param name="people" value="let $refs := (root(.)//persName[@key or @ref], root(.)//rs[@type='person'][@key or @ref]) let $keys := for $i in ($refs/@key, $refs/@ref) return $i ! tokenize(., ' ')  for $key in distinct-values($keys) return collection($global:register-root)/id($key)[self::person]"/>
@@ -59,9 +57,71 @@
                     <model behaviour="block"/>
                 </elementSpec>
                 <elementSpec ident="xi:include" mode="change">
-                    <model behaviour="pass-through">
-            <param name="content" value="id(@xpointer, doc(util:collection-name(.) || &#34;/&#34; || @href))"/>
+                    <model predicate="$parameters?mode='volume-landing'" behaviour="link" pb:mode="subsection">
+            <param name="content" value="id(@xpointer, doc(util:collection-name(.) || '/' || @href))/ancestor::TEI//titleStmt/title"/>
+            <param name="uri" value="root(.)/TEI/@xml:id || '/' || @xpointer"/>
         </model>
+                    <model predicate="$parameters?mode='volume-interior'" behaviour="link" pb:mode="subsection">
+            <param name="content" value="id(@xpointer, doc(util:collection-name(.) || '/' || @href))/ancestor::TEI//titleStmt/title"/>
+            <param name="uri" value="@xpointer"/>
+        </model>
+                </elementSpec>
+            <elementSpec ident="TEI" mode="change">
+                    <model predicate="$parameters?mode=('volume-landing', 'volume-interior')" behaviour="block">
+            <param name="content" value="(.//fileDesc//titleStmt/title, ./text/body//xi:include)"/>
+        </model>
+                    <model predicate="$parameters?mode='breadcrumb'" behaviour="pass-through">
+            <param name="content" value="teiHeader"/>
+        </model>
+                    <model predicate="$parameters?mode='metadata-panel'" behaviour="pass-through">
+            <param name="content" value="teiHeader"/>
+        </model>
+                    <model predicate="$parameters?mode='edition-navigation' and descendant::correspContext" behaviour="pass-through">
+            <desc>process correspContext to provide in-edition navigation buttons to move between documents</desc>
+            <param name="content" value="descendant::correspContext"/>
+        </model>
+                    <model predicate="$parameters?mode = 'register'" behaviour="pass-through">
+            <desc>Output register data if register profile is enabled</desc>
+            <param name="people" value="for $key in distinct-values((root(.)//persName/@key, root(.)//persName/@ref)) return collection($global:register-root)/id($key)[self::person]"/>
+            <param name="places" value="for $key in distinct-values((root(.)//placeName/@key, root(.)//placeName/@ref)) return collection($global:register-root)/id($key)[self::place]"/>
+            <pb:template xmlns="" xml:space="preserve"><div class="register">
+<h3>People</h3>
+<ul>
+[[people]]
+</ul>
+
+<h3>Places</h3>
+<ul>
+[[places]]
+</ul>
+</div></pb:template>
+        </model>
+                    <model behaviour="document"/>
+                </elementSpec>
+            <elementSpec ident="title" mode="change">
+                    <model predicate="$mode='subsection'" behaviour="heading">
+            <param name="level" value="2"/>
+        </model>
+                    <model predicate="$parameters?mode=('volume-landing', 'volume-interior')" behaviour="heading"/>
+                    <model predicate="$parameters?mode='breadcrumb'" behaviour="inline"/>
+                    <model predicate="$parameters?mode='metadata-panel'" behaviour="block"/>
+                    <model predicate="$parameters?mode='register-details' and $parameters?static" behaviour="link">
+            <param name="uri" value="$parameters?context-path || &#34;/letters/&#34; || util:document-name(.) || '/1/index.html'"/>
+            <param name="content" value="string()"/>
+        </model>
+                    <model predicate="$parameters?mode='register-details'" behaviour="link">
+            <desc>create a link to the document, respecting address-by-id configuration</desc>
+            <param name="content" value="string()"/>
+            <param name="uri" value="if ($global:address-by-id) then                             '../' || root(.)/descendant-or-self::TEI/@xml:id                                                      else                                 '../' || substring-after(document-uri(root(.)), $global:data-root || '/')"/>
+        </model>
+                    <model predicate="$parameters?display='browse'" behaviour="heading">
+            <param name="level" value="5"/>
+        </model>
+                    <model predicate="@key or @ref" behaviour="alternate">
+            <param name="alternate" value="let $key:= head((@key, @ref))  return collection($global:register-root)/id($key)"/>
+            <param name="default" value="."/>
+        </model>
+                    <model behaviour="inline"/>
                 </elementSpec>
             </schemaSpec>
         </body>

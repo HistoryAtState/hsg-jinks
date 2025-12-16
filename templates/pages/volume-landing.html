@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <template>
     ---json
     {
@@ -6,9 +7,5 @@
         }
     }
     ---
-    <p>Landing page for volume [[ $context?parameters?publicationId ]]</p>
-    <pb-view class="overflow" src="document1" column-separator=".tei-cb" append-footnotes="append-footnotes"
-        subscribe="transcription" emit="transcription" direction="[[$context?defaults?direction]]">
-        <pb-param name="mode" value="volume-landing" />
-    </pb-view>
+    [[ page:transform($doc?content, map { "mode": "volume-landing" }) ]]
 </template>

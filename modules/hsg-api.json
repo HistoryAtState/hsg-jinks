@@ -18,37 +18,27 @@
     },
     "openapi": "3.0.3",
     "paths": {
-        "/Publications/{publicationId}/{divisionId}": {
+        "/historicaldocuments/{publicationId}": {
             "get": {
-                "summary": "Retrieve interior page for a division",
-                "operationId": "hsgapi:view-interior",
+                "summary": "Retrieve landing page for a volume",
+                "operationId": "hsgapi:view",
                 "x-error-handler": "vapi:handle-error",
                 "tags": [
                     "hsg"
                 ],
                 "parameters": [
                     {
-                        "name": "file",
+                        "name": "template",
                         "in": "query",
                         "schema": {
                             "type": "string",
-                            "default": "pages/volume-interior"
+                            "default": "pages/volume-landing.html"
                         }
                     },
                     {
                         "name": "publicationId",
                         "in": "path",
                         "description": "Relative path to the document",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        },
-                        "allowReserved": true
-                    },
-                    {
-                        "name": "divisionId",
-                        "in": "path",
-                        "description": "ID of the division",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -80,27 +70,37 @@
                 }
             }
         },
-        "/Publications/{publicationId}": {
+        "/historicaldocuments/{publicationId}/{divisionId}": {
             "get": {
-                "summary": "Retrieve landing page for a volume",
-                "operationId": "hsgapi:view",
+                "summary": "Retrieve interior page for a division",
+                "operationId": "hsgapi:view-interior",
                 "x-error-handler": "vapi:handle-error",
                 "tags": [
                     "hsg"
                 ],
                 "parameters": [
                     {
-                        "name": "file",
+                        "name": "template",
                         "in": "query",
                         "schema": {
                             "type": "string",
-                            "default": "pages/volume-landing"
+                            "default": "pages/volume-interior.html"
                         }
                     },
                     {
                         "name": "publicationId",
                         "in": "path",
                         "description": "Relative path to the document",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    },
+                    {
+                        "name": "divisionId",
+                        "in": "path",
+                        "description": "ID of the division",
                         "required": true,
                         "schema": {
                             "type": "string"
