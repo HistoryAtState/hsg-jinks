@@ -57,18 +57,25 @@
                     <model behaviour="block"/>
                 </elementSpec>
                 <elementSpec ident="xi:include" mode="change">
-                    <model predicate="$parameters?mode='volume-landing'" behaviour="link" pb:mode="subsection">
+                    <model predicate="$parameters?mode='volume-landing'" behaviour="listItem" pb:mode="interior">
+            <desc>Process xincludes on a landing page</desc>
             <param name="content" value="id(@xpointer, doc(util:collection-name(.) || '/' || @href))/ancestor::TEI//titleStmt/title"/>
-            <param name="uri" value="root(.)/TEI/@xml:id || '/' || @xpointer"/>
         </model>
-                    <model predicate="$parameters?mode='volume-interior'" behaviour="link" pb:mode="subsection">
+                    <model predicate="$parameters?mode='volume-interior'" behaviour="listItem" pb:mode="document">
+            <desc>Process xincludes on an interior page</desc>
             <param name="content" value="id(@xpointer, doc(util:collection-name(.) || '/' || @href))/ancestor::TEI//titleStmt/title"/>
-            <param name="uri" value="@xpointer"/>
         </model>
                 </elementSpec>
             <elementSpec ident="TEI" mode="change">
                     <model predicate="$parameters?mode=('volume-landing', 'volume-interior')" behaviour="block">
-            <param name="content" value="(.//fileDesc//titleStmt/title, ./text/body//xi:include)"/>
+            <param name="content" value="./text/body//xi:include"/>
+            <param name="head" value=".//fileDesc//titleStmt/title"/>
+            <pb:template xmlns="" xml:space="preserve"><div>
+  [[head]]
+  <ul>
+    [[content]]
+  </ul>
+</div></pb:template>
         </model>
                     <model predicate="$parameters?mode='breadcrumb'" behaviour="pass-through">
             <param name="content" value="teiHeader"/>
@@ -99,8 +106,13 @@
                     <model behaviour="document"/>
                 </elementSpec>
             <elementSpec ident="title" mode="change">
-                    <model predicate="$mode='subsection'" behaviour="heading">
-            <param name="level" value="2"/>
+                    <model predicate="$mode='interior'" behaviour="link">
+            <desc>Coming from a landing page, list interior pages</desc>
+            <param name="uri" value="root(.)//bibl[@type='frus-volume-id'] || '/' || root(.)//bibl[@type='frus-division-id']"/>
+        </model>
+                    <model predicate="$mode='document'" behaviour="link">
+            <desc>Coming from an interior page, list documents</desc>
+            <param name="uri" value="root(.)//bibl[@type='frus-division-id']"/>
         </model>
                     <model predicate="$parameters?mode=('volume-landing', 'volume-interior')" behaviour="heading"/>
                     <model predicate="$parameters?mode='breadcrumb'" behaviour="inline"/>
