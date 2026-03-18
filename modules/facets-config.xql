@@ -21,24 +21,9 @@ declare function facets-config:get-name($id as xs:string, $type as xs:string) as
  :)
 declare variable $facets-config:facets := [
     map {
-        "dimension": "genre",
-        "heading": "facets.genre",
+        "dimension": "frus-volume-id",
+        "heading": "facets.volume",
         "max": 5,
-        "hierarchical": true()
-    },
-    map {
-        "dimension": "language",
-        "heading": "facets.language",
-        "max": 5,
-        "hierarchical": false(),
-        "output": function($label) {
-            switch($label)
-                case "de" return "German"
-                case "es" return "Spanish"
-                case "la" return "Latin"
-                case "fr" return "French"
-                case "en" return "English"
-                default return $label
-        }
+        "hierarchical": false()
     }
 ];
