@@ -3,3 +3,8 @@
     display: block;
     margin: var(--s1) auto;
 }
+
+.fixed-layout > main:has(pb-odd-editor) {
+    max-width: none;
+    width: 80%;
+}

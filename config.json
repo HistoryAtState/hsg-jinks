@@ -4,9 +4,6 @@
       "palette" : "blue"
     }
   },
-  "pkg" : {
-    "abbrev" : "hsg-jinks"
-  },
   "label" : "hsg-jinks",
   "odds" : [ "hsg-jinks.odd" ],
   "id" : "https://e-editiones.org/apps/hsg-jinks",
@@ -24,5 +21,9 @@
     "id" : "http://teipublisher.com/api/hsg",
     "path" : "hsg-api.xql"
   } ],
-  "extends" : [ "base10", "theme-base10" ]
+  "extends" : [ "base10", "theme-base10", "docker" ],
+  "pkg" : {
+    "abbrev" : "hsg-jinks"
+  },
+  "description" : ""
 }

@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Tokenize the collection path and create breadcrumb navigation
         const pathComponents = collection.split('/').filter(component => component.length > 0);
-
+        console.log('Current collection:', collection, 'Path components:', pathComponents);
         const li = document.createElement('li');
         const a = document.createElement('a');
         a.href = '?collection=';
@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const a = document.createElement('a');
             a.href = `?collection=${encodeURIComponent(currentPath)}`;
             const i18n = document.createElement('pb-i18n');
+            console.log("lasses test");
             i18n.setAttribute('key', 'breadcrumb.' + currentPath.replaceAll('/', '.'));
             i18n.textContent = component;
             a.appendChild(i18n);

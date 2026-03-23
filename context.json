@@ -25,10 +25,9 @@
       "name" : "target"
     } ]
   } ],
-  "profiles" : [ "base10", "theme-base10" ],
-  "_lastModified" : "2026-03-23T12:53:47.901Z",
+  "profiles" : [ "base10", "theme-base10", "docker" ],
+  "_lastModified" : "2026-03-23T16:46:42.461Z",
   "label" : "hsg-jinks",
-  "odds" : [ "teipublisher.odd", "hsg-jinks.odd" ],
   "version" : "1.0.0",
   "id" : "https://e-editiones.org/apps/hsg-jinks",
   "_update" : true,
@@ -236,11 +235,32 @@
       "group" : "tei"
     }
   },
-  "description" : "Defines the default theme for TEI Publisher 10",
+  "description" : "",
   "_dry" : false,
-  "source" : "/db/apps/jinks/profiles/theme-base10",
-  "type" : "theme",
+  "source" : "/db/apps/jinks/profiles/docker",
+  "type" : "feature",
   "skip" : [ "^doc/.*$", "setup.xql", "config.json" ],
+  "odds" : [ "teipublisher.odd", "hsg-jinks.odd" ],
+  "docker" : {
+    "eXist" : "6.4.0",
+    "features" : {
+      "nodejs" : false,
+      "xst" : false,
+      "ner" : false,
+      "tex" : false
+    },
+    "jwt" : "2.0.1",
+    "roaster" : "1.11.0",
+    "ports" : {
+      "https" : 8443,
+      "http" : 8080
+    },
+    "crypto" : "6.0.1",
+    "tei-publisher-lib" : "6.0.2",
+    "ant" : "1.10.15",
+    "jinks-templates" : "1.2.0"
+  },
+  "category" : "development",
   "_overwrite" : "quick",
   "defaults" : {
     "data" : "/db/apps/frus-data-jinks/data",
