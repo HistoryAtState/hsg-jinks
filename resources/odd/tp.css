@@ -92,15 +92,15 @@ people, places, organizations etc */
     text-align: right;
 }
 
-.tei-figure .table-head {
+.table-head {
     font-style: italic;
 }
 
-.tei-figure .lg-head {
+.lg-head {
     font-style: italic;
 }
 
-.tei-figure .list-head {
+.list-head {
     font-weight: bold;
 }
 
@@ -112,12 +112,16 @@ people, places, organizations etc */
     margin-left: 1em;
 }
 
-.tei-p {
-    text-align: justify;
-}
-
 .tei-row.row-label {
     font-weight: bold;
+}
+
+.tei-ex::before {
+    content: '(';
+}
+
+.tei-ex::after {                   
+    content: ')';
 }
 
 .tei-sic.sic::before {
@@ -164,6 +168,15 @@ people, places, organizations etc */
     content: ' [?] ';
 }
 
+div.tei-person,
+ul.tei-person {
+    margin-bottom: var(--s-1);
+}
+
+.tei-death::before {
+    content: ' – ';
+}
+
 .center {
     text-align: center;
 }
@@ -178,4 +191,9 @@ people, places, organizations etc */
 
 .occupation {
     margin: 1rem;
+}
+
+p:empty,
+ul:empty {
+    display: none;
 }

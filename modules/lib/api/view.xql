@@ -5,38 +5,19 @@ module namespace vapi="http://teipublisher.com/api/view";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "../../config.xqm";
 import module namespace tpu="http://www.tei-c.org/tei-publisher/util" at "../lib/util.xql";
 import module namespace errors = "http://e-editiones.org/roaster/errors";
-import module namespace custom="http://teipublisher.com/api/custom" at "../../custom-api.xql";
 import module namespace tmpl="http://e-editiones.org/xquery/templates";
 import module namespace roaster="http://e-editiones.org/roaster";
 import module namespace pm-config="http://www.tei-c.org/tei-simple/pm-config" at "pm-config.xql";
+import module namespace page="http://teipublisher.com/ns/templates/page" at "../../templates/page.xqm";
 
-(:
-: We have to provide a lookup function to templates:apply to help it
-: find functions in the imported application modules. The templates
-: module cannot see the application modules, but the inline function
-: below does see them.
-:)
-declare function vapi:lookup($name as xs:string, $arity as xs:int) {
-    try {
-        let $cfun := custom:lookup($name, $arity)
-        return
-            if (empty($cfun)) then
-                function-lookup(xs:QName($name), $arity)
-            else
-                $cfun
-    } catch * {
-        ()
-    }
-};
-
-declare function vapi:get-template($config as map(*), $template as xs:string?) {
+declare %private function vapi:get-template($config as map(*), $template as xs:string?) {
     if ($template) then
         $template
     else
         $config?template
 };
 
-declare function vapi:get-config($doc as xs:string, $view as xs:string?) {
+declare %private function vapi:get-config($doc as xs:string, $view as xs:string?) {
     let $document := config:get-document($doc)
     return
         if (exists($document)) then
@@ -45,6 +26,14 @@ declare function vapi:get-config($doc as xs:string, $view as xs:string?) {
             error($errors:NOT_FOUND, "document " || $doc || " not found")
 };
 
+(:~
+ : Loads the templating context from context.json. 
+ :
+ : Adds the languages, request, and context-path to the context.
+ : 
+ : @param request The request map.
+ : @return The merged templating context.
+ :)
 declare function vapi:load-config-json($request as map(*)?) {
     let $context := parse-json(util:binary-to-string(util:binary-doc($config:app-root || "/context.json")))
     return
@@ -72,6 +61,12 @@ declare %private function vapi:merge-config($jsonConfig as map(*), $docConfig as
         tmpl:merge-deep(($jsonConfig, $cleanedConfig))
 };
 
+(:~
+ : Main endpoint for rendering an XML document via an HTML template.
+ : 
+ : @param request The request map.
+ : @return The processed template.
+ :)
 declare function vapi:view($request as map(*)) {
     let $path :=
         if ($request?parameters?suffix) then
@@ -92,27 +87,30 @@ declare function vapi:view($request as map(*)) {
         if (not($template)) then
             error($errors:NOT_FOUND, "template " || $templateName || " not found")
         else
+            let $templateContent := serialize($template)
+            let $frontmatter := tmpl:frontmatter($templateContent)
             let $data := config:get-document($path)
             let $config := tpu:parse-pi(root($data), $request?parameters?view, $request?parameters?odd)
             let $jsonConfig := vapi:load-config-json($request)
             let $mergedConfig := vapi:merge-config($jsonConfig, $config)
             let $model := map:merge((
                 $mergedConfig,
+                vapi:load-context-data($mergedConfig, $frontmatter),
                 map {
                     "doc": map {
                         "content": $data,
                         "path": $path,
                         "odd": replace($config?odd, '^(.*)\.odd', '$1'),
                         "view": $config?view,
-                        "transform": vapi:transform-helper(?, ?, $config?odd),
-                        "transform-with": vapi:transform-helper#3
+                        "transform": page:transform(?, ?, $config?odd),
+                        "transform-with": page:transform#3
                     },
                     "template": $templateName,
                     "media": if (map:contains($config, 'media')) then $config?media else ()
                 }
             ))
             return
-                tmpl:process(serialize($template), $model, map {
+                tmpl:process($templateContent, $model, map {
                     "plainText": false(),
                     "resolver": vapi:resolver#1,
                     "modules": map {
@@ -125,21 +123,6 @@ declare function vapi:view($request as map(*)) {
                         "tei": "http://www.tei-c.org/ns/1.0"
                     }
                 })
-};
-
-declare function vapi:transform-helper($content as node()*, $parameters as map(*)?, $odd as xs:string?) {
-    let $params := map:merge((
-        if (map:contains($parameters, "root")) then
-            $parameters
-        else
-            map:put($parameters, "root", $content),
-        map { 
-            "webcomponents": 7,
-            "context-path": $config:context-path
-        }
-    ))
-    return
-        $pm-config:web-transform($content, $params, $odd)
 };
 
 declare function vapi:handle-error($error) {
@@ -206,6 +189,13 @@ declare function vapi:html($request as map(*)) {
     vapi:html($request, ())
 };
 
+(:~
+ : Endpoint to load and process an HTML template.
+ : 
+ : @param request The request map.
+ : @param extConfig Additional configuration to merge with the default configuration.
+ : @return The processed template.
+ :)
 declare function vapi:html($request as map(*), $extConfig as map(*)?) {
     let $path := $config:app-root || "/templates/" || xmldb:decode($request?parameters?file) || ".html"
     let $template :=
@@ -215,6 +205,7 @@ declare function vapi:html($request as map(*), $extConfig as map(*)?) {
             util:binary-doc($path) => util:binary-to-string()
         else
             error($errors:NOT_FOUND, "HTML file " || $path || " not found")
+    let $frontmatter := tmpl:frontmatter($template)
     let $config := map:merge((
         vapi:load-config-json($request),
         map {
@@ -222,8 +213,9 @@ declare function vapi:html($request as map(*), $extConfig as map(*)?) {
         },
         $extConfig
     ))
+    let $context := map:merge(($config, vapi:load-context-data($config, $frontmatter)))
     return
-        tmpl:process($template, $config, map {
+        tmpl:process($template, $context, map {
             "plainText": false(),
             "resolver": vapi:resolver#1,
             "modules": map {
@@ -238,9 +230,40 @@ declare function vapi:html($request as map(*), $extConfig as map(*)?) {
         })
 };
 
+(:~
+ : If a data property is present in the frontmatter, load the documents listed there and assign them to a context variable.
+ :
+ : The key of the map is the name of the context variable, the value is the path to the document.
+ : The document is loaded using the config:get-document function.
+ : The document is parsed using the tpu:parse-pi function.
+ : The parsed document is returned as a map with the following properties:
+ : - content: the document content
+ : - path: the path to the document
+ : - odd: the odd of the document
+ : - view: the view of the document
+ :)
+declare %private function vapi:load-context-data($context as map(*), $frontmatter as map(*)) {
+    for $entry in ($context?data, $frontmatter?data)
+    return
+        map:for-each($entry, function($key, $value) {
+            let $data := config:get-document($value)
+            return
+                if (exists($data)) then
+                    let $config := tpu:parse-pi(root($data), $config:default-view, $config:default-odd)
+                    return
+                        map:entry($key, map {
+                            "content": $data,
+                            "path": $value,
+                            "odd": replace($config?odd, '^(.*)\.odd', '$1'),
+                            "view": $config?view
+                        })
+                else
+                    ()
+        })
+};
+
 declare function vapi:text($request as map(*)) {
     let $path := $config:app-root || "/" || xmldb:decode($request?parameters?file) || $request?parameters?suffix
-    let $_ := util:log("INFO", "path: " || $path)
     let $template :=
         if (doc-available($path)) then
             doc($path) => serialize()

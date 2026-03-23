@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <html>
     <head>
         [% if $context?defaults?base %]
@@ -6,6 +5,9 @@
         [% endif %]
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes"/>
+        [% if $context?description %]
+        <meta name="description" content="[[ $context?description ]]"/>
+        [% endif %]
         <link rel="shortcut icon" type="image/x-icon" href="[[ $context-path ]]/resources/images/favicon.ico"/>
         <link rel="shortcut icon" type="image/png" href="[[ $context-path ]]/resources/images/favicon-16.png" sizes="16x16"/>
         <link rel="shortcut icon" type="image/png" href="[[ $context-path ]]/resources/images/favicon-24.png" sizes="24x24"/>
@@ -48,16 +50,9 @@
         [% endfor %]
         [% endif %]
 
-        [% if $script?fore %]
-            [% if $script?webcomponents = "local" %]
-            <script type="module" src="[[ $context-path ]]/resources/lib/fore.js"/>
-            [% else %]
-            <script type="module" src="https://cdn.jsdelivr.net/npm/@jinntec/fore@[[ $script?fore ]]/dist/fore.js"/>
-            [% endif %]
-        [% endif %]
         [% block scripts %][% endblock %]
     </head>
-    <body data-theme="light">
+    <body data-theme="light" class="[[ string-join($context?theme?body?classes?*, ' ') ]]">
         <pb-dialog id="downloadDialog">
             <h2 slot="title">
                 <pb-i18n key="dialogs.generatingFile">Generating file ...</pb-i18n>
@@ -67,7 +62,7 @@
                 <pb-i18n key="dialogs.close">Close</pb-i18n>
             </button>
         </pb-dialog>
-        <pb-page endpoint="[[ $context-path ]]" app-root="[[ $context-path ]]" api-version="1.0.0" supported-languages="[[ string-join(map:keys($languages), ', ') ]]" language="[[ if ($request?parameters?lang) then $request?parameters?lang else $defaults?language ]]" locales="resources/i18n/{{ns}}/{{lng}}.json" locale-fallback-ns="app [[ if (map:contains($context, 'i18n')) then string-join($context?i18n?*, ' ') else () ]]" unresolved="unresolved" url-template="[[ $context?urls?template ]]" url-ignore="[[ $context?urls?ignore ]]" class="[[ $context?theme?layout?class ]]" require-language="require-language" theme="resources/css/components.css">
+        <pb-page endpoint="[[ $context-path ]]" app-root="[[ $context-path ]]" api-version="1.0.0" supported-languages="[[ string-join($context?defaults?languages?*, ', ') ]]" language="[[ if ($request?parameters?lang) then $request?parameters?lang else $defaults?language ]]" locales="resources/i18n/{{ns}}/{{lng}}.json" locale-fallback-ns="app [[ if (map:contains($context, 'i18n')) then string-join($context?i18n?*, ' ') else () ]]" unresolved="unresolved" url-template="[[ $context?urls?template ]]" url-ignore="[[ $context?urls?ignore ]]" class="[[ $context?theme?layout?class ]]" require-language="require-language" theme="resources/css/components.css">
             <header class="page-header">
                 <div>
                     [% if $features?menubar %]
@@ -102,7 +97,7 @@
                 [% block before %][% endblock %]
             </aside>
 
-            <header class="content-top hidden-mobile">
+            <header class="content-top">
                 [% if $features?toolbar?enabled %]
                 [% include "templates/toolbar.html" %]
                 [% endif %]
@@ -130,9 +125,16 @@
             <aside class="after hidden-mobile [[ if ($context?theme?layout?after?hidden) then 'hidden' else '' ]]">
                 [% block after %][% endblock %]
             </aside>
-            [% include 'templates/footer-mobile.html' %]
+            [% if $context?theme?layout?footer?mobile?enabled %]
+                [% include 'templates/footer-mobile.html' %]
+            [% endif %]
         </pb-page>
         <div class="splash"/>
+        
+        [% for $icons in $context?theme?icons?* %]
+        [% include "resources/css/" || $icons %]
+        [% endfor %]
+        
         <script src="[[ $context-path ]]/resources/scripts/layout.js"/>
         [% for $src in $context?script?custom?* %]
         <script src="[[ if (matches($src, '^https?://')) then $src else $context-path || '/' || $src ]]"/>

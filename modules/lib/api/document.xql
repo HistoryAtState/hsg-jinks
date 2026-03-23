@@ -110,20 +110,21 @@ declare %private function dapi:mkcol ($collection, $path) {
 
 declare function dapi:save ($request as map(*)) {
     let $id := $request?parameters?id
+    let $create := $request?parameters?create
     let $path := if ($id => contains("/")) then (
         (: the id is actually a path, like `demo/subcollection/my-doc.xml`. Split it up and remove the last part :)
         tokenize($id, "/")[position() < last()] => string-join("/")
     ) else (
-        ()
+        substring-after($config:data-default, $config:data-root || "/")
     )
     (: Again, the ID might be a whole path. :)
     let $resource-name := tokenize($id, "/")[last()]
     (: Ensure the collection exists :)
-    let $_ := dapi:mkcol($config:data-default, $path)
+    let $_ := dapi:mkcol($config:data-root, $path)
     let $body := $request?body
     return try {
         let $path := xmldb:store(
-            string-join(($config:data-default, $path), "/"),
+            string-join(($config:data-root, $path), "/"),
             $resource-name,
             $body
         )
@@ -484,7 +485,7 @@ declare %private function dapi:work2epub($request as map(*), $id as xs:string, $
 };
 
 declare function dapi:get-fragment($request as map(*)) {
-    let $path := xmldb:decode-uri($request?parameters?doc)
+    let $path := xmldb:decode-uri(xs:anyURI($request?parameters?doc))
     let $docs := config:get-document($path)
     return
         if($docs)
@@ -652,21 +653,24 @@ declare function dapi:get-collection($data) {
 };
 
 declare %private function dapi:extract-footnotes($html as element()*, $root as node()?) {
+        if ($html) then
         map {
-        "footnotes": $html/div[@class="footnotes"],
-        "content":
-            element { node-name($html) } {
-                $html/@* except $html/@id,
-                (: Ensure that the root has an id. Needed for static navigation. :)
-                attribute id { "exist-" || util:node-id($root) },
-                $html/node() except $html/div[@class="footnotes"]
-            }
-    }
+            "footnotes": $html/div[@class="footnotes"],
+            "content":
+                element { node-name($html) } {
+                    $html/@* except $html/@id,
+                    (: Ensure that the root has an id. Needed for static navigation. :)
+                    attribute id { "exist-" || util:node-id($root) },
+                    $html/node() except $html/div[@class="footnotes"]
+                }
+        }
+    else
+        ()
 };
 
 declare function dapi:table-of-contents($request as map(*)) {
     let $collapse := $request?parameters?collapse
-    let $doc := xmldb:decode-uri($request?parameters?id)
+    let $doc := xmldb:decode-uri(xs:anyURI($request?parameters?id))
     let $documents := config:get-document($doc)
     return
         if($documents)
@@ -709,7 +713,14 @@ declare %private function dapi:toc-div($node, $model as map(*), $target as xs:st
             let $hasDivs := exists(nav:get-subsections($model?config, $div))
             let $nodeId :=  if ($parent) then util:node-id($parent) else util:node-id($root)
             let $xmlId := if ($parent) then $parent/@xml:id else $root/@xml:id
-            let $subsect := if ($parent) then attribute hash { util:node-id($root) } else ()
+            let $hash := 
+                if ($view != 'page' and not(nav:get-section-for-node($model?config, $div) is $root)) then
+                    if ($root/@xml:id) then 
+                        attribute hash { $root/@xml:id }
+                    else
+                        attribute hash { util:node-id($root) }
+                else 
+                    ()
             return
                     <li>
                     {
@@ -717,7 +728,7 @@ declare %private function dapi:toc-div($node, $model as map(*), $target as xs:st
                             map {
                                 "xmlId": $xmlId,
                                 "nodeId": $nodeId,
-                                "label": ($subsect, $html),
+                                "label": ($hash, $html),
                                 "hasDivs": $hasDivs,
                                 "target": $target
                             },

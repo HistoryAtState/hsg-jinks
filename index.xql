@@ -57,37 +57,35 @@ declare function idx:get-metadata($root as element(), $field as xs:string) {
             ))
             case "genre" return (
                 idx:get-genre($header),
-                root($root)//dbk:info/dbk:keywordset[@vocab="#genre"]/dbk:keyword,
+                root($root)//dbk:info/dbk:keywordset[@role="genre"]/dbk:keyword,
                 root($root)//article-meta/kwd-group[@kwd-group-type="genre"]/kwd
             )
             case "category" return
                 (root($root)/tei:TEI/@n, "ZZZ")[1]
             case "feature" return (
                 idx:get-classification($header, 'feature'),
-                $root/dbk:info/dbk:keywordset[@vocab="#feature"]/dbk:keyword
+                $root/dbk:info/dbk:keywordset[@role="feature"]/dbk:keyword
             )
             case "form" return (
                 idx:get-classification($header, 'form'),
-                $root/dbk:info/dbk:keywordset[@vocab="#form"]/dbk:keyword
+                $root/dbk:info/dbk:keywordset[@role="form"]/dbk:keyword
             )
             case "period" return (
                 idx:get-classification($header, 'period'),
-                $root/dbk:info/dbk:keywordset[@vocab="#period"]/dbk:keyword
+                $root/dbk:info/dbk:keywordset[@role="period"]/dbk:keyword
             )
             case "content" return (
                 root($root)//body,
                 $root/dbk:section
             )
-            case "place" return
-                ($root//tei:placeName/string(), $root//tei:name[@type="place"]/string())
-            case "person-id" return 
-                for $id in ($root//tei:persName, $root//tei:rs[@type='person']) 
+            case "place" return 
+                for $id in ($root//tei:placeName, $root//tei:name[@type="place"], $root//tei:rs[@type='place']) 
                 return 
-                    (if ($id/@ref) then $id/@ref/string() else (), if ($id/@key) then $id/@key/string() else ())
-            case "place-id" return 
-                for $id in ($root//tei:placeName, $root//tei:rs[@type='place']) 
+                    (if ($id/@ref) then $id/@ref/string() else (), if ($id/@key) then $id/@key/string() else $id)
+            case "person" return 
+                for $id in ($root//tei:persName, $root//tei:name[@type="person"], $root//tei:rs[@type='person']) 
                 return 
-                    (if ($id/@ref) then $id/@ref/string() else (), if ($id/@key) then $id/@key/string() else ())
+                    (if ($id/@ref) then $id/@ref/string() else (), if ($id/@key) then $id/@key/string() else $id)
             default return
                 ()
 };

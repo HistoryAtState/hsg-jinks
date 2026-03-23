@@ -1,19 +1,38 @@
 {
   "actions" : [ {
-    "description" : "Reindex data",
+    "app" : "jinks",
+    "description" : "Reindex the data",
+    "label" : "Reindex data",
     "name" : "reindex"
   }, {
-    "description" : "Fix ODDs",
+    "description" : "Rebuild list of ODDs and recompile",
+    "label" : "Fix ODDs",
     "name" : "fix-odds"
+  }, {
+    "app" : "jinks",
+    "description" : "Download the app as a `.xar` file",
+    "label" : "Download",
+    "name" : "download"
+  }, {
+    "app" : "jinks",
+    "description" : "Sync the app to a directory on the local file system",
+    "label" : "Sync",
+    "name" : "file-sync",
+    "parameters" : [ {
+      "required" : true,
+      "description" : "The path to the target directory",
+      "label" : "Directory",
+      "name" : "target"
+    } ]
   } ],
   "profiles" : [ "base10", "theme-base10" ],
-  "_lastModified" : "2025-12-16T10:01:42.654+01:00",
+  "_lastModified" : "2026-03-23T12:53:47.901Z",
   "label" : "hsg-jinks",
   "odds" : [ "teipublisher.odd", "hsg-jinks.odd" ],
   "version" : "1.0.0",
   "id" : "https://e-editiones.org/apps/hsg-jinks",
   "_update" : true,
-  "styles" : [ "resources/css/pico-components.css", "https://cdn.jsdelivr.net/npm/theme-toggles@4.10.1/css/classic.min.css", "resources/css/jinks-theme.css" ],
+  "styles" : [ "https://cdn.jsdelivr.net/npm/theme-toggles@4.10.1/css/classic.min.css", "resources/css/pico-components.css", "resources/css/jinks-theme.css", "resources/css/hsg-theme.css" ],
   "_noDeploy" : false,
   "api" : [ {
     "spec" : "hsg-api.json",
@@ -21,6 +40,7 @@
     "id" : "http://teipublisher.com/api/hsg",
     "path" : "hsg-api.xql"
   } ],
+  "depends" : [ "base10" ],
   "template-suffix" : "\\.tpl",
   "ignore" : [ "repo.xml", "resources/css/components.css" ],
   "target" : "/db/apps/hsg-jinks",
@@ -29,7 +49,7 @@
     "delete" : true,
     "dark-mode" : true,
     "items" : [ {
-      "url" : "",
+      "url" : "browse.html",
       "id" : "Start"
     } ],
     "login" : true,
@@ -37,35 +57,14 @@
     "search" : true
   },
   "theme" : {
-    "logo" : {
-      "width" : "140px",
-      "height" : "48px",
-      "dark" : "../images/tei-publisher-logo-contrast-color.svg",
-      "splash" : {
-        "size" : "360px auto",
-        "dark" : "../images/tei-publisher-logo-contrast-color.svg",
-        "light" : "../images/tei-publisher-logo-color.svg"
-      },
-      "light" : "../images/tei-publisher-logo-contrast-color.svg"
-    },
-    "hero" : {
-      "background-position" : "center",
-      "background-color" : "rgba(0, 0, 0, 0.6)",
-      "class" : "row",
-      "text-width" : "50rem",
-      "background-size" : "cover",
-      "background-image" : "../images/typewriter.jpg",
-      "background-repeat" : "no-repeat"
-    },
-    "bottom" : {
-      "background-color" : "rgba(0, 0, 0, 0.4)",
-      "background-size" : "cover",
-      "background-image" : "../images/typewriter-on-books.jpg",
-      "background-repeat" : "no-repeat"
-    },
     "layout" : {
       "class" : "fixed-layout",
       "search" : "before-top",
+      "footer" : {
+        "mobile" : {
+          "enabled" : true
+        }
+      },
       "after" : {
         "width" : "min(30vw, 356px)",
         "hidden" : false,
@@ -76,13 +75,45 @@
         "hidden" : false,
         "toggle" : true
       },
-      "max-width" : "108rem"
+      "max-width" : "84rem"
+    },
+    "menubar" : {
+      "background-color" : "var(--jinks-colors-500)",
+      "color" : "#ffffff",
+      "background-image" : "none"
+    },
+    "icons" : [ ],
+    "splash" : {
+      "width" : "320px",
+      "image" : "../images/tei-publisher-logo-color.svg",
+      "height" : "auto"
+    },
+    "body" : {
+      "background-color" : "var(--jinks-colors-100)"
+    },
+    "logo" : {
+      "width" : "140px",
+      "image" : "../images/tei-publisher-logo-contrast-color.svg",
+      "height" : "48px"
     },
     "breadcrumbs" : {
       "max" : "40ch"
     },
-    "header" : {
+    "content" : {
+      "max-width" : "70ch"
+    },
+    "texture" : {
       "background-image" : null
+    },
+    "colors" : {
+      "palettes" : {
+        "green" : "palette-green.css",
+        "teal" : "palette-teal.css",
+        "neutral" : "palette-neutral.css",
+        "blue" : "palette-blue.css",
+        "beige" : "palette-beige.css"
+      },
+      "palette" : "blue"
     },
     "fonts" : {
       "toc" : {
@@ -96,14 +127,14 @@
       },
       "base" : {
         "family" : "'Inter', 'Noto', sans-serif",
-        "line-height" : "140%",
+        "line-height" : "1.4",
         "size" : "16px",
         "weight" : "400"
       },
       "heading" : {
         "family" : "'Inter', 'Noto', sans-serif",
         "size" : "1.2rem",
-        "weight" : "400"
+        "weight" : "600"
       },
       "breadcrumbs" : {
         "size" : "0.9rem"
@@ -115,23 +146,9 @@
         "weight" : "400"
       }
     },
-    "texture" : {
-      "background-image" : "../images/jinks-images/paper.jpeg"
-    },
-    "colors" : {
-      "palettes" : {
-        "green" : "palette-green.css",
-        "teal" : "palette-teal.css",
-        "neutral" : "palette-neutral.css",
-        "blue" : "palette-blue.css",
-        "beige" : "palette-beige.css"
-      },
-      "menubar" : {
-        "background-color" : "var(--jinks-colors-500)",
-        "color" : "#ffffff",
-        "background-image" : null
-      },
-      "palette" : "blue"
+    "toolbar" : {
+      "background-color" : "var(--jinks-colors-200)",
+      "color" : "var(--jinks-color-primary)"
     }
   },
   "features" : {
@@ -198,8 +215,9 @@
     }
   },
   "pkg" : {
-    "website" : "http://tei-publisher.com",
+    "website" : "http://tei-publisher.org",
     "abbrev" : "hsg-jinks",
+    "author" : "Wolfgang Meier et al.",
     "version" : "1.0.0",
     "dependencies" : [ {
       "semver" : "1",
@@ -218,28 +236,31 @@
       "group" : "tei"
     }
   },
-  "description" : "Includes style defaults",
+  "description" : "Defines the default theme for TEI Publisher 10",
   "_dry" : false,
   "source" : "/db/apps/jinks/profiles/theme-base10",
   "type" : "theme",
   "skip" : [ "^doc/.*$", "setup.xql", "config.json" ],
-  "_overwrite" : "all",
+  "_overwrite" : "quick",
   "defaults" : {
     "data" : "/db/apps/frus-data-jinks/data",
     "address-by-id" : false,
     "odd-root" : "resources/odd",
+    "languages" : [ "bg", "cs", "zh_CN", "zh_TW", "de", "en", "es", "el", "fr", "fi", "it", "ka", "nl", "no", "pl", "pt", "ro", "ru", "sl", "sv", "tr", "uk" ],
     "data-default" : "Publications",
     "direction" : "ltr",
-    "view" : "div",
-    "media" : [ "web", "print", "fo", "latex", "epub" ],
     "template" : "volume-landing.html",
     "browse" : "browse.html",
     "search" : "div",
+    "view" : "div",
+    "data-exclude" : [ "doc($config:data-root || '/taxonomy.xml')//tei:text", "collection($config:register-root)//tei:text" ],
     "odd" : "hsg-jinks.odd",
     "pagination" : {
       "fill" : 5,
       "depth" : 10
-    }
+    },
+    "media" : [ "web", "print", "epub" ],
+    "register-root" : "registers"
   },
   "templating" : {
     "modules" : {
@@ -255,10 +276,10 @@
   },
   "script" : {
     "custom" : [ ],
-    "webcomponents" : "2.26.0-next-3.20",
+    "webcomponents" : "3.0.5",
     "extra-components" : [ ],
     "cdn" : "https://cdn.jsdelivr.net/npm/@teipublisher/pb-components"
   },
-  "order" : 902,
-  "$schema" : "../../schema/jinks.json"
+  "order" : 1,
+  "$schema" : "../jinks/schema/jinks.json"
 }

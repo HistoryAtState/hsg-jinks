@@ -1,8 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <meta xmlns="http://exist-db.org/xquery/repo" commit-id="@commit-id@" commit-time="@commit-time@">
-    <description>Includes style defaults</description>
-    <author>Wolfgang Meier</author>
-    <website>http://tei-publisher.com</website>
+    <description>hsg-jinks</description>
+    <author>Wolfgang Meier et al.</author>
+    <website>http://tei-publisher.org</website>
     <status>stable</status>
     <license>GPLv3</license>
     <copyright>true</copyright>
@@ -10,5 +9,5 @@
     <target>hsg-jinks</target>
     <prepare>pre-install.xql</prepare>
     <finish>post-install.xql</finish>
-    <permissions xmlns:repo="http://exist-db.org/xquery/repo" password="simple" user="tei" group="tei" mode="rw-rw-r--"/>
+    <permissions user="tei" group="tei" password="simple" mode="rw-rw-r--"/>
 </meta>

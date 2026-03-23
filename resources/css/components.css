@@ -33,65 +33,64 @@
     /* Logo */
 
     --jinks-logo-light: url("../images/tei-publisher-logo-contrast-color.svg");
-    --jinks-logo-dark: url("../images/tei-publisher-logo-contrast-color.svg");
     --jinks-logo-image-width: 140px;
     --jinks-logo-image-height: 48px;
     --jinks-logo-margin-right: 1rem;
 
     /* Image backgrounds */
 
-    /* Hero section */
-    --jinks-hero-background-image: url("../images/typewriter.jpg");
-    --jinks-hero-background-size: cover;
-    --jinks-hero-background-position: center;
-    --jinks-hero-background-repeat: no-repeat;
-    --jinks-hero-background-color: rgba(0, 0, 0, 0.6);
-    --jinks-hero-text-width: 50rem;
+    /* Landing page: hero section */
+    --jinks-hero-background-image: url("");
+    --jinks-hero-background-size: ;
+    --jinks-hero-background-position: ;
+    --jinks-hero-background-repeat: ;
+    --jinks-hero-background-color: ;
     --jinks-hero-height: auto;
     --jinks-hero-min-height: 60vh;
     --jinks-hero-padding: 2rem 1rem 2rem 6rem;
 
-    /* Bottom section */
-    --jinks-bottom-background-image: url("../images/typewriter-on-books.jpg");
-    --jinks-bottom-background-size: cover;
-    --jinks-bottom-background-repeat: no-repeat;
-    --jinks-bottom-background-color: rgba(0, 0, 0, 0.4);
+    /* Landing page: bottom section */
+    --jinks-bottom-background-image: url("");
+    --jinks-bottom-background-size: ;
+    --jinks-bottom-background-repeat: ;
+    --jinks-bottom-background-position: ;
+    --jinks-bottom-background-color: ;
     --jinks-bottom-height: auto;
     --jinks-bottom-min-height: 30vh;
     --jinks-bottom-padding: 2rem 1rem 2rem 6rem;
 
-    /* Header section */
-    
-        --jinks-header-background-image: none;
-    
-
     /* menubar, toolbar, drawer */
 
     
-        --jinks-menubar-background-image: none;
+    --jinks-menubar-background-image: none;
+    --jinks-menubar-background-color: var(--jinks-colors-500);
     
 
-    --jinks-menubar-background-color: var(--jinks-colors-500);
     --jinks-menubar-color: var(--jinks-colors-light);
     --jinks-menubar-font-size: 14px;
     --jinks-menubar-button-color: rgba(165, 165, 165, 0.4);
-    --jinks-toolbar-background-color: var(--jinks-colors-accent);
+
+    --jinks-toolbar-background-color: var(--jinks-colors-200);
     --jinks-toolbar-color: var(--jinks-color-primary);
 
     /* Splash */
 
     --jinks-splash-background-light: url("../images/tei-publisher-logo-color.svg");
-    --jinks-splash-background-dark: url("../images/tei-publisher-logo-contrast-color.svg");
-    --jinks-splash-image-size: 360px auto;
+    --jinks-splash-image-width: 320px;
+    --jinks-splash-image-height: auto;
 
-    --jinks-texture-background: url("../images/jinks-images/paper.jpeg");
+    /* Texture background */
+     
+    
+        --jinks-texture-background: none;
+    
 
     /* Typography */
 
 
     --jinks-base-font-family: 'Inter', 'Noto', sans-serif;
     --jinks-base-font-size: 16px;
-    --jinks-base-line-height: 140%;
+    --jinks-base-line-height: 1.4;
     --jinks-base-font-weight: 400;
 
     --jinks-content-font-family: JunicodeVF, Georgia, 'Times New Roman', serif;
@@ -102,21 +101,21 @@
     --jinks-heading-font-weight: 600 !important;
     --jinks-heading-line-height: 1.2;
 
-    --jinks-h1-font-size: 1.625rem;
-    --jinks-h1-font-weight: 600;
+    --jinks-h1-font-size: 1.625em;
+    --jinks-h1-font-weight: var(--jinks-heading-font-weight);
     --jinks-h1-line-height: 130%;
 
-    --jinks-h2-font-size: 1.25rem;
-    --jinks-h2-font-weight: 600;
+    --jinks-h2-font-size: 1.25em;
+    --jinks-h2-font-weight: var(--jinks-heading-font-weight);
     --jinks-h2-line-height: 120%;
 
-    --jinks-h3-font-size: 1.125rem;
-    --jinks-h3-font-weight: 600;
+    --jinks-h3-font-size: 1.125em;
+    --jinks-h3-font-weight: var(--jinks-heading-font-weight);
     --jinks-h3-line-height: 140%;
 
-    --jinks-h4-font-size: 1rem;
+    --jinks-h4-font-size: 1em;
     --jinks-h4-line-height: 140%;
-    --jinks-h4-font-weight: 500;
+    --jinks-h4-font-weight: calc(var(--jinks-heading-font-weight) - 100);
 
     --jinks-breadcrumbs-font-size: 0.9rem;
     --jinks-breadcrumbs-max: 40ch;
@@ -127,26 +126,24 @@
     --jinks-footnote-font-size: 0.9em;
     --jinks-footnote-padding: 0 0 0 .25em;
 
-    --jinks-content-max-width: 70rem;
-    --jinks-page-max-width: 108rem;
+    --jinks-content-max-width: 70ch;
+    --jinks-page-max-width: 84rem;
 
     /* Background colors */
     --jinks-background-color: var(--jinks-colors-100);
-    --jinks-background-color-light: var(--jinks-colors-100);
+    --jinks-background-color-light: var(--jinks-background-color);
     --jinks-background-color-dark: var(--jinks-colors-700);
 
     /* Header, menubar, toolbar, drawer, footer, splash */
 
     /* Overlay for image backgrounds to lighten or darken them */
     --jinks-overlay-background-color-light: rgba(255, 255, 255, 0.8);
-    --jinks-overlay-background-color-dark: rgba(0, 0, 0, 0.8);
+    --jinks-overlay-background-color-dark: rgba(0, 0, 0, 0.4);
 
     /* Overlay for highlights and (CHECK) hero and menubar section */
     --jinks-header-background-color: var(--jinks-overlay-background-color-light);
     --jinks-header-background-color-light: var(--jinks-header-background-color);
     --jinks-header-background-color-dark: var(--jinks-overlay-background-color-dark);
-
-    --jinks-toolbar-background-color: var(--jinks-colors-200);
 
 
     /* --pb-drawer-background-color: var(--jinks-color-inverse); */
@@ -191,9 +188,16 @@
     /* table of contents */
     --jinks-toc-indent: 1rem;
 
-    --jinks-layout-default-before-width: 356px;
-    --jinks-layout-default-after-width: 356px;
+    /* register page */
+    --jinks-registers-columns: ;
 
+    /* dialogs */
+    --jinks-dialog-header-background-color: var(--jinks-colors-500);
+    --jinks-dialog-header-color: var(--jinks-colors-light);
+    --jinks-dialog-footer-background-color: var(--jinks-colors-200);
+    --jinks-dialog-footer-color: var(--jinks-colors-700);
+    --jinks-dialog-header-font-size: 1.125rem;
+    
     /* variables passed to tei-publisher-components */
     --pb-base-font-family: var(--jinks-base-font-family);
     --pb-base-font-size: var(--jinks-base-font-size);
@@ -204,6 +208,7 @@
     /* do we really need serif def? */
     --pb-content-font-family: var(--jinks-content-font-family);
     --pb-content-font-size: var(--jinks-content-font-size);
+    --pb-content-line-height: var(--jinks-content-line-height);
 
     /* headings  */
     --pb-heading-font-family: var(--jinks-heading-font-family);
@@ -213,7 +218,7 @@
     --pb-breadcrumbs-font-size: var(--jinks-breadcrumbs-font-size);
 
     /* variables for text display in pb-view */
-    --pb-view-max-width: 920px;
+    --pb-view-max-width: var(--jinks-content-max-width);
     --pb-view-scroll-margin-top: 0;
 
     /* --pb-color-primary: #303030; */
@@ -243,8 +248,6 @@
     --pb-min-zoom: 0.5;
     --pb-max-zoom: 3.0;
     --pb-highlight-color: var(--jinks-colors-highlight);
-
-    --pb-dnd-drop-border: 2px dashed var(--jinks-color-focus)
 }
 
 
@@ -253,7 +256,7 @@
     --pico-font-family-sans-serif: var(--jinks-base-font-family);
     --pico-font-size: var(--jinks-base-font-size, var(--pico-font-size));
     --pico-font-weight: var(--jinks-base-font-weight);
-    --pico-line-height: var(--jinks-line-height);
+    --pico-line-height: var(--jinks-base-line-height);
     --pico-background-color: var(--jinks-background-color);
     --pico-border-color: var(--jinks-border-color);
 
@@ -283,6 +286,7 @@
         --pico-primary: var(--jinks-colors-600);
         --pico-primary-hover: var(--jinks-colors-700);
         --pico-color: var(--jinks-color-primary);
+        --pico-background-color: var(--jinks-background-color);
         --pico-h1-color: var(--jinks-h1-color);
         --pico-h2-color: var(--jinks-h2-color);
         --pico-h3-color: var(--jinks-h3-color);
@@ -298,6 +302,7 @@
     --pico-primary: var(--jinks-colors-600);
     --pico-primary-hover: var(--jinks-colors-700);
     --pico-color: var(--jinks-color-primary);
+    --pico-background-color: var(--jinks-background-color);
     --pico-h1-color: var(--jinks-h1-color);
     --pico-h2-color: var(--jinks-h2-color);
     --pico-h3-color: var(--jinks-h3-color);
@@ -321,10 +326,13 @@ a:link, a:visited {
     height: 2.25rem;
     border-radius: var(--jinks-form-border-radius);
     padding: 0px 12px;
+    background-color: var(--jinks-background-color-dark);
+    color: var(--jinks-color-white);
 }
 
 .badge.accent {
     background-color: var(--jinks-colors-accent);
+    color: var(--jinks-color-primary);
 }
 
 label, input {
@@ -524,7 +532,7 @@ button:has(svg):not(:has(span)),
 }
 
 /* Group of buttons, e.g. navigate left/right */
-[role="group"] {
+:not(fx-group)[role="group"] {
     list-style-type: none;
     display: inline-flex;
     align-items: center;
@@ -542,32 +550,32 @@ button:has(svg):not(:has(span)),
     box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.10);
 }
 
-[role="group"] a {
+:not(fx-group)[role="group"] a {
     color: inherit;
     text-decoration: none;
     margin: 0;
     padding: 0;
 }
 
-[role="group"] button {
+:not(fx-group)[role="group"] button {
     box-shadow: none;
     width: 1.5rem;
     height: 1.5rem;
 }
 
-[role="group"] li {
+:not(fx-group)[role="group"] li {
     display: inline-block;
     padding: 0;
     margin: 0;
 }
 
-[role="group"] input {
+:not(fx-group)[role="group"] input {
     border: none;
     background-color: transparent;
     margin: 0;
 }
 
-[role="group"] input:focus {
+:not(fx-group)[role="group"] input:focus {
     box-shadow: none;
 }
 
@@ -582,9 +590,9 @@ pb-link .btn.accent a {
     color: var(--jinks-colors-light);
 }
 
-[role="group"] pb-zoom,
-[role="group"] pb-navigation,
-[role="group"] pb-link {
+:not(fx-group)[role="group"] pb-zoom,
+:not(fx-group)[role="group"] pb-navigation,
+:not(fx-group)[role="group"] pb-link {
     width: 1.5rem;
     height: 1.5rem;
     display: inline-flex;
@@ -592,7 +600,17 @@ pb-link .btn.accent a {
     justify-content: center;
 }
 
-button.icon svg, .dropdown-button summary svg, [role="group"] svg, button svg, .btn svg {
+[role="group"] pb-navigation:has(> span+svg),
+[role="group"] pb-navigation:has(> svg+span) {
+    width: auto;
+}
+
+[role="group"]:has(pb-navigation > span+svg),
+[role="group"]:has(pb-navigation > svg+span) {
+    gap: 0.75rem;
+}
+
+button.icon svg, .dropdown-button summary svg, :not(fx-group)[role="group"] svg, button svg, .btn svg {
     width: 1rem;
     height: 1rem;
 }
@@ -958,4 +976,33 @@ h4 {
     border-color: var(--jinks-form-border-color);
     margin-bottom: var(--s-1);
     padding-bottom: var(--s-1);
+}
+
+:host(pb-paginate) .found {
+    font-size: var(--jinks-breadcrumbs-font-size);
+    padding-left: var(s-2);
+}
+
+@media (max-width: 768px) {
+    :host(pb-paginate) .found {
+        display: none;
+    }
+}
+
+:host(pb-dialog) header {
+    background-color: var(--jinks-dialog-header-background-color);
+    color: var(--jinks-dialog-header-color);
+}
+
+:host(pb-dialog) footer {
+    background-color: var(--jinks-dialog-footer-background-color);
+    color: var(--jinks-dialog-footer-color);
+}
+
+:host(pb-message) h2,
+:host(pb-message) h3 {
+    color: var(--jinks-dialog-header-color);
+    font-size: var(--jinks-dialog-header-font-size);
+    font-weight: normal;
+    margin-bottom: 0;
 }

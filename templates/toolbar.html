@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <nav class="toolbar">
     <ul>
         [% block breadcrumb %][% endblock %]
     </ul>
-    <ul>
+    <ul class="hidden-mobile">
         [% block toggle %][% endblock %]
         [% if $features?toolbar?navigation %]
         <li>
@@ -12,8 +11,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
                         <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M328 112L184 256l144 144"/>
                     </svg>
+                    <span><pb-i18n key="toolbar.previous"/></span>
                 </pb-navigation>
                 <pb-navigation emit="transcription" keyboard="right" subscribe="transcription" direction="forward" unit="page" rendition="visible">
+                    <span><pb-i18n key="toolbar.next"/></span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
                         <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M184 112l144 144-144 144"/>
                     </svg>

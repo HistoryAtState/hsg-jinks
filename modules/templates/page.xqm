@@ -78,12 +78,24 @@ declare function page:transform($nodes as node()*, $parameters as map(*)?) {
     page:transform($nodes, $parameters, ())
 };
 
+(:~
+ : Transform a sequence of nodes to HTML using the given odd and parameters.
+ :
+ : @param $nodes the nodes to transform
+ : @param $parameters the parameters to use for the transformation
+ : @param $odd the odd to use for the transformation
+ : @return the transformed nodes
+ :)
 declare function page:transform($nodes as node()*, $parameters as map(*)?, $odd as xs:string?) {
     let $odd := head(($odd, $config:default-odd))
     for $node in $nodes
     let $params := map:merge((
         $parameters,
-        map { "webcomponents": 7, "context-path": $config:context-path, "root": $node }
+        map { 
+            "webcomponents": 7, 
+            "context-path": $config:context-path, 
+            "root": head(($parameters?root, $node))
+        }
     ))
     return
         $pm-config:web-transform($node, $params, $odd)

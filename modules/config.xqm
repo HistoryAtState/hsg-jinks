@@ -270,19 +270,7 @@ declare variable $config:app-root := $gen:app-root;
  :    and the app should be mapped to the root of the website (i.e. without /exist/apps/...)
  : 3. otherwise determine path from request as in 1a.
  :)
-declare variable $config:context-path :=
-    let $prop := util:system-property("teipublisher.context-path")
-    return
-        if (exists($prop)) then
-            if ($prop = "auto") then
-                request:get-context-path() || substring-after($config:app-root, "/db") 
-            else
-                $prop
-        else if (exists(request:get-header("X-Forwarded-Host")))
-            then ""
-        else
-            request:get-context-path() || substring-after($config:app-root, "/db")
-;
+declare variable $config:context-path := $gen:context-path;
 
 (:~
  : The root of the collection hierarchy containing data.
@@ -299,16 +287,13 @@ declare variable $config:data-default := $gen:data-default;
  : A sequence of root elements which should be excluded from the list of
  : documents displayed in the browsing view.
  :)
-declare variable $config:data-exclude :=
-    doc($config:data-root || "/taxonomy.xml")//tei:text,
-    collection($config:register-root)//tei:text
-;
+declare variable $config:data-exclude := $gen:data-exclude;
 
 (:~
  : The root of the collection hierarchy containing registers data.
  :)
-declare variable $config:register-root := $config:data-root || "/registers";
-declare variable $config:register-forms := $config:data-root || "/registers/templates";
+declare variable $config:register-root := $gen:register-root;
+declare variable $config:register-forms := $config:register-root || "/templates";
 
 declare variable $config:register-map := map {
     "person": map {
@@ -335,6 +320,11 @@ declare variable $config:register-map := map {
         "id": "pb-keywords",
         "default": "term-default",
         "prefix": "category-"
+    },
+    "work": map {
+        "id": "pb-works",
+        "default": "work-default",
+        "prefix": "work-"
     }
 };
 
@@ -508,21 +498,28 @@ declare function config:default-config($docUri as xs:string?) {
 
 declare function config:document-type($div as element()) {
     switch (namespace-uri($div))
-        case "http://www.tei-c.org/ns/1.0" return
+        case xs:anyURI("http://www.tei-c.org/ns/1.0") return
             "tei"
-        case "http://docbook.org/ns/docbook" return
+        case xs:anyURI("http://docbook.org/ns/docbook") return
             "docbook"
         default return
             "jats"
 };
 
 declare function config:get-document($idOrName as xs:string) {
-    if ($config:address-by-id) then
-        root(collection($config:data-root)/id($idOrName))
-    else if (starts-with($idOrName, '/')) then
-        doc(xmldb:encode-uri($idOrName))
-    else
-        doc(xmldb:encode-uri($config:data-root || "/" || $idOrName))
+    let $document :=
+        if ($config:address-by-id) then
+            root(collection($config:data-root)/id($idOrName))
+        else if (starts-with($idOrName, '/')) then
+            doc(xmldb:encode-uri($idOrName))
+        else
+            doc(xmldb:encode-uri($config:data-root || "/" || $idOrName))
+    return 
+        if (count($document)) then 
+            $document 
+        else 
+            (: if document not found, try to find it again in any way: by id, or by path in data-root or data-default  :)
+            head((collection($config:data-root)/id($idOrName), doc(xmldb:encode-uri($idOrName)), doc(xmldb:encode-uri($config:data-root || "/" || $idOrName)), doc(xmldb:encode-uri($config:data-default || "/" || $idOrName))))
 };
 
 (:~

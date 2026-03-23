@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project default="all" name="hsg-jinks">
     <xmlproperty file="expath-pkg.xml"/>
     <property name="project.version" value="${package(version)}"/>
@@ -29,7 +28,7 @@
     </target>
 
 
-    <target name="all" depends="clean,npm.install,prepare,xar" description="main target, create xar file in build folder"/>
+    <target name="all" depends="clean,prepare,xar" description="main target, create xar file in build folder"/>
 
     <target name="clean">
         <delete includeemptydirs="true" failonerror="false">

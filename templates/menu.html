@@ -1,24 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <nav class="menubar">
     <ul>
         <li class="logo">
-            <a href="[[ $context-path ]]"/>
+            <a href="[[ head(($context?defaults?site-root, $context-path)) ]]"/>
         </li>
         [% for $item in $menu?items?* %]
         [% if $item?url or $item?url = ''%]
+        [% let $url = if (starts-with($item?url, 'http')) then $item?url else $context-path || '/' || $item?url %]
         <li class="hidden-mobile">
-            <a href="[[ if (starts-with($item?url, 'http')) then $item?url else $context-path || '/' || $item?url ]]">
+            <a href="[[ replace($url, 'browse\.html', $context?defaults?browse) ]]">
                 <pb-i18n key="menu.[[ $item?id ]]">[[ $item?id ]]</pb-i18n>
             </a>
         </li>
+        [% endlet %]
         [% elif exists($item?subitems) %]
             <li>
                 <details class="dropdown">
                     <summary><pb-i18n key="menu.[[ $item?id ]]">[[ $item?id ]]</pb-i18n></summary>
-                    <ul dir="rtl">
+                    <ul>
                         [% for $subitem in $item?subitems?* %]
                         <li>
-                            <a href="[[ $context-path ]]/[[ $subitem?url ]]"><pb-i18n key="menu.[[ $subitem?id ]]">[[ $subitem?id ]]</pb-i18n></a>
+                            <a href="[[ $context-path ]]/[[ replace($subitem?url, 'browse\.html', $context?defaults?browse) ]]"><pb-i18n key="menu.[[ $subitem?id ]]">[[ $subitem?id ]]</pb-i18n></a>
                         </li>
                         [% endfor %]
                     </ul>
@@ -32,7 +33,7 @@
         <li class="hidden-mobile">
             <details class="dropdown">
                 <summary><pb-i18n key="menu.download.title">Download</pb-i18n></summary>
-                <ul dir="rtl">
+                <ul>
                     <li>
                         <pb-edit-xml src="document1" data-i18n="[title]menu.download.view-tei" title="view-tei">
                             Edit XML
@@ -93,7 +94,7 @@
             <pb-restricted group="[[ $pkg?user?group ]]">
                 <details class="dropdown">
                     <summary><pb-i18n key="menu.admin.title">Admin</pb-i18n></summary>
-                    <ul dir="rtl">
+                    <ul>
                         [% for $odd in $config:odd-available %]
                         <li><a href="[[$context-path]]/odd-editor.html?odd=[[$odd]]" target="_blank"><pb-i18n key="menu.admin.edit-odd">Edit ODD</pb-i18n>: [[$odd]]</a></li>
                         [% endfor %]
@@ -130,7 +131,7 @@
         [% if $menu?language %]
         <li class="hidden-mobile">
             <pb-lang name="lang">
-                [% for $lang in map:keys($languages) %]
+                [% for $lang in filter(map:keys($languages), function($lang) { contains($context?defaults?languages?*, $lang) }) %]
                 <option value="[[ $lang ]]">[[ $languages?($lang) ]]</option>
                 [% endfor %]
             </pb-lang>

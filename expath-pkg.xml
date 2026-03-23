@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <package xmlns="http://expath.org/ns/pkg" name="https://e-editiones.org/apps/hsg-jinks" abbrev="hsg-jinks" version="1.0.0" spec="1.0">
     <title>hsg-jinks</title>
     <dependency processor="http://exist-db.org" semver-min="6.2.0"/>

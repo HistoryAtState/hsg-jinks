@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <template>
     ---json
     {
@@ -70,10 +69,10 @@
     
     <pb-custom-form class="options">
         <fieldset>
-            <label for="search.sort"><pb-i18n key="browse.sort"/>:</label>
-            <select name="sort" id="search.sort">
-                [% let $current = page:parameter($context, 'sort', $context?features?browse?sort?default) %]
-                [% for $option in $context?features?browse?sort?options?* %]
+            <label for="search.field"><pb-i18n key="search.scope"/>:</label>
+            <select name="field" id="search.field">
+                [% let $current = page:parameter($context, 'field', $context?features?browse?field?default) %]
+                [% for $option in $context?features?browse?field?options?* %]
                 [% if $current = $option?value %]
                 <option value="[[ $option?value ]]" selected="selected" data-i18n="[[ $option?key ]]"/>
                 [% else %]
@@ -84,10 +83,10 @@
             </select>
         </fieldset>
         <fieldset>
-            <label for="search.field"><pb-i18n key="search.scope"/>:</label>
-            <select name="field" id="search.field">
-                [% let $current = page:parameter($context, 'field', $context?features?browse?field?default) %]
-                [% for $option in $context?features?browse?field?options?* %]
+            <label for="search.sort"><pb-i18n key="browse.sort"/>:</label>
+            <select name="sort" id="search.sort">
+                [% let $current = page:parameter($context, 'sort', $context?features?browse?sort?default) %]
+                [% for $option in $context?features?browse?sort?options?* %]
                 [% if $current = $option?value %]
                 <option value="[[ $option?value ]]" selected="selected" data-i18n="[[ $option?key ]]"/>
                 [% else %]

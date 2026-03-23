@@ -51,6 +51,7 @@ else if ($exist:path eq '/api.html') then
 (: static resources from the resources, transform, templates, odd or modules subirectories are directly returned :)
 else if (matches($exist:path, "^.*/(resources|transform|templates)/.*$")
     or matches($exist:path, "^.*/odd/.*\.css$")
+    or $exist:path eq '/robots.txt'
     or matches($exist:path, "^.*/modules/.*\.json$")) then
     let $dir := replace($exist:path, "^.*/(resources|transform|modules|templates|odd)/.*$", "$1")
     return
@@ -80,7 +81,7 @@ else
     let $main :=
         if (matches($exist:path, "^/+api/+(?:odd|lint)")) then 
             "api-odd.xql" 
-        else if (matches($exist:path, "/+tex$") or matches($exist:path, "/+api/+(?:actions/reindex)$")) then
+        else if (matches($exist:path, "/+tex$") or matches($exist:path, "/+api/+(?:actions/reindex|actions/file-sync)$")) then
             "api-dba.xql"
         else 
             "api.xql"

@@ -13,8 +13,12 @@ module.exports = defineConfig({
       return config;
     },
     baseUrl: 'http://localhost:8080/exist/apps/hsg-jinks',
+    viewportWidth: 1280,
+    viewportHeight: 720,
     trashAssetsBeforeRuns: true,
     includeShadowDom: true,
+    retries: 2,
+    pageLoadTimeout: 90000,
     supportFile: 'test/cypress/support/e2e.js', 
     specPattern: 'test/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
     screenshotsFolder: 'test/cypress/screenshots',
