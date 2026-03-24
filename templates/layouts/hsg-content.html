@@ -16,7 +16,7 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul>
-                [[ page:collection-breadcrumbs($context) ]]
+                [[ hsg:collection-breadcrumbs($context) ]]
                 <li>[[ page:transform($context?doc?content, map { "mode": "breadcrumb" }, $context?doc?odd || ".odd") ]]</li>
             </ul>
         </nav>

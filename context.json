@@ -282,8 +282,13 @@
     "media" : [ "web", "print", "epub" ],
     "register-root" : "registers"
   },
-  "templating" : {
+ "templating" : {
+    "use" : [ "templates/document-toc.html","templates/document-on-this-page.html"],
     "modules" : {
+      "https://history.state.gov/ns/templates/hsg" : {
+        "at" : "modules/templates/hsg.xqm",
+        "prefix" : "hsg"
+      },
       "http://teipublisher.com/ns/templates/browse" : {
         "at" : "modules/templates/browse.xqm",
         "prefix" : "browse"
