@@ -24,6 +24,12 @@ RUN rm -f /etc/apt/sources.list.d/yarn.list 2>/dev/null || true
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends bzip2
 
+RUN apt-get update \
+    && apt-get install -y curl ca-certificates gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && node -v && npm -v
+
 # Install python pip and upgrade it to latest version
 RUN if [ "${INSTALL_NER}" = "true" ]; then \
     export DEBIAN_FRONTEND=noninteractive \
