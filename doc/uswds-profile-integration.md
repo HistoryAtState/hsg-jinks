@@ -192,15 +192,12 @@ does **not** protect them. Verified: after regeneration the DB copy had no
 **Therefore: never sync `.devcontainer/` down from the database.** Doing so would
 destroy the setup that makes regeneration possible at all.
 
-## Ports: 8091 on the host, 8080 inside the container
+## Ports
 
-Host 8080/8443 are held by the unrelated `exist-jwt-test` container; 8090/8453 by
-a **native eXist running on the host**. So:
-
-```jsonc
-// .devcontainer/devcontainer.json
-"appPort": [ "8091:8080", "8444:8443" ],
-```
+The container publishes eXist on the standard ports (`appPort: ["8080:8080",
+"8443:8443"]` in `.devcontainer/devcontainer.json`). If those are taken on your
+host by other eXist instances, remap the **host (left) side only** and keep the
+change local — see "Remapping ports" in the README.
 
 **Why not `docker.ports.http` in `config.json`?** That is the profile's
 config-driven knob and *would* survive regeneration — but it moves eXist's
@@ -213,8 +210,8 @@ remap to an arbitrary free port.
 
 | Context | Port |
 |---|---|
-| Inside the container (`existdb-vscode`, `init.sh`) | **8080** |
-| From the host (`jinks`, `xst`, `curl`, browser) | **8091** |
+| Inside the container (`existdb-vscode`, `init.sh`) | always **8080** |
+| From the host (`jinks`, `xst`, `curl`, browser) | the host side of `appPort` (**8080** unless remapped) |
 
 `.existdb.json` therefore stays on **8080** — do not "fix" it.
 
@@ -222,7 +219,7 @@ remap to an arbitrary free port.
 
 ```sh
 npx @devcontainers/cli up --workspace-folder .
-jinks update hsg-jinks --server http://localhost:8091/exist/apps/jinks
+jinks update hsg-jinks --server http://localhost:8080/exist/apps/jinks
 ```
 
 ⚠️ `npx @devcontainers/cli up` **exits 0 even when the docker build fails.** Do
@@ -270,13 +267,14 @@ back with `xst` (the `existdb-vscode` extension does the same job from inside th
 container):
 
 ```sh
-export EXISTDB_SERVER=http://localhost:8091/exist EXISTDB_USER=admin EXISTDB_PASS=""
+export EXISTDB_SERVER=http://localhost:8080/exist EXISTDB_USER=admin EXISTDB_PASS=""
 xst get /db/apps/hsg-jinks <staging-dir>
 ```
 
 Then **copy, never mirror** into the repo, excluding:
 
 - `.devcontainer/` — would destroy our hand-edits (see above)
+- `README.md`, `doc/` — this doc and the operational summary (built into the xar)
 - `.husky/`, `TODO.md`, `cypress.json`, `cypress.config.js`, `.prettierrc.json` —
   profile leakage
 - `.claude/` — swept into the xar from the workspace
@@ -293,6 +291,8 @@ snapshots. Known victims, each hit at least once — **exclude all of them** and
 re-verify after every sync:
 
 - `doc/uswds-profile-integration.md` — this document (built into the xar)
+- `README.md` — jinks-managed (regenerates to the base10 stub), but holds the
+  operational summary; exclude it or lose the findings
 - `.gitignore` — the DB copy predates the `.devcontainer/*.xar` rule; losing it
   would commit the 15 MB profile xar
 - `test/cypress/support/commands.js` (326 lines) / `e2e.js` — the DB copies were
@@ -325,7 +325,7 @@ In `/db/apps/hsg-jinks` after regeneration:
 | `templates/uswds-blocks.html` | present ✅ |
 | `resources/css/hsg-theme.css` | present, layered last ✅ |
 
-Visually confirmed in the browser on host 8091.
+Visually confirmed in the browser on the host port.
 
 ## Data
 
@@ -346,7 +346,7 @@ app + jinks + theme profile). Load it manually:
 
 ```sh
 cd ../hsg-jinks-data && ant                                  # -> build/frus-data-jinks-*.xar
-export EXISTDB_SERVER=http://localhost:8091/exist EXISTDB_USER=admin EXISTDB_PASS=""
+export EXISTDB_SERVER=http://localhost:8080/exist EXISTDB_USER=admin EXISTDB_PASS=""
 xst package install local build/frus-data-jinks-*.xar        # -> /db/apps/frus-data-jinks
 ```
 

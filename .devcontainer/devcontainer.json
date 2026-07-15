@@ -16,10 +16,10 @@
         }
     },
     "runArgs": ["--name=hsg-jinks-dev"],
-    // Host 8080/8443 are taken by the `exist-jwt-test` container, and 8090/8453
-    // by a native eXist running on the host. eXist still listens on 8080 *inside*
-    // the container -- .devcontainer/init.sh hardcodes localhost:8080 and would
-    // break if the internal port moved -- so remap on the host side only.
+    // If 8080/8443 are taken on your machine, remap the host (left) side only
+    // and keep the change local -- see "Remapping ports" in the README. eXist
+    // must keep listening on 8080 *inside* the container: .devcontainer/init.sh
+    // hardcodes localhost:8080 and would break if the internal port moved.
     // appPort publishes deterministically via docker; forwardPorts would let
     // VS Code silently pick an arbitrary free port instead.
     "appPort": [ "8080:8080", "8443:8443" ],
