@@ -1,10 +1,12 @@
 FROM mcr.microsoft.com/devcontainers/java:8-bullseye
 
 ARG EXIST_VERSION=6.4.0
-ARG PUBLISHER_LIB_VERSION=6.0.2
-ARG JINKS_TEMPLATES_VERSION=1.2.0
+ARG PUBLISHER_LIB_VERSION=6.1.0
+ARG JINKS_TEMPLATES_VERSION=1.4.1
 ARG ROUTER_VERSION=1.11.0
 ARG EDITOR_VERSION=1.0.1
+ARG CRYPTO_VERSION=6.0.1
+ARG JWT_VERSION=2.0.1
 
 
 ARG HTTP_PORT=8080
@@ -26,7 +28,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 
 RUN apt-get update \
     && apt-get install -y curl ca-certificates gnupg \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
     && node -v && npm -v
 
@@ -87,9 +89,26 @@ RUN if [ "${PUBLISHER_LIB_VERSION}" = "master" ]; then \
 
 RUN curl -L -o /usr/local/exist/autodeploy/roaster-${ROUTER_VERSION}.xar https://exist-db.org/exist/apps/public-repo/public/roaster-${ROUTER_VERSION}.xar
 RUN curl -L -o /usr/local/exist/autodeploy/atom-editor-${EDITOR_VERSION}.xar https://github.com/wolfgangmm/existdb-langserver/raw/master/resources/atom-editor-${EDITOR_VERSION}.xar
+RUN curl -L -o /usr/local/exist/autodeploy/expath-crypto-module-${CRYPTO_VERSION}.xar https://exist-db.org/exist/apps/public-repo/public/expath-crypto-module-${CRYPTO_VERSION}.xar
+RUN curl -L -o /usr/local/exist/autodeploy/jwt-${JWT_VERSION}.xar https://exist-db.org/exist/apps/public-repo/public/jwt-${JWT_VERSION}.xar
 
+# The jinks generator and the USWDS theme profile are both built from main:
+# we track jinks main, and profile-theme-uswds has no release at all.
+# eXist autodeploys alphabetically, so the zz-/zzz- prefixes force these to
+# install last -- after jinks-templates, tei-publisher-lib, roaster and jwt,
+# all of which jinks declares as dependencies.
+RUN git clone https://github.com/eeditiones/jinks.git \
+    && cd jinks \
+    && ant \
+    && cp build/*.xar /usr/local/exist/autodeploy/zz-jinks.xar
 
-
+# profile-theme-uswds is a PRIVATE repo, so it cannot be cloned anonymously here
+# (and it publishes no releases, so `docker.externalXar` has no URL to fetch).
+# Instead we copy in a xar built from the local checkout. Refresh it with:
+#   cd ~/customers/eeditiones/profile-theme-uswds && ant
+#   cp build/profile-theme-uswds-*.xar <this repo>/.devcontainer/
+# The xar is gitignored -- it is a build artifact, not source.
+COPY profile-theme-uswds-*.xar /usr/local/exist/autodeploy/zzz-profile-theme-uswds.xar
 
 
 WORKDIR /usr/local/exist
@@ -101,7 +120,13 @@ RUN bin/client.sh -l --no-gui --xpath "system:get-version()"
 
 EXPOSE ${HTTP_PORT} ${HTTPS_PORT} 8001
 
+# -Xss16m: jinks' generator:filter-conflicts (modules/generator.xql:133) is
+# non-tail-recursive with one frame per file written. profile-theme-uswds copies
+# ~2600 resource files, which overflows the default JVM thread stack and makes
+# POST /api/generator fail with java.lang.StackOverflowError. Remove once jinks
+# makes that function iterative.
 ENV JAVA_OPTS \
+    -Xss16m \
     -Djetty.port=${HTTP_PORT} \
     -Djetty.ssl.port=${HTTPS_PORT} \
     -Dfile.encoding=UTF8 \

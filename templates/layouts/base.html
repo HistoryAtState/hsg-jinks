@@ -1,24 +1,24 @@
-<html>
+<html lang="[[page:resolve-language($context)]]">
     <head>
         [% if $context?defaults?base %]
-        <base href="[[ $context-path ]]/[[ $context?defaults?base ]]"/>
+        <base href="[[ $context-path ]]/[[ $context?defaults?base ]]" />
         [% endif %]
-        <meta charset="utf-8"/>
-        <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes"/>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes" />
         [% if $context?description %]
-        <meta name="description" content="[[ $context?description ]]"/>
+        <meta name="description" content="[[ $context?description ]]" />
         [% endif %]
-        <link rel="shortcut icon" type="image/x-icon" href="[[ $context-path ]]/resources/images/favicon.ico"/>
-        <link rel="shortcut icon" type="image/png" href="[[ $context-path ]]/resources/images/favicon-16.png" sizes="16x16"/>
-        <link rel="shortcut icon" type="image/png" href="[[ $context-path ]]/resources/images/favicon-24.png" sizes="24x24"/>
-        <link rel="shortcut icon" type="image/png" href="[[ $context-path ]]/resources/images/favicon-32.png" sizes="32x32"/>
-        <link rel="shortcut icon" type="image/png" href="[[ $context-path ]]/resources/images/favicon-64.png" sizes="64x64"/>
+        <link rel="shortcut icon" type="image/x-icon" href="[[ $context-path ]]/resources/images/favicon.ico" />
+        <link rel="shortcut icon" type="image/png" href="[[ $context-path ]]/resources/images/favicon-16.png" sizes="16x16" />
+        <link rel="shortcut icon" type="image/png" href="[[ $context-path ]]/resources/images/favicon-24.png" sizes="24x24" />
+        <link rel="shortcut icon" type="image/png" href="[[ $context-path ]]/resources/images/favicon-32.png" sizes="32x32" />
+        <link rel="shortcut icon" type="image/png" href="[[ $context-path ]]/resources/images/favicon-64.png" sizes="64x64" />
 
         [% for $path in $styles?* %]
             [% if matches($path, "(?:^https?://|^/).*$") %]
-            <link rel="stylesheet" href="[[ $path ]]"/>
+            <link rel="stylesheet" href="[[ $path ]]" />
             [% else %]
-            <link rel="stylesheet" href="[[ $context-path ]]/[[ $path ]]"/>
+            <link rel="stylesheet" href="[[ $context-path ]]/[[ $path ]]" />
             [% endif %]
         [% endfor %]
 
@@ -30,23 +30,25 @@
         </style>
         [% block styles %][% endblock %]
 
+        [% block title %]
         <title>[[ $label ]]</title>
+        [% endblock %]
 
         [% if $script?webcomponents = 'dev' %]
-        <script type="module" src="[[$script?cdn]]/src/pb-components-bundle.js"/>
+        <script type="module" src="[[$script?cdn]]/src/pb-components-bundle.js"></script>
         [% for $component in $script?extra-components?* %]
-        <script type="module" src="[[$script?cdn]]/src/[[ $component ]].js"/>
+        <script type="module" src="[[$script?cdn]]/src/[[ $component ]].js"></script>
         [% endfor %]
         [% elif $script?webcomponents = 'local' %]
-        <script type="module" src="[[ $context-path ]]/resources/lib/pb-components-bundle.js"/>
+        <script type="module" src="[[ $context-path ]]/resources/lib/pb-components-bundle.js"></script>
         [% for $component in $script?extra-components?* %]
-        <script type="module" src="[[ $context-path ]]/resources/lib/[[ $component ]].js"/>
+        <script type="module" src="[[ $context-path ]]/resources/lib/[[ $component ]].js"></script>
         [% endfor %]
         [% elif $script?webcomponents = '' %]
         [% else %]
-        <script type="module" src="[[$script?cdn]]@[[$script?webcomponents]]/dist/pb-components-bundle.js"/>
+        <script type="module" src="[[$script?cdn]]@[[$script?webcomponents]]/dist/pb-components-bundle.js"></script>
         [% for $component in $script?extra-components?* %]
-        <script type="module" src="[[$script?cdn]]@[[$script?webcomponents]]/dist/[[ $component ]].js"/>
+        <script type="module" src="[[$script?cdn]]@[[$script?webcomponents]]/dist/[[ $component ]].js"></script>
         [% endfor %]
         [% endif %]
 
@@ -57,12 +59,12 @@
             <h2 slot="title">
                 <pb-i18n key="dialogs.generatingFile">Generating file ...</pb-i18n>
             </h2>
-            <p><pb-i18n key="dialogs.downloadMessage"/></p>
+            <p><pb-i18n key="dialogs.downloadMessage"></pb-i18n></p>
             <button slot="footer" autofocus="autofocus" rel="prev" aria-label="Close">
                 <pb-i18n key="dialogs.close">Close</pb-i18n>
             </button>
         </pb-dialog>
-        <pb-page endpoint="[[ $context-path ]]" app-root="[[ $context-path ]]" api-version="1.0.0" supported-languages="[[ string-join($context?defaults?languages?*, ', ') ]]" language="[[ if ($request?parameters?lang) then $request?parameters?lang else $defaults?language ]]" locales="resources/i18n/{{ns}}/{{lng}}.json" locale-fallback-ns="app [[ if (map:contains($context, 'i18n')) then string-join($context?i18n?*, ' ') else () ]]" unresolved="unresolved" url-template="[[ $context?urls?template ]]" url-ignore="[[ $context?urls?ignore ]]" class="[[ $context?theme?layout?class ]]" require-language="require-language" theme="resources/css/components.css">
+        <pb-page endpoint="[[ $context-path ]]" app-root="[[ $context-path ]]" api-version="1.0.0" supported-languages="[[ string-join($context?defaults?languages?*, ', ') ]]" locales="resources/i18n/{{ns}}/{{lng}}.json" locale-fallback-ns="app [[ if (map:contains($context, 'i18n')) then string-join($context?i18n?*, ' ') else () ]]" unresolved="unresolved" url-template="[[ $context?urls?template ]]" url-ignore="[[ $context?urls?ignore ]]" class="[[ string-join((tokenize($context?theme?layout?class, '\s+'), if (not($context?theme?layout?before?collapsible)) then 'before-fixed' else (), if (not($context?theme?layout?after?collapsible)) then 'after-fixed' else ()), ' ') ]]" require-language="require-language" theme="resources/css/components.css">
             <header class="page-header">
                 <div>
                     [% if $features?menubar %]
@@ -86,7 +88,7 @@
                     <li>
                         <a class="aside-toggle" title="Hide" data-toggle=".fixed-layout &gt; .before">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-bar-left" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M12.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5M10 8a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 7.5H9.5a.5.5 0 0 1 .5.5"/>
+                                <path fill-rule="evenodd" d="M12.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5M10 8a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 7.5H9.5a.5.5 0 0 1 .5.5"></path>
                             </svg>
                         </a>
                     </li>
@@ -103,7 +105,7 @@
                 [% endif %]
                 [% block content-top %][% endblock %]
                 [% if $features?toolbar?progress?enabled %]
-                <pb-progress subscribe="[[ $features?toolbar?progress?subscribe ]]" indeterminate="indeterminate"/>
+                <pb-progress subscribe="[[ $features?toolbar?progress?subscribe ]]" indeterminate="indeterminate"></pb-progress>
                 [% endif %]
             </header>
 
@@ -115,29 +117,36 @@
                     <li>
                         <a class="aside-toggle" title="Hide" data-toggle=".fixed-layout &gt; .after">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-bar-left" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M12.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5M10 8a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 7.5H9.5a.5.5 0 0 1 .5.5"/>
+                                <path fill-rule="evenodd" d="M12.5 15a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5M10 8a.5.5 0 0 1-.5.5H3.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L3.707 7.5H9.5a.5.5 0 0 1 .5.5"></path>
                             </svg>
                         </a>
                     </li>
                 </ul>
                 [% endif %]
             </nav>
-            <aside class="after hidden-mobile [[ if ($context?theme?layout?after?hidden) then 'hidden' else '' ]]">
+            <aside class="after hidden-mobile [[ if ($context?theme?layout?after?hidden) then 'hidden' else '' ]] [[ if ($context?theme?layout?after?mode = 'tabs') then 'after-tabs' else '' ]]">
                 [% block after %][% endblock %]
             </aside>
+            [% block footer %][% endblock %]
             [% if $context?theme?layout?footer?mobile?enabled %]
                 [% include 'templates/footer-mobile.html' %]
             [% endif %]
         </pb-page>
-        <div class="splash"/>
-        
+        <div class="splash"></div>
+
         [% for $icons in $context?theme?icons?* %]
         [% include "resources/css/" || $icons %]
         [% endfor %]
-        
-        <script src="[[ $context-path ]]/resources/scripts/layout.js"/>
+
+        <script src="[[ $context-path ]]/resources/scripts/layout.js"></script>
         [% for $src in $context?script?custom?* %]
-        <script src="[[ if (matches($src, '^https?://')) then $src else $context-path || '/' || $src ]]"/>
+        <script src="[[ if (matches($src, '^https?://')) then $src else $context-path || '/' || $src ]]"></script>
         [% endfor %]
+        <!-- Statically determine the language for the page, might be overridden once i18n is loaded -->
+        <script type="application/json" id="language-default">
+            {
+                "language": "[[ page:resolve-language($context) ]]"
+            }
+        </script>
     </body>
 </html>

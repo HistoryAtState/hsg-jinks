@@ -12,3 +12,7 @@ test/cypress/screenshots/
 test/cypress/videos/
 test/cypress/downloads/
 .DS_Store
+
+# xar built from the private profile-theme-uswds checkout, copied in for the
+# devcontainer build (see .devcontainer/Dockerfile.dev)
+.devcontainer/*.xar

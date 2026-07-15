@@ -41,15 +41,15 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul>
-                <li><a href="[[ $context-path ]]/browse.html"><pb-i18n key="breadcrumb.collection-root"/></a></li>
-                <li><pb-i18n key="search.results"/></li>
+                <li><a href="[[ $context-path ]]/[[ $context?defaults?browse ]]"><pb-i18n key="breadcrumb.collection-root"></pb-i18n></a></li>
+                <li><pb-i18n key="search.results"></pb-i18n></li>
             </ul>
         </nav>
     </li>
     [% endtemplate %]
 
     <main>
-        <pb-load class="results" url="api/search" emit="results"/>
+        <pb-load class="results" url="api/search" emit="results"></pb-load>
     </main>
 
     [% template before %]
@@ -66,6 +66,6 @@
         </div> -->
         <button slot="searchButton"><pb-i18n key="search.search">Search</pb-i18n></button>
     </pb-search>
-    <pb-custom-form class="facets" url="api/search/facets" subscribe="results" event="pb-results-received" emit="search"/>
+    <pb-custom-form class="facets" url="api/search/facets" subscribe="results" event="pb-results-received" emit="search"></pb-custom-form>
     [% endtemplate %]
 </template>

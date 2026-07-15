@@ -4,22 +4,21 @@
 --jinks-...-default variables as required for the custom theme and import these in your theme.css */
 
 :root {
-
     /* Logo */
 
-    --jinks-logo-light: url("../images/tei-publisher-logo-contrast-color.svg");
-    --jinks-logo-image-width: 140px;
-    --jinks-logo-image-height: 48px;
+    --jinks-logo-light: url("");
+    --jinks-logo-image-width: ;
+    --jinks-logo-image-height: ;
     --jinks-logo-margin-right: 1rem;
 
     /* Image backgrounds */
 
     /* Landing page: hero section */
-    --jinks-hero-background-image: url("");
-    --jinks-hero-background-size: ;
-    --jinks-hero-background-position: ;
-    --jinks-hero-background-repeat: ;
-    --jinks-hero-background-color: ;
+    --jinks-hero-background-image: url("../images/mount-rushmore.jpg");
+    --jinks-hero-background-size: cover;
+    --jinks-hero-background-position: center;
+    --jinks-hero-background-repeat: no-repeat;
+    --jinks-hero-background-color: rgba(0, 0, 0, 0.6);
     --jinks-hero-height: auto;
     --jinks-hero-min-height: 60vh;
     --jinks-hero-padding: 2rem 1rem 2rem 6rem;
@@ -37,43 +36,40 @@
     /* menubar, toolbar, drawer */
 
     
-    --jinks-menubar-background-image: none;
-    --jinks-menubar-background-color: var(--jinks-colors-500);
+    --jinks-menubar-background-color: var(--jinks-overlay-background-color-dark);
+    --jinks-menubar-background-image: url("");
     
-
     --jinks-menubar-color: var(--jinks-colors-light);
-    --jinks-menubar-font-size: 14px;
+    --jinks-menubar-font-size: ;
     --jinks-menubar-button-color: rgba(165, 165, 165, 0.4);
 
-    --jinks-toolbar-background-color: var(--jinks-colors-200);
-    --jinks-toolbar-color: var(--jinks-color-primary);
+    --jinks-toolbar-background-color: ;
+    --jinks-toolbar-color: ;
 
     /* Splash */
 
-    --jinks-splash-background-light: url("../images/tei-publisher-logo-color.svg");
-    --jinks-splash-image-width: 320px;
-    --jinks-splash-image-height: auto;
+    --jinks-splash-background-light: url("");
+    --jinks-splash-image-width: ;
+    --jinks-splash-image-height: ;
 
     /* Texture background */
-     
-    
-        --jinks-texture-background: none;
-    
 
+    
+    --jinks-texture-background: none;
+    
     /* Typography */
 
+    --jinks-base-font-family: ;
+    --jinks-base-font-size: ;
+    --jinks-base-line-height: ;
+    --jinks-base-font-weight: ;
 
-    --jinks-base-font-family: 'Inter', 'Noto', sans-serif;
-    --jinks-base-font-size: 16px;
-    --jinks-base-line-height: 1.4;
-    --jinks-base-font-weight: 400;
+    --jinks-content-font-family: ;
+    --jinks-content-font-size: ;
+    --jinks-content-line-height: ;
 
-    --jinks-content-font-family: JunicodeVF, Georgia, 'Times New Roman', serif;
-    --jinks-content-font-size: 1.25rem;
-    --jinks-content-line-height: 150%;
-
-    --jinks-heading-font-family: 'Inter', 'Noto', sans-serif;
-    --jinks-heading-font-weight: 600 !important;
+    --jinks-heading-font-family: ;
+    --jinks-heading-font-weight:  !important;
     --jinks-heading-line-height: 1.2;
 
     --jinks-h1-font-size: 1.625em;
@@ -92,20 +88,20 @@
     --jinks-h4-line-height: 140%;
     --jinks-h4-font-weight: calc(var(--jinks-heading-font-weight) - 100);
 
-    --jinks-breadcrumbs-font-size: 0.9rem;
-    --jinks-breadcrumbs-max: 40ch;
+    --jinks-breadcrumbs-font-size: ;
+    --jinks-breadcrumbs-max: ;
 
-    --jinks-toc-font-size: 1.125rem;
+    --jinks-toc-font-size: ;
 
     --jinks-font-size-smaller: 0.875rem;
-    --jinks-footnote-font-size: 0.9em;
-    --jinks-footnote-padding: 0 0 0 .25em;
+    --jinks-footnote-font-size: ;
+    --jinks-footnote-padding: 0 0 0 0.25em;
 
-    --jinks-content-max-width: 70ch;
+    --jinks-content-max-width: ;
     --jinks-page-max-width: 84rem;
 
     /* Background colors */
-    --jinks-background-color: var(--jinks-colors-100);
+    --jinks-background-color: ;
     --jinks-background-color-light: var(--jinks-background-color);
     --jinks-background-color-dark: var(--jinks-colors-700);
 
@@ -120,15 +116,14 @@
     --jinks-header-background-color-light: var(--jinks-header-background-color);
     --jinks-header-background-color-dark: var(--jinks-overlay-background-color-dark);
 
-
     /* --pb-drawer-background-color: var(--jinks-color-inverse); */
 
     /* text colors */
     --jinks-color-primary: var(--jinks-colors-700);
     --jinks-color-lighter: var(--jinks-colors-medium);
     --jinks-color-focus: var(--jinks-colors-accent);
-    --jinks-color-border: #EBEBEB;
-    --jinks-color-white: #FFFFFF;
+    --jinks-color-border: #ebebeb;
+    --jinks-color-white: #ffffff;
     --jinks-footnote-color: var(--jinks-color-primary);
 
     --jinks-h1-color: var(--jinks-colors-600);
@@ -144,8 +139,8 @@
     --jinks-form-border-radius: 90px;
     --jinks-form-border-radius-full: 999px;
     --jinks-form-hover-color: var(--jinks-colors-400);
-    --jinks-form-focus-color1: #3B82F6;
-    --jinks-form-focus-color2: rgba(59, 130, 246, 0.20);
+    --jinks-form-focus-color1: #3b82f6;
+    --jinks-form-focus-color2: rgba(59, 130, 246, 0.2);
     --jinks-form-text-color: var(--jinks-color-primary);
     --jinks-form-control-font-size: 0.875rem;
 
@@ -172,7 +167,7 @@
     --jinks-dialog-footer-background-color: var(--jinks-colors-200);
     --jinks-dialog-footer-color: var(--jinks-colors-700);
     --jinks-dialog-header-font-size: 1.125rem;
-    
+
     /* variables passed to tei-publisher-components */
     --pb-base-font-family: var(--jinks-base-font-family);
     --pb-base-font-size: var(--jinks-base-font-size);
@@ -209,7 +204,7 @@
     --pb-footnote-font-family: var(--jinks-content-font-family);
     --pb-footnote-font-weight: var(--jinks-content-font-weight);
     /* --pb-footnote-color: #303030; */
-    --pb-footnote-padding: 0 0 0 .25em;
+    --pb-footnote-padding: 0 0 0 0.25em;
 
     /* pb-popover */
     --pb-popover-theme: "light-border";
@@ -221,6 +216,6 @@
 
     --pb-zoom-factor: 1;
     --pb-min-zoom: 0.5;
-    --pb-max-zoom: 3.0;
+    --pb-max-zoom: 3;
     --pb-highlight-color: var(--jinks-colors-highlight);
 }

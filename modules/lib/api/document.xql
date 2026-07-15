@@ -534,6 +534,14 @@ declare function dapi:get-fragment($request as map(*), $docs as node()*, $path a
                     ()
         else
             pages:load-xml($docs, $view, $request?parameters?root, $path)
+    let $xml :=
+        if ($request?parameters?user.track-ids = "yes") then
+            for $item in $xml
+            return map:merge(($item, map {
+                "config": map:merge(($item?config, map { "depth": 1, "fill": -1 }), map { "duplicates": "use-last" })
+            }), map { "duplicates": "use-last" })
+        else
+            $xml
     return
         if ($xml?data) then
             let $userParams :=
@@ -554,19 +562,29 @@ declare function dapi:get-fragment($request as map(*), $docs as node()*, $path a
                     query:expand($xml?config, $mapped)[1]
                 else
                     $mapped
+            (: TODO perhaps find a way to assess whether not running the query is viable or not :)
+            let $data := if ($data) then $data else $mapped
             let $content :=
                 if (not($view = "single")) then
                     pages:get-content($xml?config, $data)
                 else
                     $data
-
-            let $html :=
-                typeswitch ($mapped)
-                    case element() | document-node() return
-                        pages:process-content($content, $xml?data, $xml?config, $userParams, $request?parameters?wrap)
-                    default return
-                        $content
-            let $transformed := dapi:extract-footnotes($html[1], $xml?data[1])
+            (: When the client already holds server-rendered content in its light DOM
+             : (SSR via page:content), it requests content=none so we skip the expensive
+             : ODD transform and return navigation metadata only. get-content above is
+             : cheap (node selection) and is still needed for the fragment id. :)
+            let $transformed :=
+                if ($request?parameters?content = "none") then
+                    map { "content": (), "footnotes": () }
+                else
+                    let $html :=
+                        typeswitch ($mapped)
+                            case element() | document-node() return
+                                pages:process-content($content, $xml?data, $xml?config, $userParams, $request?parameters?wrap)
+                            default return
+                                $content
+                    return
+                        dapi:extract-footnotes($html[1], $xml?data[1])
             let $path := replace($path, "^.*/([^/]+)$", "$1")
             return
                 if ($request?parameters?format = "html") then
@@ -673,15 +691,25 @@ declare function dapi:table-of-contents($request as map(*)) {
     let $doc := xmldb:decode-uri(xs:anyURI($request?parameters?id))
     let $documents := config:get-document($doc)
     return
-        if($documents)
-        then (
+        if($documents) then (
             cutil:check-last-modified($request, $documents, function($request as map(*), $documents as node()*) {
                 let $xml := pages:load-xml($documents, $request?parameters?view, (), $doc)
                 return
-                if (exists($xml)) then
-                    dapi:toc-div(root($xml?data), $xml, $request?parameters?target, $collapse)
-                else
-                    error($errors:NOT_FOUND, "Document " || $doc || " not found")
+                    if (exists($xml)) then
+                        let $mapped :=
+                            if (exists($request?parameters?map)) then
+                                let $mapFun := function-lookup(xs:QName("mapping:" || $request?parameters?map), 2)
+                                return
+                                    if (exists($mapFun)) then
+                                        $mapFun($xml?data, $request?parameters)
+                                    else
+                                        $xml?data
+                            else
+                                $xml?data
+                        return
+                            dapi:toc-div(root($mapped), $xml, $request?parameters?target, $collapse)
+                    else
+                        error($errors:NOT_FOUND, "Document " || $doc || " not found")
                 })
         ) else (
             router:response(404, "text/text", $doc)
@@ -713,13 +741,13 @@ declare %private function dapi:toc-div($node, $model as map(*), $target as xs:st
             let $hasDivs := exists(nav:get-subsections($model?config, $div))
             let $nodeId :=  if ($parent) then util:node-id($parent) else util:node-id($root)
             let $xmlId := if ($parent) then $parent/@xml:id else $root/@xml:id
-            let $hash := 
+            let $hash :=
                 if ($view != 'page' and not(nav:get-section-for-node($model?config, $div) is $root)) then
-                    if ($root/@xml:id) then 
+                    if ($root/@xml:id) then
                         attribute hash { $root/@xml:id }
                     else
                         attribute hash { util:node-id($root) }
-                else 
+                else
                     ()
             return
                     <li>

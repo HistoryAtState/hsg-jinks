@@ -1,0 +1,8 @@
+{
+  "profiles" : {
+    "profile-theme-uswds" : "1.0.0",
+    "docker" : "1.0.0",
+    "base10" : "1.0.0"
+  },
+  "jinks" : "10.0.0"
+}

@@ -25,13 +25,12 @@
       "name" : "target"
     } ]
   } ],
-  "profiles" : [ "base10", "theme-base10", "docker" ],
-  "_lastModified" : "2026-03-23T16:46:42.461Z",
+  "profiles" : [ "base10", "docker", "profile-theme-uswds" ],
   "label" : "hsg-jinks",
   "version" : "1.0.0",
   "id" : "https://e-editiones.org/apps/hsg-jinks",
   "_update" : true,
-  "styles" : [ "https://cdn.jsdelivr.net/npm/theme-toggles@4.10.1/css/classic.min.css", "resources/css/pico-components.css", "resources/css/jinks-theme.css", "resources/css/hsg-theme.css" ],
+  "styles" : [ "https://cdn.jsdelivr.net/npm/theme-toggles@4.10.1/css/classic.min.css", "resources/css/layout.css", "resources/css/jinks-variables.css", "resources/css/components.css", "resources/css/hsg-theme.css" ],
   "_noDeploy" : false,
   "api" : [ {
     "spec" : "hsg-api.json",
@@ -39,14 +38,20 @@
     "id" : "http://teipublisher.com/api/hsg",
     "path" : "hsg-api.xql"
   } ],
+  "profile-versions" : {
+    "profile-theme-uswds" : "1.0.0",
+    "docker" : "1.0.0",
+    "base10" : "1.0.0"
+  },
   "depends" : [ "base10" ],
+  "profile-changes" : { },
   "template-suffix" : "\\.tpl",
   "ignore" : [ "repo.xml", "resources/css/components.css" ],
   "target" : "/db/apps/hsg-jinks",
   "menu" : {
     "language" : true,
     "delete" : true,
-    "dark-mode" : true,
+    "dark-mode" : false,
     "items" : [ {
       "url" : "browse.html",
       "id" : "Start"
@@ -76,78 +81,21 @@
       },
       "max-width" : "84rem"
     },
-    "menubar" : {
-      "background-color" : "var(--jinks-colors-500)",
-      "color" : "#ffffff",
-      "background-image" : "none"
-    },
-    "icons" : [ ],
-    "splash" : {
-      "width" : "320px",
-      "image" : "../images/tei-publisher-logo-color.svg",
-      "height" : "auto"
-    },
-    "body" : {
-      "background-color" : "var(--jinks-colors-100)"
-    },
-    "logo" : {
-      "width" : "140px",
-      "image" : "../images/tei-publisher-logo-contrast-color.svg",
-      "height" : "48px"
-    },
-    "breadcrumbs" : {
-      "max" : "40ch"
-    },
-    "content" : {
-      "max-width" : "70ch"
-    },
-    "texture" : {
-      "background-image" : null
+    "landing" : {
+      "hero" : {
+        "background-position" : "center",
+        "background-color" : "rgba(0, 0, 0, 0.6)",
+        "background-size" : "cover",
+        "background-image" : "../images/mount-rushmore.jpg",
+        "background-repeat" : "no-repeat"
+      }
     },
     "colors" : {
       "palettes" : {
-        "green" : "palette-green.css",
-        "teal" : "palette-teal.css",
         "neutral" : "palette-neutral.css",
-        "blue" : "palette-blue.css",
-        "beige" : "palette-beige.css"
+        "navy" : "palette-navy.css"
       },
-      "palette" : "blue"
-    },
-    "fonts" : {
-      "toc" : {
-        "size" : "1.125rem"
-      },
-      "menubar" : {
-        "size" : "14px"
-      },
-      "footnote" : {
-        "size" : "0.9em"
-      },
-      "base" : {
-        "family" : "'Inter', 'Noto', sans-serif",
-        "line-height" : "1.4",
-        "size" : "16px",
-        "weight" : "400"
-      },
-      "heading" : {
-        "family" : "'Inter', 'Noto', sans-serif",
-        "size" : "1.2rem",
-        "weight" : "600"
-      },
-      "breadcrumbs" : {
-        "size" : "0.9rem"
-      },
-      "content" : {
-        "family" : "JunicodeVF, Georgia, 'Times New Roman', serif",
-        "line-height" : "150%",
-        "size" : "1.25rem",
-        "weight" : "400"
-      }
-    },
-    "toolbar" : {
-      "background-color" : "var(--jinks-colors-200)",
-      "color" : "var(--jinks-color-primary)"
+      "palette" : "navy"
     }
   },
   "features" : {
@@ -213,6 +161,9 @@
       "enable" : true
     }
   },
+  "skipSource" : [ "repo.xml", "expath-pkg.xml", "build.xml" ],
+  "_lastModified" : "2026-07-14T17:29:29.204Z",
+  "overwrite" : "default",
   "pkg" : {
     "website" : "http://tei-publisher.org",
     "abbrev" : "hsg-jinks",
@@ -222,8 +173,9 @@
       "semver" : "1",
       "package" : "http://e-editiones.org/roaster"
     }, {
-      "semver" : "6",
-      "package" : "http://existsolutions.com/apps/tei-publisher-lib"
+      "semver-min" : "6.1",
+      "package" : "http://existsolutions.com/apps/tei-publisher-lib",
+      "semver-max" : "6"
     }, {
       "semver" : "1",
       "package" : "http://tei-publisher.com/library/jinks-templates"
@@ -237,10 +189,10 @@
   },
   "description" : "",
   "_dry" : false,
-  "source" : "/db/apps/jinks/profiles/docker",
-  "type" : "feature",
+  "source" : "/db/apps//profile-theme-uswds",
+  "type" : "theme",
   "skip" : [ "^doc/.*$", "setup.xql", "config.json" ],
-  "odds" : [ "teipublisher.odd", "hsg-jinks.odd" ],
+  "odds" : [ "teipublisher.odd", "uswds-landing.odd", "hsg-jinks.odd" ],
   "docker" : {
     "eXist" : "6.4.0",
     "features" : {
@@ -250,19 +202,21 @@
       "tex" : false
     },
     "jwt" : "2.0.1",
-    "roaster" : "1.11.0",
+    "roaster" : "1.12.1",
     "ports" : {
       "https" : 8443,
       "http" : 8080
     },
     "crypto" : "6.0.1",
-    "tei-publisher-lib" : "6.0.2",
+    "tei-publisher-lib" : "6.1.0",
     "ant" : "1.10.15",
-    "jinks-templates" : "1.2.0"
+    "jinks-templates" : "1.4.1"
   },
   "category" : "development",
   "_overwrite" : "quick",
   "defaults" : {
+    "language" : "en",
+    "language-label" : "label",
     "data" : "/db/apps/frus-data-jinks/data",
     "address-by-id" : false,
     "odd-root" : "resources/odd",
@@ -282,13 +236,9 @@
     "media" : [ "web", "print", "epub" ],
     "register-root" : "registers"
   },
- "templating" : {
-    "use" : [ "templates/document-toc.html","templates/document-on-this-page.html"],
+  "templating" : {
+    "use" : [ "templates/uswds-blocks.html" ],
     "modules" : {
-      "https://history.state.gov/ns/templates/hsg" : {
-        "at" : "modules/templates/hsg.xqm",
-        "prefix" : "hsg"
-      },
       "http://teipublisher.com/ns/templates/browse" : {
         "at" : "modules/templates/browse.xqm",
         "prefix" : "browse"
@@ -301,10 +251,10 @@
   },
   "script" : {
     "custom" : [ ],
-    "webcomponents" : "3.0.5",
+    "webcomponents" : "3.0.0-next-4.21",
     "extra-components" : [ ],
     "cdn" : "https://cdn.jsdelivr.net/npm/@teipublisher/pb-components"
   },
-  "order" : 1,
+  "order" : 0,
   "$schema" : "../jinks/schema/jinks.json"
 }

@@ -1,16 +1,23 @@
+
 {
     "servers": {
         "localhost": {
-            "server": "http://localhost:8080/exist",
+            "server": "http://127.0.0.1:8080/exist",
             "user": "admin",
             "password": "",
-            "root": "/db/apps/hsg-jinks"
+            "root": "/apps/hsg-jinks"
         }
     },
     "sync": {
         "server": "localhost",
+        "polling": false,
+        "interval": 500,
         "ignore": [
             ".existdb.json",
+            ".devcontainer/**",
+            ".vscode/**",
+            "build.sh",
+            ".env",
             ".git/**",
             "components/**",
             "node_modules/**",

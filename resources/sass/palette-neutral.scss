@@ -1,0 +1,19 @@
+// Neutral palette — vanilla USWDS, no color overrides.
+// Loads all component overrides from styles.scss with USWDS default colors.
+
+@use "uswds-core" with (
+    $theme-show-compile-warnings: false,
+    $theme-show-notifications: false,
+    $theme-image-path: "../images"
+);
+
+@forward "uswds";
+@use "styles";
+
+// Color scale for Jinks palette picker swatches (dark → light)
+:root {
+    --jinks-colors-700: #{uswds-core.color("gray-90")};
+    --jinks-colors-500: #{uswds-core.color("gray-50")};
+    --jinks-colors-200: #{uswds-core.color("gray-20")};
+    --jinks-colors-50: #{uswds-core.color("gray-5")};
+}

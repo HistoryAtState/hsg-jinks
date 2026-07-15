@@ -5,8 +5,8 @@
         "args": {
             "HTTP_PORT": "8080",
             "HTTPS_PORT": "8443",
-            "PUBLISHER_LIB_VERSION": "6.0.2",
-            "JINKS_TEMPLATES_VERSION": "1.2.0",
+            "PUBLISHER_LIB_VERSION": "6.1.0",
+            "JINKS_TEMPLATES_VERSION": "1.4.1",
             "ROUTER_VERSION": "1.11.0",
             "EXIST_VERSION": "6.4.0",
             "JWT_VERSION": "2.0.1",
@@ -16,7 +16,13 @@
         }
     },
     "runArgs": ["--name=hsg-jinks-dev"],
-    "forwardPorts": [ 8080, 8443 ],
+    // Host 8080/8443 are taken by the `exist-jwt-test` container, and 8090/8453
+    // by a native eXist running on the host. eXist still listens on 8080 *inside*
+    // the container -- .devcontainer/init.sh hardcodes localhost:8080 and would
+    // break if the internal port moved -- so remap on the host side only.
+    // appPort publishes deterministically via docker; forwardPorts would let
+    // VS Code silently pick an arbitrary free port instead.
+    "appPort": [ "8080:8080", "8443:8443" ],
     "customizations": {
         "vscode": {
             "extensions": [ "exist-db.existdb-vscode", "42crunch.vscode-openapi", "redhat.vscode-xml" ]

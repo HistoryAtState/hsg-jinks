@@ -1,0 +1,277 @@
+// Navy palette.
+// Translated from Figma USWDS Design Kit export: resources/sass/figma/dark-blue.scss.txt
+// Loaded on top of styles.css when the "navy" palette is active.
+//
+// Translation rules applied:
+//   Figma $#-theme-color-*-medium  → $theme-color-* (the USWDS un-suffixed stop)
+//   Figma $!-usa-color-X           → token name "X"
+//   Figma $#-theme-color-*-lightest/$-darkest only kept where USWDS defines them (false !default)
+//   Figma accent-cool-vivid / accent-warm-vivid have no USWDS variable — omitted
+//   Figma $#-theme-page-* are Jinks-level tokens — expressed as CSS custom properties
+
+@use "uswds-core" with (
+    $theme-show-compile-warnings: false,
+    $theme-show-notifications: false,
+    $theme-image-path: "../images",
+
+    // Body — $#-theme-body-background-color: blue-warm-5
+    $theme-body-background-color: "blue-warm-5",
+    // Ink — $#-theme-color-ink: blue-70
+    $theme-color-base-ink: "blue-70",
+
+    // ── Base scale ───────────────────────────────────────────────────────────
+    $theme-color-base-lightest: "gray-5",
+    // $#-theme-color-base-lightest
+    $theme-color-base-lighter: "gray-10",
+    // $#-theme-color-base-lighter
+    $theme-color-base-light: "gray-30",
+    // $#-theme-color-base-light
+    $theme-color-base: "gray-50",
+    // $#-theme-color-base-medium
+    $theme-color-base-dark: "gray-60",
+    // $#-theme-color-base-dark
+    $theme-color-base-darker: "gray-80",
+    // $#-theme-color-base-darker
+    $theme-color-base-darkest: "gray-90",
+
+    // $#-theme-color-base-darkest
+    // ── Primary — blue ───────────────────────────────────────────────────────
+    $theme-color-primary-lightest: "blue-5",
+    // $#-theme-color-primary-lightest
+    $theme-color-primary-lighter: "blue-10",
+    // $#-theme-color-primary-lighter
+    $theme-color-primary-light: "blue-20v",
+    // $#-theme-color-primary-light
+    $theme-color-primary: "blue-50",
+    // $#-theme-color-primary-medium
+    $theme-color-primary-vivid: "blue-50v",
+    // $#-theme-color-primary-vivid
+    $theme-color-primary-dark: "blue-60",
+    // $#-theme-color-primary-dark
+    $theme-color-primary-darker: "blue-70v",
+    // $#-theme-color-primary-darker
+    $theme-color-primary-darkest: "blue-80v",
+
+    // $#-theme-color-primary-darkest
+    // ── Secondary — cyan ─────────────────────────────────────────────────────
+    $theme-color-secondary-lightest: "cyan-5v",
+    // $#-theme-color-secondary-lightest
+    $theme-color-secondary-lighter: "cyan-10v",
+    // $#-theme-color-secondary-lighter
+    $theme-color-secondary-light: "cyan-30v",
+    // $#-theme-color-secondary-light
+    $theme-color-secondary: "cyan-50v",
+    // $#-theme-color-secondary-medium
+    $theme-color-secondary-vivid: "cyan-30v",
+    // $#-theme-color-secondary-vivid
+    $theme-color-secondary-dark: "cyan-60v",
+    // $#-theme-color-secondary-dark
+    $theme-color-secondary-darker: "cyan-70v",
+    // $#-theme-color-secondary-darker
+    $theme-color-secondary-darkest: "cyan-80v",
+
+    // $#-theme-color-secondary-darkest
+    // ── Accent cool ──────────────────────────────────────────────────────────
+    // $#-theme-color-accent-cool-lightest: none → keep default false
+    $theme-color-accent-cool-lighter: "blue-cool-5v",
+    // $#-theme-color-accent-cool-lighter
+    $theme-color-accent-cool-light: "blue-cool-20v",
+    // $#-theme-color-accent-cool-light
+    $theme-color-accent-cool: "cyan-30v",
+    // $#-theme-color-accent-cool-medium
+    // $#-theme-color-accent-cool-vivid: blue-cool-40v → no USWDS variable
+    $theme-color-accent-cool-dark: "blue-cool-40v",
+    // $#-theme-color-accent-cool-dark
+    $theme-color-accent-cool-darker: "blue-cool-60v",
+    // $#-theme-color-accent-cool-darker
+    $theme-color-accent-cool-darkest: "blue-cool-80v",
+
+    // $#-theme-color-accent-cool-darkest
+    // ── Accent warm — remapped to blue-cool tones per Figma ──────────────────
+    $theme-color-accent-warm-lightest: "blue-cool-5v",
+    // $#-theme-color-accent-warm-lightest
+    $theme-color-accent-warm-lighter: "blue-10",
+    // $#-theme-color-accent-warm-lighter (= primary-lighter)
+    $theme-color-accent-warm-light: "blue-cool-40v",
+    // $#-theme-color-accent-warm-light
+    $theme-color-accent-warm: "blue-cool-30v",
+    // $#-theme-color-accent-warm-medium
+    // $#-theme-color-accent-warm-vivid: blue-cool-50v → no USWDS variable
+    $theme-color-accent-warm-dark: "blue-cool-60v",
+    // $#-theme-color-accent-warm-dark
+    $theme-color-accent-warm-darker: "blue-70",
+    // $#-theme-color-accent-warm-darker
+    $theme-color-accent-warm-darkest: "blue-cool-80v",
+
+    // $#-theme-color-accent-warm-darkest
+    // ── Info — cyan ──────────────────────────────────────────────────────────
+    // $#-theme-color-info-lightest / -darkest have no USWDS variable
+    $theme-color-info-lighter: "cyan-20",
+    // $#-theme-color-info-lighter
+    $theme-color-info-light: "cyan-30v",
+    // $#-theme-color-info-light
+    $theme-color-info: "cyan-50v",
+    // $#-theme-color-info-medium
+    $theme-color-info-dark: "cyan-60v",
+    // $#-theme-color-info-dark
+    $theme-color-info-darker: "cyan-70",
+
+    // $#-theme-color-info-darker
+    // ── Success — green-cool ─────────────────────────────────────────────────
+    // $#-theme-color-success-lightest / -darkest have no USWDS variable
+    $theme-color-success-lighter: "green-cool-20v",
+    // $#-theme-color-success-lighter
+    $theme-color-success-light: "green-cool-40v",
+    // $#-theme-color-success-light
+    $theme-color-success: "green-cool-50v",
+    // $#-theme-color-success-medium
+    $theme-color-success-dark: "green-cool-60v",
+    // $#-theme-color-success-dark
+    $theme-color-success-darker: "green-cool-70v",
+
+    // $#-theme-color-success-darker
+    // ── Warning — yellow ─────────────────────────────────────────────────────
+    // $#-theme-color-warning-lightest / -darkest have no USWDS variable
+    $theme-color-warning-lighter: "yellow-20v",
+    // $#-theme-color-warning-lighter
+    $theme-color-warning-light: "yellow-30v",
+    // $#-theme-color-warning-light
+    $theme-color-warning: "yellow-50v",
+    // $#-theme-color-warning-medium
+    $theme-color-warning-dark: "yellow-60",
+    // $#-theme-color-warning-dark
+    $theme-color-warning-darker: "yellow-70",
+
+    // $#-theme-color-warning-darker
+    // ── Error — red ──────────────────────────────────────────────────────────
+    // $#-theme-color-error-lightest / -darkest have no USWDS variable
+    $theme-color-error-lighter: "red-20",
+    // $#-theme-color-error-lighter
+    $theme-color-error-light: "red-30v",
+    // $#-theme-color-error-light
+    $theme-color-error: "red-50v",
+    // $#-theme-color-error-medium
+    $theme-color-error-dark: "red-60v",
+    // $#-theme-color-error-dark
+    $theme-color-error-darker: "red-70v",
+
+    // $#-theme-color-error-darker
+    // ── Emergency ────────────────────────────────────────────────────────────
+    $theme-color-emergency: "red-warm-60v",
+    // $#-theme-color-emergency-medium
+    $theme-color-emergency-dark: "red-warm-80",
+
+    // $#-theme-color-emergency-dark
+    // ── Disabled ─────────────────────────────────────────────────────────────
+    // $#-theme-color-disabled-lightest / -darkest have no USWDS variable
+    //    $theme-color-disabled-lighter: "black-transparent-30",
+    // $#-theme-color-disabled-lighter
+    //    $theme-color-disabled-light: "black-transparent-40",
+    // $#-theme-color-disabled-light
+    //    $theme-color-disabled: "black-transparent-50",
+    // $#-theme-color-disabled-medium
+    //    $theme-color-disabled-dark: "white-transparent-30",
+    // $#-theme-color-disabled-dark
+     //    $theme-color-disabled-darker: "white-transparent-20" // $#-theme-color-disabled-darker
+);
+
+@use "styles.scss";
+
+// ── Jinks-level page tokens ───────────────────────────────────────────────────
+// $#-theme-page-background-color: blue-80v
+// $#-theme-page-text-color:       white
+// These are Figma extensions with no direct USWDS $theme-* variable; expressed
+// as CSS custom properties for Jinks templates to consume.
+:root {
+    --jinks-page-background-color: #{uswds-core.color("blue-80v")};
+    --jinks-page-text-color: #{uswds-core.color("white")};
+    // Color scale for Jinks palette picker swatches (dark → light)
+    --jinks-colors-700: #{uswds-core.color("blue-80v")};
+    --jinks-colors-500: #{uswds-core.color("blue-70v")};
+    --jinks-colors-200: #{uswds-core.color("blue-20v")};
+    --jinks-colors-50: #{uswds-core.color("blue-5")};
+}
+
+// ── Component overrides ───────────────────────────────────────────────────────
+// USWDS compiles component colors at build time from $theme-* variables.
+// styles.css was compiled with the light theme values, so components that differ
+// in this palette need explicit CSS overrides here.
+
+// Body — $#-theme-body-background-color: blue-warm-5
+body,
+:host(pb-paginate) {
+    background-color: uswds-core.color("blue-warm-5");
+}
+
+// Banner — $@-component-banner-background-color: blue-70v
+.usa-banner {
+    background-color: uswds-core.color("blue-70v");
+    color: uswds-core.color("white");
+
+    a {
+        color: uswds-core.color("white");
+    }
+}
+
+// Accordion button — $@-component-accordion-button-background-color: $#-theme-color-base-darker = gray-80
+//                    $@-component-accordion-button-text-color:        $#-theme-color-ink       = blue-70
+.usa-accordion__button {
+    background-color: uswds-core.color("gray-80");
+    color: uswds-core.color("blue-70");
+}
+
+// Identifier — $@-component-identifier-background-color: $#-theme-color-ink = blue-70
+.usa-identifier {
+    background-color: uswds-core.color("blue-70");
+}
+
+// Table header — $@-component-table-header-background-color: blue-80v
+//                $@-component-table-header-text-color:        $#-theme-color-ink = blue-70
+.usa-table thead th {
+    background-color: uswds-core.color("blue-80v");
+    color: uswds-core.color("blue-70");
+}
+
+// Header/nav — dark navy background with white text
+.usa-header {
+    background-color: uswds-core.color("primary-darker");
+
+    .usa-logo__text,
+    .usa-logo__text:visited {
+        color: uswds-core.color("white");
+    }
+
+    .usa-menu-btn {
+        background-color: uswds-core.color("primary-dark");
+        color: uswds-core.color("white");
+    }
+
+    @include uswds-core.at-media("desktop") {
+        .usa-nav {
+            background-color: uswds-core.color("primary-darker");
+            border-top-color: uswds-core.color("primary-dark");
+        }
+
+        .usa-nav__primary > .usa-nav__primary-item {
+            > a,
+            > button {
+                color: uswds-core.color("white");
+                background-color: uswds-core.color("primary-darker");
+
+                &:hover {
+                    color: uswds-core.color("white");
+                }
+            }
+        }
+
+        .usa-nav__secondary-links {
+            a {
+                color: uswds-core.color("base-lighter");
+
+                &:hover {
+                    color: uswds-core.color("white");
+                }
+            }
+        }
+    }
+}

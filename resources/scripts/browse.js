@@ -20,9 +20,20 @@ document.addEventListener('DOMContentLoaded', function () {
         const breadcrumbs = document.querySelector('.toolbar [aria-label="breadcrumb"] ul');
         breadcrumbs.innerHTML = '';
 
+        // Set the <title> header element to the current collection
+        const titleElement = document.querySelector('title');
+        if (titleElement) {
+            // Use the last part of the collection path as the label,
+            // or "Home" if at root
+            const label = (collection && collection.trim()) 
+                ? collection.split('/').filter(x => x).pop() 
+                : 'Home';
+            titleElement.textContent = `${label} – Browsing Documents`;
+        }
+        
         // Tokenize the collection path and create breadcrumb navigation
         const pathComponents = collection.split('/').filter(component => component.length > 0);
-        console.log('Current collection:', collection, 'Path components:', pathComponents);
+
         const li = document.createElement('li');
         const a = document.createElement('a');
         a.href = '?collection=';
@@ -46,7 +57,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const a = document.createElement('a');
             a.href = `?collection=${encodeURIComponent(currentPath)}`;
             const i18n = document.createElement('pb-i18n');
-            console.log("lasses test");
             i18n.setAttribute('key', 'breadcrumb.' + currentPath.replaceAll('/', '.'));
             i18n.textContent = component;
             a.appendChild(i18n);

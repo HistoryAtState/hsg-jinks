@@ -1,7 +1,7 @@
 {
   "theme" : {
     "colors" : {
-      "palette" : "blue"
+      "palette" : "navy"
     }
   },
   "label" : "hsg-jinks",
@@ -21,10 +21,9 @@
     "id" : "http://teipublisher.com/api/hsg",
     "path" : "hsg-api.xql"
   } ],
-  "extends" : [ "base10", "theme-base10", "docker" ],
+  "extends" : [ "base10", "docker", "profile-theme-uswds" ],
   "pkg" : {
     "abbrev" : "hsg-jinks"
   },
-  "description" : "" 
-  }
+  "description" : "HSG Jinks"
 }

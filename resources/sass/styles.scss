@@ -1,0 +1,617 @@
+@use "uswds-core";
+@forward "uswds";
+
+/**
+ * Rationale:
+ *
+ * We should (without any HTML changes) style components from Jinks as USWDS components. This is not
+ * straight-forward because classes change and our HTML structure differs slightly. Some web
+ * components are used instead of `<a/>` elements, etc.
+ *
+ * Use `@extend` from SASS to extend the classes from uswds.
+ */
+
+// IMPORTANT NOTE: the below rule is a workaround for a dart sass-compiler issue
+// where @extend .usa-button will fail with the error "components may not be empty (in _extendPseudo)"
+.uswds-button {
+    @extend .usa-button;
+}
+.uswds-menu-btn {
+    @extend .usa-menu-btn;
+}
+
+// Anything that's hidden. Always hide it.
+.hidden {
+    display: none !important;
+}
+.mobile {
+    //    display: none !important;
+}
+
+.mobile.trigger button {
+    @extend .uswds-menu-btn;
+}
+
+// Specific grid-col styles added for use in the card component grid
+/* stylelint-disable */
+@media all and (min-width: 55em) {
+    .tablet-lg\:grid-col-6 {
+        flex: 0 1 auto !important;
+        width: 50% !important;
+    }
+}
+
+@media all and (min-width: 87.5em) {
+    .widescreen\:grid-col-4 {
+        flex: 0 1 auto !important;
+        width: 33.3333333333% !important;
+    }
+}
+
+:host(pb-search) {
+    input {
+        margin-top: 0;
+        @extend .usa-input;
+        @extend [type="search"];
+
+        &:focus {
+            outline: 0.25rem solid #2491ff;
+            outline-offset: 0;
+        }
+    }
+}
+
+pb-search {
+    // @extend .usa-form;
+    // @extend .usa-search;
+
+    > button {
+        @extend .uswds-button;
+        > * {
+            @extend .usa-search__submit-text;
+        }
+    }
+}
+
+@media all and (min-width: 64em) {
+    pb-search {
+        margin-top: 0 !important;
+    }
+}
+
+.landing-layout {
+    .page-header {
+        // Make the position unset for the landing page. Otherwise things overlap
+        position: unset !important;
+        pb-i18n {
+            @extend span;
+        }
+    }
+
+    .usa-section {
+        p {
+            @extend .usa-intro;
+        }
+        a {
+            @extend .uswds-button;
+        }
+    }
+    .content-top {
+        display: none;
+    }
+}
+
+pb-download {
+    * {
+        @extend a;
+    }
+}
+
+.team-members {
+    @extend .usa-card-group;
+
+    .member-card {
+        @extend .usa-card;
+        @extend .usa-card__container;
+
+        @extend .tablet-lg\:grid-col-6;
+        @extend .widescreen\:grid-col-4;
+
+        .member-card--top {
+            @extend .usa-card__header;
+
+            .label {
+                @extend .usa-card__heading;
+            }
+        }
+        .member-card--middle {
+            @extend .usa-card__body;
+        }
+        .member-card--description {
+            @extend .usa-card__footer;
+        }
+    }
+}
+
+nav.before-top {
+    display: none;
+}
+
+pb-login::part(trigger) {
+    @extend .uswds-button;
+    background: unset;
+    color: inherit;
+}
+
+li:has(pb-lang) {
+    // @extend .usa-language-container;
+    // @extend .usa-language--small;
+    // @extend .usa-language__primary;
+    pb-lang {
+        // @extend .uswds-button;
+        //        @extend .usa-language__primary-item;
+        @extend .usa-accordion;
+    }
+}
+
+// Style pb-lang as usa-language.
+// https://designsystem.digital.gov/patterns/select-a-language/three-or-more-languages/
+
+:host(pb-lang) {
+    summary {
+        // Undo the padding added by default.
+        padding: unset;
+
+        // pb-lang is in the header. with a dark background
+        color: uswds-core.color("base-lighter");
+    }
+    ul {
+        @extend .usa-language__submenu;
+        li {
+            @extend .usa-language__submenu-item;
+
+            color: uswds-core.color("white");
+            line-height: 1.3;
+            &:hover {
+                // Undo the built-in hover styling
+                background-color: initial;
+                // And add the underline that should be there
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
+:host(pb-login) {
+    input {
+        @extend .usa-input;
+    }
+    > a {
+        color: uswds-core.color("base-lighter");
+    }
+}
+
+pb-dialog:not([open]) {
+    display: none;
+}
+
+:host(pb-dialog) {
+    button {
+        @extend .uswds-button;
+    }
+
+    dialog {
+        @extend .usa-modal;
+        // TODO: We need another div here...
+        @extend .usa-modal__content;
+
+        article {
+            @extend .usa-modal__main;
+            header {
+                @extend .usa-modal__heading;
+                button {
+                    @extend .usa-modal__close;
+                }
+            }
+        }
+    }
+
+    ::backdrop {
+        @extend .usa-modal-overlay;
+    }
+}
+
+input[type="text"] {
+    @extend .usa-input;
+}
+
+input[type="checkbox"] {
+    @extend .usa-checkbox__input;
+}
+
+select {
+    @extend .usa-select;
+}
+
+label {
+    @extend .usa-label;
+}
+
+fieldset {
+    @extend .usa-fieldset;
+}
+
+pb-custom-form {
+    @extend .usa-form;
+
+    h3 {
+        @extend .usa-legend;
+    }
+
+    td:has(input[type="checkbox"]) {
+        @extend .usa-checkbox;
+        label {
+            @extend .usa-checkbox__label;
+            // There are a plethora of selectors that have this pattern in USWDS
+            @extend [class*="__label"];
+        }
+    }
+}
+
+.after-top,
+.before-top {
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+}
+
+nav[aria-label="breadcrumb"] {
+    ul {
+        @extend .usa-breadcrumb__list;
+        li {
+            @extend .usa-breadcrumb__list-item;
+            a {
+                @extend .usa-breadcrumb__link;
+            }
+        }
+    }
+}
+
+main {
+    @extend .usa-section;
+}
+
+details {
+    &:not([open]) > summary {
+        @extend [aria-expanded="false"];
+        @extend [aria-expanded];
+    }
+    &[open] > summary {
+        @extend [aria-expanded="true"];
+    }
+}
+
+.thumbnails {
+    @extend .usa-card-group;
+    // Special list of cards: never place them next to eachother
+    display: block;
+}
+
+.card {
+    @extend .usa-card;
+    @extend .usa-card__container;
+    // @extend .tablet-lg\:grid-col-6;
+    // @extend .widescreen\:grid-col-4;
+
+    > a {
+        @extend .usa-card__media;
+
+        img.thumbnail {
+            @extend .usa-card__img;
+            // Needed to manually stretch the image
+            width: stretch;
+        }
+    }
+    .documents-info {
+        h3 {
+            @extend .usa-card__header;
+            a {
+                @extend .usa-card__heading;
+            }
+        }
+        p {
+            @extend .usa-card__body;
+        }
+    }
+
+    header {
+        @extend .usa-card__header;
+        a:has(h5) {
+            @extend .usa-card__heading;
+        }
+        .count {
+            display: none;
+        }
+        .sample-description {
+            @extend .usa-card__body;
+            div {
+                @extend .usa-prose;
+            }
+        }
+    }
+
+    .matches {
+        @extend .usa-card__body;
+        @extend .usa-prose;
+    }
+
+    .actions {
+        @extend .usa-card__footer;
+        details {
+            @extend .usa-accordion;
+            summary {
+                @extend .usa-accordion__heading;
+                @extend .usa-accordion__button;
+
+                // This is too wide by default. make a bite more narrow
+                width: calc(100% - 5rem);
+                .ionicon {
+                    @extend .usa-icon;
+                    padding-right: 1rem;
+                }
+            }
+
+            ul {
+                @extend .usa-accordion__content;
+                //		@extend .usa-nav__submenu;
+                li {
+                    @extend .usa-nav__submenu-item;
+                    > * {
+                        @extend a;
+                    }
+                }
+            }
+        }
+    }
+}
+
+:host(pb-manage-odds) {
+    button {
+        @extend .uswds-button;
+    }
+}
+
+.alert {
+    @extend .usa-site-alert;
+    @extend .usa-alert;
+    p {
+        @extend .usa-alert__body;
+        @extend .usa-alert__text;
+    }
+}
+
+section#project-partners {
+    @extend .usa-identifier;
+    @extend .usa-identifier__section;
+    @extend .usa-identifier__section--masthead;
+
+    section {
+        @extend .usa-identifier__container;
+        header,
+        h1 {
+            @extend .usa-identifier__identity;
+        }
+        h1 {
+            @extend .usa-identifier__identity-domain;
+        }
+        p {
+            @extend .usa-identifier__identity-disclaimer;
+        }
+        .partner-logos {
+            @extend .usa-identifier__logos;
+            a {
+                @extend .usa-identifier__logo;
+                img {
+                    @extend .usa-identifier__logo-img;
+                }
+            }
+        }
+    }
+}
+
+section#bottom {
+    @extend .usa-identifier;
+    @extend .usa-identifier__section;
+    @extend .usa-identifier__section--required-links;
+
+    > div {
+        @extend .usa-identifier__container;
+        > ul {
+            @extend .usa-identifier__required-links-list;
+            > li {
+                @extend .usa-identifier__required-links-item;
+                > * {
+                    @extend .usa-identifier__required-link;
+                    @extend .usa-link;
+                }
+            }
+        }
+    }
+}
+
+.usa-header {
+    @include uswds-core.at-media("desktop") {
+        .usa-nav__primary > .usa-nav__primary-item {
+            > a,
+            > button {
+                height: auto;
+            }
+        }
+    }
+}
+
+// more specificity to override the default landing page styling of the hero section. This is the hero section on the landing page, which has a dark background and white text.
+.landing-layout > .usa-section.hero {
+    color: uswds-core.color("white");
+    background-image:
+        linear-gradient(
+            to bottom,
+            var(--jinks-hero-background-color),
+            var(--jinks-hero-background-color)
+        ),
+        var(--jinks-hero-background-image);
+    background-blend-mode: color-dodge;
+    // background-image: var(--jinks-hero-background-image) #0d182599;
+    background-size: var(--jinks-hero-background-size);
+    background-repeat: var(--jinks-hero-background-repeat);
+    background-color: var(--jinks-hero-background-color);
+    background-position: var(--jinks-hero-background-position);
+    p {
+        @include uswds-core.u-measure(4);
+    }
+}
+
+nav.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    > ul {
+        list-style-type: none;
+        display: flex;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+
+        &.hidden-mobile {
+            display: none;
+            @include uswds-core.at-media("tablet") {
+                display: flex;
+                align-items: center;
+                gap: uswds-core.units(1);
+            }
+        }
+    }
+
+    span[role="group"] {
+        @extend .usa-button-group;
+        align-items: center;
+        margin: 0;
+    }
+
+    pb-navigation {
+        display: contents;
+
+        .ionicon {
+            @extend .usa-icon;
+        }
+    }
+
+    pb-ajax {
+        button {
+            @extend .uswds-button;
+            @extend .usa-button--outline;
+
+            .ionicon {
+                @extend .usa-icon;
+            }
+        }
+    }
+
+    #edition-navigation {
+        ul.correspContext {
+            @extend .usa-button-group;
+            @extend .usa-button-group--segmented;
+            align-items: center;
+            margin: 0;
+
+            > li {
+                @extend .usa-button-group__item;
+                display: inline-flex;
+                align-items: center;
+
+                &.unavailable {
+                    @extend .usa-button;
+                    @extend .usa-button--outline;
+                    opacity: 0.4;
+                    pointer-events: none;
+                    display: inline-flex;
+                    align-items: center;
+                }
+
+                pb-popover {
+                    display: contents;
+                }
+
+                > a,
+                pb-popover > a {
+                    @extend .usa-button;
+                    @extend .usa-button--outline;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: uswds-core.units(0.5);
+                }
+
+                .icon {
+                    @extend .usa-icon;
+                }
+            }
+        }
+    }
+}
+
+:host(pb-navigation),
+:host(pb-zoom) {
+    button {
+        @extend .uswds-button;
+        @extend .usa-button--outline;
+        display: inline-flex;
+        align-items: center;
+        gap: uswds-core.units(0.5);
+    }
+}
+
+aside.before {
+    @extend .usa-sidenav;
+}
+
+:host(pb-paginate) {
+    display: block;
+
+    nav {
+        @extend .usa-pagination;
+        > ul {
+            @extend .usa-pagination__list;
+            > li {
+                @extend .usa-pagination__item;
+
+                > a {
+                    @extend .usa-pagination__link;
+                    &.active {
+                        @extend .usa-current;
+                    }
+                }
+                &.pb-paginate__page {
+                    // This class is not actually in USWDS
+                    @extend .usa-pagination__page-no !optional;
+                    > a {
+                        @extend .usa-pagination__button;
+                    }
+                }
+                &.pb-paginate__nav {
+                    @extend .usa-pagination__arrow;
+                    &.pb-paginate__nav-next > a {
+                        @extend .usa-pagination__next-page;
+                    }
+                }
+                &.pb-paginate__nav-previous > a {
+                    @extend .usa-pagination__previous-page;
+                }
+                &.pb-paginate__overflow {
+                    @extend .usa-pagination__overflow;
+                }
+            }
+        }
+    }
+}

@@ -8,7 +8,7 @@ declare variable $exist:controller external;
 declare variable $exist:prefix external;
 declare variable $exist:root external;
 
-
+ 
 declare variable $landingPage := "browse.html";
 
 declare variable $allowOrigin := local:allowOriginDynamic(request:get-header("Origin"));
@@ -81,6 +81,8 @@ else
     let $main :=
         if (matches($exist:path, "^/+api/+(?:odd|lint)")) then 
             "api-odd.xql" 
+        else if (matches($exist:path, "^/+api/+actions/+fix-odds$")) then
+            "api-actions.xql"
         else if (matches($exist:path, "/+tex$") or matches($exist:path, "/+api/+(?:actions/reindex|actions/file-sync)$")) then
             "api-dba.xql"
         else 
