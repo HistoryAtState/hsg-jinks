@@ -100,7 +100,7 @@
             <param name="default" value="."/>
         </model><model behaviour="inline"/></elementSpec>
             <elementSpec ident="teiHeader" mode="change"><model output="latex" behaviour="metadata"/><model output="fo" behaviour="omit"/><model predicate="$parameters?mode='breadcrumb'" behaviour="inline">
-            <param name="content" value="&#34;test:&#34; || fileDesc/titleStmt"/>
+            <param name="content" value="fileDesc/titleStmt"/>
         </model><model predicate="$parameters?mode='metadata-panel'" behaviour="pass-through"/><model predicate="$parameters?display='browse'" behaviour="block"/><model behaviour="metadata"/></elementSpec></schemaSpec>
         </body>
     </text></TEI>

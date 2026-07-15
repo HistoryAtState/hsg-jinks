@@ -59,6 +59,7 @@
                 <exclude name=".devcontainer"/>
                 <exclude name="test/cypress/screenshots/**"/>
                 <exclude name="test/cypress/videos/**"/>
+                <exclude name="tools/**"/>
             </fileset>
         </copy>
         <copy todir="${app.build.dir}" overwrite="true" verbose="true">
