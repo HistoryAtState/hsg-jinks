@@ -5,7 +5,7 @@
             "server": "http://127.0.0.1:8080/exist",
             "user": "admin",
             "password": "",
-            "root": "/apps/hsg-jinks"
+            "root": "/db/apps/hsg-jinks"
         }
     },
     "sync": {
