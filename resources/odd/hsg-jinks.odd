@@ -79,6 +79,9 @@
 [[places]]
 </ul>
 </div></pb:template>
+        </model><model predicate="$parameters?mode='division'" behaviour="pass-through">
+            <desc>Render a division document's text content without the HTML document skeleton, so it can be embedded in a page's main element</desc>
+            <param name="content" value="text/body"/>
         </model><model behaviour="document"/></elementSpec>
             <elementSpec ident="title" mode="change"><model predicate="$mode='interior'" behaviour="link">
             <desc>Coming from a landing page, list interior pages</desc>

@@ -9,6 +9,6 @@
     [% if $doc?content//tei:bibl[@type='frus-division-type']='chapter' %]
         [[ page:transform($doc?content, map { "mode": "volume-interior" }) ]]
     [% else %]
-        [[ page:transform($doc?content) ]]
+        [[ page:transform($doc?content, map { "mode": "division" }) ]]
     [% endif %]
 </template>
