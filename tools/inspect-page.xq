@@ -53,13 +53,15 @@ let $base := "http://localhost:8080/exist/apps/hsg-jinks"
 let $class := if ($select = "breadcrumb") then "tei-teiHeader3" else $select
 let $req := <hc:request method="GET" href="{$base || '/' || $path}"/>
 let $resp := hc:send-request($req)
-let $body := string-join($resp[position() > 1], "")
+(: never address $resp positionally: eXist may reorder the send-request
+   result (document node first) once $resp is also navigated with `//` :)
+let $body := string-join($resp[. instance of document-node()], "")
 let $matches := $resp//*[contains(@class, $class)]
 return
     serialize(
         map {
             "url": $base || "/" || $path,
-            "http-status": string($resp[1]/@status),
+            "http-status": string($resp/self::hc:response/@status),
             "selector": $class,
             "find": $find,
             "find-count": count(analyze-string($body, $find)//*:match),
