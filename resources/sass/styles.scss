@@ -451,6 +451,22 @@ section#bottom {
     }
 }
 
+// An image logo (theme.logo.image) has no intrinsic size constraint from USWDS
+// (only .usa-logo__text is styled), so an unconstrained <img> renders at its
+// native pixel size and overflows the header. A percentage height (100% of
+// .usa-navbar) is not reliable here: .usa-header--extended (used by this
+// profile's menu.html) sets .usa-navbar to height: auto, so there is no fixed
+// ancestor height for a percentage to resolve against at any viewport size.
+// Use max-height instead -- it caps the logo regardless of ancestor height,
+// matching .usa-navbar's own standard (non-extended) row height of 3rem.
+.usa-logo__img {
+    display: block;
+    max-width: 100%;
+    max-height: 3rem;
+    width: auto;
+    height: auto;
+}
+
 // more specificity to override the default landing page styling of the hero section. This is the hero section on the landing page, which has a dark background and white text.
 .landing-layout > .usa-section.hero {
     color: uswds-core.color("white");

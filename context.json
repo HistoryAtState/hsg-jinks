@@ -39,7 +39,7 @@
     "path" : "hsg-api.xql"
   } ],
   "profile-versions" : {
-    "profile-theme-uswds" : "1.1.0",
+    "profile-theme-uswds" : "1.0.0",
     "docker" : "1.0.0",
     "base10" : "1.0.0"
   },
@@ -167,7 +167,7 @@
     }
   },
   "skipSource" : [ "repo.xml", "expath-pkg.xml", "build.xml" ],
-  "_lastModified" : "2026-07-16T14:37:08.253Z",
+  "_lastModified" : "2026-07-16T14:49:21.541Z",
   "overwrite" : "default",
   "pkg" : {
     "website" : "http://tei-publisher.org",
