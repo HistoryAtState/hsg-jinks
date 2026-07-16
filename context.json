@@ -166,8 +166,8 @@
       "enable" : true
     }
   },
-  "skipSource" : [ "repo.xml", "expath-pkg.xml", "build.xml" ],
-  "_lastModified" : "2026-07-16T17:00:05.664Z",
+  "skipSource" : [ "repo.xml", "expath-pkg.xml", "build.xml", ".claude/settings.local.json" ],
+  "_lastModified" : "2026-07-16T18:10:46.228Z",
   "overwrite" : "default",
   "pkg" : {
     "website" : "http://tei-publisher.org",

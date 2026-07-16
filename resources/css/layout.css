@@ -271,3 +271,138 @@
 .landing-layout .page-header {
     position: unset;
 }
+
+/**
+ * sticky-layout: same grid shape as fixed-layout (so the before/after sidebar
+ * areas stay available for a future table-of-contents), but the page scrolls
+ * normally instead of being capped to the viewport height -- for
+ * archival/informational content pages rather than a document-reader pane.
+ * Fulfills the "sticky-layout" concept named (but never implemented) in
+ * theme-base10's own resources/css/layouts.css.
+ *
+ * Note: .before/.after are intentionally NOT independently scrolling here
+ * (unlike fixed-layout) -- they grow with their content and scroll with the
+ * page. If a sidebar table-of-contents is added later (see hsg-jinks epic
+ * #518, tickets #1078-#1080), this is a deliberate choice, not an oversight:
+ * revisit if an independently-scrolling sidebar turns out to be wanted instead.
+ */
+.sticky-layout {
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    grid-template-columns:
+        0.001fr
+        1fr
+        0.001fr;
+    grid-template-areas:
+        "header header header"
+        "before-top content-top after-top"
+        "before content after"
+        "footer footer footer";
+    position: relative;
+    box-sizing: content-box;
+    margin-inline: auto;
+}
+
+.sticky-layout > .page-header {
+    grid-area: header;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.sticky-layout > .before-top nav > ul > li,
+.sticky-layout > .after-top nav > ul > li,
+.sticky-layout > .content-top nav > ul > li {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.sticky-layout > .before:not(:empty),
+.sticky-layout > .after:not(:empty) {
+    background-color: var(--jinks-colors-50);
+    padding: var(--s-1) var(--s-1) var(--s1) var(--s-1);
+}
+
+.sticky-layout > .before-top,
+.sticky-layout > .before {
+    grid-area: before;
+    border-right: 1px solid var(--jinks-color-border);
+    max-width: 45vw;
+    width: var(--jinks-layout-before-width);
+}
+
+.sticky-layout > .after-top,
+.sticky-layout > .after {
+    grid-area: after;
+    border-left: 1px solid var(--jinks-color-border);
+    max-width: 45vw;
+    width: var(--jinks-layout-after-width);
+}
+
+.sticky-layout > .before-top {
+    grid-area: before-top;
+}
+
+.sticky-layout > .after-top {
+    grid-area: after-top;
+}
+
+.sticky-layout > .before-top,
+.sticky-layout > .after-top {
+    background-color: var(--jinks-colors-50);
+    padding-left: var(--s-1);
+    padding-right: var(--s-1);
+}
+
+.sticky-layout > .after,
+.sticky-layout > .before {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+}
+
+/**
+ * If there is only a resize handler or a script in an element it's effectively
+ * empty -- do not reserve space for it. Same rule as fixed-layout, so an empty
+ * sidebar today doesn't leave a visible empty column.
+ */
+.sticky-layout:not(:has(> .before > :not(:is(.resize-handler, script)))) > :is(.before-top, .before),
+.sticky-layout:not(:has(> .after > :not(:is(.resize-handler, script)))) > :is(.after-top, .after) {
+    display: none;
+}
+
+.sticky-layout > .content-top {
+    grid-area: content-top;
+}
+
+.sticky-layout > main {
+    grid-area: content;
+    display: flex;
+    justify-content: center;
+}
+
+.sticky-layout > main > * {
+    flex: 1;
+}
+
+.sticky-layout > footer {
+    grid-area: footer;
+}
+
+@media (max-width: 768px) {
+    .sticky-layout main {
+        display: block;
+    }
+
+    .sticky-layout > .before {
+        width: 100vw;
+        max-width: unset;
+    }
+}
+
+@media (max-width: 1023px) {
+    .sticky-layout > .before.hidden-mobile,
+    .sticky-layout > .after.hidden-mobile {
+        display: none !important;
+    }
+}
