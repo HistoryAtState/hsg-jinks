@@ -136,8 +136,8 @@
     },
     "menubar" : true,
     "toolbar" : {
-      "zoom" : true,
-      "navigation" : true,
+      "zoom" : false,
+      "navigation" : false,
       "enabled" : true,
       "progress" : {
         "subscribe" : "transcription",
@@ -167,7 +167,7 @@
     }
   },
   "skipSource" : [ "repo.xml", "expath-pkg.xml", "build.xml" ],
-  "_lastModified" : "2026-07-16T14:49:21.541Z",
+  "_lastModified" : "2026-07-16T17:00:05.664Z",
   "overwrite" : "default",
   "pkg" : {
     "website" : "http://tei-publisher.org",

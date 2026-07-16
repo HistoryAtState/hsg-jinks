@@ -18,6 +18,13 @@
     "odd" : "hsg-jinks.odd",
     "template" : "volume-landing.html"
   },
+  "features" : {
+    "toolbar" : {
+      "enabled" : true,
+      "navigation" : false,
+      "zoom" : false
+    }
+  },
   "$schema" : "../jinks/schema/jinks.json",
   "styles" : [ "resources/css/hsg-theme.css" ],
   "api" : [ {
