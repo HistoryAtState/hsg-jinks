@@ -1,5 +1,7 @@
 {
     "breadcrumb": {
+        "home": "Home",
+        "historicaldocuments": "Historical Documents",
         "collection-root": "Collections",
         "document-root": "Collections",
         "demo": "Demo",

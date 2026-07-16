@@ -57,8 +57,6 @@
     [[content]]
   </ul>
 </div></pb:template>
-        </model><model predicate="$parameters?mode='breadcrumb'" behaviour="pass-through">
-            <param name="content" value="teiHeader"/>
         </model><model predicate="$parameters?mode='metadata-panel'" behaviour="pass-through">
             <param name="content" value="teiHeader"/>
         </model><model predicate="$parameters?mode='edition-navigation' and descendant::correspContext" behaviour="pass-through">
@@ -89,7 +87,7 @@
         </model><model predicate="$mode='document'" behaviour="link">
             <desc>Coming from an interior page, list documents</desc>
             <param name="uri" value="root(.)//bibl[@type='frus-division-id']"/>
-        </model><model predicate="$parameters?mode=('volume-landing', 'volume-interior')" behaviour="heading"/><model predicate="$parameters?mode='breadcrumb'" behaviour="inline"/><model predicate="$parameters?mode='metadata-panel'" behaviour="block"/><model predicate="$parameters?mode='register-details' and $parameters?static" behaviour="link">
+        </model><model predicate="$parameters?mode=('volume-landing', 'volume-interior')" behaviour="heading"/><model predicate="$parameters?mode='metadata-panel'" behaviour="block"/><model predicate="$parameters?mode='register-details' and $parameters?static" behaviour="link">
             <param name="uri" value="$parameters?context-path || &#34;/letters/&#34; || util:document-name(.) || '/1/index.html'"/>
             <param name="content" value="string()"/>
         </model><model predicate="$parameters?mode='register-details'" behaviour="link">
@@ -102,8 +100,6 @@
             <param name="alternate" value="let $key:= head((@key, @ref))  return collection($global:register-root)/id($key)"/>
             <param name="default" value="."/>
         </model><model behaviour="inline"/></elementSpec>
-            <elementSpec ident="teiHeader" mode="change"><model output="latex" behaviour="metadata"/><model output="fo" behaviour="omit"/><model predicate="$parameters?mode='breadcrumb'" behaviour="inline">
-            <param name="content" value="fileDesc/titleStmt"/>
-        </model><model predicate="$parameters?mode='metadata-panel'" behaviour="pass-through"/><model predicate="$parameters?display='browse'" behaviour="block"/><model behaviour="metadata"/></elementSpec></schemaSpec>
+            <elementSpec ident="teiHeader" mode="change"><model output="latex" behaviour="metadata"/><model output="fo" behaviour="omit"/><model predicate="$parameters?mode='metadata-panel'" behaviour="pass-through"/><model predicate="$parameters?display='browse'" behaviour="block"/><model behaviour="metadata"/></elementSpec></schemaSpec>
         </body>
     </text></TEI>

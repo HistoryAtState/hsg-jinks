@@ -1,5 +1,7 @@
 {
     "breadcrumb": {
+        "home": "Startseite",
+        "historicaldocuments": "Historische Dokumente",
         "collection-root": "Sammlungen",
         "document-root": "Dokumente",
         "demo": "Demo",
