@@ -61,6 +61,11 @@
     "search" : true
   },
   "theme" : {
+    "logo" : {
+      "width" : "1280px",
+      "image" : "oh-logo.png",
+      "height" : "141px"
+    },
     "layout" : {
       "class" : "fixed-layout",
       "search" : "before-top",
@@ -162,7 +167,7 @@
     }
   },
   "skipSource" : [ "repo.xml", "expath-pkg.xml", "build.xml" ],
-  "_lastModified" : "2026-07-14T17:29:29.204Z",
+  "_lastModified" : "2026-07-16T14:37:08.253Z",
   "overwrite" : "default",
   "pkg" : {
     "website" : "http://tei-publisher.org",
@@ -187,7 +192,7 @@
       "group" : "tei"
     }
   },
-  "description" : "",
+  "description" : "Office of the Historian",
   "_dry" : false,
   "source" : "/db/apps//profile-theme-uswds",
   "type" : "theme",
@@ -213,7 +218,7 @@
     "jinks-templates" : "1.4.1"
   },
   "category" : "development",
-  "_overwrite" : "quick",
+  "_overwrite" : "all",
   "defaults" : {
     "language" : "en",
     "language-label" : "label",
