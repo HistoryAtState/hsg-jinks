@@ -8,3 +8,11 @@
     max-width: none;
     width: 80%;
 }
+
+/* The current chapter/document/compilation crumb is the final breadcrumb
+   segment on interior pages; it always starts on its own line below the
+   rest of the trail. */
+nav[aria-label="breadcrumb"] .breadcrumb-current {
+    display: block;
+    width: 100%;
+}

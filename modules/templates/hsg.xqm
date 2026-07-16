@@ -10,10 +10,13 @@ import module namespace config="http://www.tei-c.org/tei-simple/config" at "../c
 
 (:~
  : Generate the breadcrumb trail: Home > Historical Documents > volume title.
- : Compilation/chapter/document titles are intentionally never shown as a
- : crumb -- they are the page's own <h1> instead. The volume title is the
- : current (non-link) crumb only when the volume landing page itself is
- : being viewed; on any interior page it links back to that landing page.
+ : The volume title is the current (non-link) crumb only on the volume
+ : landing page; on any interior page it links back there.
+ :
+ : When the page being viewed is itself a chapter, document, or compilation,
+ : one more crumb -- the current (non-link), final one -- is appended on a
+ : new line: the division's own title for a chapter or compilation, or
+ : "Document <n>" (its encoded frus-document-number) for a document.
  :)
 declare function hsg:collection-breadcrumbs($context as map(*)) {
     if (exists($context?doc)) then
@@ -22,6 +25,7 @@ declare function hsg:collection-breadcrumbs($context as map(*)) {
         let $is-landing := count($components) = 2
         let $volume := doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
         let $volume-title := normalize-space(($volume//tei:titleStmt/tei:title)[1])
+        let $division-type := ($context?doc?content//tei:bibl[@type='frus-division-type'])[1]/string()
         return (
             <li>
                 <a href="{$context?context-path}/">
@@ -38,7 +42,14 @@ declare function hsg:collection-breadcrumbs($context as map(*)) {
             else
                 <li>
                     <a href="{$context?context-path}/historicaldocuments/{$publication}">{$volume-title}</a>
-                </li>
+                </li>,
+            if (not($is-landing) and $division-type = ('chapter', 'compilation')) then
+                let $own-title := normalize-space(($context?doc?content//tei:titleStmt/tei:title)[1])
+                return <li class="breadcrumb-current" aria-current="page">{$own-title}</li>
+            else if (not($is-landing) and $division-type = 'document') then
+                let $number := ($context?doc?content//tei:bibl[@type='frus-document-number'])[1]/string()
+                return <li class="breadcrumb-current" aria-current="page">Document {$number}</li>
+            else ()
         )
 
     else ()
