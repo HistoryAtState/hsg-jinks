@@ -6,7 +6,7 @@
         }
     }
     ---
-    [% if $doc?content//tei:bibl[@type='frus-division-type']='chapter' %]
+    [% if $doc?content//tei:bibl[@type='frus-division-type'] = ('chapter', 'compilation') %]
         [[ page:transform($doc?content, map { "mode": "volume-interior" }) ]]
     [% else %]
         [[ page:transform($doc?content, map { "mode": "division" }) ]]
