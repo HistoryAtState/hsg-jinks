@@ -6,9 +6,9 @@
 :root {
     /* Logo */
 
-    --jinks-logo-light: url("");
-    --jinks-logo-image-width: ;
-    --jinks-logo-image-height: ;
+    --jinks-logo-light: url("oh-logo.png");
+    --jinks-logo-image-width: 1280px;
+    --jinks-logo-image-height: 141px;
     --jinks-logo-margin-right: 1rem;
 
     /* Image backgrounds */

@@ -2,6 +2,11 @@
   "theme" : {
     "colors" : {
       "palette" : "navy"
+    },
+    "logo" : {
+      "image" : "oh-logo.png",
+      "width" : "1280px",
+      "height" : "141px"
     }
   },
   "label" : "hsg-jinks",
