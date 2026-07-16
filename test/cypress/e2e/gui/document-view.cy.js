@@ -6,22 +6,35 @@
 // (resources/odd/hsg-jinks.odd), selected in
 // templates/pages/volume-interior.html for frus-division-type='document'.
 
-const DOC = "historicaldocuments/frus1981-88v05/d1";
-const DOC_HEADING =
-    "1. Letter From President Reagan to Soviet General Secretary Gorbachev";
+const VOLUME = "historicaldocuments/frus1981-88v05";
+
+const DOCS = [
+    {
+        id: "d1",
+        heading:
+            "1. Letter From President Reagan to Soviet General Secretary Gorbachev",
+    },
+    {
+        id: "d3",
+        heading:
+            "3. Memorandum From John Lenczowski of the National Security Council Staff to the President’s Assistant for National Security Affairs (McFarlane)",
+    },
+];
 
 describe("document view", () => {
-    it("renders the document's number and title as the page's h1", () => {
-        cy.visit(DOC);
-        cy.get("main h1")
-            .should("be.visible")
-            .invoke("text")
-            .then((text) => text.replace(/\s+/g, " ").trim())
-            .should("eq", DOC_HEADING);
-    });
+    DOCS.forEach(({ id, heading }) => {
+        it(`${id}: renders the document's number and title as the page's h1`, () => {
+            cy.visit(`${VOLUME}/${id}`);
+            cy.get("main h1")
+                .should("be.visible")
+                .invoke("text")
+                .then((text) => text.replace(/\s+/g, " ").trim())
+                .should("eq", heading);
+        });
 
-    it("renders exactly one h1", () => {
-        cy.visit(DOC);
-        cy.get("main h1").should("have.length", 1);
+        it(`${id}: renders exactly one h1`, () => {
+            cy.visit(`${VOLUME}/${id}`);
+            cy.get("main h1").should("have.length", 1);
+        });
     });
 });
