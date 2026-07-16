@@ -77,6 +77,14 @@
 [[places]]
 </ul>
 </div></pb:template>
+        </model><model predicate="$parameters?mode='document-view'" behaviour="block">
+            <desc>Render a document's own title as an h1, followed by its text content</desc>
+            <param name="head" value=".//fileDesc//titleStmt/title"/>
+            <param name="content" value="text/body"/>
+            <pb:template xml:space="preserve"><div xmlns="">
+  <h1>[[head]]</h1>
+  [[content]]
+</div></pb:template>
         </model><model predicate="$parameters?mode='division'" behaviour="pass-through">
             <desc>Render a division document's text content without the HTML document skeleton, so it can be embedded in a page's main element</desc>
             <param name="content" value="text/body"/>
