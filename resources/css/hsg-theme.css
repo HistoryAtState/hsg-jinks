@@ -34,3 +34,19 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .footnote-ref a {
     text-decoration: none;
 }
+
+/* Sidebar table of contents.
+   USWDS's own indent rule for nested items never applies: its selector is
+   `.usa-sidenav__sublist :not(.usa-button):not(.uswds-button):not(pb-login::part(trigger))`,
+   and a pseudo-element inside :not() is invalid, so the browser drops the whole
+   rule -- verified, the computed padding-left is 0px and chapters render flush
+   with their compilation. Restore the indent the component intends; the real fix
+   belongs upstream in profile-theme-uswds. */
+.usa-sidenav__sublist a {
+    display: block;
+    padding-left: 2rem;
+}
+
+.usa-sidenav__sublist .usa-sidenav__sublist a {
+    padding-left: 3rem;
+}
