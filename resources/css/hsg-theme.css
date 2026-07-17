@@ -16,3 +16,21 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     display: block;
     width: 100%;
 }
+
+/* Footnotes. A note's content is one or more paragraphs, so the backlink that
+   follows it would start a line of its own; the reference site sits it at the
+   end of the note's last line. Only the last paragraph goes inline, so notes
+   that run to several paragraphs keep their breaks. */
+.footnotes > li > p:last-of-type {
+    display: inline;
+}
+
+.footnotes .footnote-backlink {
+    margin-left: 0.25em;
+    text-decoration: none;
+}
+
+/* The marker is a link, and its underline collides with the superscript. */
+.footnote-ref a {
+    text-decoration: none;
+}
