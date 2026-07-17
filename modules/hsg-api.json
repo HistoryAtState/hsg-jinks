@@ -22,7 +22,7 @@
             "get": {
                 "summary": "Retrieve landing page for a volume",
                 "operationId": "hsgapi:view",
-                "x-error-handler": "vapi:handle-error",
+                "x-error-handler": "hsgapi:handle-error",
                 "tags": [
                     "hsg"
                 ],
@@ -74,7 +74,7 @@
             "get": {
                 "summary": "Retrieve interior page for a division",
                 "operationId": "hsgapi:view-interior",
-                "x-error-handler": "vapi:handle-error",
+                "x-error-handler": "hsgapi:handle-error",
                 "tags": [
                     "hsg"
                 ],

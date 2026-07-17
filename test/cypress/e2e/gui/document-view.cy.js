@@ -179,6 +179,29 @@ describe("document view", () => {
         });
     });
 
+    describe("attachment URLs", () => {
+        // Attachments are rendered inline in their parent and have no page of
+        // their own, as on the reference site, which 404s these URLs. The data
+        // disagrees -- each attachment carries a relatedItem type="canonical"
+        // advertising this very URL -- but the reference site is authoritative.
+        ["d96-a1", "d96-a2", "d125-a1"].forEach((id) => {
+            it(`${id}: is not a page of its own`, () => {
+                cy.request({
+                    url: `${VOLUME}/${id}`,
+                    failOnStatusCode: false,
+                }).then((res) => {
+                    expect(res.status).to.eq(404);
+                    // still the styled error page, not a bare error
+                    expect(res.headers["content-type"]).to.contain("text/html");
+                });
+            });
+        });
+
+        it("the parent document is unaffected", () => {
+            cy.request(`${VOLUME}/d96`).its("status").should("eq", 200);
+        });
+    });
+
     describe("documents without footnotes", () => {
         // 8 of 341 documents have no standOff notes at all (7 editorial notes and
         // 1 historical document). They must not emit an empty list or a stray rule.
