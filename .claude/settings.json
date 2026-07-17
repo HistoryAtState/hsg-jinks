@@ -1,0 +1,7 @@
+{
+  "enabledPlugins": {
+    "jinks@jinks-skills": true,
+    "asdf-tools@line-o-plugins": true,
+    "xquery-lsp@xq-lsp": true
+  }
+}
