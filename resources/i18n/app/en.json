@@ -69,5 +69,8 @@
     "toolbar": {
         "next": "Next",
         "previous": "Previous"
+    },
+    "historicaldocuments": {
+        "title": "Historical Documents"
     }
 }

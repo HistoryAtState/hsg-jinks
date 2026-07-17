@@ -14,6 +14,29 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
  :)
 declare namespace router="http://e-editiones.org/roaster/router";
 
+(:~
+ : Landing page for the Historical Documents section: a list of all volumes.
+ :
+ : Without this route the path falls through to the jinks-owned catch-all
+ : /{docid}, which treats "historicaldocuments" as a document id and errors --
+ : yet the breadcrumb links here from every content page.
+ :
+ : The page has no document of its own, so it renders through vapi:html rather
+ : than vapi:view. The template name is fixed here instead of being declared as
+ : a parameter, so it cannot be steered from the query string.
+ :)
+declare function hsgapi:view-section($request as map(*)) {
+    vapi:html(map:merge((
+        $request,
+        map {
+            "parameters": map:merge((
+                $request?parameters,
+                map { "file": "pages/historicaldocuments" }
+            ))
+        }
+    )))
+};
+
 declare function hsgapi:view($request as map(*)) {
     let $publicationId := $request?parameters?publicationId
     let $_ := util:log("INFO", "publicationId: " || $publicationId)

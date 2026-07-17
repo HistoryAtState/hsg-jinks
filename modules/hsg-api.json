@@ -18,6 +18,28 @@
     },
     "openapi": "3.0.3",
     "paths": {
+        "/historicaldocuments": {
+            "get": {
+                "summary": "Retrieve the landing page for the Historical Documents section",
+                "operationId": "hsgapi:view-section",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/historicaldocuments/{publicationId}": {
             "get": {
                 "summary": "Retrieve landing page for a volume",
