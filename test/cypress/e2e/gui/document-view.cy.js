@@ -202,6 +202,42 @@ describe("document view", () => {
         });
     });
 
+    describe("unknown division ids", () => {
+        // id() tokenizes its argument on whitespace, so an id with a space in it
+        // resolved to several elements (crashing root($doc) with a raw XPTY0004)
+        // or to the division itself under a second URL.
+        const MISSES = [
+            ["comp1", "no such division"],
+            ["d9999", "no such document"],
+            ["D1", "ids are case-sensitive"],
+            ["d1%20d3", "two ids in one segment must not resolve, nor crash"],
+            ["d1%20", "a trailing space must not serve d1 under a second URL"],
+            ["%20d1", "nor a leading one"],
+        ];
+
+        MISSES.forEach(([id, why]) => {
+            it(`${id}: 404 (${why})`, () => {
+                cy.request({
+                    url: `${VOLUME}/${id}`,
+                    failOnStatusCode: false,
+                }).then((res) => {
+                    expect(res.status).to.eq(404);
+                    // a miss, not an internal error leaking through as a page
+                    expect(res.body).not.to.contain("java:org.exist");
+                });
+            });
+        });
+
+        it("an unknown volume is a 404 too", () => {
+            cy.request({
+                url: "historicaldocuments/nosuchvolume/d1",
+                failOnStatusCode: false,
+            })
+                .its("status")
+                .should("eq", 404);
+        });
+    });
+
     describe("documents without footnotes", () => {
         // 8 of 341 documents have no standOff notes at all (7 editorial notes and
         // 1 historical document). They must not emit an empty list or a stray rule.

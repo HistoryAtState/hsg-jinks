@@ -37,7 +37,14 @@ declare function hsgapi:view-interior($request as map(*)) {
     let $_ := util:log("INFO", "publicationId: " || $publicationId || " divisionId: " || $divisionId)
     let $doc := collection($config:data-default || "/" || $publicationId)/id($divisionId)
     return
-        if (hsgapi:is-attachment($doc)) then
+        if (not(hsgapi:is-exact-division($doc, $divisionId))) then
+            (: id() tokenizes its argument on whitespace, so "d1 d3" resolves to two
+               elements and "d1 " to one -- the first crashed root($doc) with a raw
+               XPTY0004 and the second served d1's page under a second URL. Anything
+               that is not exactly one element whose xml:id is the requested id is a
+               miss. :)
+            error($errors:NOT_FOUND, "no division " || $divisionId || " in " || $publicationId)
+        else if (hsgapi:is-attachment($doc)) then
             (: Attachments have no page of their own: they are rendered inline in
                the document that xincludes them, and the reference site 404s their
                URL. The data disagrees -- each carries a relatedItem type="canonical"
@@ -58,6 +65,16 @@ declare function hsgapi:view-interior($request as map(*)) {
                     ))
                 }
             )))
+};
+
+(:~
+ : Whether id() resolved to exactly the requested division. Guards two ways
+ : id()'s whitespace tokenization bites: several ids in one path segment
+ : ("d1%20d3") resolve to several elements, and a trailing or leading space
+ : ("d1%20") still resolves to the division itself.
+ :)
+declare function hsgapi:is-exact-division($doc as node()*, $divisionId as xs:string) as xs:boolean {
+    count($doc) eq 1 and $doc/@xml:id = $divisionId
 };
 
 (:~
