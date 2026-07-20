@@ -280,6 +280,15 @@ nav[aria-label="breadcrumb"] {
 
 main {
     @extend .usa-section;
+
+    // .usa-section's own padding-top already gives main's content its
+    // top spacing; an unstyled first child's default margin (e.g. h1's
+    // browser-default margin) would stack on top of that padding instead
+    // of collapsing into it, doubling the gap. Keep main's padding as the
+    // single source of that spacing.
+    > :first-child {
+        margin-block-start: 0;
+    }
 }
 
 details {
@@ -467,17 +476,32 @@ section#bottom {
     height: auto;
 }
 
-// USWDS's own $theme-header-max-width / $theme-footer-max-width settings are
-// resolved at Sass-compile time, so they can't track a per-app config value.
-// Override the compiled max-width on every USWDS "boxed content" selector to
-// runtime-follow --jinks-page-max-width instead (config.json's
-// theme.layout.max-width) -- the same variable .fixed-layout > main /
-// .sticky-layout > main are capped at (layout.css) -- so header, footer, and
-// main content always share one page width, configurable per app.
+// USWDS's own $theme-header-max-width / $theme-footer-max-width /
+// $theme-grid-container-max-width settings are resolved at Sass-compile
+// time, so they can't track a per-app config value. The cleaner-looking
+// fix -- repointing those settings at a custom breakpoint token that holds
+// var(--jinks-page-max-width) instead of a literal length -- was tried and
+// reverted: USWDS internals that read the SAME settings expect a real
+// numeric/token value, not an arbitrary CSS value, and hard-error at
+// compile time as soon as the settings (or the custom-breakpoints map
+// itself) are exercised by more than the plain grid-container() path --
+// hit in sequence via .usa-header--megamenu's decorative pseudo-element
+// width math (_usa-megamenu.scss), .usa-identifier's own unqualified
+// grid-container() call (_usa-identifier.scss), and .usa-layout-grid's
+// responsive-variant generator, which iterates every registered custom
+// breakpoint assuming it's a number (_usa-layout-grid.scss). So: override
+// the compiled output instead. No !important needed -- each selector below
+// matches (not just exceeds) USWDS's own compiled specificity for it, and
+// this rule is declared after `@forward "uswds"`, so it wins on source
+// order for every one of these ties.
+.usa-header--extended .usa-navbar,
+.usa-header--extended .usa-nav__inner,
 .usa-nav-container,
-.usa-nav__inner,
+.usa-footer > .grid-container,
+.usa-footer__nav,
 .usa-footer__primary-container,
 .usa-footer__primary-section > .grid-container,
+.usa-footer__secondary-section > .grid-container,
 .grid-container {
     max-width: var(--jinks-page-max-width);
 }

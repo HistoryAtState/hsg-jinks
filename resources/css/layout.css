@@ -295,7 +295,15 @@
  */
 .sticky-layout {
     display: grid;
-    grid-template-rows: auto auto auto auto;
+    /*
+     * min-height (not height, unlike .fixed-layout) pins the footer to the
+     * bottom of the viewport on a short page without capping/clipping a
+     * long one -- the "before content after" row is 1fr so it (not the
+     * header/footer/before-top/after-top rows) absorbs any leftover
+     * viewport space.
+     */
+    min-height: 100vh;
+    grid-template-rows: auto auto 1fr auto;
     grid-template-columns:
         0.001fr
         1fr
@@ -381,6 +389,12 @@
 
 .sticky-layout > .content-top {
     grid-area: content-top;
+    /* Box the breadcrumb/toolbar row the same as main, so it stays aligned
+     * with main's left edge at every viewport width -- not just below
+     * --jinks-page-max-width, where both happen to sit flush left. */
+    width: 100%;
+    max-width: var(--jinks-page-max-width);
+    margin-inline: auto;
 }
 
 .sticky-layout > main {
