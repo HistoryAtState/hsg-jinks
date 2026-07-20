@@ -22,7 +22,7 @@
     // hardcodes localhost:8080 and would break if the internal port moved.
     // appPort publishes deterministically via docker; forwardPorts would let
     // VS Code silently pick an arbitrary free port instead.
-    "appPort": [ "8080:8080", "8443:8443" ],
+    "appPort": [ "8090:8080", "8453:8443" ],
     "customizations": {
         "vscode": {
             "extensions": [ "exist-db.existdb-vscode", "42crunch.vscode-openapi", "redhat.vscode-xml" ]
