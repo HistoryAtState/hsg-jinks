@@ -8,6 +8,14 @@ Profiles: `base10`, `docker`, `profile-theme-uswds`.
 > Only the non-standard bits are documented here. Full background:
 > [`doc/uswds-profile-integration.md`](doc/uswds-profile-integration.md).
 
+## Workflow
+
+- **All changes go through a branch + PR targeting `main`** — in this repo
+  and in `profile-theme-uswds`. No direct commits to either `main`.
+- **Check a work package's assignee in OpenProject before implementing it.**
+  If we decide to pick one up, assign it to the person actually doing the
+  work, not the AI assistant — ask if it's unclear who that is.
+
 ## The devcontainer runs the generator
 
 Unlike a stock TEI Publisher devcontainer (runtime library only), this one hosts
