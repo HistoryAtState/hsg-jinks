@@ -314,8 +314,36 @@
         "before content after"
         "footer footer footer";
     position: relative;
+    /*
+     * The page box lives on the grid itself, so the whole content band --
+     * sidebars included -- is capped and centred as one, in line with the
+     * header's and footer's own .grid-container (hsg-jinks#1217). Capping
+     * main alone, as this used to, only lines up on pages without sidebars:
+     * once .before takes the first column, main centres in what is left of a
+     * full-bleed grid and the band drifts right, past the chrome above and
+     * below it.
+     *
+     * box-sizing: content-box is deliberate -- max-width applies to the
+     * content box, so grid + padding measures --jinks-page-max-width plus the
+     * gutters, exactly like .grid-container's border box.
+     */
     box-sizing: content-box;
+    max-width: var(--jinks-page-max-width);
+    padding-inline: var(--jinks-page-gutter, 2rem);
     margin-inline: auto;
+}
+
+/*
+ * ...  which the header and footer then break out of again: their bands are
+ * full-bleed, and only their contents are boxed (by .grid-container inside
+ * them). The classic centred-container escape -- 50% resolves against this
+ * capped grid, 50vw against the viewport. Safe because USWDS sets
+ * overflow-x: hidden on body, so 100vw cannot introduce a scrollbar.
+ */
+.sticky-layout > .page-header,
+.sticky-layout > footer {
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
 }
 
 .sticky-layout > .page-header {
@@ -387,24 +415,21 @@
     display: none;
 }
 
+/* .content-top and main need no page box of their own any more -- the grid
+ * carries it (see .sticky-layout above), and both stay aligned with it. */
 .sticky-layout > .content-top {
     grid-area: content-top;
-    /* Box the breadcrumb/toolbar row the same as main, so it stays aligned
-     * with main's left edge at every viewport width -- not just below
-     * --jinks-page-max-width, where both happen to sit flush left. */
     width: 100%;
-    max-width: var(--jinks-page-max-width);
-    margin-inline: auto;
 }
 
 .sticky-layout > main {
     grid-area: content;
     display: flex;
     justify-content: center;
-    /* Same page-width match as .fixed-layout > main -- see the comment there. */
+    /* width: 100% is required: an auto-margin grid item is no longer stretched
+     * to its track by default, so without it main shrinks to fit its flex
+     * child instead of filling the "content" column. */
     width: 100%;
-    max-width: var(--jinks-page-max-width);
-    margin-inline: auto;
 }
 
 .sticky-layout > main > * {

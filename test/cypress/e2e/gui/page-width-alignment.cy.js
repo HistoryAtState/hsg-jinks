@@ -56,6 +56,39 @@ describe("page-width alignment", () => {
         });
     });
 
+    // The page box belongs to the whole content band, sidebars included
+    // (#1217). It used to sit on main alone, which only lines up on pages
+    // without a sidebar -- the volume landing page above. On comp, chapter and
+    // document pages .before takes the first column, and main used to centre
+    // in what was left of a full-bleed grid, pushing the band up to 146px past
+    // the chrome above and below it.
+    [
+        ["comp", `${VOLUME}/comp`],
+        ["chapter", `${VOLUME}/ch1`],
+        ["document", `${VOLUME}/d1`],
+    ].forEach(([kind, path]) => {
+        [1440, 1728].forEach((width) => {
+            it(`${kind} page: content band stays inside the header's page box at ${width}px`, () => {
+                cy.viewport(width, 900);
+                cy.visit(path);
+                cy.get(".usa-nav__inner").then(($nav) => {
+                    const nav = $nav[0].getBoundingClientRect();
+                    const style = getComputedStyle($nav[0]);
+                    const pageLeft = nav.left + parseFloat(style.paddingLeft);
+                    const pageRight = nav.right - parseFloat(style.paddingRight);
+                    // sidebar starts where the header's content starts ...
+                    cy.get(".before")
+                        .then(($el) => $el[0].getBoundingClientRect().left)
+                        .should("be.closeTo", pageLeft, 2);
+                    // ... and main ends where the header's content ends
+                    cy.get("main")
+                        .then(($el) => $el[0].getBoundingClientRect().right)
+                        .should("be.closeTo", pageRight, 2);
+                });
+            });
+        });
+    });
+
     it("footer is pinned to the bottom of the viewport on a short page", () => {
         cy.viewport(1440, 1200);
         cy.visit(VOLUME); // volume landing: short page
