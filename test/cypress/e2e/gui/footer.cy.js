@@ -20,7 +20,7 @@ const VOLUME = "historicaldocuments/frus1981-88v05";
 });
 
 // The footer carries real content in the navy design (#1086): four link
-// columns ending in Contact (phone, mail, the office's own social accounts),
+// columns ending in Contact (mail, the office's own social accounts),
 // then the wordmark band. Nothing of the USWDS example survives -- no
 // placeholder text, no dead javascript:void(0) links, no sign-up form.
 describe("footer content", () => {
@@ -47,10 +47,9 @@ describe("footer content", () => {
             .should("have.attr", "href", "https://www.state.gov/privacy-policy/");
     });
 
-    it("reaches the office by phone and mail", () => {
+    it("reaches the office by mail", () => {
         cy.get("footer.usa-footer .usa-footer__address a").then(($a) =>
             expect([...$a].map((el) => el.getAttribute("href"))).to.deep.equal([
-                "tel:+1-202-955-0200",
                 "mailto:history@state.gov",
             ])
         );
