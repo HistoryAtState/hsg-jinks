@@ -19,20 +19,20 @@ const VOLUME = "historicaldocuments/frus1981-88v05";
     });
 });
 
-// The footer carries the reference site's real content (#1086): four link
-// columns, the Office of the Historian address block, and nothing from the
-// USWDS example (no placeholder text, no dead javascript:void(0) links, no
-// sign-up form, no social-media icons -- history.state.gov has neither).
+// The footer carries real content in the navy design (#1086): four link
+// columns ending in Contact (phone, mail, the office's own social accounts),
+// then the wordmark band. Nothing of the USWDS example survives -- no
+// placeholder text, no dead javascript:void(0) links, no sign-up form.
 describe("footer content", () => {
     beforeEach(() => cy.visit(`${VOLUME}/ch1`));
 
-    it("has the four link columns of the reference site", () => {
+    it("has the four link columns of the design", () => {
         cy.get("footer.usa-footer .usa-footer__primary-link").then(($h) =>
             expect([...$h].map((el) => el.textContent.trim())).to.deep.equal([
                 "Learn more",
                 "Topics",
-                "Contact",
                 "Policies",
+                "Contact",
             ])
         );
     });
@@ -47,15 +47,39 @@ describe("footer content", () => {
             .should("have.attr", "href", "https://www.state.gov/privacy-policy/");
     });
 
-    it("names the office and its contact address", () => {
-        cy.get("footer.usa-footer .usa-footer__logo-heading").should(
-            "contain.text",
-            "Office of the Historian"
+    it("reaches the office by phone and mail", () => {
+        cy.get("footer.usa-footer .usa-footer__address a").then(($a) =>
+            expect([...$a].map((el) => el.getAttribute("href"))).to.deep.equal([
+                "tel:+1-202-955-0200",
+                "mailto:history@state.gov",
+            ])
         );
-        cy.get("footer.usa-footer .usa-footer__address a").should(
-            "have.attr",
-            "href",
-            "mailto:history@state.gov"
+    });
+
+    it("links the office's own social accounts", () => {
+        cy.get("footer.usa-footer .usa-social-link").then(($a) =>
+            expect([...$a].map((el) => el.getAttribute("href"))).to.deep.equal([
+                "https://x.com/HistoryAtState",
+                "https://github.com/HistoryAtState",
+            ])
+        );
+    });
+
+    it("closes with the wordmark and the parent bureau", () => {
+        cy.get("footer.usa-footer .usa-footer__logo-img")
+            .should("have.attr", "alt")
+            .and("contain", "Office of the Historian");
+        cy.get("footer.usa-footer .hsg-footer__agency").should(
+            "contain.text",
+            "United States Department of State"
+        );
+    });
+
+    it("sits on the navy ground of the design", () => {
+        cy.get("footer.usa-footer").should(
+            "have.css",
+            "background-color",
+            "rgb(23, 58, 87)"
         );
     });
 
@@ -63,7 +87,6 @@ describe("footer content", () => {
         cy.get("footer.usa-footer").within(() => {
             cy.get('a[href="javascript:void(0);"]').should("not.exist");
             cy.get(".usa-sign-up").should("not.exist");
-            cy.get(".usa-social-link").should("not.exist");
         });
         cy.get("footer.usa-footer")
             .invoke("text")

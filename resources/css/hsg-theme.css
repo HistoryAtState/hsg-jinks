@@ -50,3 +50,141 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .usa-sidenav__sublist .usa-sidenav__sublist a {
     padding-left: 3rem;
 }
+
+/* Footer (#1086).
+   USWDS ships the big footer light-on-white; the design puts the whole thing
+   on navy, with both bands sharing one background so the seam disappears.
+   Colours are taken from the design: #173a57 ground, USWDS primary-lighter
+   headings, near-white links, a lighter navy disc behind the social icons. */
+.hsg-footer {
+    --hsg-footer-background: #173a57;
+    --hsg-footer-heading: var(--jinks-colors-200, #a1d3ff);
+    --hsg-footer-text: #dbe9f7;
+    background-color: var(--hsg-footer-background);
+    color: var(--hsg-footer-text);
+    padding-top: 2rem;
+}
+
+.hsg-footer .usa-footer__primary-section,
+.hsg-footer .usa-footer__secondary-section {
+    background-color: transparent;
+    border-top: none;
+}
+
+.hsg-footer .usa-footer__primary-link {
+    color: var(--hsg-footer-heading);
+    margin-bottom: 1.5rem;
+}
+
+.hsg-footer a {
+    color: var(--hsg-footer-text);
+    text-decoration: none;
+}
+
+.hsg-footer a:hover {
+    text-decoration: underline;
+}
+
+.hsg-footer .usa-footer__secondary-link {
+    margin-bottom: 0.75rem;
+    padding-top: 0;
+}
+
+.hsg-footer .usa-footer__secondary-link::before {
+    content: none; /* USWDS's bullet separator; the design has none */
+}
+
+/* Contact column: phone and mail sit on one line with their icon. The icons
+   ship as black SVGs, so they are inverted rather than recoloured.
+   USWDS right-aligns .usa-footer__contact-links from tablet up, which is for
+   the example's logo-and-contact band; here the block is a fourth nav column
+   and reads left-aligned like its neighbours. */
+.hsg-footer .usa-footer__contact-links {
+    margin-top: 0;
+    text-align: left;
+}
+
+.hsg-footer .usa-footer__address {
+    margin-top: 0.75rem;
+}
+
+.hsg-footer .usa-footer__contact-info {
+    align-items: center;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-start;
+    margin-bottom: 0.5rem;
+}
+
+.hsg-footer .usa-footer__social-links {
+    justify-content: flex-start;
+}
+
+.hsg-footer__icon {
+    filter: brightness(0) invert(1);
+    height: 1.25rem;
+    width: 1.25rem;
+}
+
+.hsg-footer .usa-footer__social-links {
+    margin-top: 1.5rem;
+}
+
+.hsg-footer .usa-social-link {
+    align-items: center;
+    background-color: #0e517f;
+    border-radius: 50%;
+    display: flex;
+    height: 3rem;
+    justify-content: center;
+    width: 3rem;
+}
+
+.hsg-footer .usa-social-link__icon {
+    filter: brightness(0) invert(1);
+    height: 1.5rem;
+    width: 1.5rem;
+}
+
+/* Closing band: the office wordmark left, its place in the department right. */
+.hsg-footer .usa-footer__secondary-section {
+    margin-top: 2rem;
+}
+
+/* The only logo asset is the navy one the header uses, which disappears against
+   this background; knock it out to white. That flattens the seal and flag to
+   silhouettes -- replace with a proper light variant of the wordmark when the
+   design supplies one. */
+.hsg-footer .usa-footer__logo-img {
+    filter: brightness(0) invert(1);
+    max-width: 26rem;
+    width: 100%;
+}
+
+.hsg-footer__agency {
+    align-self: end;
+    text-align: right;
+}
+
+.hsg-footer__agency .usa-footer__logo-heading,
+.hsg-footer__agency .usa-footer__contact-heading {
+    color: var(--hsg-footer-text);
+    font-family: "Merriweather Web", Georgia, Cambria, "Times New Roman", Times, serif;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.hsg-footer__agency .usa-footer__logo-heading {
+    font-weight: 400;
+}
+
+.hsg-footer__agency .usa-footer__contact-heading {
+    font-weight: 700;
+}
+
+@media (max-width: 640px) {
+    .hsg-footer__agency {
+        margin-top: 1.5rem;
+        text-align: left;
+    }
+}
