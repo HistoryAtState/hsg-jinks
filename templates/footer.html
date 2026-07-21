@@ -1,152 +1,114 @@
 <!--
-    This is the big footer as described in the USWDS documentation.
-    It is included in the landing page template as an example of how to use the USWDS footer component.
-    It can be customized as needed for the specific project.
---><footer class="usa-footer usa-footer--big">
-    <div class="grid-container usa-footer__return-to-top">
-        <a href="#">Return to top</a>
-    </div>
+    Site footer, USWDS "big" variant, dressed in the navy design (#1086).
+
+    Four link columns, then a band carrying the Office of the Historian logo
+    and its parent bureau. Content follows the reference site (history.state.gov)
+    and hsg-shell's templates/site.xml; the USWDS example's sign-up form is
+    dropped, its placeholder social icons replaced by the office's real
+    accounts. Presentation lives in resources/css/hsg-theme.css.
+
+    Links into sections this app does not serve yet (Department History,
+    Countries, About, FAQ) point at the production site for now; they become
+    context-path-relative as those sections land (#1095, #1096, #1097).
+--><footer class="usa-footer usa-footer--big hsg-footer">
     <div class="usa-footer__primary-section">
         <div class="grid-container">
-            <div class="grid-row grid-gap">
-                <div class="tablet:grid-col-8">
-                    <nav class="usa-footer__nav" aria-label="Footer navigation,,">
-                        <div class="grid-row grid-gap-4">
-                            <div class="mobile-lg:grid-col-6 desktop:grid-col-3">
-                                <section class="usa-footer__primary-content usa-footer__primary-content--collapsible">
-                                    <h4 class="usa-footer__primary-link">&lt;Topic&gt;</h4>
-                                    <ul class="usa-list usa-list--unstyled">
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link that's a bit longer than most of
-                                                the others&gt;</a>
-                                        </li>
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                    </ul>
-                                </section>
+            <nav class="usa-footer__nav" aria-label="Footer navigation">
+                <div class="grid-row grid-gap-4">
+                    <div class="mobile-lg:grid-col-6 desktop:grid-col-3">
+                        <section class="usa-footer__primary-content usa-footer__primary-content--collapsible">
+                            <h4 class="usa-footer__primary-link">Learn more</h4>
+                            <ul class="usa-list usa-list--unstyled">
+                                <li class="usa-footer__secondary-link">
+                                    <a href="[[ head(($context?defaults?site-root, $context-path)) ]]/">Home</a>
+                                </li>
+                                <li class="usa-footer__secondary-link">
+                                    <a href="[[ head(($context?defaults?site-root, $context-path)) ]]/search.html">Search</a>
+                                </li>
+                                <li class="usa-footer__secondary-link">
+                                    <a href="https://history.state.gov/about/">About Us</a>
+                                </li>
+                                <li class="usa-footer__secondary-link">
+                                    <a href="https://history.state.gov/about/faq">FAQ</a>
+                                </li>
+                            </ul>
+                        </section>
+                    </div>
+                    <div class="mobile-lg:grid-col-6 desktop:grid-col-3">
+                        <section class="usa-footer__primary-content usa-footer__primary-content--collapsible">
+                            <h4 class="usa-footer__primary-link">Topics</h4>
+                            <ul class="usa-list usa-list--unstyled">
+                                <li class="usa-footer__secondary-link">
+                                    <a href="[[ head(($context?defaults?site-root, $context-path)) ]]/historicaldocuments">Historical Documents</a>
+                                </li>
+                                <li class="usa-footer__secondary-link">
+                                    <a href="https://history.state.gov/departmenthistory/">Department History</a>
+                                </li>
+                                <li class="usa-footer__secondary-link">
+                                    <a href="https://history.state.gov/countries/">Countries</a>
+                                </li>
+                            </ul>
+                        </section>
+                    </div>
+                    <div class="mobile-lg:grid-col-6 desktop:grid-col-3">
+                        <section class="usa-footer__primary-content usa-footer__primary-content--collapsible">
+                            <h4 class="usa-footer__primary-link">Policies</h4>
+                            <ul class="usa-list usa-list--unstyled">
+                                <li class="usa-footer__secondary-link">
+                                    <a href="https://www.state.gov/section-508-accessibility-statement/">Accessibility Statement</a>
+                                </li>
+                                <li class="usa-footer__secondary-link">
+                                    <a href="https://www.state.gov/privacy-policy/">Privacy Policy</a>
+                                </li>
+                                <li class="usa-footer__secondary-link">
+                                    <a href="https://www.state.gov/external-link-policy-and-disclaimers/">External Link Policy</a>
+                                </li>
+                                <li class="usa-footer__secondary-link">
+                                    <a href="https://www.state.gov/copyright-information/">Copyright Information</a>
+                                </li>
+                                <li class="usa-footer__secondary-link">
+                                    <a href="https://history.state.gov/about/content-warning">Content Warning</a>
+                                </li>
+                            </ul>
+                        </section>
+                    </div>
+                    <div class="mobile-lg:grid-col-6 desktop:grid-col-3">
+                        <section class="usa-footer__primary-content usa-footer__contact-links">
+                            <h4 class="usa-footer__primary-link">Contact</h4>
+                            <ul class="usa-list usa-list--unstyled">
+                                <li class="usa-footer__secondary-link">
+                                    <a href="https://history.state.gov/about/contact-us">Contact Us</a>
+                                </li>
+                            </ul>
+                            <address class="usa-footer__address">
+                                <div class="usa-footer__contact-info">
+                                    <img class="hsg-footer__icon" src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/images/usa-icons/mail.svg" alt=""/>
+                                    <a href="mailto:history@state.gov">history@state.gov</a>
+                                </div>
+                            </address>
+                            <div class="usa-footer__social-links grid-row grid-gap-1">
+                                <div class="grid-col-auto">
+                                    <a class="usa-social-link" href="https://x.com/HistoryAtState"><img class="usa-social-link__icon" src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/images/usa-icons/x.svg" alt="X"/></a>
+                                </div>
+                                <div class="grid-col-auto">
+                                    <a class="usa-social-link" href="https://github.com/HistoryAtState"><img class="usa-social-link__icon" src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/images/usa-icons/github.svg" alt="GitHub"/></a>
+                                </div>
                             </div>
-                            <div class="mobile-lg:grid-col-6 desktop:grid-col-3">
-                                <section class="usa-footer__primary-content usa-footer__primary-content--collapsible">
-                                    <h4 class="usa-footer__primary-link">&lt;Topic&gt;</h4>
-                                    <ul class="usa-list usa-list--unstyled">
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link that's pretty long&gt;</a>
-                                        </li>
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                    </ul>
-                                </section>
-                            </div>
-                            <div class="mobile-lg:grid-col-6 desktop:grid-col-3">
-                                <section class="usa-footer__primary-content usa-footer__primary-content--collapsible">
-                                    <h4 class="usa-footer__primary-link">&lt;Topic&gt;</h4>
-                                    <ul class="usa-list usa-list--unstyled">
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                    </ul>
-                                </section>
-                            </div>
-                            <div class="mobile-lg:grid-col-6 desktop:grid-col-3">
-                                <section class="usa-footer__primary-content usa-footer__primary-content--collapsible">
-                                    <h4 class="usa-footer__primary-link">&lt;Topic&gt;</h4>
-                                    <ul class="usa-list usa-list--unstyled">
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                        <li class="usa-footer__secondary-link">
-                                            <a href="javascript:void(0);">&lt;Secondary link&gt;</a>
-                                        </li>
-                                    </ul>
-                                </section>
-                            </div>
-                        </div>
-                    </nav>
-                </div>
-                <div class="tablet:grid-col-4">
-                    <div class="usa-sign-up">
-                        <h3 class="usa-sign-up__heading">
-                            <a id="sign-up" class="usa-anchor"/>Sign up
-                        </h3>
-                        <form class="usa-form">
-                            <label class="usa-label" for="email" id="">Your email address</label>
-                            <input class="usa-input" id="email" name="email" type="email" autocomplete="email"/>
-                            <button class="usa-button" type="submit">Sign up</button>
-                        </form>
+                        </section>
                     </div>
                 </div>
-            </div>
+            </nav>
         </div>
     </div>
     <div class="usa-footer__secondary-section">
         <div class="grid-container">
             <div class="grid-row grid-gap">
-                <div class="usa-footer__logo grid-row mobile-lg:grid-col-6 mobile-lg:grid-gap-2">
-                    <div class="mobile-lg:grid-col-auto">
-                        <img class="usa-footer__logo-img" src="/assets/img/logo-img.png" alt=""/>
-                    </div>
-                    <div class="mobile-lg:grid-col-auto">
-                        <p class="usa-footer__logo-heading">&lt;Name of Agency&gt;</p>
-                    </div>
+                <div class="usa-footer__logo tablet:grid-col-6">
+                    <img class="usa-footer__logo-img" src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/css/[[ $theme?logo?image ]]" alt="Office of the Historian, U.S. Department of State, Bureau of Administration"/>
                 </div>
-                <div class="usa-footer__contact-links mobile-lg:grid-col-6">
-                    <div class="usa-footer__social-links grid-row grid-gap-1">
-                        <div class="grid-col-auto">
-                            <a class="usa-social-link" href="javascript:void(0);"><img class="usa-social-link__icon" src="/assets/img/usa-icons/facebook.svg" alt="Facebook"/></a>
-                        </div>
-                        <div class="grid-col-auto">
-                            <a class="usa-social-link" href="javascript:void(0);"><img class="usa-social-link__icon" src="/assets/img/usa-icons/twitter.svg" alt="Twitter"/></a>
-                        </div>
-                        <div class="grid-col-auto">
-                            <a class="usa-social-link" href="javascript:void(0);"><img class="usa-social-link__icon" src="/assets/img/usa-icons/youtube.svg" alt="YouTube"/></a>
-                        </div>
-                        <div class="grid-col-auto">
-                            <a class="usa-social-link" href="javascript:void(0);"><img class="usa-social-link__icon" src="/assets/img/usa-icons/instagram.svg" alt="Instagram"/></a>
-                        </div>
-                        <div class="grid-col-auto">
-                            <a class="usa-social-link" href="javascript:void(0);"><img class="usa-social-link__icon" src="/assets/img/usa-icons/rss_feed.svg" alt="RSS"/></a>
-                        </div>
-                    </div>
-                    <p class="usa-footer__contact-heading">&lt;Agency Contact Center&gt;</p>
-                    <address class="usa-footer__address">
-                        <div class="usa-footer__contact-info grid-row grid-gap">
-                            <div class="grid-col-auto">
-                                <a href="tel:1-800-555-5555">&lt;(800) 555-GOVT&gt;</a>
-                            </div>
-                            <div class="grid-col-auto">
-                                <a href="mailto:info@agency.gov">&lt;info@agency.gov&gt;</a>
-                            </div>
-                        </div>
-                    </address>
+                <div class="hsg-footer__agency tablet:grid-col-6">
+                    <p class="usa-footer__logo-heading">Office of the Historian, Shared Knowledge Services, Bureau of Administration</p>
+                    <p class="usa-footer__contact-heading">United States Department of State</p>
                 </div>
             </div>
         </div>
