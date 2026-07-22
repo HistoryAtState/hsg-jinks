@@ -2,6 +2,8 @@
     "breadcrumb": {
         "home": "Home",
         "historicaldocuments": "Historical Documents",
+        "countries": "Countries",
+        "archives": "Archives",
         "collection-root": "Collections",
         "document-root": "Collections",
         "demo": "Demo",
@@ -72,5 +74,8 @@
     },
     "historicaldocuments": {
         "title": "Historical Documents"
+    },
+    "countries": {
+        "title": "Countries"
     }
 }

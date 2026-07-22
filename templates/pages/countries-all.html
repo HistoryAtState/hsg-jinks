@@ -1,0 +1,71 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/countries": { "at": "modules/templates/countries.xqm", "prefix": "countries" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        }
+    }
+    ---
+    <div class="section-landing">
+        <h1>All Countries</h1>
+        <p>This section provides historical reference information on the countries with which the
+            United States has had diplomatic relations. The articles in this section are listed
+            below. An asterisk indicates former countries, previously recognized by the United
+            States, that have been dissolved or superseded by other states.</p>
+        <!-- Two-column layout (reference-site parity): hsg-shell's ch:list splits the
+             letter-groups themselves in half, not the items; columns end up visually
+             uneven (roughly A-L / M-Z) rather than balanced by item count. Reproduced
+             here rather than rebalanced, since parity with the reference site is the
+             goal (#1095/#1123). -->
+        <div class="grid-row grid-gap">
+            [[
+                let $groups := countries:country-groups()
+                let $half := ceiling(count($groups) div 2)
+                for $col in (1, 2)
+                let $column-groups :=
+                    if ($col = 1) then
+                        subsequence($groups, 1, $half)
+                    else
+                        subsequence($groups, $half + 1)
+                return
+                    <div class="tablet:grid-col-6">
+                    {
+                        for $group in $column-groups
+                        return
+                            <div>
+                                <h3>{$group?letter}</h3>
+                                <ul class="usa-list usa-list--unstyled">
+                                {
+                                    for $a in $group?articles
+                                    return
+                                        <li><a href="{$context?context-path}/countries/{$a?id}">{$a?sort-title}</a></li>
+                                }
+                                </ul>
+                            </div>
+                    }
+                    </div>
+            ]]
+        </div>
+    </div>
+
+    [% template after %]
+    <h2>
+        <pb-i18n key="breadcrumb.countries">Countries</pb-i18n>
+    </h2>
+    <ul class="usa-sidenav">
+        <li class="usa-sidenav__item">
+            <a href="[[ $context?context-path ]]/countries">Countries</a>
+        </li>
+    </ul>
+    <h3>Related Resources</h3>
+    <ul class="usa-sidenav">
+        <li class="usa-sidenav__item">
+            <a href="[[ $context?context-path ]]/countries/archives">World Wide Diplomatic Archives
+                Index</a>
+        </li>
+    </ul>
+    [% endtemplate %]
+</template>

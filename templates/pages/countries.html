@@ -1,0 +1,76 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/countries": { "at": "modules/templates/countries.xqm", "prefix": "countries" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        }
+    }
+    ---
+    <div class="section-landing">
+        <h1>
+            <pb-i18n key="countries.title">Countries</pb-i18n>
+        </h1>
+        <p>This section provides historical reference information on aspects of the United
+            States' relations with the countries of the world. The central component is a guide
+            to matters of diplomatic recognition and the establishment and maintenance of
+            diplomatic relations between the United States and states of the world, from 1776 to
+            the present.</p>
+        <label class="usa-label" for="country-select">Select a country</label>
+        <div class="usa-combo-box">
+            <select class="usa-select" name="country-select" id="country-select"
+                onchange="if (this.value) { window.location.href = this.value; }">
+                <option value="">Select a country</option>
+                [[
+                    for $group in countries:country-groups()
+                    return
+                        for $a in $group?articles
+                        return
+                            <option value="{$context?context-path}/countries/{$a?id}">{$a?title}</option>
+                ]]
+            </select>
+        </div>
+        <p><em>An asterisk indicates former countries, previously recognized by the United
+            States, that have been dissolved or superseded by other states.</em></p>
+        <p>This guide brings together information on these subjects from among diverse and widely
+            scattered documentary and archival sources. The most significant categories of
+            information provided for each individual country include:</p>
+        <ol>
+            <li>the date and circumstances under which the United States recognized, or was
+                recognized by, each state;</li>
+            <li>the date and mode by which the United States established diplomatic relations
+                with each state;</li>
+            <li>the date the United States established a physical diplomatic presence through a
+                legation, embassy, or other mission in each country;</li>
+            <li>and the dates and circumstances of any interruption or resumption of diplomatic
+                relations.</li>
+        </ol>
+        <p>Over time, additional details will be added for each country, such as information on
+            the United States consular presence.</p>
+        <p>Finally, this section also provides historical information on some territorial
+            entities that the United States has not recognized or with which it does not have
+            diplomatic relations.</p>
+        <p>Select an article from the list of <a href="[[ $context?context-path ]]/countries/all">all
+            countries</a>.</p>
+    </div>
+
+    [% template after %]
+    <h2>
+        <pb-i18n key="breadcrumb.countries">Countries</pb-i18n>
+    </h2>
+    <ul class="usa-sidenav">
+        <li class="usa-sidenav__item">
+            <a href="[[ $context?context-path ]]/countries/all">View a list of all countries</a>
+        </li>
+    </ul>
+    <h3>Related Resources</h3>
+    <ul class="usa-sidenav">
+        <li class="usa-sidenav__item">
+            <a href="[[ $context?context-path ]]/countries/archives">World Wide Diplomatic Archives
+                Index</a>
+        </li>
+    </ul>
+    [% endtemplate %]
+</template>

@@ -1,0 +1,54 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/countries": { "at": "modules/templates/countries.xqm", "prefix": "countries" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        }
+    }
+    ---
+    <div class="section-landing">
+        <!-- Reference-site parity: the "All Archives" index page's own H1 literally
+             reads "All Countries" today (a copy-paste leftover from the countries
+             index page, confirmed on the live reference site) - reproduced here
+             rather than corrected, per #1095's "same content and work" goal. -->
+        <h1>All Countries</h1>
+        <!-- Also parity: unlike countries-all.html, the reference site's archives
+             index has never had a two-column split (archives:list in hsg-shell
+             never wrapped its output in columns) - single column here matches. -->
+        [[
+            for $group in countries:archive-groups()
+            return
+                <div>
+                    <h3>{$group?letter}</h3>
+                    <ul class="usa-list usa-list--unstyled">
+                    {
+                        for $a in $group?articles
+                        return
+                            <li><a href="{$context?context-path}/countries/archives/{$a?id}">{$a?sort-title}</a></li>
+                    }
+                    </ul>
+                </div>
+        ]]
+    </div>
+
+    [% template after %]
+    <h2>Archives</h2>
+    <ul class="usa-sidenav">
+        <li class="usa-sidenav__item">
+            <a href="[[ $context?context-path ]]/countries/archives">World Wide Diplomatic Archives
+                Index</a>
+        </li>
+    </ul>
+    <h3>Related Resources</h3>
+    <ul class="usa-sidenav">
+        <li class="usa-sidenav__item">
+            <a href="[[ $context?context-path ]]/countries/all">
+                <pb-i18n key="breadcrumb.countries">Countries</pb-i18n>
+            </a>
+        </li>
+    </ul>
+    [% endtemplate %]
+</template>

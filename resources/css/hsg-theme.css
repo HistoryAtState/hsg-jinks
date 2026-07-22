@@ -188,3 +188,14 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
         text-align: left;
     }
 }
+
+/* External reference link confirmed dead (404/redirected-away, #1095). Flags
+   it visually rather than silently dropping or swapping it; a bracketed
+   alternative link follows in the markup where one was found. */
+.hsg-link-broken {
+    color: #b50909;
+}
+
+.hsg-link-broken:visited {
+    color: #8b0707;
+}
