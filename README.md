@@ -15,6 +15,19 @@ Profiles: `base10`, `docker`, `profile-theme-uswds`.
 - **Check a work package's assignee in OpenProject before implementing it.**
   If we decide to pick one up, assign it to the person actually doing the
   work, not the AI assistant — ask if it's unclear who that is.
+- **Reference work packages as `OP#<id>`** in PR titles and descriptions —
+  that is the token OpenProject's GitHub integration scans for, and how a PR
+  gets linked to its work package. A bare `#1217` means nothing to it (GitHub
+  reads that as an issue in *this* repo), and a work package URL
+  is a link for humans, not a reference. Example title:
+
+  ```
+  fix: content band on sidebar pages respects the page width (OP#1217)
+  ```
+
+  Linking is not closing: move the work package yourself when the PR merges.
+  This board's workflow only permits New, In progress, Closed, On hold and
+  Rejected — **Closed is how it marks work done**.
 
 ## The devcontainer runs the generator
 
