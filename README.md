@@ -41,6 +41,23 @@ sync overwrite them.
 StackOverflow on large profiles (`generator:filter-conflicts` recurses per file;
 USWDS ships ~2600). Remove when Jinks fixes it.
 
+### Pinned baseline
+
+Everything except `jinks` itself is pinned to a release, in
+`devcontainer.json` → `build.args` (the `Dockerfile.dev` `ARG` defaults mirror
+them):
+
+| package | version | note |
+|---|---|---|
+| jinks-templates | 1.4.2 | pinned to the public-repo release. Building it from `main` — which this container used to do — always self-identifies as **1.0.0**, because semantic-release stamps the version only when publishing |
+| roaster | 1.12.2 | 1.11.0 answers an empty `POST /api/login` with 401 instead of clearing the session, which fails a generated test (#1216) |
+| tei-publisher-lib | 6.1.0 | |
+| eXist | 6.4.0 | |
+
+After changing any of them, rebuild the container and confirm with
+`xst package list --versions` — `xst package install` has been seen reporting
+`updated to X@<new>` while the deployed collection stayed on the old version.
+
 ## Remapping ports
 
 The container publishes eXist on the standard ports, 8080/8443. If those are
@@ -78,7 +95,8 @@ can't reach it — it is built from the sibling checkout:
 
 ```sh
 cd ../profile-theme-uswds && ant
-cp build/profile-theme-uswds-*.xar ../hsg-jinks/.devcontainer/   # for next container build
+rm ../hsg-jinks/.devcontainer/profile-theme-uswds-*.xar          # only one may be there:
+cp build/profile-theme-uswds-*.xar ../hsg-jinks/.devcontainer/   # Dockerfile COPYs by glob
 export EXISTDB_SERVER=http://localhost:8080/exist EXISTDB_USER=admin EXISTDB_PASS=""
 xst package install --force build/profile-theme-uswds-*.xar
 printf 'n\n' | jinks update hsg-jinks --server http://localhost:8080/exist/apps/jinks
