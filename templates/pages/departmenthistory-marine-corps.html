@@ -1,0 +1,61 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/departmenthistory": { "at": "modules/templates/departmenthistory.xqm", "prefix": "dh" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ dh:breadcrumb($context, (map{"label": "The U.S. Marine Corps and the Department", "href": "/departmenthistory/marine-corps"})) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <!--
+        Ported from hsg-shell's pages/departmenthistory/marine-corps.xml. That
+        page could not be verified against the local eXist mirror (it postdates
+        the mirror's last sync); verify PDF link and copy against production
+        before launch (#1133).
+    -->
+    <div class="section-landing usa-prose">
+        <h1>The U.S. Marine Corps and the Department</h1>
+        <p>To commemorate the United States Marine Corps’ 250th birthday celebration in 2025, the
+            Office of the Historian produced a pamphlet that examines the past 250 years of
+            collaboration between the Marines and the nation’s diplomats.
+            <a href="https://static.history.state.gov/marine-corps/history-of-collaboration-usmc-usdos.pdf">“A
+                History of Collaboration: The U.S. Marine Corps and the U.S. Department of
+                State”</a>
+            describes how the United States Marine Corps (USMC) has played a critical and
+            evolving role in ensuring the protection of Department of State personnel, classified
+            material, and U.S. property. Featuring accounts from the American Revolution through
+            the Global War on Terror, the pamphlet details how Marines have protected diplomatic
+            personnel and property during conflicts and periods of instability across the globe.
+            It examines how this nearly two and a half century collaboration between the USMC and
+            the Department adapted to changing geopolitical landscapes and the growing complexity
+            of international relations. The pamphlet concludes that the USMC-State partnership
+            remains a model of interagency collaboration and mutually supporting missions.</p>
+        <p class="text-center">
+            <a class="usa-button" href="https://static.history.state.gov/marine-corps/history-of-collaboration-usmc-usdos.pdf">Download
+                PDF (1.7 MB)</a>
+        </p>
+        <p>The Office of the Historian is grateful to the following individuals and offices who
+            provided assistance and support for this project: Deputy Assistant Secretary for
+            Shared Knowledge Services (A/SKS) Timothy Kootz, Maureen Gregory of the Bureau of
+            Global Public Affairs’ (GPA) Office of Content Strategy, Kathleen Hendrix of GPA’s
+            Office of Platforms, and Leo J. Daughterty III, author of <em>The Marine Corps and the
+                State Department: Enduring Partners in United States Foreign Policy,
+                1798-2007</em> (2009).</p>
+    </div>
+
+    [% template after %]
+    [% include "templates/departmenthistory-sidebar.html" %]
+    [% endtemplate %]
+</template>

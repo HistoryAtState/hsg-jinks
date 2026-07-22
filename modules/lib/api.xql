@@ -22,6 +22,8 @@ import module namespace hsgapi="http://teipublisher.com/api/hsg" at "../hsg-api.
 
 import module namespace countryapi="http://teipublisher.com/api/countries" at "../countries-api.xql";
 
+import module namespace dhapi="http://teipublisher.com/api/departmenthistory" at "../departmenthistory-api.xql";
+
 
 
 declare option output:indent "no";
@@ -35,14 +37,9 @@ let $lookup := function($name as xs:string) {
 }
 let $resp := roaster:route(
     (
-
-
         "modules/countries-api.json",
-
-
+        "modules/departmenthistory-api.json",
         "modules/hsg-api.json",
-
-
         "modules/lib/api.json"
     ), $lookup)
 return

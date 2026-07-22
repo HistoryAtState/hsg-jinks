@@ -56,3 +56,13 @@ browser-automation tooling is available. Point it at the worktree's own
 instance: `CYPRESS_BASE_URL=$(worktree port) npx cypress run --spec <path>`.
 For one-off measurements (not a permanent regression test), write a throwaway
 spec under `test/cypress/e2e/gui/`, run it, read the result, then delete it.
+
+## Prefer XQuery over Python for one-off scripting
+
+When writing throwaway scripts to inspect, transform, or validate data in this
+repo (checking a data collection, reshaping XML, scripting a query against
+eXist), reach for XQuery first — it runs in the same environment as the app
+and against the live database directly, rather than shelling out to a
+different language runtime. Only fall back to Python (or another scripting
+language) when the same task genuinely can't be expressed in XQuery, or
+doesn't involve XML/the database at all (e.g. validating plain JSON syntax).

@@ -1,0 +1,64 @@
+<!--
+    Section side navigation, shared by every Department History page (#1132).
+
+    Canonical subsection list, settled once here per #1132's "decide the
+    canonical subsection list once": drops the old sidebar's dead
+    `departmenthistory/timeline` link (route is commented out in hsg-shell's
+    controller.xql) and adds marine-corps, which the old sidebar omitted even
+    though the route is live. Links point at routes landing across #1096's
+    later phases (short-history/buildings: #1134/#1135; secretaries/
+    principals-chiefs/chiefsofmission/by-country/by-organization: #1136-#1140;
+    travels/visits: #1142-#1145); 404 until those phases land, same
+    transitional state historicaldocuments' navigation went through in #518.
+-->
+<h2>
+    <pb-i18n key="departmenthistory.title">Department History</pb-i18n>
+</h2>
+<ul class="usa-sidenav">
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/departmenthistory">Overview</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/departmenthistory/short-history">Short History</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/departmenthistory/buildings">Buildings of the Department of State</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/departmenthistory/people">People</a>
+        <ul class="usa-sidenav__sublist">
+            <li class="usa-sidenav__item">
+                <a href="[[ $context?context-path ]]/departmenthistory/people/secretaries">Biographies of the Secretaries of State</a>
+            </li>
+            <li class="usa-sidenav__item">
+                <a href="[[ $context?context-path ]]/departmenthistory/people/principals-chiefs">Principal Officers and Chiefs of Mission</a>
+            </li>
+            <li class="usa-sidenav__item">
+                <a href="[[ $context?context-path ]]/departmenthistory/people/chiefsofmission">Chiefs of Mission</a>
+            </li>
+        </ul>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/departmenthistory/travels">Travels</a>
+        <ul class="usa-sidenav__sublist">
+            <li class="usa-sidenav__item">
+                <a href="[[ $context?context-path ]]/departmenthistory/travels/secretary">Travels of the Secretary of State</a>
+            </li>
+            <li class="usa-sidenav__item">
+                <a href="[[ $context?context-path ]]/departmenthistory/travels/president">Travels of the President</a>
+            </li>
+        </ul>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/departmenthistory/visits">Visits by Foreign Heads of State</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/departmenthistory/diplomatic-couriers">U.S. Diplomatic Couriers</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/departmenthistory/wwi">World War I and the Department</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/departmenthistory/marine-corps">The U.S. Marine Corps and the Department</a>
+    </li>
+</ul>

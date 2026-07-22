@@ -1,0 +1,59 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/departmenthistory": { "at": "modules/templates/departmenthistory.xqm", "prefix": "dh" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ dh:breadcrumb($context, (map{"label": "People", "href": "/departmenthistory/people"})) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="section-landing usa-prose">
+        <h1>People</h1>
+        <p>The people who have served the Department of State represent a long and complex
+            tradition of U.S. diplomacy. This section contains a variety of information about
+            these people and their work. It includes the following:</p>
+        <ul class="usa-list">
+            <li>
+                <a href="[[ $context?context-path ]]/departmenthistory/people/secretaries">Biographies</a>
+                of the Secretaries of State and suggestions for further reading about these public
+                servants;
+            </li>
+            <li>
+                Extensive lists of the past
+                <a href="[[ $context?context-path ]]/departmenthistory/people/principals-chiefs">Principal
+                    Officers of the Department of State and Chiefs of Mission</a>
+                organized by position, country, and name;
+            </li>
+            <li>
+                Details about the
+                <a href="[[ $context?context-path ]]/departmenthistory/travels/secretary">foreign travels
+                    of the Secretaries of State</a>
+                and the
+                <a href="[[ $context?context-path ]]/departmenthistory/travels/president">Presidents of
+                    the United States</a>; and,
+            </li>
+            <li>
+                Lists of the
+                <a href="[[ $context?context-path ]]/departmenthistory/visits">visits of foreign
+                    leaders</a>
+                to the United States.
+            </li>
+        </ul>
+    </div>
+
+    [% template after %]
+    [% include "templates/departmenthistory-sidebar.html" %]
+    [% endtemplate %]
+</template>
