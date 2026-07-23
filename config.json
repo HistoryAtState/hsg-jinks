@@ -32,6 +32,11 @@
     "prefix" : "hsgapi",
     "id" : "http://teipublisher.com/api/hsg",
     "path" : "hsg-api.xql"
+  }, {
+    "spec" : "countries-api.json",
+    "prefix" : "countryapi",
+    "id" : "http://teipublisher.com/api/countries",
+    "path" : "countries-api.xql"
   } ],
   "extends" : [ "base10", "docker", "profile-theme-uswds" ],
   "pkg" : {

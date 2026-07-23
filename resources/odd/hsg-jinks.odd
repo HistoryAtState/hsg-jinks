@@ -205,6 +205,41 @@
             <param name="place" value="@place"/>
             <param name="label" value="@n"/>
         </model></elementSpec>
-            <elementSpec ident="teiHeader" mode="change"><model output="latex" behaviour="metadata"/><model output="fo" behaviour="omit"/><model predicate="$parameters?mode='metadata-panel'" behaviour="pass-through"/><model predicate="$parameters?display='browse'" behaviour="block"/><model behaviour="metadata"/></elementSpec></schemaSpec>
+            <elementSpec ident="teiHeader" mode="change"><model output="latex" behaviour="metadata"/><model output="fo" behaviour="omit"/><model predicate="$parameters?mode='metadata-panel'" behaviour="pass-through"/><model predicate="$parameters?display='browse'" behaviour="block"/><model behaviour="metadata"/></elementSpec>
+            <elementSpec ident="placeName" mode="change">
+                <desc>The base teipublisher.odd's last-resort model for a placeName carrying
+                    @key/@ref (behaviour="alternate") unconditionally looks the key up in
+                    collection($global:register-root)/id('pb-places') -- this app has no
+                    register/authority-file collection at all (registers/ 404s), so that id()
+                    call receives zero nodes where its own signature requires exactly one,
+                    crashing with XPTY0004 on every placeName that carries @key/@ref (found via
+                    rdcr articles, #1095/#1128 -- e.g. placeName[@key='kanagawa'] in
+                    countries/japan). Render inline instead whenever no register mode is in
+                    play, matching what the base ODD already does for a plain placeName with
+                    no @key.</desc>
+                <model predicate="(@key or @ref) and not($parameters?mode = ('register', 'register-details', 'register-overview'))" behaviour="inline"/>
+            </elementSpec>
+            <elementSpec ident="persName" mode="change">
+                <desc>Same register-lookup crash as placeName above (id(@key,
+                    collection($global:register-root)/id('pb-persons')) against a
+                    non-existent register), same fix.</desc>
+                <model predicate="(@key or @ref) and not($parameters?mode = ('register', 'register-details', 'register-overview'))" behaviour="inline"/>
+            </elementSpec>
+            <elementSpec ident="graphic" mode="change">
+                <desc>rdcr country articles carry tei:graphic/@url as a bare filename (e.g.
+                    "japan-flag.jpg", #1095/#1128) with no base-URI logic anywhere in the base
+                    ODD, so it would render as a broken relative src. The reference site
+                    resolves these against static.history.state.gov/countries/ (confirmed live);
+                    reproduced here as an explicit prefix rather than left bare. Scoped to only
+                    the "bare filename" shape (no scheme, no leading slash) so it doesn't touch
+                    any graphic that already carries a full path/URL elsewhere in the app.</desc>
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)'))" behaviour="graphic">
+                    <param name="url" value="'https://static.history.state.gov/countries/' || @url"/>
+                    <param name="width" value="@width"/>
+                    <param name="height" value="@height"/>
+                    <param name="scale" value="@scale"/>
+                    <param name="title" value="desc"/>
+                </model>
+            </elementSpec></schemaSpec>
         </body>
     </text></TEI>

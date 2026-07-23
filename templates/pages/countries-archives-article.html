@@ -1,0 +1,38 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/countries": { "at": "modules/templates/countries.xqm", "prefix": "countries" }
+            },
+            "extends": "templates/layouts/countries-content.html"
+        }
+    }
+    ---
+    <div>
+        <h1>[[ countries:article-heading($context?doc?content) ]]</h1>
+        [[ page:transform($context?doc?content, map { "mode": "division" }) ]]
+    </div>
+
+    [% template before %]
+    <h2>Archives</h2>
+    <ul class="usa-sidenav">
+        <li class="usa-sidenav__item">
+            <a href="[[ $context?context-path ]]/countries/archives/all">List of all countries in the
+                World Wide Diplomatic Archives Index</a>
+        </li>
+        <li class="usa-sidenav__item">
+            <a href="[[ $context?context-path ]]/countries/archives">World Wide Diplomatic Archives
+                Index</a>
+        </li>
+    </ul>
+    <h3>Related Resources</h3>
+    <ul class="usa-sidenav">
+        <li class="usa-sidenav__item">
+            <a href="[[ $context?context-path ]]/countries">
+                <pb-i18n key="breadcrumb.countries">Countries</pb-i18n>
+            </a>
+        </li>
+    </ul>
+    [% endtemplate %]
+</template>

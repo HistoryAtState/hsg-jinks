@@ -1,0 +1,229 @@
+{
+    "components": {
+        "securitySchemes": {
+            "basicAuth": {
+                "scheme": "basic",
+                "type": "http"
+            },
+            "cookieAuth": {
+                "in": "cookie",
+                "name": "teipublisher.com.login",
+                "type": "apiKey"
+            }
+        }
+    },
+    "info": {
+        "title": "HSG Jinks Countries API",
+        "description": "Full route definition for /countries (#1095): two co-mounted TEI article collections behind one URL prefix -- rdcr (recognition/diplomatic-relations guides, 'countries') and wwdai (World Wide Diplomatic Archives Index, mounted at /countries/archives). Same TEI-section triple shape as hsg-api.json, minus an interior/division route: both collections are single-level documents only.",
+        "version": "1.0.0"
+    },
+    "openapi": "3.0.3",
+    "paths": {
+        "/countries": {
+            "get": {
+                "summary": "Landing page of the Countries section",
+                "operationId": "countryapi:index",
+                "x-error-handler": "countryapi:handle-error",
+                "tags": [
+                    "countries"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/countries/all": {
+            "get": {
+                "summary": "Alphabetical index of every country article",
+                "operationId": "countryapi:list",
+                "x-error-handler": "countryapi:handle-error",
+                "tags": [
+                    "countries"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/countries/{countryId}": {
+            "get": {
+                "summary": "Retrieve a country article",
+                "operationId": "countryapi:view",
+                "x-error-handler": "countryapi:handle-error",
+                "tags": [
+                    "countries"
+                ],
+                "parameters": [
+                    {
+                        "name": "template",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "pages/countries-article.html"
+                        }
+                    },
+                    {
+                        "name": "countryId",
+                        "in": "path",
+                        "description": "Article id (file name without .xml in rdcr/articles)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[a-z]+(-[a-z]+)*$"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No country article with this id",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/countries/archives": {
+            "get": {
+                "summary": "Landing page of the World Wide Diplomatic Archives Index",
+                "operationId": "countryapi:archives-index",
+                "x-error-handler": "countryapi:handle-error",
+                "tags": [
+                    "countries"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/countries/archives/all": {
+            "get": {
+                "summary": "Alphabetical index of every archive article",
+                "operationId": "countryapi:archives-list",
+                "x-error-handler": "countryapi:handle-error",
+                "tags": [
+                    "countries"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/countries/archives/{archiveId}": {
+            "get": {
+                "summary": "Retrieve an archive article",
+                "operationId": "countryapi:archives-view",
+                "x-error-handler": "countryapi:handle-error",
+                "tags": [
+                    "countries"
+                ],
+                "parameters": [
+                    {
+                        "name": "template",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "pages/countries-archives-article.html"
+                        }
+                    },
+                    {
+                        "name": "archiveId",
+                        "in": "path",
+                        "description": "Article id (file name without .xml in wwdai/articles)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[a-z]+(-[a-z]+)*$"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No archive article with this id",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "servers": [
+        {
+            "description": "Endpoint for testing on localhost",
+            "url": "/exist/apps/jinks"
+        }
+    ],
+    "security": [
+        {
+            "cookieAuth": []
+        },
+        {
+            "basicAuth": []
+        }
+    ]
+}

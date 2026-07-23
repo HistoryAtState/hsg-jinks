@@ -188,3 +188,22 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
         text-align: left;
     }
 }
+
+/* External reference link confirmed dead (404/redirected-away, #1095). Flags
+   it visually rather than silently dropping or swapping it; a bracketed
+   alternative link follows in the markup where one was found.
+   No USWDS color custom properties are vendored in this app (only the
+   compiled JS bundle), so this is a locally-defined semantic token rather
+   than a USWDS one. */
+:root {
+    --hsg-color-link-broken: #b50909;
+    --hsg-color-link-broken-visited: #8b0707;
+}
+
+.hsg-link-broken {
+    color: var(--hsg-color-link-broken);
+}
+
+.hsg-link-broken:visited {
+    color: var(--hsg-color-link-broken-visited);
+}
