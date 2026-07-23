@@ -501,6 +501,66 @@
                     }
                 }
             }
+        },
+        "/departmenthistory/travels/president/{personOrCountryId}": {
+            "get": {
+                "summary": "Trips for a president, or trips to a destination country",
+                "operationId": "dhapi:travels-president-listing",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "parameters": [
+                    {
+                        "name": "personOrCountryId",
+                        "in": "path",
+                        "description": "presidents.xml id, or a destination country id",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "No matching president or destination country",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/departmenthistory/travels/secretary/{personOrCountryId}": {
+            "get": {
+                "summary": "Trips for a secretary, or trips to a destination country",
+                "operationId": "dhapi:travels-secretary-listing",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "parameters": [
+                    {
+                        "name": "personOrCountryId",
+                        "in": "path",
+                        "description": "POCOM person id (or a superseded old-id, 302s to canonical), or a destination country id",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "302": {
+                        "description": "Redirect to the canonical id for a superseded old-id",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "No matching secretary or destination country",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
         }
     },
     "servers": [

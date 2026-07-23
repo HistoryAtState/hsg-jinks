@@ -1214,3 +1214,135 @@ declare function dh:travels-index-breadcrumb($context as map(*), $role as xs:str
         map { "label": if ($role = 'president') then "Travels of the President" else "Travels of the Secretary of State" }
     ))
 };
+
+(:~
+ : #1143. Shared by travels and visits tables (#1144/#1145 reuse this
+ : directly): same-day / same-month / same-year / cross-year date-range
+ : formatting, ported from hsg-shell's identical logic in both
+ : travels-html.xqm's travels-to-table and visits-html.xqm's visits-table --
+ : one function instead of two copies.
+ :)
+declare function dh:humanize-date-range($startDate as xs:string, $endDate as xs:string) as xs:string {
+    if (not($startDate castable as xs:date)) then
+        'date error'
+    else
+        let $start := xs:date($startDate)
+        return
+            if ($startDate = $endDate or not($endDate castable as xs:date)) then
+                format-date($start, '[MNn] [D], [Y0001]', 'en', (), 'US')
+            else
+                let $end := xs:date($endDate)
+                return
+                    if (year-from-date($start) = year-from-date($end) and month-from-date($start) = month-from-date($end)) then
+                        format-date($start, '[MNn] [D]', 'en', (), 'US') || '&#8211;' || format-date($end, '[D], [Y0001]', 'en', (), 'US')
+                    else if (year-from-date($start) = year-from-date($end)) then
+                        format-date($start, '[MNn] [D]', 'en', (), 'US') || '&#8211;' || format-date($end, '[MNn] [D], [Y0001]', 'en', (), 'US')
+                    else
+                        format-date($start, '[MNn] [D], [Y0001]', 'en', (), 'US') || '&#8211;' || format-date($end, '[MNn] [D], [Y0001]', 'en', (), 'US')
+};
+
+(:~
+ : Whether $id resolves as a person (a president in presidents.xml, or a
+ : secretary with their own secretary-travels file) rather than a
+ : destination-country id -- the polymorphic key #1143's route resolves in
+ : this order, person first.
+ :)
+declare function dh:travels-is-person($role as xs:string, $id as xs:string) as xs:boolean {
+    if ($role = 'president') then
+        exists(dh:travels-president-doc()/presidents/president[id = $id])
+    else
+        doc-available(dh:travels-collection('secretary') || "/" || $id || ".xml")
+};
+
+declare function dh:travels-trips-by-person($role as xs:string, $id as xs:string) as element(trip)* {
+    for $trip in collection(dh:travels-collection($role))//trip[@who = $id]
+    order by $trip/start-date
+    return $trip
+};
+
+declare function dh:travels-trips-by-country($role as xs:string, $countryId as xs:string) as element(trip)* {
+    for $trip in collection(dh:travels-collection($role))//trip[country/@id = $countryId]
+    order by $trip/start-date
+    return $trip
+};
+
+(:~
+ : Person view suppresses the Name column (redundant with the page title);
+ : country view suppresses Country. Matches hsg-shell's travels-to-table
+ : $suppress convention exactly -- by-person passed "name", by-country
+ : passed "country".
+ :)
+declare function dh:travels-table($trips as element(trip)*, $suppress as xs:string) as element(table) {
+    <table class="usa-table usa-table--striped usa-table--stacked">
+        <thead>
+            <tr>
+                {if ($suppress = 'name') then () else <th scope="col">Name</th>}
+                {if ($suppress = 'country') then () else <th scope="col">Country</th>}
+                <th scope="col">Locale</th>
+                <th scope="col">Remarks</th>
+                <th scope="col">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        {
+            for $trip in $trips
+            return
+                <tr>
+                    {if ($suppress = 'name') then () else <td data-label="Name">{if (normalize-space($trip/name) != '') then normalize-space($trip/name) else dh:person-name(dh:person-doc($trip/@who))}</td>}
+                    {if ($suppress = 'country') then () else <td data-label="Country">{normalize-space($trip/country)}</td>}
+                    <td data-label="Locale">{normalize-space($trip/locale)}</td>
+                    <td data-label="Remarks">{normalize-space($trip/remarks)}</td>
+                    <td data-label="Date">{dh:humanize-date-range(normalize-space($trip/start-date), normalize-space($trip/end-date))}</td>
+                </tr>
+        }
+        </tbody>
+    </table>
+};
+
+declare function dh:travels-listing-title($role as xs:string, $id as xs:string) as xs:string {
+    if (dh:travels-is-person($role, $id)) then
+        if ($role = 'president') then
+            normalize-space(dh:travels-president-doc()/presidents/president[id = $id]/name)
+        else
+            dh:person-name(dh:person-doc($id))
+    else
+        normalize-space(dh:travels-trips-by-country($role, $id)[last()]/country)
+};
+
+(:~
+ : $role's own hiatus is only meaningful for president (#1142's ticket
+ : text; the secretary hiatus notice is a static line on the index page,
+ : not a per-listing one). Shown on every by-country listing plus the
+ : current administration's own by-person listing, matching hsg-shell's
+ : request:set-attribute("show-travels-hiatus-notice", ...) condition
+ : (exists($current-country-name) or $person-or-country-id = current admin).
+ :)
+declare function dh:travels-show-president-hiatus($id as xs:string) as xs:boolean {
+    not(dh:travels-is-person('president', $id)) or $id = 'trump-donald-j'
+};
+
+(:~
+ : No <h1> + notice + table in one function, unlike most other dh:*-content
+ : functions: the hiatus notice is a template partial ([% include %]), which
+ : can only be pulled in from the template itself (see dh:person-has-bio /
+ : #1141 for the same split), so the template checks
+ : dh:travels-show-president-hiatus between calling dh:travels-listing-title
+ : (for the <h1>) and dh:travels-listing-table (for the trips).
+ :)
+declare function dh:travels-listing-table($context as map(*), $role as xs:string) as element(table) {
+    let $id := $context?request?parameters?personOrCountryId
+    return
+        if (dh:travels-is-person($role, $id)) then
+            dh:travels-table(dh:travels-trips-by-person($role, $id), 'name')
+        else
+            dh:travels-table(dh:travels-trips-by-country($role, $id), 'country')
+};
+
+declare function dh:travels-listing-breadcrumb($context as map(*), $role as xs:string) as element(li)+ {
+    let $id := $context?request?parameters?personOrCountryId
+    return dh:breadcrumb($context, (
+        map { "label": "Travels", "href": "/departmenthistory/travels" },
+        map { "label": if ($role = 'president') then "Travels of the President" else "Travels of the Secretary of State", "href": "/departmenthistory/travels/" || $role },
+        map { "label": dh:travels-listing-title($role, $id) }
+    ))
+};

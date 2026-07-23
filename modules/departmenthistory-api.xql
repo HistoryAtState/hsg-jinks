@@ -299,6 +299,39 @@ declare function dhapi:travels-secretary($request as map(*)) {
 };
 
 (:~
+ : Rework note (#1143): the old site's president route rendered an empty
+ : 200 for an unknown id; 404 instead, matching the secretary route (which
+ : already 404s) and every other unknown-id normalization in this epic.
+ :)
+declare function dhapi:travels-president-listing($request as map(*)) {
+    let $id := $request?parameters?personOrCountryId
+    return
+        if (dh:travels-is-person('president', $id) or exists(dh:travels-trips-by-country('president', $id))) then
+            dhapi:render($request, "pages/departmenthistory-travels-president-listing")
+        else
+            error($errors:NOT_FOUND, "no president or destination country " || $id)
+};
+
+(:~
+ : Old-id 302, same mechanism as #1141's dh:person-canonical-id-for-old-id
+ : (travel person-ids are POCOM person-ids -- confirmed, secretary-travels'
+ : filenames match POCOM ids exactly).
+ :)
+declare function dhapi:travels-secretary-listing($request as map(*)) {
+    let $id := $request?parameters?personOrCountryId
+    return
+        if (dh:travels-is-person('secretary', $id) or exists(dh:travels-trips-by-country('secretary', $id))) then
+            dhapi:render($request, "pages/departmenthistory-travels-secretary-listing")
+        else
+            let $canonical := dh:person-canonical-id-for-old-id($id)
+            return
+                if (exists($canonical)) then
+                    dhapi:redirect($config:context-path || "/departmenthistory/travels/secretary/" || $canonical)
+                else
+                    error($errors:NOT_FOUND, "no secretary or destination country " || $id)
+};
+
+(:~
  : Wrap the jinks-owned vapi:handle-error, which renders the error page but
  : hardcodes HTTP 200, so a missing page still reports success to crawlers and
  : link checkers. Keep its markup, correct the status. Same as
