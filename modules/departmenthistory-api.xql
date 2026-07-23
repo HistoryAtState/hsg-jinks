@@ -262,6 +262,34 @@ declare function dhapi:principal-officers-role($request as map(*)) {
             dhapi:render($request, "pages/departmenthistory-principal-officers-role")
 };
 
+declare function dhapi:chiefs-by-country($request as map(*)) {
+    dhapi:render($request, "pages/departmenthistory-chiefs-by-country")
+};
+
+declare function dhapi:chiefs-by-organization($request as map(*)) {
+    dhapi:render($request, "pages/departmenthistory-chiefs-by-organization")
+};
+
+(:~
+ : Polymorphic per the ticket ("org-mission, principal-position or
+ : country"): an org-mission or country id renders directly; a
+ : positions-principals id is an old-URL-compatibility case (hsg-shell's
+ : chiefs-by-role-or-country-id resolved it the same way) -- 302 to the
+ : canonical /principalofficers/{roleId} rather than duplicating #1139's
+ : rendering here. Anything else 404s (rework note: the old site rendered
+ : an empty 200).
+ :)
+declare function dhapi:chiefs-listing($request as map(*)) {
+    let $id := $request?parameters?roleOrCountryId
+    return
+        if (exists(dh:chiefs-org-doc($id)) or exists(dh:chiefs-country-doc($id))) then
+            dhapi:render($request, "pages/departmenthistory-chiefs-listing")
+        else if (exists(dh:principal-position-doc($id))) then
+            dhapi:redirect($config:context-path || "/departmenthistory/people/principalofficers/" || $id)
+        else
+            error($errors:NOT_FOUND, "no chief-of-mission role or country " || $id)
+};
+
 (:~
  : Wrap the jinks-owned vapi:handle-error, which renders the error page but
  : hardcodes HTTP 200, so a missing page still reports success to crawlers and

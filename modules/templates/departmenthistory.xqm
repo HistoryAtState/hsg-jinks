@@ -391,13 +391,23 @@ declare function dh:secretaries($context as map(*)) as element(ol) {
  :)
 
 (:~
- : Bare-title-case display for a territory id ("united-kingdom" ->
- : "United Kingdom"). A placeholder for the proper lookup #1140 needs (the
- : gsh countries-old dataset resolves historical vs. contemporary territory
- : names, e.g. a mission's territory-id may differ from its
- : contemporary-territory-id) -- good enough to make a role entry readable
- : without that dependency.
+ : #1140's gsh join, closing the placeholder #1141 originally left here: the
+ : countries-old collection (confirmed reachable directly, no need to import
+ : the foreign gsh.xqm module for a plain id-to-label lookup) resolves a
+ : territory id to its display name. Falls back to a bare title-case of the
+ : id itself (still used directly by nothing now, but kept as insurance
+ : against a territory id with no countries-old entry -- verified there
+ : isn't one today: missions-countries' 199 territory-ids and
+ : countries-old's 199 non-suppressed ids are exactly the same set, see
+ : dh:chiefs-by-country-list).
  :)
+declare variable $dh:GSH_COUNTRIES_COL := "/db/apps/gsh/data/countries-old";
+
+declare function dh:country-label($territoryId as xs:string) as xs:string {
+    let $label := normalize-space(collection($dh:GSH_COUNTRIES_COL)/country[id = $territoryId]/label)
+    return if ($label != '') then $label else dh:territory-label($territoryId)
+};
+
 declare %private function dh:territory-label($territoryId as xs:string) as xs:string {
     string-join(
         for $word in tokenize($territoryId, '-')
@@ -427,7 +437,7 @@ declare function dh:person-roles($personId as xs:string) as map(*)* {
         for $chief in $mission/chiefs/chief[person-id = $personId]
         let $role-title := collection($dh:POCOM_COL || "/roles-country-chiefs")/role[id = $chief/role-title-id]/names/singular
         return map {
-            "title": normalize-space($role-title) || " to " || dh:territory-label($mission/territory-id),
+            "title": normalize-space($role-title) || " to " || dh:country-label($mission/territory-id),
             "start": $chief/started/date/string(),
             "end": $chief/ended/date/string()
         }
@@ -879,4 +889,229 @@ declare function dh:principal-officers-breadcrumb($context as map(*)) as element
             dh:breadcrumb($context, $trail)
         else
             dh:breadcrumb($context, ($trail, map { "label": normalize-space(dh:principal-position-doc($roleId)/names/plural) }))
+};
+
+(:~
+ : #1140. By-country index driven directly by missions-countries' own
+ : territory-ids, not by porting hsg-shell's countries-old ISO2 suppression
+ : list (aw/bm/bt/ky/xa/cw/hk/kp/kr/xj/qr/tw/xd/us/an/ps) -- verified live
+ : that the two approaches produce the exact same 199-country set (a set
+ : comparison both ways came back empty), so driving from the collection
+ : that actually has mission data is equivalent and doesn't require carrying
+ : forward an unexplained magic list. Two-column split by letter (not by
+ : item count), same "kludgy, reference-parity" technique as feat/1095's
+ : countries-all.html.
+ :)
+declare function dh:chiefs-by-country-list($context as map(*)) as element(div) {
+    let $countries :=
+        for $mission in collection($dh:POCOM_COL || "/missions-countries")/country-mission
+        let $label := dh:country-label($mission/territory-id)
+        order by $label
+        return map { "id": $mission/territory-id/string(), "label": $label }
+    let $letters := distinct-values($countries ! upper-case(substring(?label, 1, 1)))
+    let $sorted-letters := for $l in $letters order by $l return $l
+    let $half := ceiling(count($sorted-letters) div 2)
+    return
+        <div class="grid-row grid-gap">
+        {
+            for $col in (1, 2)
+            let $column-letters := if ($col = 1) then subsequence($sorted-letters, 1, $half) else subsequence($sorted-letters, $half + 1)
+            return
+                <div class="tablet:grid-col-6">
+                {
+                    for $letter in $column-letters
+                    return
+                        <div>
+                            <h3>{$letter}</h3>
+                            <ul class="usa-list usa-list--unstyled">
+                            {
+                                for $country in $countries[upper-case(substring(?label, 1, 1)) = $letter]
+                                return
+                                    <li><a href="{$context?context-path}/departmenthistory/people/chiefsofmission/{$country?id}">{$country?label}</a></li>
+                            }
+                            </ul>
+                        </div>
+                }
+                </div>
+        }
+        </div>
+};
+
+declare function dh:chiefs-by-organization-list($context as map(*)) as element(ul) {
+    <ul class="usa-list">
+    {
+        for $org in collection($dh:POCOM_COL || "/missions-orgs")/org-mission
+        order by $org/names/plural
+        return
+            <li><a href="{$context?context-path}/departmenthistory/people/chiefsofmission/{$org/id}">{normalize-space($org/names/plural)}</a></li>
+    }
+    </ul>
+};
+
+declare function dh:chiefs-country-doc($id as xs:string) as element(country-mission)? {
+    let $path := $dh:POCOM_COL || "/missions-countries/" || $id || ".xml"
+    return if (doc-available($path)) then doc($path)/country-mission else ()
+};
+
+declare function dh:chiefs-org-doc($id as xs:string) as element(org-mission)? {
+    let $path := $dh:POCOM_COL || "/missions-orgs/" || $id || ".xml"
+    return if (doc-available($path)) then doc($path)/org-mission else ()
+};
+
+(:~
+ : A country-mission chief's role-title-id points into roles-country-chiefs
+ : (e.g. "ambassador", "minister-resident"); an org-mission chief's
+ : role-title-id is self-referential -- it's the org-mission's own id (e.g.
+ : "representative-to-un" for a UN chief), confirmed live: the first lookup
+ : alone left every org-mission chief's position label blank. Checking both
+ : sources makes this one function usable from dh:mission-chiefs-list for
+ : either mission type.
+ :)
+declare function dh:chief-role-label($roleTitleId as xs:string) as xs:string {
+    let $country-role := normalize-space(collection($dh:POCOM_COL || "/roles-country-chiefs")/role[id = $roleTitleId]/names/singular)
+    return
+        if ($country-role != '') then $country-role
+        else normalize-space(collection($dh:POCOM_COL || "/missions-orgs")/org-mission[id = $roleTitleId]/names/singular)
+};
+
+(:~
+ : Chiefs list for a country-mission or org-mission -- both use the same
+ : <chiefs><chief|mission-note>*</chiefs> shape (confirmed for missions-orgs
+ : too, not just missions-countries). Document order is preserved
+ : deliberately, per the ticket's explicit warning: it is curation, not an
+ : accidental omission of a sort. A mission-note interleaved between chiefs
+ : renders as a slim info alert in place, not sorted to the end.
+ :
+ : $currentTerritoryId is empty for an org-mission (no territory to
+ : annotate against); for a country-mission, a chief's own
+ : contemporary-territory-id is only shown when it differs from the
+ : mission's, flagging a historical-territory rename.
+ :)
+declare function dh:mission-chiefs-list($context as map(*), $chiefsAndNotes as element()*, $currentTerritoryId as xs:string?) as element(ul) {
+    <ul class="usa-collection">
+    {
+        for $entry in $chiefsAndNotes
+        return
+            if ($entry/self::chief) then
+                let $chief := $entry
+                let $person := dh:person-doc($chief/person-id)
+                let $position-label := dh:chief-role-label($chief/role-title-id)
+                let $start-date := ($chief/started/date, $chief/arrived/date, $chief/appointed/date)[normalize-space(.) != ''][1]
+                let $end-date := normalize-space($chief/ended/date)
+                let $contemporary-territory := normalize-space($chief/contemporary-territory-id)
+                let $territory-note :=
+                    if ($contemporary-territory != '' and $contemporary-territory != $currentTerritoryId) then
+                        ', ' || dh:country-label($contemporary-territory)
+                    else ()
+                return
+                    <li class="usa-collection__item">
+                        <div class="usa-collection__body">
+                            <h3 class="usa-collection__heading">
+                                <a href="{$context?context-path}/departmenthistory/people/{$chief/person-id}">{dh:person-name-birth-death($person)}</a>
+                            </h3>
+                            <p class="usa-collection__meta">
+                                {$position-label}{$territory-note}, {substring(normalize-space($start-date), 1, 4)}&#8211;{if ($end-date != '') then substring($end-date, 1, 4) else 'present'}
+                            </p>
+                        </div>
+                    </li>
+            else
+                <li class="usa-collection__item">
+                    <div class="usa-alert usa-alert--info usa-alert--slim">
+                        <div class="usa-alert__body">
+                            <p class="usa-alert__text">{normalize-space($entry/text)}</p>
+                        </div>
+                    </div>
+                </li>
+    }
+    </ul>
+};
+
+(:~
+ : "Other Nominees" (country-mission) / "Other Appointees" (org-mission) --
+ : same shape, different element name, hence the $label parameter rather
+ : than two near-identical functions.
+ :)
+declare function dh:mission-other-list($context as map(*), $others as element(chief)*, $label as xs:string) as element(div) {
+    <div>
+        <h2>{$label}</h2>
+        {
+            if (empty($others)) then
+                <p><em>None</em></p>
+            else
+                <ul class="usa-collection">
+                {
+                    for $chief in $others
+                    let $person := dh:person-doc($chief/person-id)
+                    let $position-label := dh:chief-role-label($chief/role-title-id)
+                    let $note := normalize-space($chief/note)
+                    return
+                        <li class="usa-collection__item">
+                            <div class="usa-collection__body">
+                                <h3 class="usa-collection__heading">
+                                    <a href="{$context?context-path}/departmenthistory/people/{$chief/person-id}">{dh:person-name-birth-death($person)}</a>
+                                </h3>
+                                <p class="usa-collection__meta">{$position-label}{if ($note != '') then ': ' || $note else ()}</p>
+                            </div>
+                        </li>
+                }
+                </ul>
+        }
+    </div>
+};
+
+(:~
+ : The polymorphic {roleOrCountryId} page (#1140's ticket text: "org-mission,
+ : principal-position or country"). org-mission and country are this
+ : ticket's own two real targets; a positions-principals id falling through
+ : to here is an old-URL-compatibility case (verified: hsg-shell's
+ : chiefs-by-role-or-country-id resolves any collection(pocom)//id match,
+ : which includes principal-position's own <id>) -- rather than duplicate
+ : #1139's rendering, dhapi:chiefs-listing 302s that case to the canonical
+ : /principalofficers/{roleId} URL.
+ :)
+declare function dh:chiefs-listing-content($context as map(*)) as element()+ {
+    let $id := $context?request?parameters?roleOrCountryId
+    let $org := dh:chiefs-org-doc($id)
+    return
+        if (exists($org)) then (
+            <h1>{normalize-space($org/names/plural)}</h1>,
+            dh:render-record-richtext($org/description/div),
+            dh:mission-chiefs-list($context, $org/chiefs/*, ()),
+            dh:mission-other-list($context, $org/other-appointees/chief, "Other Appointees")
+        )
+        else
+            let $mission := dh:chiefs-country-doc($id)
+            return (
+                <h1>{dh:country-label($mission/territory-id)}</h1>,
+                dh:mission-chiefs-list($context, $mission/chiefs/*, $mission/territory-id/string()),
+                dh:mission-other-list($context, $mission/other-nominees/chief, "Other Nominees")
+            )
+};
+
+declare function dh:chiefs-listing-title($context as map(*)) as xs:string {
+    let $id := $context?request?parameters?roleOrCountryId
+    let $org := dh:chiefs-org-doc($id)
+    return
+        if (exists($org)) then normalize-space($org/names/plural)
+        else dh:country-label(dh:chiefs-country-doc($id)/territory-id)
+};
+
+(:~
+ : Shared prefix for all three new #1140 pages: People > Chiefs of Mission
+ : (linking back to #1132's existing hub page at /chiefsofmission).
+ :)
+declare %private function dh:chiefs-trail() as map(*)+ {
+    (map { "label": "People", "href": "/departmenthistory/people" }, map { "label": "Chiefs of Mission", "href": "/departmenthistory/people/chiefsofmission" })
+};
+
+declare function dh:chiefs-by-country-breadcrumb($context as map(*)) as element(li)+ {
+    dh:breadcrumb($context, (dh:chiefs-trail(), map { "label": "By Country" }))
+};
+
+declare function dh:chiefs-by-organization-breadcrumb($context as map(*)) as element(li)+ {
+    dh:breadcrumb($context, (dh:chiefs-trail(), map { "label": "By Organization" }))
+};
+
+declare function dh:chiefs-listing-breadcrumb($context as map(*)) as element(li)+ {
+    dh:breadcrumb($context, (dh:chiefs-trail(), map { "label": dh:chiefs-listing-title($context) }))
 };

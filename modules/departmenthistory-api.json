@@ -413,6 +413,66 @@
                     }
                 }
             }
+        },
+        "/departmenthistory/people/chiefsofmission/by-country": {
+            "get": {
+                "summary": "Chiefs of Mission, letter-grouped by country",
+                "operationId": "dhapi:chiefs-by-country",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/departmenthistory/people/chiefsofmission/by-organization": {
+            "get": {
+                "summary": "Chiefs of Mission to international organizations, listed",
+                "operationId": "dhapi:chiefs-by-organization",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/departmenthistory/people/chiefsofmission/{roleOrCountryId}": {
+            "get": {
+                "summary": "Chiefs of Mission for a country or international organization (polymorphic id)",
+                "operationId": "dhapi:chiefs-listing",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "parameters": [
+                    {
+                        "name": "roleOrCountryId",
+                        "in": "path",
+                        "description": "org-mission id, country territory-id, or (redirects) a positions-principals id",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "302": {
+                        "description": "Redirect to the canonical principal-officers URL for a positions-principals id",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "No matching role, country, or organization",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
         }
     },
     "servers": [
