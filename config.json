@@ -3,6 +3,11 @@
     "colors" : {
       "palette" : "navy"
     },
+    "landing" : {
+      "hero" : {
+        "label" : "Placeholder image; the hero photograph is still to be provided"
+      }
+    },
     "logo" : {
       "image" : "oh-logo.png",
       "width" : "1280px",
