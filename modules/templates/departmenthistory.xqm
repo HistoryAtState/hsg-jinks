@@ -441,13 +441,29 @@ declare function dh:person-roles($personId as xs:string) as map(*)* {
 };
 
 declare function dh:person-service-record($personId as xs:string) as element(ul) {
+    dh:person-service-record($personId, ())
+};
+
+(:~
+ : $highlightYear marks whichever role(s) were active in that year (#1138's
+ : by-year listing) with a semantic class -- the ticket's own rework note,
+ : replacing hsg-shell's bold-inline-style highlighting. () for #1137's
+ : by-name listing and #1141's person page, which don't highlight anything;
+ : the 1-arg overload above is their entry point, so neither call site
+ : changed when this parameter was added.
+ :)
+declare function dh:person-service-record($personId as xs:string, $highlightYear as xs:integer?) as element(ul) {
     <ul class="usa-collection">
     {
         for $role in dh:person-roles($personId)
         let $start-year := if (normalize-space($role?start) != '') then substring($role?start, 1, 4) else '?'
         let $end-year := if (normalize-space($role?end) != '') then substring($role?end, 1, 4) else 'present'
+        let $is-current :=
+            exists($highlightYear)
+            and $start-year castable as xs:integer and xs:integer($start-year) <= $highlightYear
+            and ($end-year = 'present' or (xs:integer($end-year) >= $highlightYear))
         return
-            <li class="usa-collection__item">
+            <li class="usa-collection__item{if ($is-current) then ' usa-collection__item--current' else ()}">
                 <div class="usa-collection__body">
                     <h3 class="usa-collection__heading">{$role?title}</h3>
                     <p class="usa-collection__meta">{$start-year}&#8211;{$end-year}</p>
@@ -575,6 +591,10 @@ declare function dh:people-by-letter($letter as xs:string) as element(person)* {
  : by-year listings.
  :)
 declare function dh:people-list($context as map(*), $people as element(person)*) as element(ul) {
+    dh:people-list($context, $people, ())
+};
+
+declare function dh:people-list($context as map(*), $people as element(person)*, $highlightYear as xs:integer?) as element(ul) {
     <ul class="usa-collection">
     {
         for $person in $people
@@ -585,7 +605,7 @@ declare function dh:people-list($context as map(*), $people as element(person)*)
                     <h3 class="usa-collection__heading">
                         <a href="{$context?context-path}/departmenthistory/people/{$person/id}">{$marker}{dh:person-name-birth-death($person)}</a>
                     </h3>
-                    {dh:person-service-record($person/id/string())}
+                    {dh:person-service-record($person/id/string(), $highlightYear)}
                 </div>
             </li>
     }
@@ -650,4 +670,129 @@ declare function dh:people-by-name-breadcrumb($context as map(*), $letter as xs:
             dh:breadcrumb($context, $trail)
         else
             dh:breadcrumb($context, ($trail, map { "label": "Starting with " || upper-case($letter) }))
+};
+
+(:~
+ : #1138. Range fixed at 1778-present per the ticket's own stated range,
+ : rather than min()/max() over every date in POCOM: the ticket notes this
+ : computation "needs range indexes on the pocom collection to perform" --
+ : indexes this app doesn't own (pocom is a foreign collection, its
+ : collection.xconf isn't this app's to change) -- and 1778 is already the
+ : documented start of the record. Cheaper and no less correct.
+ :)
+declare variable $dh:PEOPLE_BY_YEAR_MIN := 1778;
+
+declare function dh:people-by-year-max() as xs:integer {
+    year-from-date(current-date())
+};
+
+(:~
+ : Whether $role (a <principal> or <chief>) was active during $year: started
+ : by that year and either still ongoing (no end date) or ended no earlier
+ : than that year.
+ :)
+declare %private function dh:role-active-in-year($role as element(), $year as xs:integer) as xs:boolean {
+    let $start := normalize-space($role/started/date)
+    let $end := normalize-space($role/ended/date)
+    return
+        $start != '' and xs:integer(substring($start, 1, 4)) <= $year
+        and ($end = '' or xs:integer(substring($end, 1, 4)) >= $year)
+};
+
+(:~
+ : Every person holding a role -- any of the three POCOM position families
+ : -- active during $year. Three full collection scans per request (no
+ : index to narrow by date range, see dh:PEOPLE_BY_YEAR_MIN); acceptable for
+ : now at POCOM's size, revisit if this page's latency becomes a problem.
+ :)
+declare function dh:people-active-in-year($year as xs:integer) as element(person)* {
+    let $personIds := distinct-values((
+        for $position in collection($dh:POCOM_COL || "/positions-principals")/principal-position
+        for $principal in $position/principals/principal
+        where dh:role-active-in-year($principal, $year)
+        return $principal/person-id,
+
+        for $mission in collection($dh:POCOM_COL || "/missions-countries")/country-mission
+        for $chief in $mission/chiefs/chief
+        where dh:role-active-in-year($chief, $year)
+        return $chief/person-id,
+
+        for $org in collection($dh:POCOM_COL || "/missions-orgs")/org-mission
+        for $chief in $org/chiefs/chief
+        where dh:role-active-in-year($chief, $year)
+        return $chief/person-id
+    ))
+    for $id in $personIds
+    let $person := dh:person-doc($id)
+    where exists($person)
+    order by $person/persName/surname, $person/persName/forename
+    return $person
+};
+
+(:~
+ : Year links for the by-year index, grouped by decade (#1138's "decade-
+ : grouped year links"). One <section> per decade rather than hsg-shell's
+ : 3-column split, a presentational detail skipped for this pass.
+ :)
+declare function dh:people-by-year-nav($context as map(*)) as element(div) {
+    <div class="people-by-year-nav">
+    {
+        for $year in $dh:PEOPLE_BY_YEAR_MIN to dh:people-by-year-max()
+        let $decade := $year idiv 10 * 10
+        group by $decade
+        order by $decade
+        return
+            <section>
+                <h2>{$decade}s</h2>
+                <ul class="usa-list usa-list--unstyled">
+                {
+                    for $y in $year
+                    order by $y
+                    return
+                        <li><a href="{$context?context-path}/departmenthistory/people/by-year/{$y}">{$y}</a></li>
+                }
+                </ul>
+            </section>
+    }
+    </div>
+};
+
+declare function dh:people-by-year-prev-next($context as map(*), $year as xs:integer) as element(nav)? {
+    let $prev := if ($year > $dh:PEOPLE_BY_YEAR_MIN) then $year - 1 else ()
+    let $next := if ($year < dh:people-by-year-max()) then $year + 1 else ()
+    return
+        if (empty($prev) and empty($next)) then ()
+        else
+            <nav aria-label="Pagination" class="usa-pagination">
+                <ul class="usa-pagination__list">
+                {
+                    if (exists($prev)) then
+                        <li class="usa-pagination__item usa-pagination__arrow">
+                            <a href="{$context?context-path}/departmenthistory/people/by-year/{$prev}" class="usa-pagination__link usa-pagination__previous-page">
+                                <pb-i18n key="odd.previous">Previous</pb-i18n> ({$prev})
+                            </a>
+                        </li>
+                    else (),
+                    if (exists($next)) then
+                        <li class="usa-pagination__item usa-pagination__arrow">
+                            <a href="{$context?context-path}/departmenthistory/people/by-year/{$next}" class="usa-pagination__link usa-pagination__next-page">
+                                <pb-i18n key="odd.next">Next</pb-i18n> ({$next})
+                            </a>
+                        </li>
+                    else ()
+                }
+                </ul>
+            </nav>
+};
+
+declare function dh:people-by-year-breadcrumb($context as map(*), $year as xs:integer?) as element(li)+ {
+    let $trail := (
+        map { "label": "People", "href": "/departmenthistory/people" },
+        map { "label": "By Year", "href": "/departmenthistory/people/by-year" }
+    )
+    return
+        if (empty($year)) then
+            dh:breadcrumb($context, $trail)
+        else
+            dh:breadcrumb($context, ($trail, map { "label": xs:string($year) }))
 };

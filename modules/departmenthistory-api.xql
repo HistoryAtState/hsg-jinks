@@ -219,6 +219,31 @@ declare function dhapi:people-by-name-letter($request as map(*)) {
             dhapi:render($request, "pages/departmenthistory-people-by-name-letter")
 };
 
+declare function dhapi:people-by-year($request as map(*)) {
+    dhapi:render($request, "pages/departmenthistory-people-by-year")
+};
+
+(:~
+ : Rework note (#1138): the old site's year route raises a raw error (400)
+ : outside 1778-present; validate here and 404 instead, the same
+ : normalization #1137 applies to an out-of-range letter. Non-numeric
+ : segments ("abc") also land here rather than crashing castable-as
+ : downstream.
+ :)
+declare function dhapi:people-by-year-year($request as map(*)) {
+    let $yearParam := $request?parameters?year
+    return
+        if (not($yearParam castable as xs:integer)) then
+            error($errors:NOT_FOUND, "not a year: " || $yearParam)
+        else
+            let $year := xs:integer($yearParam)
+            return
+                if ($year < $dh:PEOPLE_BY_YEAR_MIN or $year > dh:people-by-year-max()) then
+                    error($errors:NOT_FOUND, "year " || $year || " is out of range")
+                else
+                    dhapi:render($request, "pages/departmenthistory-people-by-year-year")
+};
+
 (:~
  : Wrap the jinks-owned vapi:handle-error, which renders the error page but
  : hardcodes HTTP 200, so a missing page still reports success to crawlers and

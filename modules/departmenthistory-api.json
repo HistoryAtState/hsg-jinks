@@ -329,6 +329,48 @@
                     }
                 }
             }
+        },
+        "/departmenthistory/people/by-year": {
+            "get": {
+                "summary": "People by year: decade-grouped year index",
+                "operationId": "dhapi:people-by-year",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/departmenthistory/people/by-year/{year}": {
+            "get": {
+                "summary": "People holding a role in the given year",
+                "operationId": "dhapi:people-by-year-year",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "parameters": [
+                    {
+                        "name": "year",
+                        "in": "path",
+                        "description": "Four-digit year, 1778 to the current year",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "Not a valid year in range",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
         }
     },
     "servers": [
