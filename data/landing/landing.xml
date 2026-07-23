@@ -1,0 +1,89 @@
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Office of the Historian — landing page</title>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian, Foreign Service Institute, United States Department of State</publisher>
+            </publicationStmt>
+            <sourceDesc>
+                <p>born digital</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <div type="hero" xml:lang="en">
+                <head>The Office of the Historian</head>
+            </div>
+            <div type="intro" xml:lang="en">
+                <p>Our Office provides information to the American people about the
+                    Department and its history; U.S. foreign relations and resources to
+                    conduct research on Department records; and responds to
+                    content-specific questions about <title>FRUS</title> series.</p>
+                <list type="links">
+                    <item>
+                        <ref target="about">Read More About Us</ref>
+                    </item>
+                </list>
+            </div>
+            <div type="publications" xml:lang="en">
+                <head>Latest Publications</head>
+                <ref type="section-link" target="historicaldocuments">All Publications</ref>
+                <list type="publications">
+                    <item>
+                        <figure>
+                            <graphic url="https://static.history.state.gov/frus/frus1989-92v31/covers/frus1989-92v31.jpg"/>
+                            <figDesc>Cover of Foreign Relations of the United States, 1989–1992, Volume XXXI, START I</figDesc>
+                        </figure>
+                        <term>Historical Documents</term>
+                        <term>2025</term>
+                        <head>
+                            <ref target="historicaldocuments/frus1989-92v31">Now Available: Foreign
+                                Relations of the United States, 1989–1992, Volume XXXI, START I,
+                                1989–1991</ref>
+                        </head>
+                        <p>This is the second of two volumes in the Foreign Relations series
+                            devoted to the START I agreement, which President George H.W. Bush and
+                            Soviet leader Mikhail Gorbachev signed on July 31, 1991.</p>
+                    </item>
+                    <item>
+                        <figure>
+                            <graphic url="https://static.history.state.gov/frus/frus1977-80v27/covers/frus1977-80v27.jpg"/>
+                            <figDesc>Cover of Foreign Relations of the United States, 1977–1980, Volume XXVII, Western Europe</figDesc>
+                        </figure>
+                        <term>Historical Documents</term>
+                        <term>2025</term>
+                        <head>
+                            <ref target="historicaldocuments/frus1977-80v27">Now Available:
+                                Foreign Relations of the United States, 1977–1980, Volume XXVII,
+                                Western Europe: Canada, Federal Republic of Germany, and Nordic
+                                Countries Chapters</ref>
+                        </head>
+                        <p>These chapters document the Carter administration’s approach to
+                            relations with Canada, West Germany, and the Nordic countries. The
+                            remaining chapters in the volume will be released as they are cleared
+                            for publication.</p>
+                    </item>
+                    <item>
+                        <figure>
+                            <graphic url="https://static.history.state.gov/frus/frus1981-88v05/covers/frus1981-88v05.jpg"/>
+                            <figDesc>Cover of Foreign Relations of the United States, 1981–1988, Volume V, Soviet Union</figDesc>
+                        </figure>
+                        <term>Historical Documents</term>
+                        <term>2024</term>
+                        <head>
+                            <ref target="historicaldocuments/frus1981-88v05">Now Available:
+                                Foreign Relations of the United States, 1981–1988, Volume V, Soviet
+                                Union, March 1985–October 1986</ref>
+                        </head>
+                        <p>This volume documents the first eighteen months of renewed engagement
+                            between the United States and the Soviet Union.</p>
+                    </item>
+                </list>
+                <ref type="action" target="historicaldocuments">View All Publications</ref>
+            </div>
+        </body>
+    </text>
+</TEI>

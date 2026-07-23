@@ -25,23 +25,18 @@
       "name" : "target"
     } ]
   } ],
-  "profiles" : [ "base10", "docker", "profile-theme-uswds" ],
+  "profiles" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
   "label" : "hsg-jinks",
-  "version" : "1.2.3",
+  "version" : "1.3.0",
   "id" : "https://e-editiones.org/apps/hsg-jinks",
   "_update" : true,
   "styles" : [ "https://cdn.jsdelivr.net/npm/theme-toggles@4.10.1/css/classic.min.css", "resources/css/layout.css", "resources/css/jinks-variables.css", "resources/css/components.css", "resources/css/hsg-theme.css" ],
   "_noDeploy" : false,
-  "api" : [ {
-    "spec" : "hsg-api.json",
-    "prefix" : "hsgapi",
-    "id" : "http://teipublisher.com/api/hsg",
-    "path" : "hsg-api.xql"
-  } ],
   "profile-versions" : {
-    "profile-theme-uswds" : "1.2.3",
+    "profile-theme-uswds" : "1.3.0",
     "docker" : "1.0.0",
-    "base10" : "1.0.0"
+    "base10" : "1.0.0",
+    "landing-page" : "1.0.0"
   },
   "depends" : [ "base10" ],
   "profile-changes" : { },
@@ -90,8 +85,17 @@
       "hero" : {
         "background-position" : "center",
         "background-color" : "rgba(0, 0, 0, 0.6)",
+        "class" : "two-column",
+        "label" : "Placeholder image; the hero photograph is still to be provided",
+        "height" : "25rem",
         "background-size" : "cover",
         "background-image" : "../images/mount-rushmore.jpg",
+        "background-repeat" : "no-repeat"
+      },
+      "bottom" : {
+        "background-color" : "rgba(0, 0, 0, 0.4)",
+        "background-size" : "cover",
+        "background-image" : "../images/typewriter3.jpg",
         "background-repeat" : "no-repeat"
       }
     },
@@ -166,8 +170,11 @@
       "enable" : true
     }
   },
-  "skipSource" : [ "repo.xml", "expath-pkg.xml", "build.xml", ".claude/settings.local.json" ],
-  "_lastModified" : "2026-07-20T09:24:57.999Z",
+  "skipSource" : [ "repo.xml", "expath-pkg.xml", "build.xml", ".claude/settings.local.json", ".moderne" ],
+  "data" : {
+    "landing" : "/db/apps/hsg-jinks/data/landing/landing.xml"
+  },
+  "_lastModified" : "2026-07-23T11:49:40.026Z",
   "overwrite" : "default",
   "pkg" : {
     "website" : "http://tei-publisher.org",
@@ -196,8 +203,8 @@
   "_dry" : false,
   "source" : "/db/apps//profile-theme-uswds",
   "type" : "theme",
-  "skip" : [ "^doc/.*$", "setup.xql", "config.json" ],
-  "odds" : [ "teipublisher.odd", "uswds-landing.odd", "hsg-jinks.odd" ],
+  "skip" : [ "^doc/.*$", "^data/landing/landing\\.xml", "^resources/images/team/", "^resources/images/(typewriter[12]|books|header-bg|paper-texture)\\.jpg", "^resources/images/type\\.jpeg", "^resources/images/gplv3-rounded-grey-180x60\\.jpg", "^resources/images/(tei-with-text|e-editiones-logo-color|jinntec|tei-publisher-logo-color|arrow-right)\\.svg", "^resources/scripts/header\\.js", "^test/cypress/e2e/gui/landing-page\\.cy\\.js", "setup.xql", "config.json" ],
+  "odds" : [ "teipublisher.odd", "landing.odd", "uswds-landing.odd", "hsg-jinks.odd" ],
   "docker" : {
     "eXist" : "6.4.0",
     "features" : {
@@ -217,12 +224,13 @@
     "ant" : "1.10.15",
     "jinks-templates" : "1.4.1"
   },
-  "category" : "development",
+  "category" : "components",
   "_overwrite" : "all",
   "defaults" : {
     "language" : "en",
     "language-label" : "label",
     "data" : "/db/apps/frus-data-jinks/data",
+    "landing" : "index.html",
     "address-by-id" : false,
     "odd-root" : "resources/odd",
     "languages" : [ "bg", "cs", "zh_CN", "zh_TW", "de", "en", "es", "el", "fr", "fi", "it", "ka", "nl", "no", "pl", "pt", "ro", "ru", "sl", "sv", "tr", "uk" ],
@@ -242,15 +250,23 @@
     "register-root" : "registers"
   },
   "templating" : {
-    "use" : [ "templates/uswds-blocks.html" ],
+    "use" : [ "templates/uswds-blocks.html", "templates/hsg-blocks.html" ],
     "modules" : {
       "http://teipublisher.com/ns/templates/browse" : {
         "at" : "modules/templates/browse.xqm",
         "prefix" : "browse"
       },
+      "http://teipublisher.com/ns/templates/landing-page" : {
+        "at" : "modules/templates/landing-page.xqm",
+        "prefix" : "landing"
+      },
       "http://teipublisher.com/ns/templates/page" : {
         "at" : "modules/templates/page.xqm",
         "prefix" : "page"
+      },
+      "http://history.state.gov/ns/templates/landing" : {
+        "at" : "modules/templates/hsg-landing.xqm",
+        "prefix" : "hsg-landing"
       }
     }
   },
@@ -260,6 +276,13 @@
     "extra-components" : [ ],
     "cdn" : "https://cdn.jsdelivr.net/npm/@teipublisher/pb-components"
   },
-  "order" : 0,
-  "$schema" : "../jinks/schema/jinks.json"
+  "order" : 102,
+  "$schema" : "../jinks/schema/jinks.json",
+  "i18n" : [ "landing-page" ],
+  "api" : [ {
+    "spec" : "hsg-api.json",
+    "prefix" : "hsgapi",
+    "id" : "http://teipublisher.com/api/hsg",
+    "path" : "hsg-api.xql"
+  } ]
 }
