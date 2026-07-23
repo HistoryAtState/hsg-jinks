@@ -473,6 +473,34 @@
                     }
                 }
             }
+        },
+        "/departmenthistory/travels/president": {
+            "get": {
+                "summary": "Travels of the President: by-president and by-destination indexes",
+                "operationId": "dhapi:travels-president",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/departmenthistory/travels/secretary": {
+            "get": {
+                "summary": "Travels of the Secretary of State: by-secretary and by-destination indexes",
+                "operationId": "dhapi:travels-secretary",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
         }
     },
     "servers": [

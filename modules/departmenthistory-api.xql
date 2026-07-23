@@ -290,6 +290,14 @@ declare function dhapi:chiefs-listing($request as map(*)) {
             error($errors:NOT_FOUND, "no chief-of-mission role or country " || $id)
 };
 
+declare function dhapi:travels-president($request as map(*)) {
+    dhapi:render($request, "pages/departmenthistory-travels-president")
+};
+
+declare function dhapi:travels-secretary($request as map(*)) {
+    dhapi:render($request, "pages/departmenthistory-travels-secretary")
+};
+
 (:~
  : Wrap the jinks-owned vapi:handle-error, which renders the error page but
  : hardcodes HTTP 200, so a missing page still reports success to crawlers and

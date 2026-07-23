@@ -1,0 +1,42 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/departmenthistory": { "at": "modules/templates/departmenthistory.xqm", "prefix": "dh" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ dh:travels-index-breadcrumb($context, "president") ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="usa-prose">
+        <h1>Travels Abroad of the President</h1>
+        [% include "templates/departmenthistory-president-travels-hiatus.html" %]
+        <p>This resource presents basic historical information on all foreign trips by the
+            President.</p>
+        <div class="grid-row grid-gap">
+            <div class="tablet:grid-col-8">
+                <h2>By President</h2>
+                [[ dh:travels-president-office-holders($context) ]]
+            </div>
+            <div class="tablet:grid-col-4">
+                <h2>By Destination</h2>
+                [[ dh:travels-destinations($context, "president") ]]
+            </div>
+        </div>
+    </div>
+
+    [% template after %]
+    [% include "templates/departmenthistory-sidebar.html" %]
+    [% endtemplate %]
+</template>

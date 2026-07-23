@@ -1115,3 +1115,102 @@ declare function dh:chiefs-by-organization-breadcrumb($context as map(*)) as ele
 declare function dh:chiefs-listing-breadcrumb($context as map(*)) as element(li)+ {
     dh:breadcrumb($context, (dh:chiefs-trail(), map { "label": dh:chiefs-listing-title($context) }))
 };
+
+(:~
+ : #1142/#1143. Travels and visits are the epic's second, smaller no-ODD
+ : record family (21 president-travel files + 34 secretary-travel files +
+ : 16 decade-bucketed visit files) -- same "no-ODD" architecture as POCOM,
+ : reusing dh:breadcrumb and (for the secretary route's old-id 302)
+ : dh:person-canonical-id-for-old-id, but its own, simpler collections:
+ : travel person-ids share POCOM's people namespace (confirmed:
+ : secretary-travels' filenames match POCOM person-ids exactly, e.g.
+ : kerry-john-forbes) but the trip/visit data itself lives outside POCOM.
+ :)
+declare variable $dh:TRAVELS_COL := "/db/apps/travels";
+declare variable $dh:VISITS_COL := "/db/apps/visits/data";
+
+declare function dh:travels-collection($role as xs:string) as xs:string {
+    $dh:TRAVELS_COL || "/" || $role || "-travels"
+};
+
+declare function dh:travels-president-doc() as document-node() {
+    doc($dh:TRAVELS_COL || "/presidents/presidents.xml")
+};
+
+(:~
+ : Office-holders (of the given role) who actually traveled, in term order,
+ : each linking to their own listing page. President term years come from
+ : the presidents.xml code table; Secretary term years reuse
+ : dh:principal-chain-end against secretary.xml (#1136's own merging logic
+ : applied here too, for the same reason: a re-appointment marked
+ : @treatAsConsecutive should not restart the year range).
+ :)
+declare function dh:travels-president-office-holders($context as map(*)) as element(ul) {
+    let $traveledIds := distinct-values(collection(dh:travels-collection('president'))//trip/@who)
+    return
+        <ul class="usa-collection">
+        {
+            for $president in dh:travels-president-doc()/presidents/president[id = $traveledIds]
+            let $start-year := year-from-date(xs:date($president/took-office-date))
+            let $end-date := normalize-space($president/left-office-date)
+            order by $start-year
+            return
+                <li class="usa-collection__item">
+                    <div class="usa-collection__body">
+                        <h3 class="usa-collection__heading">
+                            <a href="{$context?context-path}/departmenthistory/travels/president/{$president/id}">{normalize-space($president/name)}</a>
+                        </h3>
+                        <p class="usa-collection__meta">{$start-year}&#8211;{if ($end-date != '') then year-from-date(xs:date($end-date)) else 'present'}</p>
+                    </div>
+                </li>
+        }
+        </ul>
+};
+
+declare function dh:travels-secretary-office-holders($context as map(*)) as element(ul) {
+    let $traveledIds := for $r in xmldb:get-child-resources(dh:travels-collection('secretary')) return replace($r, '\.xml$', '')
+    let $secretaryDoc := doc($dh:POCOM_COL || "/positions-principals/secretary.xml")
+    return
+        <ul class="usa-collection">
+        {
+            for $personId in $traveledIds
+            let $principal := $secretaryDoc//principals/principal[person-id = $personId][1]
+            let $person := dh:person-doc($personId)
+            let $chain-end := if (exists($principal)) then dh:principal-chain-end($principal, $principal/following-sibling::principal) else ()
+            let $start-year := if (exists($principal)) then substring($principal/started/date, 1, 4) else '?'
+            let $end-date := if (exists($chain-end)) then normalize-space($chain-end/ended/date) else ''
+            order by $start-year
+            return
+                <li class="usa-collection__item">
+                    <div class="usa-collection__body">
+                        <h3 class="usa-collection__heading">
+                            <a href="{$context?context-path}/departmenthistory/travels/secretary/{$personId}">{dh:person-name($person)}</a>
+                        </h3>
+                        <p class="usa-collection__meta">{$start-year}&#8211;{if ($end-date != '') then substring($end-date, 1, 4) else 'present'}</p>
+                    </div>
+                </li>
+        }
+        </ul>
+};
+
+declare function dh:travels-destinations($context as map(*), $role as xs:string) as element(ul) {
+    let $countries := collection(dh:travels-collection($role))//country
+    let $ids := distinct-values($countries/@id)
+    return
+        <ul class="usa-collection">
+        {
+            for $id in $ids
+            let $label := normalize-space(($countries[@id = $id])[1])
+            order by $label
+            return
+                <li class="usa-collection__item"><a href="{$context?context-path}/departmenthistory/travels/{$role}/{$id}">{$label}</a></li>
+        }
+        </ul>
+};
+
+declare function dh:travels-index-breadcrumb($context as map(*), $role as xs:string) as element(li)+ {
+    dh:breadcrumb($context, (
+        map { "label": "Travels", "href": "/departmenthistory/travels" },
+        map { "label": if ($role = 'president') then "Travels of the President" else "Travels of the Secretary of State" }
+    ))
+};

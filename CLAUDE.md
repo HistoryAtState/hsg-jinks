@@ -66,3 +66,16 @@ and against the live database directly, rather than shelling out to a
 different language runtime. Only fall back to Python (or another scripting
 language) when the same task genuinely can't be expressed in XQuery, or
 doesn't involve XML/the database at all (e.g. validating plain JSON syntax).
+
+## HTML comments in templates: never use "--" inside them
+
+XML forbids a literal `--` anywhere inside a `<!-- ... -->` comment (only at
+the closing `-->`). This repo's template files are XML, so a comment written
+in ordinary prose style — using `--` as a dash, the way this file and commit
+messages do — breaks the whole template with a cryptic `XPST0003 expecting
+end of XML comment` error at deploy time, not at write time. It has caused
+repeat, easy-to-miss bugs. Use `;`, `—` (em dash), or a full stop instead of
+`--` inside any `<!-- -->` block. Before deploying a new or edited template
+comment, a quick check across changed files:
+`grep -rn -- '--' templates/**/*.html | grep -v 'usa-\|context-path'` (or
+review each `<!-- -->` block by eye) catches it before the round trip.
