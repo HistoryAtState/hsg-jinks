@@ -28,3 +28,17 @@ custom extension points (`modules/`, `api`, `styles`, `templating.modules` in
 
 See `doc/` for in-progress migration/feature planning notes
 (`epic-518-rendering-plan.md`, `uswds-profile-integration.md`).
+
+## Parallel worktrees & the read-only mirror
+
+- Work happens in parallel git worktrees (flat siblings, `../hsg-jinks--<slug>`),
+  each with its own devcontainer on its own host port — created via
+  `tools/new-worktree.sh` (README "Parallel worktrees"). This checkout's own
+  instance is defined by `./.env` (`EXISTDB_SERVER`) — trust it, never fall
+  back to defaults.
+- **Host port 8080 is the read-only hsg-shell reference mirror** — guest reads
+  only. Never install packages, run jinks, or REST-write against it; a
+  PreToolUse hook blocks write-shaped commands targeting it.
+- Shared machine-local state (OP_TOKEN, port registry, baseline profile xar)
+  lives in `~/.config/hsg/`. For OpenProject writes:
+  `source ~/.config/hsg/secrets.env` first — never inline the token.

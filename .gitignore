@@ -19,3 +19,5 @@ test/cypress/downloads/
 # xar built from the private profile-theme-uswds checkout, copied in for the
 # devcontainer build (see .devcontainer/Dockerfile.dev)
 .devcontainer/*.xar
+# per-worktree devcontainer settings (ports, compose project name)
+.devcontainer/.env
