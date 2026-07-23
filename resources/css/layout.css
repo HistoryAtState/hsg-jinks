@@ -188,6 +188,60 @@
     overflow: visible;
 }
 
+/*
+ * Fixed (non-collapsible) sidebars: theme.layout.before/after.collapsible:
+ * false adds before-fixed/after-fixed to pb-page (see templates/layouts/
+ * base.html). Hide the now-pointless collapse toggle and let .content-top
+ * span across the sidebar's column too, flush with the page's left/right
+ * edge instead of stopping at the sidebar. Ported from theme-base10's
+ * resources/css/layouts.css.
+ */
+.fixed-layout.before-fixed > .before-top {
+    display: none;
+}
+
+.fixed-layout.before-fixed > .before,
+.fixed-layout.before-fixed > .before-top {
+    border-right: none;
+}
+
+.fixed-layout.before-fixed > .before-top .aside-toggle {
+    display: none;
+}
+
+.fixed-layout.before-fixed > .content-top {
+    grid-column: before-top / content-top;
+}
+
+.fixed-layout.before-fixed > .before:not(:empty) {
+    background-color: var(--jinks-background-color);
+}
+
+.fixed-layout.after-fixed > .after-top {
+    display: none;
+}
+
+.fixed-layout.after-fixed > .after,
+.fixed-layout.after-fixed > .after-top {
+    border-left: none;
+}
+
+.fixed-layout.after-fixed > .after-top .aside-toggle {
+    display: none;
+}
+
+.fixed-layout.after-fixed > .content-top {
+    grid-column: content-top / after-top;
+}
+
+.fixed-layout.after-fixed > .after:not(:empty) {
+    background-color: var(--jinks-background-color);
+}
+
+.fixed-layout.before-fixed.after-fixed > .content-top {
+    grid-column: before-top / after-top;
+}
+
 .fixed-layout > footer {
     grid-area: footer;
 }
@@ -420,6 +474,57 @@
 .sticky-layout > .content-top {
     grid-area: content-top;
     width: 100%;
+}
+
+/*
+ * Fixed (non-collapsible) sidebars: same before-fixed/after-fixed treatment
+ * as .fixed-layout above -- hide the collapse toggle and let .content-top
+ * span across the sidebar's column, flush with the page's left/right edge.
+ */
+.sticky-layout.before-fixed > .before-top {
+    display: none;
+}
+
+.sticky-layout.before-fixed > .before,
+.sticky-layout.before-fixed > .before-top {
+    border-right: none;
+}
+
+.sticky-layout.before-fixed > .before-top .aside-toggle {
+    display: none;
+}
+
+.sticky-layout.before-fixed > .content-top {
+    grid-column: before-top / content-top;
+}
+
+.sticky-layout.before-fixed > .before:not(:empty) {
+    background-color: var(--jinks-background-color);
+}
+
+.sticky-layout.after-fixed > .after-top {
+    display: none;
+}
+
+.sticky-layout.after-fixed > .after,
+.sticky-layout.after-fixed > .after-top {
+    border-left: none;
+}
+
+.sticky-layout.after-fixed > .after-top .aside-toggle {
+    display: none;
+}
+
+.sticky-layout.after-fixed > .content-top {
+    grid-column: content-top / after-top;
+}
+
+.sticky-layout.after-fixed > .after:not(:empty) {
+    background-color: var(--jinks-background-color);
+}
+
+.sticky-layout.before-fixed.after-fixed > .content-top {
+    grid-column: before-top / after-top;
 }
 
 .sticky-layout > main {
