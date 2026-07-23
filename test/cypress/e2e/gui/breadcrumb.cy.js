@@ -33,6 +33,21 @@ describe("breadcrumb", () => {
         lastCrumb().should("have.attr", "aria-current", "page").find("a").should("not.exist");
     });
 
+    // The volume landing page has a TOC in the before sidebar, making
+    // pb-page's grid "before-fixed" (see templates/layouts/hsg-content.html).
+    // .content-top must then span across the sidebar's column (profile-
+    // theme-uswds layout.css) so the toolbar/breadcrumb row lines up with the
+    // page-header's left edge instead of stopping at the sidebar.
+    it("volume landing page: breadcrumb aligns flush with the page header's left edge", () => {
+        cy.visit(VOLUME);
+        cy.get(".usa-logo").then(($logo) => {
+            const logoLeft = $logo[0].getBoundingClientRect().left;
+            cy.get('nav[aria-label="breadcrumb"]').should(($nav) => {
+                expect($nav[0].getBoundingClientRect().left).to.be.closeTo(logoLeft, 1);
+            });
+        });
+    });
+
     it("compilation page: current crumb is the compilation's own title, on its own line", () => {
         cy.visit(`${VOLUME}/comp`);
         crumbTexts().should("deep.equal", [
