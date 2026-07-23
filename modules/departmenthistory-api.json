@@ -241,6 +241,20 @@
                     }
                 }
             }
+        },
+        "/departmenthistory/people/secretaries": {
+            "get": {
+                "summary": "Secretaries of State, ordered list (record-derived, POCOM)",
+                "operationId": "dhapi:secretaries",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
         }
     },
     "servers": [

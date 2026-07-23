@@ -146,6 +146,15 @@ declare function dhapi:buildings-section($request as map(*)) {
 };
 
 (:~
+ : Phase 2 pilot (#1136): the first POCOM record-backed route. Renders
+ : through vapi:html like the static pages -- dh:secretaries computes the
+ : list directly, there is no ODD transform involved.
+ :)
+declare function dhapi:secretaries($request as map(*)) {
+    dhapi:render($request, "pages/departmenthistory-secretaries")
+};
+
+(:~
  : Wrap the jinks-owned vapi:handle-error, which renders the error page but
  : hardcodes HTTP 200, so a missing page still reports success to crawlers and
  : link checkers. Keep its markup, correct the status. Same as

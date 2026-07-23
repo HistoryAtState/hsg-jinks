@@ -277,3 +277,95 @@ declare function dh:monograph-section-pagination($context as map(*)) as element(
                 </ul>
             </nav>
 };
+
+(:~
+ : POCOM (Principal Officers & Chiefs of Mission) is the epic's "no-ODD"
+ : record-rendering concern (#1147's data-transformation decision): plain,
+ : unnamespaced custom XML -- not TEI -- with thousands of small records
+ : joined by id, not a document tree the ODD can transform. Every POCOM page
+ : is server-side XQuery computing HTML directly, the same way
+ : hsg:volume-list computes historicaldocuments' section-landing list, just
+ : with joins instead of a single traversal.
+ :
+ : #1136 (Secretaries) is this concern's pilot, per the ticket's own text --
+ : the simplest record-backed page, one file
+ : (positions-principals/secretary.xml), no cross-collection joins yet
+ : (principal officers/chiefs of mission add code-table and
+ : concurrent-appointments joins; by-name/by-year add range queries across
+ : the whole 4,261-person collection).
+ :)
+declare variable $dh:POCOM_COL := "/db/apps/pocom";
+
+(:~
+ : A person record by id. Unindexed collection scan across 4,261 files --
+ : same technique hsg-shell's pocom-html.xqm used (collection(...)/person[id
+ : = $id]) -- acceptable for a pilot; worth an index if per-page latency
+ : becomes a problem once by-name/by-year (#1137/#1138) are querying this
+ : collection on every request instead of a handful of times per secretaries
+ : list.
+ :)
+declare function dh:person-doc($personId as xs:string) as element(person)? {
+    collection($dh:POCOM_COL || "/people")/person[id = $personId]
+};
+
+(:~
+ : Display name, forename before surname -- same order as hsg-shell's
+ : pocom:person-name-by-id. genName (e.g. "Jr.") appended when present.
+ :)
+declare function dh:person-name($person as element(person)?) as xs:string {
+    if (empty($person)) then
+        ()
+    else
+        string-join(
+            ($person/persName/forename, $person/persName/surname, $person/persName/genName)
+                ! normalize-space(.)[. != ''],
+            ' '
+        )
+};
+
+(:~
+ : Walks forward through immediately-following @treatAsConsecutive siblings
+ : to find the principal whose <ended> date is the term-chain's real end.
+ : Confirmed against the live data: of secretary.xml's 72 <principal>
+ : entries, exactly one (James Monroe's second term, 1815) carries
+ : @treatAsConsecutive="yes" -- the two entries have a real gap between them
+ : (1814-09-30 to 1815-02-28) but are displayed as one continuous term.
+ : Recursion depth is bounded by how many consecutive entries chain
+ : together, which in the observed data is never more than two.
+ :)
+declare %private function dh:secretary-chain-end($principal as element(principal), $following as element(principal)*) as element(principal) {
+    if (exists($following) and $following[1]/@treatAsConsecutive = 'yes') then
+        dh:secretary-chain-end($following[1], subsequence($following, 2))
+    else
+        $principal
+};
+
+(:~
+ : Ordered list of Secretaries of State (#1136), each entry's year range
+ : computed via dh:secretary-chain-end -- consecutive terms merge into one
+ : entry, non-consecutive re-appointments (several Secretaries served
+ : non-adjacent terms without the flag) each get their own. No end date
+ : (@current) renders as "-present".
+ :)
+declare function dh:secretaries($context as map(*)) as element(ol) {
+    let $doc := doc($dh:POCOM_COL || "/positions-principals/secretary.xml")
+    let $principals := $doc//principals/principal
+    return
+        <ol class="usa-prose">
+        {
+            for $p at $pos in $principals
+            where not($p/@treatAsConsecutive = 'yes')
+            let $following := subsequence($principals, $pos + 1)
+            let $chain-end := dh:secretary-chain-end($p, $following)
+            let $person := dh:person-doc($p/person-id)
+            let $start-year := substring($p/started/date, 1, 4)
+            let $end-date := normalize-space($chain-end/ended/date)
+            let $end-year := if ($end-date != '') then substring($end-date, 1, 4) else 'present'
+            return
+                <li>
+                    <a href="{$context?context-path}/departmenthistory/people/{$p/person-id/string()}">{dh:person-name($person)}</a>
+                    <span> ({$start-year}&#8211;{$end-year})</span>
+                </li>
+        }
+        </ol>
+};
