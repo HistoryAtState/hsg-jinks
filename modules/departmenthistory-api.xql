@@ -4,6 +4,9 @@ module namespace dhapi="http://teipublisher.com/api/departmenthistory";
 
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors="http://e-editiones.org/roaster/errors";
+import module namespace dh="https://history.state.gov/ns/templates/departmenthistory" at "templates/departmenthistory.xqm";
+
+declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 (:~
  : The key roaster reads the status code from. Rebuilt here rather than
@@ -60,6 +63,68 @@ declare function dhapi:marine-corps($request as map(*)) {
 
 declare function dhapi:wwi($request as map(*)) {
     dhapi:render($request, "pages/departmenthistory-wwi")
+};
+
+declare %private function dhapi:monograph-toc($request as map(*), $publication as xs:string) {
+    vapi:html(map:merge((
+        $request,
+        map {
+            "parameters": map:merge((
+                $request?parameters,
+                map {
+                    "file": "pages/departmenthistory-monograph-toc",
+                    "publication": $publication
+                }
+            ))
+        }
+    )))
+};
+
+declare function dhapi:short-history($request as map(*)) {
+    dhapi:monograph-toc($request, "short-history")
+};
+
+declare function dhapi:buildings($request as map(*)) {
+    dhapi:monograph-toc($request, "buildings")
+};
+
+(:~
+ : Short History and Buildings (#1135) are single-file monographs -- every
+ : chapter/subchapter lives in the one document, so unlike
+ : hsgapi:view-interior there is no per-division file to resolve a docid to.
+ : Locate the division by @xml:id directly and pass it as a template
+ : parameter; the template hands it to page:transform itself (see
+ : dh:monograph-doc / dh:monograph-divisions).
+ :)
+declare %private function dhapi:monograph-section($request as map(*), $publication as xs:string) {
+    let $sectionId := $request?parameters?sectionId
+    let $doc := dh:monograph-doc($publication)
+    let $division := dh:monograph-division($doc, $sectionId)
+    return
+        if (count($division) ne 1) then
+            error($errors:NOT_FOUND, "no section " || $sectionId || " in " || $publication)
+        else
+            vapi:html(map:merge((
+                $request,
+                map {
+                    "parameters": map:merge((
+                        $request?parameters,
+                        map {
+                            "file": "pages/departmenthistory-monograph-section",
+                            "publication": $publication,
+                            "sectionId": $sectionId
+                        }
+                    ))
+                }
+            )))
+};
+
+declare function dhapi:short-history-section($request as map(*)) {
+    dhapi:monograph-section($request, "short-history")
+};
+
+declare function dhapi:buildings-section($request as map(*)) {
+    dhapi:monograph-section($request, "buildings")
 };
 
 (:~
