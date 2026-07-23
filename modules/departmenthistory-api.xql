@@ -244,6 +244,24 @@ declare function dhapi:people-by-year-year($request as map(*)) {
                     dhapi:render($request, "pages/departmenthistory-people-by-year-year")
 };
 
+declare function dhapi:principal-officers($request as map(*)) {
+    dhapi:render($request, "pages/departmenthistory-principal-officers")
+};
+
+(:~
+ : Rework note (#1139): the old site's unknown-roleId route rendered an
+ : empty 200 page; 404 instead, same normalization as #1137/#1138's
+ : unknown-letter/out-of-range-year handling.
+ :)
+declare function dhapi:principal-officers-role($request as map(*)) {
+    let $roleId := $request?parameters?roleId
+    return
+        if (empty(dh:principal-position-doc($roleId))) then
+            error($errors:NOT_FOUND, "no principal-officer role " || $roleId)
+        else
+            dhapi:render($request, "pages/departmenthistory-principal-officers-role")
+};
+
 (:~
  : Wrap the jinks-owned vapi:handle-error, which renders the error page but
  : hardcodes HTTP 200, so a missing page still reports success to crawlers and

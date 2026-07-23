@@ -330,33 +330,33 @@ declare function dh:person-name($person as element(person)?) as xs:string {
  : entries, exactly one (James Monroe's second term, 1815) carries
  : @treatAsConsecutive="yes" -- the two entries have a real gap between them
  : (1814-09-30 to 1815-02-28) but are displayed as one continuous term.
- : Recursion depth is bounded by how many consecutive entries chain
- : together, which in the observed data is never more than two.
+ : Generic across every positions-principals record (#1139 reuses this for
+ : every role, not just Secretary), not just secretary.xml.
  :)
-declare %private function dh:secretary-chain-end($principal as element(principal), $following as element(principal)*) as element(principal) {
+declare %private function dh:principal-chain-end($principal as element(principal), $following as element(principal)*) as element(principal) {
     if (exists($following) and $following[1]/@treatAsConsecutive = 'yes') then
-        dh:secretary-chain-end($following[1], subsequence($following, 2))
+        dh:principal-chain-end($following[1], subsequence($following, 2))
     else
         $principal
 };
 
 (:~
- : Ordered list of Secretaries of State (#1136), each entry's year range
- : computed via dh:secretary-chain-end -- consecutive terms merge into one
- : entry, non-consecutive re-appointments (several Secretaries served
- : non-adjacent terms without the flag) each get their own. No end date
- : (@current) renders as "-present".
+ : Chronological officeholder list for one principal-position record, each
+ : entry's year range computed via dh:principal-chain-end -- consecutive
+ : terms merge into one entry, non-consecutive re-appointments (several
+ : Secretaries served non-adjacent terms without the flag) each get their
+ : own. No end date (still serving) renders as "-present". Shared by #1136
+ : (secretary.xml specifically) and #1139 (every principal-position role).
  :)
-declare function dh:secretaries($context as map(*)) as element(ol) {
-    let $doc := doc($dh:POCOM_COL || "/positions-principals/secretary.xml")
-    let $principals := $doc//principals/principal
+declare function dh:principal-position-officeholders($context as map(*), $position as element(principal-position)) as element(ol) {
+    let $principals := $position/principals/principal
     return
         <ol class="usa-prose">
         {
             for $p at $pos in $principals
             where not($p/@treatAsConsecutive = 'yes')
             let $following := subsequence($principals, $pos + 1)
-            let $chain-end := dh:secretary-chain-end($p, $following)
+            let $chain-end := dh:principal-chain-end($p, $following)
             let $person := dh:person-doc($p/person-id)
             let $start-year := substring($p/started/date, 1, 4)
             let $end-date := normalize-space($chain-end/ended/date)
@@ -368,6 +368,10 @@ declare function dh:secretaries($context as map(*)) as element(ol) {
                 </li>
         }
         </ol>
+};
+
+declare function dh:secretaries($context as map(*)) as element(ol) {
+    dh:principal-position-officeholders($context, doc($dh:POCOM_COL || "/positions-principals/secretary.xml")/principal-position)
 };
 
 (:~
@@ -795,4 +799,84 @@ declare function dh:people-by-year-breadcrumb($context as map(*), $year as xs:in
             dh:breadcrumb($context, $trail)
         else
             dh:breadcrumb($context, ($trail, map { "label": xs:string($year) }))
+};
+
+(:~
+ : #1139. Positions grouped by the role-category code table, in the code
+ : table's own order (Secretaries, Assistant Secretaries, Deputy
+ : Secretaries, Under Secretaries, Ambassadors at Large, ... Discontinued);
+ : "country" and "international-organization" categories excluded per the
+ : ticket -- those are #1140's chiefs-of-mission roles, confirmed by
+ : checking role-category-codes.xml directly (11 categories total, these
+ : two are the only ones missions-countries/missions-orgs data uses).
+ :)
+declare function dh:principal-officers-index($context as map(*)) as element(div) {
+    let $categories := doc($dh:POCOM_COL || "/code-tables/role-category-codes.xml")//item[not(value = ('country', 'international-organization'))]
+    return
+        <div class="principal-officers-index">
+        {
+            for $cat in $categories
+            let $positions :=
+                for $pp in collection($dh:POCOM_COL || "/positions-principals")/principal-position[category = $cat/value]
+                order by $pp/names/plural
+                return $pp
+            where exists($positions)
+            return
+                <section>
+                    <h2>{normalize-space($cat/label)}</h2>
+                    <ul class="usa-list">
+                    {
+                        for $pp in $positions
+                        return
+                            <li>
+                                <a href="{$context?context-path}/departmenthistory/people/principalofficers/{$pp/id}">{normalize-space($pp/names/plural)}</a>
+                            </li>
+                    }
+                    </ul>
+                </section>
+        }
+        </div>
+};
+
+declare function dh:principal-position-doc($roleId as xs:string) as element(principal-position)? {
+    let $path := $dh:POCOM_COL || "/positions-principals/" || $roleId || ".xml"
+    return if (doc-available($path)) then doc($path)/principal-position else ()
+};
+
+(:~
+ : A record's <description> is quasi-rich-text (div/p/hi only, confirmed by
+ : scanning every positions-principals description's element vocabulary) --
+ : not TEI, so no ODD applies, but structured enough to walk directly rather
+ : than treat as opaque. hi -> em is the only element with no direct HTML
+ : equivalent; div/p pass through unchanged.
+ :)
+declare function dh:render-record-richtext($nodes as node()*) as node()* {
+    for $n in $nodes
+    return
+        typeswitch($n)
+            case element(div) return <div>{dh:render-record-richtext($n/node())}</div>
+            case element(p) return <p>{dh:render-record-richtext($n/node())}</p>
+            case element(hi) return <em>{dh:render-record-richtext($n/node())}</em>
+            case text() return $n
+            default return dh:render-record-richtext($n/node())
+};
+
+declare function dh:principal-officers-role-content($context as map(*)) as element()+ {
+    let $roleId := $context?request?parameters?roleId
+    let $position := dh:principal-position-doc($roleId)
+    return (
+        <h1>{normalize-space($position/names/plural)}</h1>,
+        dh:render-record-richtext($position/description/div),
+        dh:principal-position-officeholders($context, $position)
+    )
+};
+
+declare function dh:principal-officers-breadcrumb($context as map(*)) as element(li)+ {
+    let $roleId := $context?request?parameters?roleId
+    let $trail := (map { "label": "People", "href": "/departmenthistory/people" }, map { "label": "Principal Officers", "href": "/departmenthistory/people/principalofficers" })
+    return
+        if (empty($roleId)) then
+            dh:breadcrumb($context, $trail)
+        else
+            dh:breadcrumb($context, ($trail, map { "label": normalize-space(dh:principal-position-doc($roleId)/names/plural) }))
 };

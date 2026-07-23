@@ -371,6 +371,48 @@
                     }
                 }
             }
+        },
+        "/departmenthistory/people/principalofficers": {
+            "get": {
+                "summary": "Principal officer positions grouped by category",
+                "operationId": "dhapi:principal-officers",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/departmenthistory/people/principalofficers/{roleId}": {
+            "get": {
+                "summary": "Principal officer position: description and chronological officeholder list",
+                "operationId": "dhapi:principal-officers-role",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "parameters": [
+                    {
+                        "name": "roleId",
+                        "in": "path",
+                        "description": "positions-principals record id",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "The role was not found",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
         }
     },
     "servers": [
