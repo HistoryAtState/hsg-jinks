@@ -3,8 +3,7 @@
     {
         "templating": {
             "modules": {
-                "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" },
-                "https://history.state.gov/ns/templates/countries": { "at": "modules/templates/countries.xqm", "prefix": "countries" }
+                "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
             },
             "extends": "templates/layouts/base.html"
         },
@@ -25,20 +24,7 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul>
-                [[
-                    (: A page-level "template breadcrumb" override does not take effect here --
-                       verified empirically (#1095): a page extending this layout and redefining
-                       "template breadcrumb" itself still renders *this* definition, not its own,
-                       so per-section breadcrumb logic has to be dispatched from here rather than
-                       overridden from the page template. hsg:collection-breadcrumbs is FRUS-only
-                       (walks $config:data-default); countries:breadcrumbs covers the other TEI
-                       section built on this same shared layout so far (rdcr/wwdai, #1095). Add
-                       further sections' dispatch here as they land on hsg-content.html too. :)
-                    if (starts-with($context?doc?path, "/db/apps/rdcr/") or starts-with($context?doc?path, "/db/apps/wwdai/")) then
-                        countries:breadcrumbs($context)
-                    else
-                        hsg:collection-breadcrumbs($context)
-                ]]
+                [[ hsg:collection-breadcrumbs($context) ]]
             </ul>
         </nav>
     </li>

@@ -1,0 +1,42 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/countries": { "at": "modules/templates/countries.xqm", "prefix": "countries" }
+            },
+            "extends": "templates/layouts/base.html"
+        },
+        "theme": {
+            "layout": {
+                "class": "sticky-layout"
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    [% if exists($context?doc) %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ countries:breadcrumbs($context) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endif %]
+    [% endtemplate %]
+
+    [% template footer %]
+    [% include "templates/footer.html" %]
+    [% endtemplate %]
+
+    <main>
+        [% block above-content %][% endblock %]
+        <!-- Content block -->
+        [% block content %][% endblock %]
+        [% block below-content %][% endblock %]
+    </main>
+    [% if exists($context?doc) %]
+    <pb-document id="document1" path="[[ $context?doc?path ]]" odd="[[ $context?doc?odd ]]" view="[[ $context?doc?view ]]" root-path="[[ $config:data-root ]]" source-view="[[ $page:EXIDE ]]"></pb-document>
+    [% endif %]
+</template>
