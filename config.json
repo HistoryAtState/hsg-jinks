@@ -12,6 +12,9 @@
   "label" : "hsg-jinks",
   "odds" : [ "hsg-jinks.odd" ],
   "id" : "https://e-editiones.org/apps/hsg-jinks",
+  "data" : {
+    "landing" : "/db/apps/hsg-jinks/data/landing/landing.xml"
+  },
   "defaults" : {
     "data" : "/db/apps/frus-data-jinks/data",
     "data-default" : "Publications",
@@ -33,7 +36,7 @@
     "id" : "http://teipublisher.com/api/hsg",
     "path" : "hsg-api.xql"
   } ],
-  "extends" : [ "base10", "docker", "profile-theme-uswds" ],
+  "extends" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
   "pkg" : {
     "abbrev" : "hsg-jinks"
   },
