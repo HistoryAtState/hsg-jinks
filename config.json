@@ -37,6 +37,16 @@
     "path" : "hsg-api.xql"
   } ],
   "extends" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
+  "skip" : [
+    "^data/landing/landing\\.xml",
+    "^resources/images/team/",
+    "^resources/images/(typewriter[12]|books|header-bg|paper-texture)\\.jpg",
+    "^resources/images/type\\.jpeg",
+    "^resources/images/gplv3-rounded-grey-180x60\\.jpg",
+    "^resources/images/(tei-with-text|e-editiones-logo-color|jinntec|tei-publisher-logo-color|arrow-right)\\.svg",
+    "^resources/scripts/header\\.js",
+    "^test/cypress/e2e/gui/landing-page\\.cy\\.js"
+  ],
   "pkg" : {
     "abbrev" : "hsg-jinks"
   },
