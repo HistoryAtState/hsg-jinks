@@ -199,6 +199,26 @@ declare function dhapi:person($request as map(*)) {
                     error($errors:NOT_FOUND, "no person " || $personId)
 };
 
+declare function dhapi:people-by-name($request as map(*)) {
+    dhapi:render($request, "pages/departmenthistory-people-by-name")
+};
+
+(:~
+ : Rework note (#1137): the old site's letter route raises a raw
+ : collection-not-found error (400) on an id outside a-z; validate against
+ : dh:people-letters (only letters that actually have people) and 404
+ : instead, the same normalization #1134/#1135 already did for unknown
+ : section ids.
+ :)
+declare function dhapi:people-by-name-letter($request as map(*)) {
+    let $letter := $request?parameters?letter
+    return
+        if (not($letter = dh:people-letters())) then
+            error($errors:NOT_FOUND, "no people starting with letter " || $letter)
+        else
+            dhapi:render($request, "pages/departmenthistory-people-by-name-letter")
+};
+
 (:~
  : Wrap the jinks-owned vapi:handle-error, which renders the error page but
  : hardcodes HTTP 200, so a missing page still reports success to crawlers and

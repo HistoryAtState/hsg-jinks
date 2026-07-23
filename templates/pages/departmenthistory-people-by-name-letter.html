@@ -1,0 +1,32 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/departmenthistory": { "at": "modules/templates/departmenthistory.xqm", "prefix": "dh" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ dh:people-by-name-breadcrumb($context, $context?request?parameters?letter) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="usa-prose">
+        <h1>Starting with [[ upper-case($context?request?parameters?letter) ]]</h1>
+        [[ dh:people-by-name-nav($context, $context?request?parameters?letter) ]]
+        [[ dh:people-list($context, dh:people-by-letter($context?request?parameters?letter)) ]]
+        [[ dh:people-by-name-prev-next($context, $context?request?parameters?letter) ]]
+    </div>
+
+    [% template after %]
+    [% include "templates/departmenthistory-sidebar.html" %]
+    [% endtemplate %]
+</template>

@@ -287,6 +287,48 @@
                     }
                 }
             }
+        },
+        "/departmenthistory/people/by-name": {
+            "get": {
+                "summary": "People by name: A-Z letter index",
+                "operationId": "dhapi:people-by-name",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/departmenthistory/people/by-name/{letter}": {
+            "get": {
+                "summary": "People by name: all people whose surname starts with the given letter",
+                "operationId": "dhapi:people-by-name-letter",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "parameters": [
+                    {
+                        "name": "letter",
+                        "in": "path",
+                        "description": "Single lowercase letter",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "No people start with that letter",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
         }
     },
     "servers": [

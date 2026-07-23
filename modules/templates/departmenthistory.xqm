@@ -540,3 +540,114 @@ declare function dh:person-body($context as map(*)) as element()+ {
         else
             dh:person-service-record($personId)
 };
+
+(:~
+ : #1137/#1138 share this: the A-Z browse (surname-initial subcollections)
+ : and the chronological browse (all role date ranges) both list people with
+ : the same per-person nested role summary. dh:person-service-record, built
+ : for #1141's own page, is that one shared formatter -- the ticket's own
+ : "extract one formatter" instruction, done by reuse rather than a new
+ : function.
+ :)
+
+(:~
+ : People are stored in per-surname-initial subcollections
+ : (pocom/people/{a..z}), one eXist collection listing rather than
+ : hsg-shell's distinct-values() scan over every surname in the 4,260-person
+ : collection -- same result (confirmed: 25 letters present, no "x"), cheaper
+ : to compute.
+ :)
+declare function dh:people-letters() as xs:string* {
+    for $letter in xmldb:get-child-collections($dh:POCOM_COL || "/people")
+    order by $letter
+    return $letter
+};
+
+declare function dh:people-by-letter($letter as xs:string) as element(person)* {
+    for $person in collection($dh:POCOM_COL || "/people/" || $letter)/person
+    order by $person/id
+    return $person
+};
+
+(:~
+ : Career-officer marker (career-type = 'career' or 'both'), a plain "*"
+ : prefix matching hsg-shell's pocom:format-index. Shared by the by-name and
+ : by-year listings.
+ :)
+declare function dh:people-list($context as map(*), $people as element(person)*) as element(ul) {
+    <ul class="usa-collection">
+    {
+        for $person in $people
+        let $marker := if ($person/career-type = ('career', 'both')) then '* ' else ()
+        return
+            <li class="usa-collection__item">
+                <div class="usa-collection__body">
+                    <h3 class="usa-collection__heading">
+                        <a href="{$context?context-path}/departmenthistory/people/{$person/id}">{$marker}{dh:person-name-birth-death($person)}</a>
+                    </h3>
+                    {dh:person-service-record($person/id/string())}
+                </div>
+            </li>
+    }
+    </ul>
+};
+
+(:~
+ : Letter pills for the by-name index and every listing page's own
+ : navigation -- only letters with people, not a fixed A-Z run (matches
+ : hsg-shell's pocom:letters; #1140's country/org index pages have their own
+ : separate concerns and don't reuse this).
+ :)
+declare function dh:people-by-name-nav($context as map(*), $current as xs:string?) as element(ul) {
+    <ul class="usa-button-group">
+    {
+        for $letter in dh:people-letters()
+        return
+            <li class="usa-button-group__item">
+                <a class="usa-button usa-button--outline{if ($letter = $current) then ' usa-current' else ()}" href="{$context?context-path}/departmenthistory/people/by-name/{$letter}">{upper-case($letter)}</a>
+            </li>
+    }
+    </ul>
+};
+
+declare function dh:people-by-name-prev-next($context as map(*), $letter as xs:string) as element(nav)? {
+    let $letters := dh:people-letters()
+    let $pos := index-of($letters, $letter)[1]
+    let $prev := if ($pos > 1) then $letters[$pos - 1] else ()
+    let $next := if ($pos < count($letters)) then $letters[$pos + 1] else ()
+    return
+        if (empty($prev) and empty($next)) then ()
+        else
+            <nav aria-label="Pagination" class="usa-pagination">
+                <ul class="usa-pagination__list">
+                {
+                    if (exists($prev)) then
+                        <li class="usa-pagination__item usa-pagination__arrow">
+                            <a href="{$context?context-path}/departmenthistory/people/by-name/{$prev}" class="usa-pagination__link usa-pagination__previous-page">
+                                <pb-i18n key="odd.previous">Previous</pb-i18n> ({upper-case($prev)})
+                            </a>
+                        </li>
+                    else (),
+                    if (exists($next)) then
+                        <li class="usa-pagination__item usa-pagination__arrow">
+                            <a href="{$context?context-path}/departmenthistory/people/by-name/{$next}" class="usa-pagination__link usa-pagination__next-page">
+                                <pb-i18n key="odd.next">Next</pb-i18n> ({upper-case($next)})
+                            </a>
+                        </li>
+                    else ()
+                }
+                </ul>
+            </nav>
+};
+
+declare function dh:people-by-name-breadcrumb($context as map(*), $letter as xs:string?) as element(li)+ {
+    let $trail := (
+        map { "label": "People", "href": "/departmenthistory/people" },
+        map { "label": "By Name", "href": "/departmenthistory/people/by-name" }
+    )
+    return
+        if (empty($letter)) then
+            dh:breadcrumb($context, $trail)
+        else
+            dh:breadcrumb($context, ($trail, map { "label": "Starting with " || upper-case($letter) }))
+};
