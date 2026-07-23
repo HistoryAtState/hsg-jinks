@@ -130,6 +130,34 @@
                 }
             }
         },
+        "/departmenthistory/diplomatic-couriers/{filmId}": {
+            "get": {
+                "summary": "Diplomatic courier film page",
+                "operationId": "dhapi:courier-film",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "parameters": [
+                    {
+                        "name": "filmId",
+                        "in": "path",
+                        "description": "ID of the film (one of the four literal film ids)",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "The film was not found",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
         "/departmenthistory/short-history": {
             "get": {
                 "summary": "Short History table of contents",

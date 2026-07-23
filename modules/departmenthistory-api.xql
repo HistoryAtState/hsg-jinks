@@ -65,6 +65,24 @@ declare function dhapi:wwi($request as map(*)) {
     dhapi:render($request, "pages/departmenthistory-wwi")
 };
 
+(:~
+ : The four film ids the old controller enumerated (#1146's rework note): a
+ : fixed literal whitelist, not a collection scan -- there is no data
+ : collection backing these pages, they are four hand-authored templates.
+ :)
+declare variable $dhapi:COURIER_FILMS := (
+    "through-the-khyber-pass", "behind-the-iron-curtain", "into-moscow", "before-the-jet-age"
+);
+
+declare function dhapi:courier-film($request as map(*)) {
+    let $filmId := $request?parameters?filmId
+    return
+        if (not($filmId = $dhapi:COURIER_FILMS)) then
+            error($errors:NOT_FOUND, "no diplomatic courier film " || $filmId)
+        else
+            dhapi:render($request, "pages/departmenthistory-courier-" || $filmId)
+};
+
 declare %private function dhapi:monograph-toc($request as map(*), $publication as xs:string) {
     vapi:html(map:merge((
         $request,

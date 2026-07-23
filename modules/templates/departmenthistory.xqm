@@ -30,6 +30,19 @@ declare function dh:monograph-short-title($doc as document-node()) as xs:string 
 };
 
 (:~
+ : Shared Brightcove embed for the four diplomatic-courier films (#1146). All
+ : four hsg-shell pages pasted the same account/player script tag with only
+ : the video-id differing -- one partial, video-id as data, instead of four
+ : copies of the embed markup (and its <script src> CSP liability).
+ :)
+declare function dh:courier-video($videoId as xs:string) as element(div) {
+    <div class="video-wrapper">
+        <video class="video-js" controls="controls" data-account="1705665025" data-application-id="" data-embed="default" data-player="HJ8lQG1Eg" data-video-id="{$videoId}"/>
+        <script src="https://players.brightcove.net/1705665025/HJ8lQG1Eg_default/index.min.js"/>
+    </div>
+};
+
+(:~
  : Resolve a division by @xml:id -- the one lookup dhapi:monograph-section's
  : 404 guard and dh:current-section's template-side re-resolution must agree
  : on exactly. Returns however many elements actually match (0, 1, or more,
