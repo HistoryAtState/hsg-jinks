@@ -52,6 +52,15 @@
     "^resources/scripts/header\\.js",
     "^test/cypress/e2e/gui/landing-page\\.cy\\.js"
   ],
+  "templating" : {
+    "use" : [ "templates/hsg-blocks.html" ],
+    "modules" : {
+      "http://history.state.gov/ns/templates/landing" : {
+        "prefix" : "hsg-landing",
+        "at" : "modules/templates/hsg-landing.xqm"
+      }
+    }
+  },
   "pkg" : {
     "abbrev" : "hsg-jinks"
   },
