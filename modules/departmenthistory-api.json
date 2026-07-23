@@ -561,6 +561,48 @@
                     }
                 }
             }
+        },
+        "/departmenthistory/visits": {
+            "get": {
+                "summary": "Visits by Foreign Leaders: by-year and by-country indexes",
+                "operationId": "dhapi:visits",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/departmenthistory/visits/{countryOrYear}": {
+            "get": {
+                "summary": "Visits for a given year or country of origin",
+                "operationId": "dhapi:visits-listing",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "parameters": [
+                    {
+                        "name": "countryOrYear",
+                        "in": "path",
+                        "description": "Four-digit year, or a country id",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "No visits for that year or country",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
         }
     },
     "servers": [

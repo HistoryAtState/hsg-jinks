@@ -1,0 +1,30 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/departmenthistory": { "at": "modules/templates/departmenthistory.xqm", "prefix": "dh" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ dh:visits-listing-breadcrumb($context) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="usa-prose">
+        <h1>[[ dh:visits-listing-title($context?request?parameters?countryOrYear) ]]</h1>
+        [[ dh:visits-listing-table($context?request?parameters?countryOrYear) ]]
+    </div>
+
+    [% template after %]
+    [% include "templates/departmenthistory-sidebar.html" %]
+    [% endtemplate %]
+</template>

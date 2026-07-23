@@ -331,6 +331,30 @@ declare function dhapi:travels-secretary-listing($request as map(*)) {
                     error($errors:NOT_FOUND, "no secretary or destination country " || $id)
 };
 
+declare function dhapi:visits($request as map(*)) {
+    dhapi:render($request, "pages/departmenthistory-visits")
+};
+
+(:~
+ : Rework note (#1145): the old site rendered an empty 200 with an empty
+ : title for an unknown key; 404 instead. A key is valid if it's a year with
+ : at least one visit, or a country id with at least one visit -- an
+ : out-of-range decade file simply doesn't exist (doc() returns empty), so
+ : dh:visits-by-year naturally comes back empty for those too, no separate
+ : range check needed.
+ :)
+declare function dhapi:visits-listing($request as map(*)) {
+    let $key := $request?parameters?countryOrYear
+    return
+        if (
+            (dh:visits-is-year($key) and exists(dh:visits-by-year(xs:integer($key))))
+            or (not(dh:visits-is-year($key)) and exists(dh:visits-by-country($key)))
+        ) then
+            dhapi:render($request, "pages/departmenthistory-visits-listing")
+        else
+            error($errors:NOT_FOUND, "no visits for " || $key)
+};
+
 (:~
  : Wrap the jinks-owned vapi:handle-error, which renders the error page but
  : hardcodes HTTP 200, so a missing page still reports success to crawlers and

@@ -1346,3 +1346,141 @@ declare function dh:travels-listing-breadcrumb($context as map(*), $role as xs:s
         map { "label": dh:travels-listing-title($role, $id) }
     ))
 };
+
+(:~
+ : #1144/#1145. Visits data is decade-bucketed (16 files, visits/data/1870.xml
+ : .. 2020.xml, each covering ten years -- confirmed live: 1970.xml holds
+ : dates from 1970 through 1979), unlike travels' one-file-per-person.
+ : Reuses dh:humanize-date-range unchanged.
+ :)
+declare function dh:visits-decade-file($year as xs:integer) as xs:string {
+    $dh:VISITS_COL || "/" || (($year idiv 10) * 10) || ".xml"
+};
+
+declare function dh:visits-is-year($key as xs:string) as xs:boolean {
+    matches($key, '^\d{4}')
+};
+
+(:~
+ : "Last updated" derived from the data (#1144's rework note -- hsg-shell
+ : hand-edited this line): the latest last-modified-datetime across every
+ : visit record. A handful of records have an empty last-modified-datetime
+ : (confirmed live -- casting the raw sequence to xs:dateTime throws
+ : FORG0001), filtered out rather than erroring the whole page.
+ :)
+declare function dh:visits-last-updated() as xs:string {
+    let $latest := max(
+        for $d in collection($dh:VISITS_COL)/visits/visit/last-modified-datetime
+        where normalize-space($d) castable as xs:dateTime
+        return xs:dateTime($d)
+    )
+    return format-dateTime($latest, '[MNn] [Y0001]', 'en', (), 'US')
+};
+
+declare function dh:visits-years($context as map(*)) as element(ul) {
+    let $years := distinct-values(
+        for $date in collection($dh:VISITS_COL)//(start-date | end-date)
+        where normalize-space($date) castable as xs:date
+        return year-from-date(xs:date($date))
+    )
+    return
+        <ul class="usa-collection">
+        {
+            for $year in $years
+            order by $year
+            return
+                <li class="usa-collection__item"><a href="{$context?context-path}/departmenthistory/visits/{$year}">{$year}</a></li>
+        }
+        </ul>
+};
+
+(:~
+ : Distinct visitor-origin labels, each linking to its @id -- or, when a
+ : record's <from> carries no @id (none in the current data, but the
+ : ticket calls this case out explicitly), marked with a trailing "*"
+ : instead of a link, matching hsg-shell's visits:countries exactly.
+ :)
+declare function dh:visits-countries($context as map(*)) as element(ul) {
+    let $allFrom := collection($dh:VISITS_COL)/visits/visit/from
+    let $labels := distinct-values($allFrom)
+    return
+        <ul class="usa-collection">
+        {
+            for $label in $labels
+            let $id := normalize-space(($allFrom[. = $label])[1]/@id)
+            order by $label
+            return
+                <li class="usa-collection__item">
+                {
+                    if ($id != '') then
+                        <a href="{$context?context-path}/departmenthistory/visits/{$id}">{$label}</a>
+                    else
+                        ($label, ' *')
+                }
+                </li>
+        }
+        </ul>
+};
+
+declare function dh:visits-by-year($year as xs:integer) as element(visit)* {
+    for $visit in doc(dh:visits-decade-file($year))/visits/visit[year-from-date(xs:date(start-date)) = $year]
+    order by $visit/start-date
+    return $visit
+};
+
+declare function dh:visits-by-country($countryId as xs:string) as element(visit)* {
+    for $visit in collection($dh:VISITS_COL)/visits/visit[from/@id = $countryId]
+    order by $visit/start-date
+    return $visit
+};
+
+declare function dh:visits-table($visits as element(visit)*, $suppressFrom as xs:boolean) as element(table) {
+    <table class="usa-table usa-table--striped usa-table--stacked">
+        <thead>
+            <tr>
+                <th scope="col">Visitor</th>
+                {if ($suppressFrom) then () else <th scope="col">From</th>}
+                <th scope="col">Description</th>
+                <th scope="col">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+        {
+            for $visit in $visits
+            return
+                <tr>
+                    <td data-label="Visitor">{normalize-space($visit/visitor)}</td>
+                    {if ($suppressFrom) then () else <td data-label="From">{normalize-space($visit/from)}</td>}
+                    <td data-label="Description">{normalize-space($visit/description)}</td>
+                    <td data-label="Date">{dh:humanize-date-range(normalize-space($visit/start-date), normalize-space($visit/end-date))}</td>
+                </tr>
+        }
+        </tbody>
+    </table>
+};
+
+declare function dh:visits-listing-title($key as xs:string) as xs:string {
+    if (dh:visits-is-year($key)) then
+        "Visits By Foreign Leaders in " || $key
+    else
+        "Visits By Foreign Leaders of " || normalize-space(dh:visits-by-country($key)[last()]/from)
+};
+
+declare function dh:visits-listing-table($key as xs:string) as element(table) {
+    if (dh:visits-is-year($key)) then
+        dh:visits-table(dh:visits-by-year(xs:integer($key)), false())
+    else
+        dh:visits-table(dh:visits-by-country($key), true())
+};
+
+declare function dh:visits-index-breadcrumb($context as map(*)) as element(li)+ {
+    dh:breadcrumb($context, (map { "label": "Visits by Foreign Leaders" }))
+};
+
+declare function dh:visits-listing-breadcrumb($context as map(*)) as element(li)+ {
+    let $key := $context?request?parameters?countryOrYear
+    return dh:breadcrumb($context, (
+        map { "label": "Visits by Foreign Leaders", "href": "/departmenthistory/visits" },
+        map { "label": dh:visits-listing-title($key) }
+    ))
+};
