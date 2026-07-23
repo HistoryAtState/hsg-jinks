@@ -57,6 +57,14 @@ instance: `CYPRESS_BASE_URL=$(worktree port) npx cypress run --spec <path>`.
 For one-off measurements (not a permanent regression test), write a throwaway
 spec under `test/cypress/e2e/gui/`, run it, read the result, then delete it.
 
+**`xst`'s own config can silently point at 8080.** `xst` reads `~/.xstrc` (a
+personal, machine-wide file, separate from this repo's `.existdb.json`) for its
+default host/port, and it may default to 8080. Do not edit `~/.xstrc` — it's
+outside this repo and may be shared by other projects/checkouts. Instead keep a
+repo-local `.xstrc` here (already gitignored) pointing at the correct devcontainer
+port, and invoke deploys as `xst --config .xstrc package install ...` rather than
+bare `xst package install ...`.
+
 ## Prefer XQuery over Python for one-off scripting
 
 When writing throwaway scripts to inspect, transform, or validate data in this

@@ -60,14 +60,26 @@ declare function dh:monograph-division($doc as document-node(), $sectionId as xs
  : (chapter > subchapter) while buildings is one flat level (section), so the
  : traversal follows actual DOM nesting rather than assumed type values.
  :
- : An un-id'd division (short-history's lead-in subchapters, the old app's
- : hardcoded "intro" section-id for buildings -- ticket #1134's rework note)
- : is skipped rather than special-cased: it has no id to link to, and its
- : content still reaches the reader because it is nested inside its
- : addressable ancestor's div, which page:transform renders in full.
+ : Walks front/body/back, not body alone: buildings has front matter
+ : (intro, foreword -- both carry a real @xml:id, contrary to this
+ : function's first version, which assumed the old app's hardcoded "intro"
+ : section-id meant the division had none) and back matter (a numbered
+ : section continuing body's own sequence). Found live, the hard way: a
+ : Cypress acceptance spec (#1149) clicking through the TOC never reached
+ : "intro" because the traversal stopped at body, even though
+ : /buildings/intro itself resolved fine (dh:monograph-division searches the
+ : whole document, not body-scoped) -- the section existed and rendered, but
+ : nothing linked to it. short-history has no front/back (confirmed:
+ : grepping its source for those elements finds none), so this is a no-op
+ : widening for that document.
+ :
+ : An un-id'd division (short-history's lead-in subchapters) is skipped
+ : rather than special-cased: it has no id to link to, and its content still
+ : reaches the reader because it is nested inside its addressable ancestor's
+ : div, which page:transform renders in full.
  :)
 declare function dh:monograph-divisions($doc as document-node()) as element(tei:div)* {
-    $doc//tei:body//tei:div[@xml:id]
+    $doc//(tei:front | tei:body | tei:back)//tei:div[@xml:id]
 };
 
 (:~
@@ -76,10 +88,11 @@ declare function dh:monograph-divisions($doc as document-node()) as element(tei:
  : short-history's chapter > subchapter goes two levels -- buildings is
  : flat). Reused as both the TOC page's main content (#1134) and the section
  : page's left sidebar (#1135, marks $current) -- one traversal, two
- : placements, same reasoning as hsg:volume-toc.
+ : placements, same reasoning as hsg:volume-toc. Walks front/body/back's
+ : own top-level divisions, same reasoning as dh:monograph-divisions above.
  :)
 declare function dh:monograph-toc($context as map(*), $doc as document-node(), $route as xs:string, $current as xs:string?) as element(ul) {
-    dh:monograph-toc-level($context, $doc/tei:TEI/tei:text/tei:body/tei:div, $route, $current, "usa-sidenav")
+    dh:monograph-toc-level($context, $doc/tei:TEI/tei:text/(tei:front | tei:body | tei:back)/tei:div, $route, $current, "usa-sidenav")
 };
 
 declare %private function dh:monograph-toc-level($context as map(*), $divisions as element(tei:div)*, $route as xs:string, $current as xs:string?, $listClass as xs:string) as element(ul) {
@@ -235,11 +248,25 @@ declare function dh:monograph-section-sidebar($context as map(*)) as element(nav
  : and head/p/graphic/hi already fall through to teipublisher.odd with no
  : override in this app's ODD.
  :
- : No separate <h1> here: teipublisher.odd already renders the division's own
- : <head> as the top heading of whatever subtree it's handed (confirmed live
- : -- passing $division re-bases heading levels from that node, not from its
- : absolute depth in the full document), so adding one here just duplicated
- : it.
+ : Explicit <h1> from the division's own <head> text, with that same <head>
+ : element stripped from the copy handed to page:transform. An earlier
+ : version relied on teipublisher.odd rendering the division's own <head>
+ : as the page's heading and skipped adding one here to avoid a duplicate --
+ : true for a top-level chapter (its head came out <h1>), but false for a
+ : subchapter one level deeper in the source: its head rendered as <h2>,
+ : found live via a Cypress acceptance spec (#1149) asserting on "main h1"
+ : after clicking Next from a chapter into its first subchapter, which
+ : failed because there was no h1 at all on that page. Heading level tracks
+ : the division's *absolute* nesting depth in the source document, not the
+ : depth relative to whatever node page:transform was handed -- passing
+ : $division doesn't re-base it, contrary to what one data point (a
+ : chapter, always at the same depth as every other chapter) suggested.
+ : Stripping the division's own head and supplying <h1> directly sidesteps
+ : the level question entirely: every section page gets exactly one real
+ : <h1>, and content nested inside (e.g. a subchapter's own head, seen when
+ : viewing its parent chapter) still renders at whatever level the ODD
+ : assigns it, which is correct there -- only the page's own top heading
+ : needs to be forced to <h1>.
  :
  : Known gap: graphics carry bare filenames (e.g. "sh-jmonroe.jpg") with no
  : base URI fix yet -- tracked as data-transformation rework (#1147), not
@@ -247,7 +274,16 @@ declare function dh:monograph-section-sidebar($context as map(*)) as element(nav
  :)
 declare function dh:monograph-section-content($context as map(*)) as element()+ {
     let $s := dh:current-section($context)
-    return page:transform($s?division, map { "mode": "monograph-section" })
+    let $division := $s?division
+    let $ownHead := $division/tei:head[1]
+    let $bare := element { node-name($division) } {
+        $division/@*,
+        $division/node()[not(. is $ownHead)]
+    }
+    return (
+        <h1>{normalize-space($ownHead)}</h1>,
+        page:transform($bare, map { "mode": "monograph-section" })
+    )
 };
 
 declare function dh:monograph-section-pagination($context as map(*)) as element(nav)? {
