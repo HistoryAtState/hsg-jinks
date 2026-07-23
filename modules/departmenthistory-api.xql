@@ -4,6 +4,7 @@ module namespace dhapi="http://teipublisher.com/api/departmenthistory";
 
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors="http://e-editiones.org/roaster/errors";
+import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace dh="https://history.state.gov/ns/templates/departmenthistory" at "templates/departmenthistory.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
@@ -152,6 +153,50 @@ declare function dhapi:buildings-section($request as map(*)) {
  :)
 declare function dhapi:secretaries($request as map(*)) {
     dhapi:render($request, "pages/departmenthistory-secretaries")
+};
+
+(:~
+ : A 302 with a Location header, built by hand from the same raw
+ : router:RESPONSE_* QNames dhapi:handle-error already uses to rewrite a
+ : status code -- roaster.xqm's own roaster:response($code, $media-type,
+ : $body, $headers) constructor isn't imported here (nothing else in this
+ : module needs it), so this mirrors what it builds rather than pulling in
+ : the whole module for one call. Confirmed against roaster 1.9's
+ : router.xql: router:write-response reads RESPONSE_CODE, sets
+ : RESPONSE_HEADERS via response:set-header, then serializes RESPONSE_BODY
+ : under RESPONSE_TYPE -- an empty string body with a text/html type is a
+ : normal, empty redirect response.
+ :)
+declare %private function dhapi:redirect($url as xs:string) as map(*) {
+    map {
+        xs:QName("router:RESPONSE_CODE"): 302,
+        xs:QName("router:RESPONSE_HEADERS"): map { "Location": $url },
+        xs:QName("router:RESPONSE_TYPE"): "text/html",
+        xs:QName("router:RESPONSE_BODY"): ""
+    }
+};
+
+(:~
+ : #1141. Three outcomes: the id resolves to a real person -> render;
+ : the id is a recorded old-id -> 302 to the canonical id (60 old-ids on the
+ : devcontainer's data, per collection(...)/person[old-ids] -- ticket says
+ : 63, another instance-divergence case like #1136's, not re-litigated
+ : here); neither -> 404. dh:person-has-bio
+ : (checked again inside the template) decides the biography-vs-record-only
+ : layout; this handler only resolves which person is being requested.
+ :)
+declare function dhapi:person($request as map(*)) {
+    let $personId := $request?parameters?personId
+    return
+        if (exists(dh:person-doc($personId))) then
+            dhapi:render($request, "pages/departmenthistory-person")
+        else
+            let $canonical := dh:person-canonical-id-for-old-id($personId)
+            return
+                if (exists($canonical)) then
+                    dhapi:redirect($config:context-path || "/departmenthistory/people/" || $canonical)
+                else
+                    error($errors:NOT_FOUND, "no person " || $personId)
 };
 
 (:~

@@ -255,6 +255,38 @@
                     }
                 }
             }
+        },
+        "/departmenthistory/people/{personId}": {
+            "get": {
+                "summary": "Person page: POCOM service record, with a TEI biography for Secretaries who have one",
+                "operationId": "dhapi:person",
+                "x-error-handler": "dhapi:handle-error",
+                "tags": [ "departmenthistory" ],
+                "parameters": [
+                    {
+                        "name": "personId",
+                        "in": "path",
+                        "description": "POCOM person id, or a superseded old-id (302s to the canonical id)",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "302": {
+                        "description": "Redirect to the canonical id for a superseded old-id",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "The person was not found",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
         }
     },
     "servers": [

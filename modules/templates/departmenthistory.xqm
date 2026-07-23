@@ -369,3 +369,174 @@ declare function dh:secretaries($context as map(*)) as element(ol) {
         }
         </ol>
 };
+
+(:~
+ : #1141, the section's most complex page and its only TEI/record hybrid.
+ :
+ : Deliberately simplified against hsg-shell's pocom-html.xqm
+ : (format-roles/format-role/sort-roles, ~250 lines): every role this person
+ : held renders as its own chronological entry with a plain start-end year
+ : range, rather than grouping concurrent appointments into one entry with an
+ : auto-generated cross-accreditation summary, and country/org role dates use
+ : a single started/ended range rather than the full
+ : Appointed/Entry-on-Duty/Assumed-Charge/Presentation-of-Credentials/
+ : Termination label set that varies by role class. Both are real gaps versus
+ : the reference site, tracked here rather than silently matched -- fixing
+ : them needs concurrent-appointments joins and the role-class date-label
+ : rules, deferred rather than guessed at for this first pass.
+ :)
+
+(:~
+ : Bare-title-case display for a territory id ("united-kingdom" ->
+ : "United Kingdom"). A placeholder for the proper lookup #1140 needs (the
+ : gsh countries-old dataset resolves historical vs. contemporary territory
+ : names, e.g. a mission's territory-id may differ from its
+ : contemporary-territory-id) -- good enough to make a role entry readable
+ : without that dependency.
+ :)
+declare %private function dh:territory-label($territoryId as xs:string) as xs:string {
+    string-join(
+        for $word in tokenize($territoryId, '-')
+        return upper-case(substring($word, 1, 1)) || substring($word, 2),
+        ' '
+    )
+};
+
+(:~
+ : Every role a person held, across all three POCOM position collections,
+ : in chronological order. Three collection scans per person page -- fine at
+ : POCOM's size (83 principal positions + 199 country missions + 16 org
+ : missions, none large) but revisit if this page's latency becomes a
+ : problem.
+ :)
+declare function dh:person-roles($personId as xs:string) as map(*)* {
+    let $principal-roles :=
+        for $position in collection($dh:POCOM_COL || "/positions-principals")/principal-position
+        for $principal in $position/principals/principal[person-id = $personId]
+        return map {
+            "title": normalize-space($position/names/singular),
+            "start": $principal/started/date/string(),
+            "end": $principal/ended/date/string()
+        }
+    let $country-roles :=
+        for $mission in collection($dh:POCOM_COL || "/missions-countries")/country-mission
+        for $chief in $mission/chiefs/chief[person-id = $personId]
+        let $role-title := collection($dh:POCOM_COL || "/roles-country-chiefs")/role[id = $chief/role-title-id]/names/singular
+        return map {
+            "title": normalize-space($role-title) || " to " || dh:territory-label($mission/territory-id),
+            "start": $chief/started/date/string(),
+            "end": $chief/ended/date/string()
+        }
+    let $org-roles :=
+        for $org in collection($dh:POCOM_COL || "/missions-orgs")/org-mission
+        for $chief in $org/chiefs/chief[person-id = $personId]
+        return map {
+            "title": normalize-space($org/names/singular),
+            "start": $chief/started/date/string(),
+            "end": $chief/ended/date/string()
+        }
+    for $role in ($principal-roles, $country-roles, $org-roles)
+    order by $role?start
+    return $role
+};
+
+declare function dh:person-service-record($personId as xs:string) as element(ul) {
+    <ul class="usa-collection">
+    {
+        for $role in dh:person-roles($personId)
+        let $start-year := if (normalize-space($role?start) != '') then substring($role?start, 1, 4) else '?'
+        let $end-year := if (normalize-space($role?end) != '') then substring($role?end, 1, 4) else 'present'
+        return
+            <li class="usa-collection__item">
+                <div class="usa-collection__body">
+                    <h3 class="usa-collection__heading">{$role?title}</h3>
+                    <p class="usa-collection__meta">{$start-year}&#8211;{$end-year}</p>
+                </div>
+            </li>
+    }
+    </ul>
+};
+
+declare function dh:person-name-birth-death($person as element(person)?) as xs:string {
+    let $birth := normalize-space($person/birth)
+    let $death := normalize-space($person/death)
+    return dh:person-name($person)
+        || ' (' || (if ($birth != '') then $birth else '?')
+        || '&#8211;' || (if ($death != '') then $death else '?') || ')'
+};
+
+(:~
+ : Canonical id for a superseded old-id (#1141's 63-old-id 302 requirement),
+ : e.g. verveer-melanne's recorded old-id verveer-mellane. Same collection
+ : scan technique as dh:person-doc.
+ :)
+declare function dh:person-canonical-id-for-old-id($oldId as xs:string) as xs:string? {
+    collection($dh:POCOM_COL || "/people")/person[old-ids/old-id = $oldId][1]/id/string()
+};
+
+(:~
+ : Whether the person has a secretary-bios TEI biography (69 of them,
+ : filename = person-id). Drives the template's choice between the
+ : biography-as-main-content layout and the record-only layout with the
+ : hiatus notice -- kept in the template ([% if %] can't call into a
+ : template partial from XQuery) rather than folded into
+ : dh:person-page-content below.
+ :)
+declare function dh:person-has-bio($personId as xs:string) as xs:boolean {
+    doc-available($dh:OP_COL || "/secretary-bios/" || $personId || ".xml")
+};
+
+declare function dh:person-breadcrumb($context as map(*)) as element(li)+ {
+    let $personId := $context?request?parameters?personId
+    let $person := dh:person-doc($personId)
+    return dh:breadcrumb($context, (
+        map { "label": "People", "href": "/departmenthistory/people" },
+        map { "label": dh:person-name($person) }
+    ))
+};
+
+(:~
+ : Main content: the TEI biography (rendered through the base ODD's
+ : mode='division' pass-through, same technique as historicaldocuments'
+ : back-matter divisions -- a single-document, single-page article needs no
+ : new ODD work) plus the POCOM record as a sidebar summary when a biography
+ : exists; the POCOM record alone, as the page's main content, otherwise.
+ : dh:person-has-bio in the template decides which -- this function only
+ : renders whichever main-content body was asked for.
+ :)
+(:~
+ : Split from the body (below) so the template can insert the hiatus notice
+ : between the heading and the body on the no-bio branch, matching
+ : hsg-shell's layout -- name heading, then the notice, then the record.
+ :)
+declare function dh:person-heading($context as map(*)) as element(h1) {
+    let $personId := $context?request?parameters?personId
+    let $person := dh:person-doc($personId)
+    return
+        if (dh:person-has-bio($personId)) then
+            <h1>Biographies of the Secretaries of State: {dh:person-name-birth-death($person)}</h1>
+        else
+            <h1>{dh:person-name-birth-death($person)}</h1>
+};
+
+declare function dh:person-body($context as map(*)) as element()+ {
+    let $personId := $context?request?parameters?personId
+    return
+        if (dh:person-has-bio($personId)) then
+            let $bio := doc($dh:OP_COL || "/secretary-bios/" || $personId || ".xml")
+            return (
+                page:transform($bio/tei:TEI, map { "mode": "division" }),
+                <aside class="usa-card">
+                    <div class="usa-card__container">
+                        <div class="usa-card__header">
+                            <h2 class="usa-card__heading">From Principal Officers and Chiefs of Mission</h2>
+                        </div>
+                        <div class="usa-card__body">
+                            {dh:person-service-record($personId)}
+                        </div>
+                    </div>
+                </aside>
+            )
+        else
+            dh:person-service-record($personId)
+};
