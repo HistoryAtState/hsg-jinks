@@ -140,6 +140,13 @@
     [[content]]
 </div></pb:template>
         </model>
+                    <model predicate="@type='hero' and not(p) and not(list)" behaviour="pass-through">
+            <desc>Split hero: title band only, the media band is emitted by the template</desc>
+            <param name="heading" value="head/node()"/>
+            <pb:template xml:space="preserve"><div xmlns="" class="grid-container">
+  <h1>[[heading]]</h1>
+</div></pb:template>
+        </model>
                     <model predicate="@type='hero'" behaviour="pass-through">
             <param name="heading" value="head/node()"/>
             <param name="content" value="p/node()"/>
@@ -151,6 +158,47 @@
     <p>[[content]]</p>
     [[links]]
   </div>
+</div></pb:template>
+        </model>
+                    <model predicate="@type='intro'" behaviour="pass-through">
+            <desc>Landing intro band: lead paragraph plus action links</desc>
+            <param name="content" value="p"/>
+            <param name="links" value="list[@type='links']"/>
+            <pb:template xml:space="preserve"><div xmlns="" class="grid-container">
+  <div class="grid-row grid-gap">
+    <div class="tablet:grid-col-8">[[content]]</div>
+    <div class="tablet:grid-col-4">[[links]]</div>
+  </div>
+</div></pb:template>
+        </model>
+                    <model predicate="@type='publications'" behaviour="pass-through">
+            <desc>Latest-publications band: flag cards</desc>
+            <param name="header" value="head/node()"/>
+            <param name="link" value="ref[@type='section-link']"/>
+            <param name="content" value="list[@type='publications']/item"/>
+            <param name="actions" value="ref[@type='action']"/>
+            <pb:template xml:space="preserve"><div xmlns="" class="grid-container">
+  <div class="section-header">
+    <h2>[[header]]</h2>
+    [[link]]
+  </div>
+  <ul class="usa-card-group">[[content]]</ul>
+  <div class="section-actions">[[actions]]</div>
+</div></pb:template>
+        </model>
+                    <model predicate="@type='news'" behaviour="pass-through">
+            <desc>Latest-news band: vertical cards</desc>
+            <param name="header" value="head/node()"/>
+            <param name="link" value="ref[@type='section-link']"/>
+            <param name="content" value="list[@type='news']/item"/>
+            <param name="actions" value="ref[@type='action']"/>
+            <pb:template xml:space="preserve"><div xmlns="" class="grid-container">
+  <div class="section-header">
+    <h2>[[header]]</h2>
+    [[link]]
+  </div>
+  <ul class="usa-card-group">[[content]]</ul>
+  <div class="section-actions">[[actions]]</div>
 </div></pb:template>
         </model>
                     <model predicate="parent::body or parent::front or parent::back" behaviour="section"/>
@@ -276,6 +324,72 @@
             <param name="url" value="if (ref/@target != '#') then head(ref/@target) else $parameters?browse-url"/>
             <pb:template xml:space="preserve"><a xmlns="" href="[[url]]" class="partner-logo"><img src="[[image]]"/></a></pb:template>
         </model>
+                    <model predicate="parent::list[@type='publications']" behaviour="pass-through">
+        <desc>Publication flag card</desc>
+            <param name="image" value="figure/graphic/@url"/>
+            <param name="alt" value="figure/figDesc"/>
+            <param name="tags" value="term"/>
+            <param name="title" value="head/node()"/>
+            <param name="teaser" value="p"/>
+            <pb:template xml:space="preserve"><li xmlns="" class="usa-card usa-card--flag">
+  <div class="usa-card__container">
+    <div class="usa-card__media">
+      <div class="usa-card__img"><img src="[[image]]" alt="[[alt]]"/></div>
+    </div>
+    <div class="usa-card__header">
+      <div class="card-tags">[[tags]]</div>
+      <h3 class="usa-card__heading">[[title]]</h3>
+    </div>
+    <div class="usa-card__body">[[teaser]]</div>
+  </div>
+</li></pb:template>
+        </model>
+                    <model predicate="parent::list[@type='news'] and date" behaviour="pass-through">
+        <desc>News card with a dated footer</desc>
+            <param name="image" value="figure/graphic/@url"/>
+            <param name="alt" value="figure/figDesc"/>
+            <param name="title" value="head/node()"/>
+            <param name="teaser" value="p"/>
+            <param name="date" value="date/node()"/>
+            <param name="more" value="ref[@type='action']"/>
+            <pb:template xml:space="preserve"><li xmlns="" class="usa-card tablet:grid-col-4">
+  <div class="usa-card__container">
+    <div class="usa-card__media">
+      <div class="usa-card__img"><img src="[[image]]" alt="[[alt]]"/></div>
+    </div>
+    <div class="usa-card__header">
+      <h3 class="usa-card__heading">[[title]]</h3>
+    </div>
+    <div class="usa-card__body">[[teaser]]</div>
+    <div class="usa-card__footer">
+      <span class="card-date">[[date]]</span>
+      [[more]]
+    </div>
+  </div>
+</li></pb:template>
+        </model>
+                    <model predicate="parent::list[@type='news']" behaviour="pass-through">
+        <desc>News card without a date</desc>
+            <param name="image" value="figure/graphic/@url"/>
+            <param name="alt" value="figure/figDesc"/>
+            <param name="title" value="head/node()"/>
+            <param name="teaser" value="p"/>
+            <param name="more" value="ref[@type='action']"/>
+            <pb:template xml:space="preserve"><li xmlns="" class="usa-card tablet:grid-col-4">
+  <div class="usa-card__container">
+    <div class="usa-card__media">
+      <div class="usa-card__img"><img src="[[image]]" alt="[[alt]]"/></div>
+    </div>
+    <div class="usa-card__header">
+      <h3 class="usa-card__heading">[[title]]</h3>
+    </div>
+    <div class="usa-card__body">[[teaser]]</div>
+    <div class="usa-card__footer">
+      [[more]]
+    </div>
+  </div>
+</li></pb:template>
+        </model>
                     <model behaviour="listItem"/>
                 </elementSpec>
                 <elementSpec ident="ref" mode="change">
@@ -290,8 +404,27 @@
             <param name="uri" value="if (@target='#') then $parameters?browse-url else @target"/>
             <param name="target" value="if (@rend='new') then '_blank' else '_self'"/>
         </model>
+                    <model predicate="@type='action' and ancestor::item" behaviour="link" cssClass="usa-button usa-button--outline">
+            <desc>Card-level action link</desc>
+            <param name="uri" value="@target"/>
+        </model>
+                    <model predicate="@type='action'" behaviour="link" cssClass="usa-button">
+            <desc>Section-level action button</desc>
+            <param name="uri" value="@target"/>
+        </model>
+                    <model predicate="@type='section-link'" behaviour="link" cssClass="usa-link">
+            <desc>Section-header side link</desc>
+            <param name="uri" value="@target"/>
+        </model>
                     <model predicate="@target" behaviour="link">
             <param name="uri" value="@target"/>
+        </model>
+                    <model behaviour="inline"/>
+                </elementSpec>
+                <elementSpec ident="term" mode="change">
+                    <model predicate="ancestor::div[@type=('publications', 'news')]" behaviour="pass-through">
+            <desc>Card tag chip</desc>
+            <pb:template xml:space="preserve"><span xmlns="" class="usa-tag">[[content]]</span></pb:template>
         </model>
                     <model behaviour="inline"/>
                 </elementSpec>
