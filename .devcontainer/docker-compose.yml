@@ -1,0 +1,33 @@
+# Compose-based devcontainer so per-worktree values (host ports, project name)
+# come from the gitignored .devcontainer/.env -- see env.template and the
+# README section "Parallel worktrees". Checked-in files stay identical in
+# every worktree.
+services:
+  existdb:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        # Pinned baseline -- see README "Pinned baseline" before changing.
+        EXIST_VERSION: "6.4.0"
+        PUBLISHER_LIB_VERSION: "6.1.0"
+        JINKS_TEMPLATES_VERSION: "1.4.2"
+        ROUTER_VERSION: "1.12.2"
+        JWT_VERSION: "2.0.1"
+        CRYPTO_VERSION: "6.0.1"
+        HTTP_PORT: "8080"
+        HTTPS_PORT: "8443"
+        INSTALL_NER: "false"
+        INSTALL_TEXLIVE: "false"
+    ports:
+      # Host side varies per worktree (from .devcontainer/.env); eXist must
+      # keep listening on 8080/8443 *inside* the container -- init.sh and
+      # .existdb.json hardcode it.
+      - "${HSG_HTTP_PORT:-8090}:8080"
+      - "${HSG_HTTPS_PORT:-8453}:8443"
+    volumes:
+      - ..:/workspaces/hsg-jinks:cached
+    environment:
+      # Lower per worktree (HSG_JVM_RAM in .devcontainer/.env) when running
+      # several instances side by side.
+      - JVM_MAX_RAM_PERCENTAGE=${HSG_JVM_RAM:-75.0}

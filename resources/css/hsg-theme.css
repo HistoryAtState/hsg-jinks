@@ -189,6 +189,24 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     }
 }
 
+/* Search bar vertical alignment in the header (menu.login/menu.language are
+   off, see config.json). USWDS's own extended-header source positions
+   .usa-nav__secondary with a hardcoded `bottom: 4rem` (their own comment:
+   "XXX magic number") assuming the secondary-links row (login + language)
+   still has content. With both removed that row collapses to ~0 height, so
+   the box's anchored bottom edge no longer leaves the search bar centered
+   against the (141px-tall) logo row above -- measured 18px / ~1.15rem low.
+   App-specific because it's tied to this app's custom logo height; not an
+   upstream profile fix. Known USWDS bug, closed unfixed (understaffing):
+   https://github.com/uswds/uswds/issues/2835 -- a maintainer suggested
+   `.usa-nav__secondary:only-of-type` there, which would let USWDS handle
+   this generically, but it was never implemented. */
+@media all and (min-width: 64em) {
+    .usa-nav__secondary {
+        bottom: 5.15rem;
+    }
+}
+
 /* External reference link confirmed dead (404/redirected-away, #1095). Flags
    it visually rather than silently dropping or swapping it; a bracketed
    alternative link follows in the markup where one was found.
