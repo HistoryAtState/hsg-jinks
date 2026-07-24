@@ -27,13 +27,13 @@
   } ],
   "profiles" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
   "label" : "hsg-jinks",
-  "version" : "1.3.0",
+  "version" : "1.3.1",
   "id" : "https://e-editiones.org/apps/hsg-jinks",
   "_update" : true,
   "styles" : [ "https://cdn.jsdelivr.net/npm/theme-toggles@4.10.1/css/classic.min.css", "resources/css/layout.css", "resources/css/jinks-variables.css", "resources/css/components.css", "resources/css/hsg-theme.css" ],
   "_noDeploy" : false,
   "profile-versions" : {
-    "profile-theme-uswds" : "1.3.0",
+    "profile-theme-uswds" : "1.3.1",
     "docker" : "1.0.0",
     "base10" : "1.0.0",
     "landing-page" : "1.0.0"
@@ -174,7 +174,7 @@
   "data" : {
     "landing" : "/db/apps/hsg-jinks/data/landing/landing.xml"
   },
-  "_lastModified" : "2026-07-23T11:49:40.026Z",
+  "_lastModified" : "2026-07-23T12:02:09.37Z",
   "overwrite" : "default",
   "pkg" : {
     "website" : "http://tei-publisher.org",

@@ -6,7 +6,12 @@
 // is. Four things verified here, one per finding from the alignment review
 // that followed the original page-width fix:
 //   1. the header logo (.usa-navbar) lines up with the nav row (.usa-nav__inner)
-//   2. the breadcrumb (.content-top) lines up with main, at any viewport width
+//   2. the breadcrumb (.content-top) lines up with the page box's left edge,
+//      at any viewport width -- NOT with main. The volume landing page has a
+//      populated TOC sidebar (.before), making pb-page's grid "before-fixed"
+//      (see templates/layouts/hsg-content.html), which lets .content-top span
+//      across that sidebar's column so the breadcrumb sits flush with the
+//      header instead of stopping at the sidebar like main does.
 //   3. the breadcrumb-to-H1 gap is a single spacing value, not two stacked ones
 //   4. the footer sits at the bottom of the viewport on a short page, and
 //      below all content (not clipped) on a long one
@@ -33,12 +38,16 @@ describe("page-width alignment", () => {
         ["narrow (<1344px)", 1200],
         ["wide (>1344px)", 1728],
     ].forEach(([label, width]) => {
-        it(`breadcrumb lines up with main content at a ${label} viewport`, () => {
+        it(`breadcrumb lines up with the page box's left edge at a ${label} viewport`, () => {
             cy.viewport(width, 900);
             cy.visit(VOLUME);
-            left('nav[aria-label="breadcrumb"]').then((crumbLeft) => {
-                left("main").should((mainLeft) => {
-                    expect(crumbLeft).to.be.closeTo(mainLeft, 1);
+            // .usa-logo, not .usa-nav__inner itself: the nav row carries its
+            // own 32px (2rem) padding-inline, so its content edge -- where
+            // the logo sits -- is the actual page box left edge to compare
+            // against.
+            left(".usa-logo").then((logoLeft) => {
+                left('nav[aria-label="breadcrumb"]').should((crumbLeft) => {
+                    expect(crumbLeft).to.be.closeTo(logoLeft, 1);
                 });
             });
         });
