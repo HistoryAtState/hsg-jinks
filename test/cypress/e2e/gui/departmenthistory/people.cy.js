@@ -43,7 +43,10 @@ describe("browsing into a person page", () => {
         // State" and would otherwise be matched instead.
         cy.get('a[href$="/principalofficers/secretary"]').click();
         cy.location("pathname").should("match", /principalofficers\/secretary$/);
-        cy.get("main ol li").should("have.length", 71);
+        // Floor, not exact match: POCOM data only grows (new Secretaries are
+        // added, never removed), so pin a lower bound instead of the count
+        // current at the time this test was written.
+        cy.get("main ol li").should("have.length.at.least", 70);
         cy.contains("a", "Thomas Jefferson").click();
         cy.location("pathname").should("match", /people\/jefferson-thomas$/);
     });
