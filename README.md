@@ -98,7 +98,7 @@ shared `~/.config/hsg/` — never in tracked files:
 | `.env` (worktree root) | `EXISTDB_SERVER` (**this worktree's port**), `EXISTDB_USER/PASS`, `CYPRESS_BASE_URL` |
 | `.devcontainer/.env` | `HSG_HTTP_PORT`, `HSG_HTTPS_PORT`, `COMPOSE_PROJECT_NAME` (see `env.template`) |
 | `~/.config/hsg/worktree-ports.tsv` | slug → port registry |
-| `~/.config/hsg/xars/` | frozen baseline profile xar (next section) |
+| `~/.config/hsg/xars/` | frozen baseline profile + data xars (next sections) |
 | `~/.config/hsg/secrets.env` | `OP_TOKEN` — `source` it before OpenProject curl calls; the token never appears in a repo or a command line |
 
 Port rules (unchanged in spirit from the old "Remapping ports" section):
@@ -117,6 +117,49 @@ Port rules (unchanged in spirit from the old "Remapping ports" section):
 Teardown of a finished worktree: `docker compose -f .devcontainer/docker-compose.yml
 down`, `git worktree remove <path>`, delete its row from the port registry.
 
+## Container initialization (`init.sh`)
+
+`.devcontainer/init.sh` is the devcontainer's `postCreateCommand` (see
+`devcontainer.json`): it runs **every time the container is created**,
+whether that's `new-worktree.sh`'s first build or a later rebuild through the
+Dev Containers tooling. `new-worktree.sh` runs the exact same script itself
+(`docker compose exec existdb sh .devcontainer/init.sh`) rather than
+duplicating its steps, so there's one seed path, not two that can drift out
+of sync.
+
+The dividing line: **anything that seeds state living inside eXist's own
+database goes in `init.sh`**, because that state does not survive container
+recreation (there's no volume — eXist's data directory is just part of the
+container's writable layer). Anything that's about the host, the git
+worktree, or the Docker image build stays a one-time step in
+`new-worktree.sh`, because it lives in git, in `~/.config/hsg/`, or gets
+baked into the image before `init.sh` ever runs.
+
+`init.sh` currently:
+
+- adds `admin` to the `tei` group (security-manager state; without it a
+  later `jinks sync` writes auth errors as file content instead of failing
+  loudly)
+- builds and installs the full app xar (`ant` + `repo:install-and-deploy-from-db`)
+
+It does *not* install `frus-data-jinks` or the USWDS theme — those autodeploy
+from the frozen baseline xars baked into the image (see "USWDS profile
+baseline" and "Data" below), so they survive container recreation with no
+help from this script. It also does not run `jinks create` — that needs the
+`jinks` CLI, which only lives on the host, not inside the container; see the
+comment in `new-worktree.sh` for why that step has to stay there.
+
+**Known gap:** `postCreateCommand` only fires through the Dev Containers
+CLI/VS Code. A plain `docker compose down && up` (e.g. after moving a
+worktree, as happened when `header-cleanup` got renamed) does **not** trigger
+it — the container comes back up with only whatever's baked into the image,
+silently missing anything `init.sh` would have seeded live. If you recreate
+a container that way, run it by hand afterward:
+
+```sh
+docker compose -f .devcontainer/docker-compose.yml exec existdb sh .devcontainer/init.sh
+```
+
 ## USWDS profile baseline
 
 `profile-theme-uswds` is **private and unreleased**, so `docker.externalXar`
@@ -126,7 +169,7 @@ use the same **frozen baseline**:
 
 - The baseline is the `hsg-baseline` tag in the profile checkout, built once
   and stored as `~/.config/hsg/xars/profile-theme-uswds-baseline.xar`
-  (`BASELINE.txt` beside it records commit + date).
+  (`profile-theme-uswds-BASELINE.txt` beside it records commit + date).
 - `tools/new-worktree.sh` copies it into every new worktree — identical theme
   everywhere.
 - **Worktrees whose WP fixes the profile itself** are the exception: create a
@@ -143,22 +186,42 @@ use the same **frozen baseline**:
   (Pipe `n`: `jinks update` prompts on conflicts and dies without a TTY. The
   `build.xml` / `expath-pkg.xml` conflicts are app-specific — keep ours.)
 - **When a profile fix merges to its `main`**: move the `hsg-baseline` tag,
-  rebuild, replace the shared xar and update `BASELINE.txt`. Other worktrees
-  pick the new baseline up on their next container rebuild — nobody is forced
-  to absorb it mid-work. Don't chase `context.json`'s `profile-versions`; it
-  is sticky by design and only `-r` (never use it) recomputes it.
+  rebuild, replace the shared xar and update `profile-theme-uswds-BASELINE.txt`.
+  Other worktrees pick the new baseline up on their next container rebuild —
+  nobody is forced to absorb it mid-work. Don't chase `context.json`'s
+  `profile-versions`; it is sticky by design and only `-r` (never use it)
+  recomputes it.
 
 ## Data
 
-Not installed by the devcontainer. One sample volume (`frus1981-88v05`) from the
-sibling repo `../../hsg-jinks-data` → `/db/apps/frus-data-jinks`:
+`hsg-jinks-data` (one sample volume, `frus1981-88v05`, deployed as
+`/db/apps/frus-data-jinks`) has no GitHub release either, so it follows the
+exact same **frozen baseline** pattern as the USWDS profile above — baked
+into the image's `autodeploy/` at `.devcontainer/Dockerfile.dev` build time,
+not built or installed per-container. That matters because eXist's database
+lives entirely inside the container (no volume): anything installed only at
+*runtime* (the old approach: `ant` + `xst package install` against the
+running instance) is gone the moment the container is recreated, with no
+warning that it's missing until a page 404s.
 
-```sh
-cd ../../hsg-jinks-data && ant
-xst package install --force build/frus-data-jinks-*.xar   # EXISTDB_* as above
-```
+- The baseline is stored as `~/.config/hsg/xars/frus-data-jinks-baseline.xar`
+  (`frus-data-jinks-BASELINE.txt` beside it records commit + date). Refresh
+  it the same way as the profile baseline:
 
-Lives in the running container only; reinstall after a rebuild.
+  ```sh
+  cd ../../hsg-jinks-data && ant
+  cp build/frus-data-jinks-*.xar ~/.config/hsg/xars/frus-data-jinks-baseline.xar
+  ```
+
+  Then rebuild any worktree's container to pick it up.
+- `tools/new-worktree.sh` copies it into every new worktree's `.devcontainer/`
+  alongside the theme baseline; `Dockerfile.dev` `COPY`s both into
+  `autodeploy/` so eXist installs them itself on every fresh boot.
+- More data packages are coming. Until any of them have GitHub releases to
+  fetch directly (like `tei-publisher-lib`/`roaster`/`jwt` already do in
+  `Dockerfile.dev`), each one follows this same freeze-and-copy-in pattern —
+  install pre-built packages, don't build them from source inside every
+  container.
 
 ## Sync-down: files to exclude
 

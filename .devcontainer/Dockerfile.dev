@@ -110,6 +110,17 @@ RUN git clone https://github.com/eeditiones/jinks.git \
 # The xar is gitignored -- it is a build artifact, not source.
 COPY profile-theme-uswds-*.xar /usr/local/exist/autodeploy/zzz-profile-theme-uswds.xar
 
+# frus-data-jinks (hsg-jinks-data) has no GitHub release yet either, so for now
+# it follows the same frozen-baseline pattern as profile-theme-uswds above --
+# baked into autodeploy rather than built or installed per-container, so it
+# survives every container rebuild automatically. Refresh it with:
+#   cd ~/customers/hsg/hsg-jinks-data && ant
+#   cp build/frus-data-jinks-*.xar <this repo>/.devcontainer/
+# Once a release exists, switch this to a curl fetch like tei-publisher-lib/
+# roaster/jwt above and drop the manual copy step in new-worktree.sh.
+# The xar is gitignored -- it is a build artifact, not source.
+COPY frus-data-jinks-*.xar /usr/local/exist/autodeploy/zzzz-frus-data-jinks.xar
+
 
 WORKDIR /usr/local/exist
 

@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Create a parallel-work worktree of hsg-jinks with its own devcontainer
 # instance: allocates a free host port pair, writes the per-worktree config
-# (.env + .devcontainer/.env), copies in the baseline USWDS profile xar,
-# builds + starts the container and seeds it with data and the app.
+# (.env + .devcontainer/.env), copies in the baseline USWDS profile + data
+# xars, builds + starts the container, then generates + deploys the app
+# (data and theme autodeploy from the baked-in baselines -- see
+# .devcontainer/init.sh and README "Container initialization").
 #
 # Usage:
 #   tools/new-worktree.sh <slug> [branch] [base]
@@ -29,12 +31,14 @@
 # Shared machine-local state (never in git): ~/.config/hsg/
 #   worktree-ports.tsv                    slug <tab> http <tab> https <tab> path
 #   xars/profile-theme-uswds-baseline.xar frozen theme baseline (see README)
+#   xars/frus-data-jinks-baseline.xar     frozen data baseline (see README "Data")
 
 set -euo pipefail
 
 CONFIG_DIR="$HOME/.config/hsg"
 REGISTRY="$CONFIG_DIR/worktree-ports.tsv"
 BASELINE_XAR="$CONFIG_DIR/xars/profile-theme-uswds-baseline.xar"
+BASELINE_DATA_XAR="$CONFIG_DIR/xars/frus-data-jinks-baseline.xar"
 BASE_HTTP=8090   # main's ports; worktrees allocate upward from +1
 BASE_HTTPS=8453
 
@@ -59,9 +63,7 @@ script_repo=$(cd "$(dirname "$0")/.." && pwd)
 common_dir=$(git -C "$script_repo" rev-parse --path-format=absolute --git-common-dir)
 main_clone=$(dirname "$common_dir")
 parent=$(dirname "$main_clone")
-repos_root=$(dirname "$parent")
 wt_path="$parent/$slug"
-data_repo="$repos_root/hsg-jinks-data"
 
 [ -e "$wt_path" ] && { echo "error: $wt_path already exists" >&2; exit 1; }
 mkdir -p "$CONFIG_DIR/xars"
@@ -82,6 +84,11 @@ http_port=$((BASE_HTTP + n)); https_port=$((BASE_HTTPS + n))
 [ -f "$BASELINE_XAR" ] || {
     echo "error: baseline profile xar missing: $BASELINE_XAR" >&2
     echo "build it from the profile checkout (README 'USWDS profile baseline')" >&2
+    exit 1
+}
+[ -f "$BASELINE_DATA_XAR" ] || {
+    echo "error: baseline data xar missing: $BASELINE_DATA_XAR" >&2
+    echo "build it from hsg-jinks-data (README 'Data')" >&2
     exit 1
 }
 
@@ -143,6 +150,7 @@ cat > "$wt_path/.existdb.json" <<EOF
 EOF
 
 cp "$BASELINE_XAR" "$wt_path/.devcontainer/profile-theme-uswds-baseline.xar"
+cp "$BASELINE_DATA_XAR" "$wt_path/.devcontainer/frus-data-jinks-baseline.xar"
 
 echo "==> npm ci"
 (cd "$wt_path" && npm ci --no-audit --no-fund)
@@ -169,23 +177,20 @@ curl -fso /dev/null "http://127.0.0.1:$http_port/exist/" || {
 
 cd "$wt_path"
 
-# /api/source needs the admin user in group 'tei' (dba alone is not enough);
-# without this, a later jinks sync writes auth errors as file content.
-echo 'sm:add-group-member("tei", "admin")' | xst run -
-
-echo "==> installing data (frus-data-jinks)"
-(cd "$data_repo" && ant)
-xst package install --force "$data_repo"/build/frus-data-jinks-*.xar
-
+# jinks (the CLI) only lives on the host, not inside the container, so this
+# step can't move into init.sh. It registers the app with the jinks generator
+# service running in THIS instance -- needed for a future `jinks update`, not
+# for the app to render (which init.sh's plain xar reinstall handles fine).
 echo "==> generating app via jinks create"
 printf 'n\n' | jinks create -c config.json \
     -s "http://localhost:$http_port/exist/apps/jinks" -u admin -p "" -q
 
-# jinks create deploys only generated files; push the full local tree on top
-# (custom modules/templates), otherwise api.xql 400s.
-echo "==> building + installing full app xar"
-ant
-xst package install --force build/hsg-jinks-*.xar
+# jinks create deploys only generated files; init.sh pushes the full local
+# tree on top (custom modules/templates), otherwise api.xql 400s. This is the
+# same init.sh a later manual container recreation must be re-run by hand
+# (README "Container initialization") -- one seed path, not two to drift.
+echo "==> running init.sh (tei group membership, build + install full app xar)"
+compose exec -T existdb sh /workspaces/hsg-jinks/.devcontainer/init.sh
 
 cat <<EOF
 

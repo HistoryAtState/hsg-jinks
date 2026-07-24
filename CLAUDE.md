@@ -42,3 +42,12 @@ See `doc/` for in-progress migration/feature planning notes
 - Shared machine-local state (OP_TOKEN, port registry, baseline profile xar)
   lives in `~/.config/hsg/`. For OpenProject writes:
   `source ~/.config/hsg/secrets.env` first — never inline the token.
+
+## Measuring rendered layout
+
+When a visual/layout question needs an actual browser (not just reading CSS),
+use **Cypress** (`test/cypress/`, already configured) rather than assuming
+browser-automation tooling is available. Point it at the worktree's own
+instance: `CYPRESS_BASE_URL=$(worktree port) npx cypress run --spec <path>`.
+For one-off measurements (not a permanent regression test), write a throwaway
+spec under `test/cypress/e2e/gui/`, run it, read the result, then delete it.
