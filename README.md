@@ -66,11 +66,13 @@ instance. One command sets everything up:
 tools/new-worktree.sh <slug> [branch]     # branch defaults to feat/<slug>
 ```
 
-It creates `<parent>/hsg-jinks--<slug>` as a **flat sibling of the main clone**
-(required — `../hsg-jinks-data` and `../hsg-project` references must keep
-working), allocates the next free host port pair (8091+/8454+ upward; main
-keeps 8090/8453), writes the per-worktree config, copies in the baseline
-profile xar, builds + starts the container, and seeds data + app.
+It creates `<parent>/hsg-jinks--<slug>` as a **flat sibling of the main clone**,
+nested one level under the repos root that also holds `hsg-jinks-data` and
+`hsg-project` — so from inside a worktree, `../../hsg-jinks-data` and
+`../../hsg-project` are the working relative references. Allocates the next
+free host port pair (8091+/8454+ upward; main keeps 8090/8453), writes the
+per-worktree config, copies in the baseline profile xar, builds + starts the
+container, and seeds data + app.
 
 Machine-specific state lives in two gitignored files per worktree plus the
 shared `~/.config/hsg/` — never in tracked files:
@@ -133,10 +135,10 @@ use the same **frozen baseline**:
 ## Data
 
 Not installed by the devcontainer. One sample volume (`frus1981-88v05`) from the
-sibling repo `../hsg-jinks-data` → `/db/apps/frus-data-jinks`:
+sibling repo `../../hsg-jinks-data` → `/db/apps/frus-data-jinks`:
 
 ```sh
-cd ../hsg-jinks-data && ant
+cd ../../hsg-jinks-data && ant
 xst package install --force build/frus-data-jinks-*.xar   # EXISTDB_* as above
 ```
 

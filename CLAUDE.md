@@ -10,8 +10,8 @@ than hand-editing generated files (see the jinks skills for the full workflow).
 The pre-v10 TEI Publisher application this project replaces lives outside this
 repo, in a sibling checkout of the full HSG source tree:
 
-- Source root: `../hsg-project` (its own git repo — do not copy it in here)
-- Application code: `../hsg-project/repos/hsg-shell`
+- Source root: `../../hsg-project` (its own git repo — do not copy it in here)
+- Application code: `../../hsg-project/repos/hsg-shell`
 
 `hsg-shell` is the old, hand-built app (custom `controller.xql`, `modules/`,
 `templates/`, `pages/`, `transform/`, styling, `cantaloupe.properties`, etc.). Use
