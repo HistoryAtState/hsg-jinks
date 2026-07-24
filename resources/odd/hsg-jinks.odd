@@ -201,7 +201,22 @@
             <desc>When show-notes parameter is set, display note in register overview (index)</desc>
         </model><model predicate="$parameters?mode='register-overview' and not($parameters?show-notes)" behaviour="omit">
             <desc>Omit notes in register overview (index) When show-notes parameter is not set</desc>
-        </model><model predicate="parent::person or parent::place or parent::org" behaviour="paragraph"/><model predicate="$parameters?mode='toc' or ancestor::listAnnotation" behaviour="omit"/><model behaviour="note">
+        </model><model predicate="parent::person or parent::place or parent::org" behaviour="paragraph"/><model predicate="$parameters?mode='toc' or ancestor::listAnnotation" behaviour="omit"/><model predicate="$parameters?mode='monograph-section' and not(@place)" behaviour="note">
+            <desc>Buildings' 357 footnotes (#1096, PR follow-up) carry no @place attribute at
+                all -- the base ODD's own fallback below reads @place verbatim, so with it
+                absent every note fell back to the "note" behaviour's own default placement,
+                rendered inline instead of collected at the foot of the page (compare
+                /departmenthistory/buildings/section1 live against the reference site, which
+                does show them as footnotes). Short History has no tei:note elements at all
+                (0, confirmed), so this is Buildings-only in practice, but scoped by mode
+                rather than collection to match wherever dh:monograph-section-content's own
+                page:transform call applies. Mirrors the reference implementation's own fix
+                for the same app (../hsg-project/repos/hsg-shell/resources/odd/source/
+                departmenthistory.odd), which hardcodes place="foot" the same way rather than
+                relying on source data that was never encoded with it.</desc>
+            <param name="place" value="'foot'"/>
+            <param name="label" value="@n"/>
+        </model><model behaviour="note">
             <param name="place" value="@place"/>
             <param name="label" value="@n"/>
         </model></elementSpec>

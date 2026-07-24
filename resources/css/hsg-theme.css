@@ -243,3 +243,26 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .usa-prose > .tei-div > :first-child.tei-head {
     display: none;
 }
+
+/* Buildings' footnotes (#1096, PR follow-up: "footnotes are inline with the
+   text" instead of collected at the bottom, comparing
+   /departmenthistory/buildings/section1 against the reference site) render
+   correctly as far as the ODD/behaviour goes (hsg-jinks.odd's "note"
+   elementSpec, place="foot"): teipublisher's own `html:note` behaviour
+   (tei-publisher-lib's pmf:note) emits a small in-text <a rel="footnote">
+   marker, a <dl class="footnote"> carrying the full text, and a
+   <pb-popover> web component (carrying its own independent copy of the
+   text) that shows it interactively -- but nothing in this app's own CSS
+   hides that <dl> for on-screen viewing, so the full text still rendered
+   inline right where the note occurred. print.css already has a
+   print-only equivalent (`float: footnote`, CSS Paged Media); this is the
+   missing on-screen counterpart. Confirmed live: pb-popover is a
+   registered custom element and does not hide its own "for" target
+   itself, so this can't rely on the component to do it. Scoped to
+   .usa-prose (Department History's own content wrapper) rather than
+   applied globally, since other parts of the app may render notes inside
+   a <pb-view> web component's shadow DOM, a separate rendering path this
+   fix hasn't touched or verified. */
+.usa-prose dl.footnote {
+    display: none;
+}
