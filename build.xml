@@ -59,6 +59,19 @@
                 <exclude name=".devcontainer"/>
                 <exclude name="test/cypress/screenshots/**"/>
                 <exclude name="test/cypress/videos/**"/>
+                <!-- dev/worktree tooling: no runtime role in the deployed app -->
+                <exclude name=".claude/**"/>
+                <exclude name=".env"/>
+                <exclude name=".dockerignore"/>
+                <exclude name=".tool-versions"/>
+                <exclude name="Dockerfile"/>
+                <exclude name="CLAUDE.md"/>
+                <exclude name="lsp-config.xq"/>
+                <exclude name=".moderne/**"/>
+                <!-- Cypress runs from the host/container filesystem, not the deployed collection -->
+                <exclude name="test/cypress/e2e/**"/>
+                <exclude name="cypress.config.cjs"/>
+                <exclude name="generate-theme-docs.js"/>
             </fileset>
         </copy>
         <copy todir="${app.build.dir}" overwrite="true" verbose="true">
