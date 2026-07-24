@@ -45,12 +45,12 @@
     <div class="usa-prose">
         <h1>[[ dh:travels-listing-title($context?request?parameters?role, $context?request?parameters?personOrCountryId) ]]</h1>
         [% if dh:travels-show-president-hiatus($context?request?parameters?personOrCountryId) %]
-        [% include "templates/departmenthistory/president-travels-hiatus.html" %]
+        [% include "templates/pages/departmenthistory/president-travels-hiatus.html" %]
         [% endif %]
         [[ dh:travels-listing-table($context, $context?request?parameters?role) ]]
     </div>
 
     [% template before %]
-    [% include "templates/departmenthistory/sidebar.html" %]
+    [% include "templates/pages/departmenthistory/sidebar.html" %]
     [% endtemplate %]
 </template>

@@ -40,7 +40,7 @@
 
     <div class="usa-prose">
         [% if $context?request?parameters?publication = 'short-history' %]
-        [% include "templates/departmenthistory/short-history-notice-brief.html" %]
+        [% include "templates/pages/departmenthistory/short-history-notice-brief.html" %]
         [% endif %]
         [[ dh:monograph-section-content($context) ]]
         [[ dh:monograph-section-pagination($context) ]]
