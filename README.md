@@ -78,11 +78,11 @@ tools/new-worktree.sh <slug> [branch]
 - If `<type>` is absent or unrecognized, the slug is used as the branch name
   verbatim, with no prefix inserted (e.g. `hsg-analysis`).
 
-The worktree folder itself is always `hsg-jinks--<slug>` (next paragraph) —
-the convention above is what makes that folder name double as the branch
-name, so `git worktree list` and `ls ..` stay legible together.
+The worktree folder itself is always `<slug>` (next paragraph) — the
+convention above is what makes that folder name double as the branch name,
+so `git worktree list` and `ls ..` stay legible together.
 
-It creates `<parent>/hsg-jinks--<slug>` as a **flat sibling of the main clone**,
+It creates `<parent>/<slug>` as a **flat sibling of the main clone**,
 nested one level under the repos root that also holds `hsg-jinks-data` and
 `hsg-project` — so from inside a worktree, `../../hsg-jinks-data` and
 `../../hsg-project` are the working relative references. Allocates the next

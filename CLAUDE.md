@@ -31,7 +31,7 @@ See `doc/` for in-progress migration/feature planning notes
 
 ## Parallel worktrees & the read-only mirror
 
-- Work happens in parallel git worktrees (flat siblings, `../hsg-jinks--<slug>`),
+- Work happens in parallel git worktrees (flat siblings, `../<slug>`),
   each with its own devcontainer on its own host port — created via
   `tools/new-worktree.sh` (README "Parallel worktrees"). This checkout's own
   instance is defined by `./.env` (`EXISTDB_SERVER`) — trust it, never fall

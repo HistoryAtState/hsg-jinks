@@ -21,7 +21,7 @@
 # See README "Parallel worktrees" for the full rule.
 #
 # Layout rule: worktrees are FLAT SIBLINGS of the main clone
-# (<parent>/hsg-jinks--<slug>), nested one level under the repos root that
+# (<parent>/<slug>), nested one level under the repos root that
 # also holds hsg-jinks-data and hsg-project (<repos_root>/hsg-jinks/*). So
 # from inside a worktree, ../../hsg-jinks-data and ../../hsg-project are the
 # working relative references. See README "Parallel worktrees".
@@ -60,7 +60,7 @@ common_dir=$(git -C "$script_repo" rev-parse --path-format=absolute --git-common
 main_clone=$(dirname "$common_dir")
 parent=$(dirname "$main_clone")
 repos_root=$(dirname "$parent")
-wt_path="$parent/hsg-jinks--$slug"
+wt_path="$parent/$slug"
 data_repo="$repos_root/hsg-jinks-data"
 
 [ -e "$wt_path" ] && { echo "error: $wt_path already exists" >&2; exit 1; }
