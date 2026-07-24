@@ -33,6 +33,10 @@
       "zoom" : false
     }
   },
+  "menu" : {
+    "login" : false,
+    "language" : false
+  },
   "$schema" : "../jinks/schema/jinks.json",
   "styles" : [ "resources/css/hsg-theme.css" ],
   "api" : [ {
