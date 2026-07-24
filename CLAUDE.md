@@ -41,9 +41,17 @@ See `doc/` for in-progress migration/feature planning notes
   `tools/new-worktree.sh` (README "Parallel worktrees"). This checkout's own
   instance is defined by `./.env` (`EXISTDB_SERVER`) — trust it, never fall
   back to defaults.
-- **Host port 8080 is the read-only hsg-shell reference mirror** — guest reads
-  only. Never install packages, run jinks, or REST-write against it; a
-  PreToolUse hook blocks write-shaped commands targeting it.
+- **Host port 8080 is the read-only hsg-shell reference mirror. Never
+  install, deploy, or write anything to it, ever** — no `xst package
+  install`, no `ant`-then-deploy, no `jinks update`, no REST writes. Read-only
+  probing (checking whether a data collection exists, sampling a record) is
+  fine. A PreToolUse hook (`.claude/hooks/protect-reference-mirror.sh`,
+  wired up in `.claude/settings.json`) blocks write-shaped Bash commands
+  targeting it as a backstop, but treat that as defense-in-depth, not a
+  substitute for checking which port a command targets before running it.
+- **The deploy target is this worktree's own devcontainer**, not a fixed
+  port — check `./.env` (`EXISTDB_SERVER`) rather than assuming 8090 or any
+  other previously-seen value; the host port is assigned per worktree.
 - Shared machine-local state (OP_TOKEN, port registry, baseline profile xar)
   lives in `~/.config/hsg/`. For OpenProject writes:
   `source ~/.config/hsg/secrets.env` first — never inline the token.
