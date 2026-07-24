@@ -3,6 +3,8 @@ xquery version "3.1";
 module namespace dh="https://history.state.gov/ns/templates/departmenthistory";
 
 import module namespace page="http://teipublisher.com/ns/templates/page" at "page.xqm";
+import module namespace pages="http://www.tei-c.org/tei-simple/pages" at "../lib/pages.xql";
+import module namespace nav="http://www.tei-c.org/tei-simple/navigation" at "../navigation.xql";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -263,13 +265,37 @@ declare function dh:monograph-section-sidebar($context as map(*)) as element(nav
  : renders its subchapters' content inline) are never a div's first child
  : at the top level and remain visible, at whatever level the ODD assigns
  : them, which is correct there.
+ :
+ : Buildings' 357 footnotes (place="foot", forced in hsg-jinks.odd's own
+ : "note" elementSpec override since the source carries no @place at all)
+ : render inline via tei-publisher-lib's own "note" behaviour: a small
+ : in-text marker, a <dl class="footnote"> with the full text right where
+ : the note occurred, and a <pb-popover> with its own independent copy for
+ : hover/click. A first attempt just hid the <dl> with CSS (display: none)
+ : -- functional (the popover still works), but not what the reference
+ : site does, which collects every note into a single <div class="footnotes">
+ : after the main content, with a border-top divider (#1096, PR follow-up
+ : screenshot comparison). pages:process-content (modules/lib/pages.xql,
+ : used elsewhere in this app by page:content for the pb-view SSR path)
+ : already implements exactly that consolidation step -- reused its own
+ : two building blocks (pages:clean-footnotes to strip class="footnote"
+ : elements out of the transformed body, nav:output-footnotes to re-emit
+ : them collected, separating any pb-popover elements into their own
+ : sibling <div class="popovers"> so hover/click still works alongside the
+ : now-visible bottom list) rather than reimplementing the same walk.
  :)
 declare function dh:monograph-section-content($context as map(*)) as element()+ {
     let $s := dh:current-section($context)
     let $division := $s?division
+    let $transformed := page:transform($division, map { "mode": "monograph-section" })
+    let $body := pages:clean-footnotes($transformed)
+    let $footnotes :=
+        for $fn in $transformed//*[@class = "footnote"]
+        return element { node-name($fn) } { $fn/@*, pages:clean-footnotes($fn/node()) }
     return (
         <h1>{normalize-space($division/tei:head[1])}</h1>,
-        page:transform($division, map { "mode": "monograph-section" })
+        $body,
+        if ($footnotes) then nav:output-footnotes($footnotes) else ()
     )
 };
 

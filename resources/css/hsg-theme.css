@@ -244,25 +244,39 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     display: none;
 }
 
-/* Buildings' footnotes (#1096, PR follow-up: "footnotes are inline with the
-   text" instead of collected at the bottom, comparing
-   /departmenthistory/buildings/section1 against the reference site) render
-   correctly as far as the ODD/behaviour goes (hsg-jinks.odd's "note"
-   elementSpec, place="foot"): teipublisher's own `html:note` behaviour
-   (tei-publisher-lib's pmf:note) emits a small in-text <a rel="footnote">
-   marker, a <dl class="footnote"> carrying the full text, and a
-   <pb-popover> web component (carrying its own independent copy of the
-   text) that shows it interactively -- but nothing in this app's own CSS
-   hides that <dl> for on-screen viewing, so the full text still rendered
-   inline right where the note occurred. print.css already has a
-   print-only equivalent (`float: footnote`, CSS Paged Media); this is the
-   missing on-screen counterpart. Confirmed live: pb-popover is a
-   registered custom element and does not hide its own "for" target
-   itself, so this can't rely on the component to do it. Scoped to
-   .usa-prose (Department History's own content wrapper) rather than
-   applied globally, since other parts of the app may render notes inside
-   a <pb-view> web component's shadow DOM, a separate rendering path this
-   fix hasn't touched or verified. */
-.usa-prose dl.footnote {
-    display: none;
+/* Buildings' footnotes (#1096, PR follow-up), collected at the bottom of
+   the section by dh:monograph-section-content (pages:clean-footnotes +
+   nav:output-footnotes) into a <div class="footnotes"> holding the
+   original <dl class="footnote"> elements, matching the reference site's
+   own <div class="footnotes"><ol>...: a slim divider line above the list
+   (border-top, same treatment the reference site's own stylesheet uses),
+   and dl/dt/dd laid out as a compact number + text row instead of the
+   browser's default definition-list indentation. */
+.usa-prose .footnotes {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ccc;
+}
+
+.usa-prose .footnotes dl.footnote {
+    display: flex;
+    gap: 0.5em;
+    margin: 0 0 0.75em;
+}
+
+.usa-prose .footnotes dl.footnote dt {
+    font-weight: 700;
+}
+
+.usa-prose .footnotes dl.footnote dd {
+    margin: 0;
+}
+
+/* The popovers sibling div (also emitted by nav:output-footnotes, holding
+   each note's own <pb-popover> for hover/click preview) carries no visible
+   content of its own -- pb-popover is fixed/absolutely positioned by the
+   component itself when triggered -- but without this the empty div can
+   still take up block space. */
+.usa-prose .popovers {
+    display: contents;
 }
