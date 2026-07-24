@@ -6,10 +6,19 @@
 #
 # Usage:
 #   tools/new-worktree.sh <slug> [branch] [base]
-#       branch defaults to feat/<slug>; new branches are based on <base>
-#       (default: main), NOT on whatever the main clone has checked out
+#       new branches are based on <base> (default: main), NOT on whatever
+#       the main clone has checked out
 #   tools/new-worktree.sh --no-container <slug> [branch] [base]
 #                                              stop after writing config files
+#
+# Slug convention: <type>-<wp#>-<short-slug>, e.g. fix-1217-page-box-sidebar-pages
+# (<wp#> is the OpenProject work package number; omit it for untracked/ad-hoc
+# work, e.g. chore-parallel-worktrees). <type> is one of feat/fix/chore/explore/
+# docs/refactor/test/perf/build/port and sets the default branch's prefix
+# (<type>/<rest>). An absent/unrecognized type (and so also an absent wp#,
+# since it's just part of <rest>) means the slug is used as the branch name
+# verbatim, with no prefix inserted (e.g. hsg-analysis).
+# See README "Parallel worktrees" for the full rule.
 #
 # Layout rule: worktrees are FLAT SIBLINGS of the main clone
 # (<parent>/hsg-jinks--<slug>), nested one level under the repos root that
@@ -32,7 +41,13 @@ BASE_HTTPS=8453
 no_container=0
 if [ "${1:-}" = "--no-container" ]; then no_container=1; shift; fi
 slug="${1:?usage: tools/new-worktree.sh [--no-container] <slug> [branch] [base]}"
-branch="${2:-feat/$slug}"
+case "$slug" in
+    feat-*|fix-*|chore-*|explore-*|docs-*|refactor-*|test-*|perf-*|build-*|port-*)
+        default_branch="${slug%%-*}/${slug#*-}" ;;
+    *)
+        default_branch="$slug" ;;
+esac
+branch="${2:-$default_branch}"
 base="${3:-main}"
 
 case "$slug" in

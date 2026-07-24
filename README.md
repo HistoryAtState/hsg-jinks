@@ -63,8 +63,24 @@ Each work package gets its own git worktree with its own devcontainer/eXist
 instance. One command sets everything up:
 
 ```sh
-tools/new-worktree.sh <slug> [branch]     # branch defaults to feat/<slug>
+tools/new-worktree.sh <slug> [branch]
 ```
+
+**Slug naming convention:** `<type>-<wp#>-<short-slug>`, e.g.
+`fix-1217-page-box-sidebar-pages`, where:
+
+- `<type>` is a conventional-commit-style prefix — `feat`, `fix`, `chore`,
+  `explore`, `docs`, `refactor`, `test`, `perf`, `build`, or `port` — and sets
+  the default branch's prefix (`<type>/<rest>`, e.g. `fix/1217-page-box-sidebar-pages`).
+- `<wp#>` is the OpenProject work package number (see "Workflow" above, `OP#<id>`
+  without the `OP#`); omit it for untracked/ad-hoc work, e.g.
+  `chore-parallel-worktrees` → branch `chore/parallel-worktrees`.
+- If `<type>` is absent or unrecognized, the slug is used as the branch name
+  verbatim, with no prefix inserted (e.g. `hsg-analysis`).
+
+The worktree folder itself is always `hsg-jinks--<slug>` (next paragraph) —
+the convention above is what makes that folder name double as the branch
+name, so `git worktree list` and `ls ..` stay legible together.
 
 It creates `<parent>/hsg-jinks--<slug>` as a **flat sibling of the main clone**,
 nested one level under the repos root that also holds `hsg-jinks-data` and
