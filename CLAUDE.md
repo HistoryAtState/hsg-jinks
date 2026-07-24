@@ -5,13 +5,18 @@ the Historian. This is a **Mode B** repo: `expath-pkg.xml` + `config.json` at th
 root, no `profiles/`. Edit `config.json` and regenerate via `jinks update` rather
 than hand-editing generated files (see the jinks skills for the full workflow).
 
+This repo expects several companion repos as flat siblings in one parent
+directory — `jinks`, `jinks-templates`, `profile-theme-uswds`, `hsg-jinks-data`,
+`hsg-project` — see README "Workspace layout" for the full picture and what
+each one is for.
+
 ## Reference implementation (old app)
 
 The pre-v10 TEI Publisher application this project replaces lives outside this
 repo, in a sibling checkout of the full HSG source tree:
 
-- Source root: `../hsg-project` (its own git repo — do not copy it in here)
-- Application code: `../hsg-project/repos/hsg-shell`
+- Source root: `../../hsg-project` (its own git repo — do not copy it in here)
+- Application code: `../../hsg-project/repos/hsg-shell`
 
 `hsg-shell` is the old, hand-built app (custom `controller.xql`, `modules/`,
 `templates/`, `pages/`, `transform/`, styling, `cantaloupe.properties`, etc.). Use
@@ -31,7 +36,7 @@ See `doc/` for in-progress migration/feature planning notes
 
 ## Parallel worktrees & the read-only mirror
 
-- Work happens in parallel git worktrees (flat siblings, `../hsg-jinks--<slug>`),
+- Work happens in parallel git worktrees (flat siblings, `../<slug>`),
   each with its own devcontainer on its own host port — created via
   `tools/new-worktree.sh` (README "Parallel worktrees"). This checkout's own
   instance is defined by `./.env` (`EXISTDB_SERVER`) — trust it, never fall
@@ -42,3 +47,12 @@ See `doc/` for in-progress migration/feature planning notes
 - Shared machine-local state (OP_TOKEN, port registry, baseline profile xar)
   lives in `~/.config/hsg/`. For OpenProject writes:
   `source ~/.config/hsg/secrets.env` first — never inline the token.
+
+## Measuring rendered layout
+
+When a visual/layout question needs an actual browser (not just reading CSS),
+use **Cypress** (`test/cypress/`, already configured) rather than assuming
+browser-automation tooling is available. Point it at the worktree's own
+instance: `CYPRESS_BASE_URL=$(worktree port) npx cypress run --spec <path>`.
+For one-off measurements (not a permanent regression test), write a throwaway
+spec under `test/cypress/e2e/gui/`, run it, read the result, then delete it.

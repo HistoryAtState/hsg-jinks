@@ -331,7 +331,7 @@ Visually confirmed in the browser on the host port.
 
 The app's `defaults.data` points at `/db/apps/frus-data-jinks/data` (default
 collection `Publications`). That is supplied by the sibling repo
-**`../hsg-jinks-data`** (git `HistoryAtState/hsg-jinks-data`), an eXist data
+**`../../hsg-jinks-data`** (git `HistoryAtState/hsg-jinks-data`), an eXist data
 package deploying to `/db/apps/frus-data-jinks`.
 
 It is a slimmed data-model sample, not production data: the most recent commit
@@ -345,7 +345,7 @@ The devcontainer does **not** install data automatically (it only deploys the
 app + jinks + theme profile). Load it manually:
 
 ```sh
-cd ../hsg-jinks-data && ant                                  # -> build/frus-data-jinks-*.xar
+cd ../../hsg-jinks-data && ant                                # -> build/frus-data-jinks-*.xar
 export EXISTDB_SERVER=http://localhost:8080/exist EXISTDB_USER=admin EXISTDB_PASS=""
 xst package install local build/frus-data-jinks-*.xar        # -> /db/apps/frus-data-jinks
 ```

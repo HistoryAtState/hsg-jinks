@@ -2,7 +2,8 @@
   "enabledPlugins": {
     "jinks@jinks-skills": true,
     "asdf-tools@line-o-plugins": true,
-    "xquery-lsp@xq-lsp": true
+    "xquery-lsp@xq-lsp": true,
+    "xst@line-o-plugins": true
   },
   "hooks": {
     "PreToolUse": [
