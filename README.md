@@ -140,14 +140,25 @@ baked into the image before `init.sh` ever runs.
 - adds `admin` to the `tei` group (security-manager state; without it a
   later `jinks sync` writes auth errors as file content instead of failing
   loudly)
-- builds and installs the full app xar (`ant` + `repo:install-and-deploy-from-db`)
+- builds and installs the full app xar (`ant` + `repo:install-and-deploy-from-db`),
+  first `repo:undeploy`/`repo:remove`-ing any existing registration of the
+  same package. `repo:install-and-deploy-from-db` silently drops some files
+  instead of overwriting them when run against an already-registered
+  package (observed: the roaster API-spec modules vanish, breaking the
+  router). Harmless the first time (nothing's registered yet), but this
+  script is also meant to be re-run by hand to redeploy edited code without
+  recreating the container — `xst package install` avoids the same trap by
+  always clearing the old registration first, so `init.sh` does the same.
 
 It does *not* install `frus-data-jinks` or the USWDS theme — those autodeploy
 from the frozen baseline xars baked into the image (see "USWDS profile
 baseline" and "Data" below), so they survive container recreation with no
-help from this script. It also does not run `jinks create` — that needs the
-`jinks` CLI, which only lives on the host, not inside the container; see the
-comment in `new-worktree.sh` for why that step has to stay there.
+help from this script. It also does not run `jinks create` — this is a Mode B
+repo, so config.json's generated output is already committed to git; a plain
+xar install redeploys that same content through the same underlying
+mechanism `jinks create` itself uses, without the registration conflict
+above. Only run `jinks update` by hand, and only after actually editing
+config.json.
 
 **Known gap:** `postCreateCommand` only fires through the Dev Containers
 CLI/VS Code. A plain `docker compose down && up` (e.g. after moving a

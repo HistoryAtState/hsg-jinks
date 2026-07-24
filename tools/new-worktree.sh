@@ -177,18 +177,18 @@ curl -fso /dev/null "http://127.0.0.1:$http_port/exist/" || {
 
 cd "$wt_path"
 
-# jinks (the CLI) only lives on the host, not inside the container, so this
-# step can't move into init.sh. It registers the app with the jinks generator
-# service running in THIS instance -- needed for a future `jinks update`, not
-# for the app to render (which init.sh's plain xar reinstall handles fine).
-echo "==> generating app via jinks create"
-printf 'n\n' | jinks create -c config.json \
-    -s "http://localhost:$http_port/exist/apps/jinks" -u admin -p "" -q
-
-# jinks create deploys only generated files; init.sh pushes the full local
-# tree on top (custom modules/templates), otherwise api.xql 400s. This is the
-# same init.sh a later manual container recreation must be re-run by hand
-# (README "Container initialization") -- one seed path, not two to drift.
+# No `jinks create` here: this is a Mode B repo, so config.json's generated
+# output (context.json, .jinks.json, .jinks-versions.json, modules/,
+# templates/...) is already committed to git. `jinks create` would just
+# redeploy that same content through the same deploy mechanism a plain xar
+# install already uses -- and calling it first actively breaks the plain
+# install that follows (repo:install-and-deploy-from-db silently drops files
+# when run against an already-registered package; see init.sh). Only run
+# `jinks update` by hand, and only after actually editing config.json.
+#
+# This is the same init.sh a later manual container recreation must be
+# re-run by hand (README "Container initialization") -- one seed path, not
+# two to drift.
 echo "==> running init.sh (tei group membership, build + install full app xar)"
 compose exec -T existdb sh /workspaces/hsg-jinks/.devcontainer/init.sh
 
