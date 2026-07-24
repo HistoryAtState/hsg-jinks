@@ -143,4 +143,53 @@ describe("sidebar table of contents", () => {
                 expect(parseFloat(getComputedStyle($a[0]).paddingLeft)).to.be.greaterThan(0);
             });
     });
+
+    describe("USWDS link chrome", () => {
+        // Same root cause as the indent fix above (pb-login::part(trigger)
+        // extends .usa-button, which pollutes every a:not(.usa-button) rule
+        // sitewide with an invalid :not() clause, so browsers drop it) -- but
+        // it also drops display/padding/hover/color for every sidenav link,
+        // not just the sublist indent. hsg-theme.css restores those too.
+        beforeEach(() => cy.visit(`${VOLUME}/ch1`));
+
+        it("gives top-level and nested links block display with padding", () => {
+            cy.get("nav.toc ul.usa-sidenav > li > a")
+                .first()
+                .should(($a) => {
+                    const style = getComputedStyle($a[0]);
+                    expect(style.display).to.eq("block");
+                    expect(parseFloat(style.paddingTop)).to.be.greaterThan(0);
+                    expect(parseFloat(style.paddingRight)).to.be.greaterThan(0);
+                    expect(parseFloat(style.paddingBottom)).to.be.greaterThan(0);
+                });
+
+            cy.get("nav.toc ul.usa-sidenav__sublist li a")
+                .first()
+                .should(($a) => {
+                    const style = getComputedStyle($a[0]);
+                    expect(style.display).to.eq("block");
+                    expect(parseFloat(style.paddingTop)).to.be.greaterThan(0);
+                });
+        });
+
+        it("gives non-current links a muted color, distinct from the current page", () => {
+            cy.get("nav.toc a.usa-current").then(($current) => {
+                const currentColor = getComputedStyle($current[0]).color;
+                cy.get("nav.toc ul.usa-sidenav a:not(.usa-current)")
+                    .first()
+                    .should(($a) => {
+                        const color = getComputedStyle($a[0]).color;
+                        // default UA link blue/visited-purple, not the USWDS muted gray
+                        expect(color).not.to.eq("rgb(0, 0, 238)");
+                        expect(color).not.to.eq(currentColor);
+                    });
+            });
+        });
+
+        it("keeps the current page bold (unaffected by the selector bug -- regression guard)", () => {
+            cy.get("nav.toc a.usa-current")
+                .first()
+                .should("have.css", "font-weight", "700");
+        });
+    });
 });

@@ -51,6 +51,40 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     padding-left: 3rem;
 }
 
+/* Base sidenav link chrome (#1089 follow-up).
+   Same root cause as the indent fix above: USWDS's own `a:not(.usa-button)`
+   rule for display/padding/hover/color is invalidated by the same
+   pb-login::part(trigger) pollution, so it's dropped for every sidenav
+   link, not just the sublist indent -- restored directly here. The real fix
+   belongs upstream in profile-theme-uswds (drop @extend .usa-button from
+   pb-login::part(trigger)/.uswds-button, or scope it so it can't leak into
+   unrelated :not() clauses). */
+.usa-sidenav a,
+.usa-sidenav__sublist a {
+    display: block;
+    padding-top: .5rem;
+    padding-right: 1rem;
+    padding-bottom: .5rem;
+    text-decoration: none;
+}
+
+.usa-sidenav > li > a {
+    padding-left: 1rem;
+}
+
+.usa-sidenav a:hover {
+    background-color: #f0f0f0;
+    text-decoration: none;
+}
+
+.usa-sidenav a:not(.usa-current) {
+    color: #5c5c5c;
+}
+
+.usa-sidenav a:not(.usa-current):hover {
+    color: #2378c3;
+}
+
 /* Footer (#1086).
    USWDS ships the big footer light-on-white; the design puts the whole thing
    on navy, with both bands sharing one background so the seam disappears.
