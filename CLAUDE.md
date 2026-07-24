@@ -6,7 +6,7 @@ root, no `profiles/`. Edit `config.json` and regenerate via `jinks update` rathe
 than hand-editing generated files (see the jinks skills for the full workflow).
 
 This repo expects several companion repos as flat siblings in one parent
-directory — `jinks`, `jinks-templates`, `profile-uswds-theme`, `hsg-jinks-data`,
+directory — `jinks`, `jinks-templates`, `profile-theme-uswds`, `hsg-jinks-data`,
 `hsg-project` — see README "Workspace layout" for the full picture and what
 each one is for.
 

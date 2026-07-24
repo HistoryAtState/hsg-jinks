@@ -17,7 +17,7 @@ the sibling names matter:
 
 ```
 <workspace>
-├── profile-uswds-theme   USWDS theme profile (private, unreleased) — see "USWDS profile baseline"
+├── profile-theme-uswds   USWDS theme profile (private, unreleased) — see "USWDS profile baseline"
 ├── jinks                 the Jinks generator itself (Mode A) — baked into every devcontainer image
 ├── jinks-templates       companion templates library — also baked in
 ├── hsg-jinks-data        FRUS sample data, deployed as frus-data-jinks — see "Data"
@@ -25,15 +25,11 @@ the sibling names matter:
 └── hsg-jinks             this repo: `main` + parallel worktrees — see "Parallel worktrees"
 ```
 
-(`profile-uswds-theme` is this workspace's name for it; the repo itself and
-its package are named `profile-theme-uswds` — same thing, different word
-order, don't let it throw you.)
-
 Each sibling can be a plain clone, a symlink to a clone kept elsewhere, or
 its own git worktree of that repo — pick whatever fits how you're using it.
 `jinks` and `jinks-templates` don't need their own worktree unless you're
 actively changing them; a `git worktree add` is only worth it when, like
-`profile-uswds-theme` here, you want it parked on a different branch than
+`profile-theme-uswds` here, you want it parked on a different branch than
 whatever the original checkout has open.
 
 **`secrets.env`, `worktree-ports.tsv`, and the frozen baseline xars are *not*

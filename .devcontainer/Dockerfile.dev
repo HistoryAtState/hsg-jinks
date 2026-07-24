@@ -105,7 +105,7 @@ RUN git clone https://github.com/eeditiones/jinks.git \
 # profile-theme-uswds is a PRIVATE repo, so it cannot be cloned anonymously here
 # (and it publishes no releases, so `docker.externalXar` has no URL to fetch).
 # Instead we copy in a xar built from the local checkout. Refresh it with:
-#   cd ../../profile-uswds-theme && ant       # from a worktree; see README "Workspace layout"
+#   cd ../../profile-theme-uswds && ant       # from a worktree; see README "Workspace layout"
 #   cp build/profile-theme-uswds-*.xar <this repo>/.devcontainer/
 # The xar is gitignored -- it is a build artifact, not source.
 COPY profile-theme-uswds-*.xar /usr/local/exist/autodeploy/zzz-profile-theme-uswds.xar
