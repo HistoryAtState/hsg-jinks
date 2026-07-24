@@ -83,6 +83,9 @@ defaults mirror them):
 | roaster | 1.12.2 | 1.11.0 answers an empty `POST /api/login` with 401 instead of clearing the session, which fails a generated test (#1216) |
 | tei-publisher-lib | 6.1.0 | |
 | eXist | 6.4.0 | |
+| wwdai | 0.6.5 | countries-section data (OP#1095): `HistoryAtState/wwdai` GitHub Release asset |
+| rdcr | 0.8.7 | countries-section data (OP#1095): `HistoryAtState/rdcr` GitHub Release asset |
+| carousel | 0.11.10 | landing-page carousel: `HistoryAtState/carousel` GitHub Release asset |
 
 After changing any of them, rebuild the container and confirm with
 `xst package list --versions` — `xst package install` has been seen reporting
