@@ -6,6 +6,14 @@
                 "https://history.state.gov/ns/templates/departmenthistory": { "at": "modules/templates/departmenthistory.xqm", "prefix": "dh" }
             },
             "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false,
+                    "collapsible": false
+                }
+            }
         }
     }
     ---
@@ -27,10 +35,14 @@
     [% endtemplate %]
 
     <div class="section-landing usa-prose">
-        [[ dh:monograph-toc-page($context, $context?request?parameters?publication) ]]
+        <h1>[[ dh:monograph-title(dh:monograph-doc($context?request?parameters?publication)) ]]</h1>
+        [% if $context?request?parameters?publication = 'short-history' %]
+        [% include "templates/departmenthistory-short-history-notice.html" %]
+        [% endif %]
+        [[ dh:monograph-toc($context, dh:monograph-doc($context?request?parameters?publication), $context?request?parameters?publication, ()) ]]
     </div>
 
-    [% template after %]
+    [% template before %]
     [% include "templates/departmenthistory-sidebar.html" %]
     [% endtemplate %]
 </template>

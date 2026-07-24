@@ -226,13 +226,45 @@
                 <model predicate="(@key or @ref) and not($parameters?mode = ('register', 'register-details', 'register-overview'))" behaviour="inline"/>
             </elementSpec>
             <elementSpec ident="graphic" mode="change">
-                <desc>rdcr country articles carry tei:graphic/@url as a bare filename (e.g.
-                    "japan-flag.jpg", #1095/#1128) with no base-URI logic anywhere in the base
-                    ODD, so it would render as a broken relative src. The reference site
-                    resolves these against static.history.state.gov/countries/ (confirmed live);
-                    reproduced here as an explicit prefix rather than left bare. Scoped to only
-                    the "bare filename" shape (no scheme, no leading slash) so it doesn't touch
-                    any graphic that already carries a full path/URL elsewhere in the app.</desc>
+                <desc>Several data collections carry tei:graphic/@url as a bare filename (e.g.
+                    "japan-flag.jpg" for rdcr countries #1095/#1128; "sh-bfranklin.jpg" for
+                    short-history, "1-homes-cover.jpg" for buildings, "jefferson-thomas.jpg" for
+                    secretary-bios, #1096 PR review) with no base-URI logic anywhere in the base
+                    ODD, so they would render as broken relative srcs. The reference site
+                    resolves each against its own static.history.state.gov/{collection}/ prefix
+                    (confirmed live per collection); reproduced here as per-collection models,
+                    matched by the source document's collection path via base-uri(/), tried in
+                    order with the original countries model kept last as the fallback for any
+                    other bare-filename graphic. Some short-history graphics carry a "../"-
+                    relative filename (e.g. "../secretaries/hull-cordell.jpg", for secretaries
+                    who are also pictured inline in the short-history text) -- string-concatenating
+                    onto the short-history prefix produces "short-history/../secretaries/...",
+                    which browsers (and static.history.state.gov itself) resolve like any other
+                    relative URL, so no special-casing was needed for those. Each model is scoped
+                    to only the "bare filename" shape (no scheme, no leading slash) so it doesn't
+                    touch any graphic that already carries a full path/URL elsewhere in the
+                    app.</desc>
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/other-publications/short-history/')" behaviour="graphic">
+                    <param name="url" value="'https://static.history.state.gov/short-history/' || @url"/>
+                    <param name="width" value="@width"/>
+                    <param name="height" value="@height"/>
+                    <param name="scale" value="@scale"/>
+                    <param name="title" value="desc"/>
+                </model>
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/other-publications/buildings/')" behaviour="graphic">
+                    <param name="url" value="'https://static.history.state.gov/buildings/' || @url"/>
+                    <param name="width" value="@width"/>
+                    <param name="height" value="@height"/>
+                    <param name="scale" value="@scale"/>
+                    <param name="title" value="desc"/>
+                </model>
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/other-publications/secretary-bios/')" behaviour="graphic">
+                    <param name="url" value="'https://static.history.state.gov/secretaries/' || @url"/>
+                    <param name="width" value="@width"/>
+                    <param name="height" value="@height"/>
+                    <param name="scale" value="@scale"/>
+                    <param name="title" value="desc"/>
+                </model>
                 <model predicate="not(matches(@url, '^(?:[a-z]+://|/)'))" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/countries/' || @url"/>
                     <param name="width" value="@width"/>

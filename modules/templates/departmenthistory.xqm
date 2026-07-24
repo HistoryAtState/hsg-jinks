@@ -191,19 +191,6 @@ declare function dh:breadcrumb($context as map(*), $trail as map(*)*) as element
     )
 };
 
-(:~
- : Title + table of contents for a monograph's TOC page (#1134). One function
- : call per template interpolation site, same style as hsg:volume-list on
- : historicaldocuments.html.
- :)
-declare function dh:monograph-toc-page($context as map(*), $publication as xs:string) as element()+ {
-    let $doc := dh:monograph-doc($publication)
-    return (
-        <h1>{dh:monograph-title($doc)}</h1>,
-        dh:monograph-toc($context, $doc, $publication, ())
-    )
-};
-
 declare function dh:monograph-toc-breadcrumb($context as map(*), $publication as xs:string) as element(li)+ {
     let $doc := dh:monograph-doc($publication)
     return dh:breadcrumb($context, (map { "label": dh:monograph-short-title($doc), "href": "/departmenthistory/" || $publication }))
@@ -245,44 +232,44 @@ declare function dh:monograph-section-sidebar($context as map(*)) as element(nav
  : unmatched-mode fallback (div elementSpec's predicate-less
  : behaviour="block") rather than a dedicated ODD mode: passing a plain-TEI
  : div node with no frus-* markers needs no more than that default wrapping,
- : and head/p/graphic/hi already fall through to teipublisher.odd with no
- : override in this app's ODD.
+ : and head/p/graphic/hi already fall through to teipublisher.odd (or this
+ : app's own hsg-jinks.odd overrides) with $division passed through
+ : unmodified.
  :
- : Explicit <h1> from the division's own <head> text, with that same <head>
- : element stripped from the copy handed to page:transform. An earlier
- : version relied on teipublisher.odd rendering the division's own <head>
- : as the page's heading and skipped adding one here to avoid a duplicate --
- : true for a top-level chapter (its head came out <h1>), but false for a
- : subchapter one level deeper in the source: its head rendered as <h2>,
- : found live via a Cypress acceptance spec (#1149) asserting on "main h1"
- : after clicking Next from a chapter into its first subchapter, which
- : failed because there was no h1 at all on that page. Heading level tracks
- : the division's *absolute* nesting depth in the source document, not the
- : depth relative to whatever node page:transform was handed -- passing
- : $division doesn't re-base it, contrary to what one data point (a
- : chapter, always at the same depth as every other chapter) suggested.
- : Stripping the division's own head and supplying <h1> directly sidesteps
- : the level question entirely: every section page gets exactly one real
- : <h1>, and content nested inside (e.g. a subchapter's own head, seen when
- : viewing its parent chapter) still renders at whatever level the ODD
- : assigns it, which is correct there -- only the page's own top heading
- : needs to be forced to <h1>.
+ : $division is passed to page:transform as-is, still attached to its
+ : source document -- an earlier version reconstructed a detached copy
+ : (stripping the division's own <head> via a computed element
+ : constructor) to solve the heading-level problem below, which silently
+ : broke page:transform for the *entire* subtree: teipublisher's rendering
+ : depends on base-uri()/document context that a freestanding in-memory
+ : fragment doesn't have, so every section page rendered an empty content
+ : div (found via a PR review comparing against the reference site, not by
+ : any test -- the existing Cypress spec only asserted the <h1> was
+ : present, which the old version still produced).
  :
- : Known gap: graphics carry bare filenames (e.g. "sh-jmonroe.jpg") with no
- : base URI fix yet -- tracked as data-transformation rework (#1147), not
- : fixed here.
+ : Explicit <h1> from the division's own <head> text, WITHOUT stripping
+ : that <head> from what's handed to page:transform -- the ODD still
+ : renders it too, as part of the division's normal content (confirmed:
+ : customizing the "head" elementSpec itself, scoped to the division's own
+ : top-level head via a "sectionId" parameter, compiles and evaluates
+ : correctly in isolation but never actually fires live -- teipublisher's
+ : "section"/"block" behaviour implementations for div appear to extract
+ : and render a div's own immediate head directly, without re-dispatching
+ : it back through the elementSpec model-matching machinery, so an
+ : elementSpec-level override can't reach it). The ODD's own rendering of
+ : that same head is hidden via CSS instead (resources/css/hsg-theme.css,
+ : ".tei-div > :first-child.tei-head"), scoped to only the division's own
+ : *first* child -- nested subchapter heads (seen when a chapter's page
+ : renders its subchapters' content inline) are never a div's first child
+ : at the top level and remain visible, at whatever level the ODD assigns
+ : them, which is correct there.
  :)
 declare function dh:monograph-section-content($context as map(*)) as element()+ {
     let $s := dh:current-section($context)
     let $division := $s?division
-    let $ownHead := $division/tei:head[1]
-    let $bare := element { node-name($division) } {
-        $division/@*,
-        $division/node()[not(. is $ownHead)]
-    }
     return (
-        <h1>{normalize-space($ownHead)}</h1>,
-        page:transform($bare, map { "mode": "monograph-section" })
+        <h1>{normalize-space($division/tei:head[1])}</h1>,
+        page:transform($division, map { "mode": "monograph-section" })
     )
 };
 

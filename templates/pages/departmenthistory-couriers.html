@@ -6,6 +6,14 @@
                 "https://history.state.gov/ns/templates/departmenthistory": { "at": "modules/templates/departmenthistory.xqm", "prefix": "dh" }
             },
             "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false,
+                    "collapsible": false
+                }
+            }
         }
     }
     ---
@@ -99,7 +107,7 @@
                 and Cold War, 1945–1961</a>.</p>
     </div>
 
-    [% template after %]
+    [% template before %]
     [% include "templates/departmenthistory-sidebar.html" %]
     [% endtemplate %]
 </template>

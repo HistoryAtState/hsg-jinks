@@ -6,6 +6,14 @@
                 "https://history.state.gov/ns/templates/departmenthistory": { "at": "modules/templates/departmenthistory.xqm", "prefix": "dh" }
             },
             "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false,
+                    "collapsible": false
+                }
+            }
         }
     }
     ---
@@ -31,6 +39,9 @@
     [% endtemplate %]
 
     <div class="usa-prose">
+        [% if $context?request?parameters?publication = 'short-history' %]
+        [% include "templates/departmenthistory-short-history-notice-brief.html" %]
+        [% endif %]
         [[ dh:monograph-section-content($context) ]]
         [[ dh:monograph-section-pagination($context) ]]
     </div>

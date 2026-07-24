@@ -83,7 +83,31 @@ in ordinary prose style — using `--` as a dash, the way this file and commit
 messages do — breaks the whole template with a cryptic `XPST0003 expecting
 end of XML comment` error at deploy time, not at write time. It has caused
 repeat, easy-to-miss bugs. Use `;`, `—` (em dash), or a full stop instead of
-`--` inside any `<!-- -->` block. Before deploying a new or edited template
-comment, a quick check across changed files:
-`grep -rn -- '--' templates/**/*.html | grep -v 'usa-\|context-path'` (or
-review each `<!-- -->` block by eye) catches it before the round trip.
+`--` inside any `<!-- -->` block.
+
+It isn't only prose dashes: writing out a literal CSS class name that happens
+to use BEM's `--` modifier syntax (`usa-alert--error`, `usa-alert--warning`,
+etc.) inside a comment trips the exact same rule — found live when a comment
+mentioning `usa-alert--warning` broke a template the same way a dash would
+have. When referencing a `--`-modifier class name in a comment, write it some
+other way (quote the base and modifier separately: `"usa-alert" "error"
+variant`) rather than the literal class string.
+
+Before deploying a new or edited template comment, check every changed
+`.html` file's comment *bodies* specifically — a plain `grep -rn -- '--'`
+over-matches (flags `--` in ordinary attributes like `class="usa-..."`
+outside any comment) and under-matches if you then filter those false
+positives out by pattern (a `grep -v 'usa-'` hides genuine `--` mentioned
+*inside* a comment too, which is exactly how this bug slipped through once
+already). A short Python one-liner checks only inside `<!-- -->` bodies,
+across every changed template, with no false positives either way:
+```
+python3 -c "
+import re, glob
+for f in glob.glob('templates/**/*.html', recursive=True):
+    content = open(f).read()
+    for m in re.finditer(r'<!--(.*?)-->', content, re.S):
+        if '--' in m.group(1):
+            print(f, repr(m.group(1)[:200]))
+"
+```
