@@ -17,20 +17,35 @@
         }
     }
     ---
+    <!--
+        Shared by-country/by-organization index page (#1096 optimization
+        pass, one template for two routes that only ever differed by which
+        list function to call): dhapi:chiefs-by-country / dhapi:chiefs-by-
+        organization pass which "kind" via the "kind" request parameter,
+        read back through $context?request?parameters?kind. The two list
+        functions stay separate (dh:chiefs-by-country-list returns a
+        two-column alphabetical grid, dh:chiefs-by-organization-list a flat
+        list; different shapes, not worth forcing into one), only the
+        wrapping template is unified.
+    -->
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
             <ul>
-                [[ dh:chiefs-by-organization-breadcrumb($context) ]]
+                [[ dh:chiefs-by-kind-breadcrumb($context, $context?request?parameters?kind) ]]
             </ul>
         </nav>
     </li>
     [% endtemplate %]
 
-    <!-- hsg-shell's page title wrongly reads "By Country" here; fixed. -->
     <div class="usa-prose">
+        [% if $context?request?parameters?kind = 'country' %]
+        <h1>Chiefs of Mission, Listed Alphabetically by Country</h1>
+        [[ dh:chiefs-by-country-list($context) ]]
+        [% else %]
         <h1>Chiefs of Mission, Listed by International Organization</h1>
         [[ dh:chiefs-by-organization-list($context) ]]
+        [% endif %]
     </div>
 
     [% template before %]

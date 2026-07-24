@@ -262,12 +262,38 @@ declare function dhapi:principal-officers-role($request as map(*)) {
             dhapi:render($request, "pages/departmenthistory-principal-officers-role")
 };
 
+(:~
+ : Country and organization listings are two routes into one template
+ : (#1096 optimization pass): same shape (a title plus one list function
+ : call), differing only in which of dh:chiefs-by-country-list /
+ : dh:chiefs-by-organization-list to call -- those two return genuinely
+ : different structures (a two-column alphabetical grid vs a flat list), so
+ : unifying them into one function wasn't worthwhile, but the template
+ : wrapping either one is identical modulo which to call. "kind" is
+ : synthesized server-side, the same technique dhapi:monograph-toc already
+ : uses for "publication" -- not a URL path parameter.
+ :)
+declare %private function dhapi:chiefs-by-kind($request as map(*), $kind as xs:string) {
+    vapi:html(map:merge((
+        $request,
+        map {
+            "parameters": map:merge((
+                $request?parameters,
+                map {
+                    "file": "pages/departmenthistory-chiefs-by-kind",
+                    "kind": $kind
+                }
+            ))
+        }
+    )))
+};
+
 declare function dhapi:chiefs-by-country($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-chiefs-by-country")
+    dhapi:chiefs-by-kind($request, "country")
 };
 
 declare function dhapi:chiefs-by-organization($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-chiefs-by-organization")
+    dhapi:chiefs-by-kind($request, "organization")
 };
 
 (:~
@@ -290,12 +316,60 @@ declare function dhapi:chiefs-listing($request as map(*)) {
             error($errors:NOT_FOUND, "no chief-of-mission role or country " || $id)
 };
 
+(:~
+ : President and secretary index pages are two routes into one template
+ : (#1096 optimization pass): same shape throughout (title, optional
+ : hiatus notice, office-holders list, destinations list), and the
+ : underlying dh:travels-index-breadcrumb / dh:travels-destinations
+ : functions already take "role" as a plain string parameter -- only the
+ : template files themselves hadn't been unified yet. "role" is
+ : synthesized server-side, the same technique dhapi:monograph-toc already
+ : uses for "publication" -- not a URL path parameter.
+ :)
+declare %private function dhapi:travels-role($request as map(*), $role as xs:string) {
+    vapi:html(map:merge((
+        $request,
+        map {
+            "parameters": map:merge((
+                $request?parameters,
+                map {
+                    "file": "pages/departmenthistory-travels-role",
+                    "role": $role
+                }
+            ))
+        }
+    )))
+};
+
 declare function dhapi:travels-president($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-travels-president")
+    dhapi:travels-role($request, "president")
 };
 
 declare function dhapi:travels-secretary($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-travels-secretary")
+    dhapi:travels-role($request, "secretary")
+};
+
+(:~
+ : Shared render step for both listing routes below (#1096 optimization
+ : pass): one template, "role" synthesized server-side same as
+ : dhapi:travels-role above. The pre-render validation the two routes do
+ : (unknown-id 404, secretary's extra old-id redirect) stays separate --
+ : genuinely different behaviour, not boilerplate -- only the render step
+ : itself was duplicated.
+ :)
+declare %private function dhapi:travels-listing($request as map(*), $role as xs:string) {
+    vapi:html(map:merge((
+        $request,
+        map {
+            "parameters": map:merge((
+                $request?parameters,
+                map {
+                    "file": "pages/departmenthistory-travels-listing",
+                    "role": $role
+                }
+            ))
+        }
+    )))
 };
 
 (:~
@@ -307,7 +381,7 @@ declare function dhapi:travels-president-listing($request as map(*)) {
     let $id := $request?parameters?personOrCountryId
     return
         if (dh:travels-is-person('president', $id) or exists(dh:travels-trips-by-country('president', $id))) then
-            dhapi:render($request, "pages/departmenthistory-travels-president-listing")
+            dhapi:travels-listing($request, "president")
         else
             error($errors:NOT_FOUND, "no president or destination country " || $id)
 };
@@ -321,7 +395,7 @@ declare function dhapi:travels-secretary-listing($request as map(*)) {
     let $id := $request?parameters?personOrCountryId
     return
         if (dh:travels-is-person('secretary', $id) or exists(dh:travels-trips-by-country('secretary', $id))) then
-            dhapi:render($request, "pages/departmenthistory-travels-secretary-listing")
+            dhapi:travels-listing($request, "secretary")
         else
             let $canonical := dh:person-canonical-id-for-old-id($id)
             return

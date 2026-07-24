@@ -1153,12 +1153,13 @@ declare %private function dh:chiefs-trail() as map(*)+ {
     (map { "label": "People", "href": "/departmenthistory/people" }, map { "label": "Chiefs of Mission", "href": "/departmenthistory/people/chiefsofmission" })
 };
 
-declare function dh:chiefs-by-country-breadcrumb($context as map(*)) as element(li)+ {
-    dh:breadcrumb($context, (dh:chiefs-trail(), map { "label": "By Country" }))
-};
-
-declare function dh:chiefs-by-organization-breadcrumb($context as map(*)) as element(li)+ {
-    dh:breadcrumb($context, (dh:chiefs-trail(), map { "label": "By Organization" }))
+(:~
+ : Shared by both by-country and by-organization (#1096 optimization pass,
+ : one template for both): $kind is "country" or "organization", matching
+ : the "kind" request parameter dhapi:chiefs-by-kind synthesizes.
+ :)
+declare function dh:chiefs-by-kind-breadcrumb($context as map(*), $kind as xs:string) as element(li)+ {
+    dh:breadcrumb($context, (dh:chiefs-trail(), map { "label": "By " || (if ($kind = 'country') then "Country" else "Organization") }))
 };
 
 declare function dh:chiefs-listing-breadcrumb($context as map(*)) as element(li)+ {
