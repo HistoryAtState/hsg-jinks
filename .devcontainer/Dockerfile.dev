@@ -105,7 +105,7 @@ RUN git clone https://github.com/eeditiones/jinks.git \
 # profile-theme-uswds is a PRIVATE repo, so it cannot be cloned anonymously here
 # (and it publishes no releases, so `docker.externalXar` has no URL to fetch).
 # Instead we copy in a xar built from the local checkout. Refresh it with:
-#   cd ~/customers/eeditiones/profile-theme-uswds && ant
+#   cd ../../profile-uswds-theme && ant       # from a worktree; see README "Workspace layout"
 #   cp build/profile-theme-uswds-*.xar <this repo>/.devcontainer/
 # The xar is gitignored -- it is a build artifact, not source.
 COPY profile-theme-uswds-*.xar /usr/local/exist/autodeploy/zzz-profile-theme-uswds.xar
@@ -114,7 +114,7 @@ COPY profile-theme-uswds-*.xar /usr/local/exist/autodeploy/zzz-profile-theme-usw
 # it follows the same frozen-baseline pattern as profile-theme-uswds above --
 # baked into autodeploy rather than built or installed per-container, so it
 # survives every container rebuild automatically. Refresh it with:
-#   cd ~/customers/hsg/hsg-jinks-data && ant
+#   cd ../../hsg-jinks-data && ant             # from a worktree; see README "Workspace layout"
 #   cp build/frus-data-jinks-*.xar <this repo>/.devcontainer/
 # Once a release exists, switch this to a curl fetch like tei-publisher-lib/
 # roaster/jwt above and drop the manual copy step in new-worktree.sh.

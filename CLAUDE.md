@@ -5,6 +5,11 @@ the Historian. This is a **Mode B** repo: `expath-pkg.xml` + `config.json` at th
 root, no `profiles/`. Edit `config.json` and regenerate via `jinks update` rather
 than hand-editing generated files (see the jinks skills for the full workflow).
 
+This repo expects several companion repos as flat siblings in one parent
+directory — `jinks`, `jinks-templates`, `profile-uswds-theme`, `hsg-jinks-data`,
+`hsg-project` — see README "Workspace layout" for the full picture and what
+each one is for.
+
 ## Reference implementation (old app)
 
 The pre-v10 TEI Publisher application this project replaces lives outside this
