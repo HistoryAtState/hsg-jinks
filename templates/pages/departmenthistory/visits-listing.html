@@ -21,19 +21,18 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul>
-                [[ dh:people-by-year-breadcrumb($context, ()) ]]
+                [[ dh:visits-listing-breadcrumb($context) ]]
             </ul>
         </nav>
     </li>
     [% endtemplate %]
 
     <div class="usa-prose">
-        <h1>Principal Officers and Chiefs of Mission, by Year</h1>
-        <p>Select a year to see who held a Principal Officer or Chief of Mission role in it.</p>
-        [[ dh:people-by-year-nav($context) ]]
+        <h1>[[ dh:visits-listing-title($context?request?parameters?countryOrYear) ]]</h1>
+        [[ dh:visits-listing-table($context?request?parameters?countryOrYear) ]]
     </div>
 
     [% template before %]
-    [% include "templates/departmenthistory-sidebar.html" %]
+    [% include "templates/departmenthistory/sidebar.html" %]
     [% endtemplate %]
 </template>

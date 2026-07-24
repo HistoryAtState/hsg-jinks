@@ -21,20 +21,18 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul>
-                [[ dh:people-by-name-breadcrumb($context, $context?request?parameters?letter) ]]
+                [[ dh:principal-officers-breadcrumb($context) ]]
             </ul>
         </nav>
     </li>
     [% endtemplate %]
 
     <div class="usa-prose">
-        <h1>Starting with [[ upper-case($context?request?parameters?letter) ]]</h1>
-        [[ dh:people-by-name-nav($context, $context?request?parameters?letter) ]]
-        [[ dh:people-list($context, dh:people-by-letter($context?request?parameters?letter)) ]]
-        [[ dh:people-by-name-prev-next($context, $context?request?parameters?letter) ]]
+        <h1>Principal Officers, by Title</h1>
+        [[ dh:principal-officers-index($context) ]]
     </div>
 
     [% template before %]
-    [% include "templates/departmenthistory-sidebar.html" %]
+    [% include "templates/departmenthistory/sidebar.html" %]
     [% endtemplate %]
 </template>

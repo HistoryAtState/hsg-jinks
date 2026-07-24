@@ -40,7 +40,7 @@
     <div class="usa-prose">
         [% if $context?request?parameters?role = 'president' %]
         <h1>Travels Abroad of the President</h1>
-        [% include "templates/departmenthistory-president-travels-hiatus.html" %]
+        [% include "templates/departmenthistory/president-travels-hiatus.html" %]
         <p>This resource presents basic historical information on all foreign trips by the
             President.</p>
         [% else %]
@@ -71,6 +71,6 @@
     </div>
 
     [% template before %]
-    [% include "templates/departmenthistory-sidebar.html" %]
+    [% include "templates/departmenthistory/sidebar.html" %]
     [% endtemplate %]
 </template>

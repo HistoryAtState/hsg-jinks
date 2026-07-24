@@ -29,7 +29,7 @@
 
     <div class="section-landing usa-prose">
         <h1>Chiefs of Mission</h1>
-        [% include "templates/departmenthistory-hiatus-notice.html" %]
+        [% include "templates/departmenthistory/hiatus-notice.html" %]
         <ul class="usa-list">
             <li>
                 <a href="[[ $context?context-path ]]/departmenthistory/people/chiefsofmission/by-country">Listed
@@ -43,6 +43,6 @@
     </div>
 
     [% template before %]
-    [% include "templates/departmenthistory-sidebar.html" %]
+    [% include "templates/departmenthistory/sidebar.html" %]
     [% endtemplate %]
 </template>

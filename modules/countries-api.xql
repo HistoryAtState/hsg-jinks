@@ -28,19 +28,19 @@ declare %private function countryapi:render($request as map(*), $file as xs:stri
 };
 
 declare function countryapi:index($request as map(*)) {
-    countryapi:render($request, "pages/countries")
+    countryapi:render($request, "pages/countries/index")
 };
 
 declare function countryapi:list($request as map(*)) {
-    countryapi:render($request, "pages/countries-all")
+    countryapi:render($request, "pages/countries/all")
 };
 
 declare function countryapi:archives-index($request as map(*)) {
-    countryapi:render($request, "pages/countries-archives")
+    countryapi:render($request, "pages/countries/archives/index")
 };
 
 declare function countryapi:archives-list($request as map(*)) {
-    countryapi:render($request, "pages/countries-archives-all")
+    countryapi:render($request, "pages/countries/archives/all")
 };
 
 (:~

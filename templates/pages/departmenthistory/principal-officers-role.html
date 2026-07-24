@@ -21,18 +21,17 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul>
-                [[ dh:breadcrumb($context, (map{"label": "People", "href": "/departmenthistory/people"}, map{"label": "Secretaries of State"})) ]]
+                [[ dh:principal-officers-breadcrumb($context) ]]
             </ul>
         </nav>
     </li>
     [% endtemplate %]
 
     <div class="usa-prose">
-        <h1>Secretaries of State</h1>
-        [[ dh:secretaries($context) ]]
+        [[ dh:principal-officers-role-content($context) ]]
     </div>
 
     [% template before %]
-    [% include "templates/departmenthistory-sidebar.html" %]
+    [% include "templates/departmenthistory/sidebar.html" %]
     [% endtemplate %]
 </template>

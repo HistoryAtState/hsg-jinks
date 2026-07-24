@@ -21,17 +21,22 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul>
-                [[ dh:chiefs-listing-breadcrumb($context) ]]
+                [[ dh:breadcrumb($context, ()) ]]
             </ul>
         </nav>
     </li>
     [% endtemplate %]
 
-    <div class="usa-prose">
-        [[ dh:chiefs-listing-content($context) ]]
+    <div class="section-landing usa-prose">
+        <h1>
+            <pb-i18n key="departmenthistory.title">Department History</pb-i18n>
+        </h1>
+        <p>This section of our website contains publications and datasets on various aspects of
+            the history of the U.S. Department of State. Please access these materials via the
+            links in the sidebar.</p>
     </div>
 
     [% template before %]
-    [% include "templates/departmenthistory-sidebar.html" %]
+    [% include "templates/departmenthistory/sidebar.html" %]
     [% endtemplate %]
 </template>

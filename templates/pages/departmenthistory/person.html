@@ -30,7 +30,7 @@
     <div class="usa-prose">
         [[ dh:person-heading($context) ]]
         [% if not(dh:person-has-bio($context?request?parameters?personId)) %]
-        [% include "templates/departmenthistory-hiatus-notice.html" %]
+        [% include "templates/departmenthistory/hiatus-notice.html" %]
         [% endif %]
         [[ dh:person-body($context) ]]
         <!--
@@ -43,6 +43,6 @@
     </div>
 
     [% template before %]
-    [% include "templates/departmenthistory-sidebar.html" %]
+    [% include "templates/departmenthistory/sidebar.html" %]
     [% endtemplate %]
 </template>

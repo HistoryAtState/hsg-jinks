@@ -35,35 +35,35 @@ declare %private function dhapi:render($request as map(*), $file as xs:string) {
 };
 
 declare function dhapi:index($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory")
+    dhapi:render($request, "pages/departmenthistory/index")
 };
 
 declare function dhapi:people($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-people")
+    dhapi:render($request, "pages/departmenthistory/people")
 };
 
 declare function dhapi:chiefs($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-chiefsofmission")
+    dhapi:render($request, "pages/departmenthistory/chiefsofmission")
 };
 
 declare function dhapi:principals-chiefs($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-principals-chiefs")
+    dhapi:render($request, "pages/departmenthistory/principals-chiefs")
 };
 
 declare function dhapi:travels($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-travels")
+    dhapi:render($request, "pages/departmenthistory/travels")
 };
 
 declare function dhapi:couriers($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-couriers")
+    dhapi:render($request, "pages/departmenthistory/courier/index")
 };
 
 declare function dhapi:marine-corps($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-marine-corps")
+    dhapi:render($request, "pages/departmenthistory/marine-corps")
 };
 
 declare function dhapi:wwi($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-wwi")
+    dhapi:render($request, "pages/departmenthistory/wwi")
 };
 
 (:~
@@ -81,7 +81,7 @@ declare function dhapi:courier-film($request as map(*)) {
         if (not($filmId = $dhapi:COURIER_FILMS)) then
             error($errors:NOT_FOUND, "no diplomatic courier film " || $filmId)
         else
-            dhapi:render($request, "pages/departmenthistory-courier-" || $filmId)
+            dhapi:render($request, "pages/departmenthistory/courier/" || $filmId)
 };
 
 declare %private function dhapi:monograph-toc($request as map(*), $publication as xs:string) {
@@ -91,7 +91,7 @@ declare %private function dhapi:monograph-toc($request as map(*), $publication a
             "parameters": map:merge((
                 $request?parameters,
                 map {
-                    "file": "pages/departmenthistory-monograph-toc",
+                    "file": "pages/departmenthistory/monograph-toc",
                     "publication": $publication
                 }
             ))
@@ -129,7 +129,7 @@ declare %private function dhapi:monograph-section($request as map(*), $publicati
                     "parameters": map:merge((
                         $request?parameters,
                         map {
-                            "file": "pages/departmenthistory-monograph-section",
+                            "file": "pages/departmenthistory/monograph-section",
                             "publication": $publication,
                             "sectionId": $sectionId
                         }
@@ -152,7 +152,7 @@ declare function dhapi:buildings-section($request as map(*)) {
  : list directly, there is no ODD transform involved.
  :)
 declare function dhapi:secretaries($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-secretaries")
+    dhapi:render($request, "pages/departmenthistory/secretaries")
 };
 
 (:~
@@ -189,7 +189,7 @@ declare function dhapi:person($request as map(*)) {
     let $personId := $request?parameters?personId
     return
         if (exists(dh:person-doc($personId))) then
-            dhapi:render($request, "pages/departmenthistory-person")
+            dhapi:render($request, "pages/departmenthistory/person")
         else
             let $canonical := dh:person-canonical-id-for-old-id($personId)
             return
@@ -200,7 +200,7 @@ declare function dhapi:person($request as map(*)) {
 };
 
 declare function dhapi:people-by-name($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-people-by-name")
+    dhapi:render($request, "pages/departmenthistory/people-by-name")
 };
 
 (:~
@@ -216,11 +216,11 @@ declare function dhapi:people-by-name-letter($request as map(*)) {
         if (not($letter = dh:people-letters())) then
             error($errors:NOT_FOUND, "no people starting with letter " || $letter)
         else
-            dhapi:render($request, "pages/departmenthistory-people-by-name-letter")
+            dhapi:render($request, "pages/departmenthistory/people-by-name-letter")
 };
 
 declare function dhapi:people-by-year($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-people-by-year")
+    dhapi:render($request, "pages/departmenthistory/people-by-year")
 };
 
 (:~
@@ -241,11 +241,11 @@ declare function dhapi:people-by-year-year($request as map(*)) {
                 if ($year < $dh:PEOPLE_BY_YEAR_MIN or $year > dh:people-by-year-max()) then
                     error($errors:NOT_FOUND, "year " || $year || " is out of range")
                 else
-                    dhapi:render($request, "pages/departmenthistory-people-by-year-year")
+                    dhapi:render($request, "pages/departmenthistory/people-by-year-year")
 };
 
 declare function dhapi:principal-officers($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-principal-officers")
+    dhapi:render($request, "pages/departmenthistory/principal-officers")
 };
 
 (:~
@@ -259,7 +259,7 @@ declare function dhapi:principal-officers-role($request as map(*)) {
         if (empty(dh:principal-position-doc($roleId))) then
             error($errors:NOT_FOUND, "no principal-officer role " || $roleId)
         else
-            dhapi:render($request, "pages/departmenthistory-principal-officers-role")
+            dhapi:render($request, "pages/departmenthistory/principal-officers-role")
 };
 
 (:~
@@ -280,7 +280,7 @@ declare %private function dhapi:chiefs-by-kind($request as map(*), $kind as xs:s
             "parameters": map:merge((
                 $request?parameters,
                 map {
-                    "file": "pages/departmenthistory-chiefs-by-kind",
+                    "file": "pages/departmenthistory/chiefs-by-kind",
                     "kind": $kind
                 }
             ))
@@ -309,7 +309,7 @@ declare function dhapi:chiefs-listing($request as map(*)) {
     let $id := $request?parameters?roleOrCountryId
     return
         if (exists(dh:chiefs-org-doc($id)) or exists(dh:chiefs-country-doc($id))) then
-            dhapi:render($request, "pages/departmenthistory-chiefs-listing")
+            dhapi:render($request, "pages/departmenthistory/chiefs-listing")
         else if (exists(dh:principal-position-doc($id))) then
             dhapi:redirect($config:context-path || "/departmenthistory/people/principalofficers/" || $id)
         else
@@ -333,7 +333,7 @@ declare %private function dhapi:travels-role($request as map(*), $role as xs:str
             "parameters": map:merge((
                 $request?parameters,
                 map {
-                    "file": "pages/departmenthistory-travels-role",
+                    "file": "pages/departmenthistory/travels-role",
                     "role": $role
                 }
             ))
@@ -364,7 +364,7 @@ declare %private function dhapi:travels-listing($request as map(*), $role as xs:
             "parameters": map:merge((
                 $request?parameters,
                 map {
-                    "file": "pages/departmenthistory-travels-listing",
+                    "file": "pages/departmenthistory/travels-listing",
                     "role": $role
                 }
             ))
@@ -406,7 +406,7 @@ declare function dhapi:travels-secretary-listing($request as map(*)) {
 };
 
 declare function dhapi:visits($request as map(*)) {
-    dhapi:render($request, "pages/departmenthistory-visits")
+    dhapi:render($request, "pages/departmenthistory/visits")
 };
 
 (:~
@@ -424,7 +424,7 @@ declare function dhapi:visits-listing($request as map(*)) {
             (dh:visits-is-year($key) and exists(dh:visits-by-year(xs:integer($key))))
             or (not(dh:visits-is-year($key)) and exists(dh:visits-by-country($key)))
         ) then
-            dhapi:render($request, "pages/departmenthistory-visits-listing")
+            dhapi:render($request, "pages/departmenthistory/visits-listing")
         else
             error($errors:NOT_FOUND, "no visits for " || $key)
 };

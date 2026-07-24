@@ -21,19 +21,17 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul>
-                [[ dh:people-by-year-breadcrumb($context, xs:integer($context?request?parameters?year)) ]]
+                [[ dh:chiefs-listing-breadcrumb($context) ]]
             </ul>
         </nav>
     </li>
     [% endtemplate %]
 
     <div class="usa-prose">
-        <h1>[[ $context?request?parameters?year ]]</h1>
-        [[ dh:people-list($context, dh:people-active-in-year(xs:integer($context?request?parameters?year)), xs:integer($context?request?parameters?year)) ]]
-        [[ dh:people-by-year-prev-next($context, xs:integer($context?request?parameters?year)) ]]
+        [[ dh:chiefs-listing-content($context) ]]
     </div>
 
     [% template before %]
-    [% include "templates/departmenthistory-sidebar.html" %]
+    [% include "templates/departmenthistory/sidebar.html" %]
     [% endtemplate %]
 </template>
