@@ -35,56 +35,6 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     text-decoration: none;
 }
 
-/* Sidebar table of contents.
-   USWDS's own indent rule for nested items never applies: its selector is
-   `.usa-sidenav__sublist :not(.usa-button):not(.uswds-button):not(pb-login::part(trigger))`,
-   and a pseudo-element inside :not() is invalid, so the browser drops the whole
-   rule -- verified, the computed padding-left is 0px and chapters render flush
-   with their compilation. Restore the indent the component intends; the real fix
-   belongs upstream in profile-theme-uswds. */
-.usa-sidenav__sublist a {
-    display: block;
-    padding-left: 2rem;
-}
-
-.usa-sidenav__sublist .usa-sidenav__sublist a {
-    padding-left: 3rem;
-}
-
-/* Base sidenav link chrome (#1089 follow-up).
-   Same root cause as the indent fix above: USWDS's own `a:not(.usa-button)`
-   rule for display/padding/hover/color is invalidated by the same
-   pb-login::part(trigger) pollution, so it's dropped for every sidenav
-   link, not just the sublist indent -- restored directly here. The real fix
-   belongs upstream in profile-theme-uswds (drop @extend .usa-button from
-   pb-login::part(trigger)/.uswds-button, or scope it so it can't leak into
-   unrelated :not() clauses). */
-.usa-sidenav a,
-.usa-sidenav__sublist a {
-    display: block;
-    padding-top: .5rem;
-    padding-right: 1rem;
-    padding-bottom: .5rem;
-    text-decoration: none;
-}
-
-.usa-sidenav > li > a {
-    padding-left: 1rem;
-}
-
-.usa-sidenav a:hover {
-    background-color: #f0f0f0;
-    text-decoration: none;
-}
-
-.usa-sidenav a:not(.usa-current) {
-    color: #5c5c5c;
-}
-
-.usa-sidenav a:not(.usa-current):hover {
-    color: #2378c3;
-}
-
 /* Footer (#1086).
    USWDS ships the big footer light-on-white; the design puts the whole thing
    on navy, with both bands sharing one background so the seam disappears.
