@@ -7,6 +7,9 @@ ARG ROUTER_VERSION=1.12.2
 ARG EDITOR_VERSION=1.0.1
 ARG CRYPTO_VERSION=6.0.1
 ARG JWT_VERSION=2.0.1
+ARG WWDAI_VERSION=0.6.5
+ARG RDCR_VERSION=0.8.7
+ARG CAROUSEL_VERSION=0.11.10
 
 
 ARG HTTP_PORT=8080
@@ -91,6 +94,15 @@ RUN curl -L -o /usr/local/exist/autodeploy/roaster-${ROUTER_VERSION}.xar https:/
 RUN curl -L -o /usr/local/exist/autodeploy/atom-editor-${EDITOR_VERSION}.xar https://github.com/wolfgangmm/existdb-langserver/raw/master/resources/atom-editor-${EDITOR_VERSION}.xar
 RUN curl -L -o /usr/local/exist/autodeploy/expath-crypto-module-${CRYPTO_VERSION}.xar https://exist-db.org/exist/apps/public-repo/public/expath-crypto-module-${CRYPTO_VERSION}.xar
 RUN curl -L -o /usr/local/exist/autodeploy/jwt-${JWT_VERSION}.xar https://exist-db.org/exist/apps/public-repo/public/jwt-${JWT_VERSION}.xar
+
+# Countries-section data (OP#1095, modules/countries-api.xql): rdcr and wwdai
+# are HistoryAtState/{rdcr,wwdai} on GitHub, released via semantic-release
+# with the xar attached as a GitHub Release asset -- same pinned-fetch
+# pattern as roaster/jwt/crypto above, just a different host. carousel
+# (modules/templates/hsg-landing.xqm) is released the same way.
+RUN curl -fL -o /usr/local/exist/autodeploy/wwdai-${WWDAI_VERSION}.xar https://github.com/HistoryAtState/wwdai/releases/download/v${WWDAI_VERSION}/wwdai.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/rdcr-${RDCR_VERSION}.xar https://github.com/HistoryAtState/rdcr/releases/download/v${RDCR_VERSION}/rdcr.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/carousel-${CAROUSEL_VERSION}.xar https://github.com/HistoryAtState/carousel/releases/download/v${CAROUSEL_VERSION}/carousel.xar
 
 # The jinks generator and the USWDS theme profile are both built from main:
 # we track jinks main, and profile-theme-uswds has no release at all.
