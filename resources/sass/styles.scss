@@ -88,13 +88,15 @@ pb-search {
         }
     }
 
-    .usa-section {
-        p {
-            @extend .usa-intro;
-        }
-        a {
-            @extend .uswds-button;
-        }
+    // Scope these to their intended targets: the intro/lead paragraph and the
+    // ODD's link lists (list[@type='links'] renders with cssClass "buttons").
+    // A bare `.usa-section p/a` would also swallow card titles and teasers.
+    .usa-section.section-intro p,
+    .usa-section.hero p {
+        @extend .usa-intro;
+    }
+    .usa-section .buttons a {
+        @extend .uswds-button;
     }
     .content-top {
         display: none;
@@ -281,12 +283,16 @@ nav[aria-label="breadcrumb"] {
 main {
     @extend .usa-section;
 
-    // .usa-section's own padding-top already gives main's content its
-    // top spacing; an unstyled first child's default margin (e.g. h1's
-    // browser-default margin) would stack on top of that padding instead
-    // of collapsing into it, doubling the gap. Keep main's padding as the
-    // single source of that spacing.
-    > :first-child {
+    // .usa-section's own padding-top already gives main's content its top
+    // spacing; an unstyled heading's default margin (h1's browser-default
+    // margin, ~0.67em) would collapse straight through any number of
+    // zero-margin/zero-padding wrapper divs between main and the heading
+    // (the ODD transform's actual wrapper markup varies by page type/mode)
+    // and stack on top of main's padding instead of being absorbed by it,
+    // doubling the gap. Target the heading directly, not main's own first
+    // child, so this holds regardless of wrapper depth. Keep main's
+    // padding as the single source of that spacing.
+    h1:first-of-type {
         margin-block-start: 0;
     }
 }
@@ -524,6 +530,98 @@ section#bottom {
     background-position: var(--jinks-hero-background-position);
     p {
         @include uswds-core.u-measure(4);
+    }
+}
+
+// ── Landing page, Figma redesign (history.state.gov node 3162-11169) ─────────
+// Split hero: a dark title band followed by a full-width media band, replacing
+// the legacy text-over-image hero above (kept for older landing templates).
+.landing-layout .hero-title {
+    background-color: uswds-core.color("primary-darker");
+    color: uswds-core.color("white");
+
+    h1 {
+        font-family: uswds-core.family("serif");
+        font-size: uswds-core.size("serif", "3xl");
+        font-weight: 700;
+        margin: 0;
+    }
+}
+
+.landing-layout .hero-media {
+    height: var(--jinks-hero-media-height, 25rem);
+    background-color: var(--jinks-hero-background-color);
+    background-image: var(--jinks-hero-background-image);
+    background-size: var(--jinks-hero-background-size, cover);
+    background-position: var(--jinks-hero-background-position, center);
+    background-repeat: var(--jinks-hero-background-repeat, no-repeat);
+}
+
+.landing-layout {
+    // Alternating band rhythm: publications on a light blue tint, the
+    // neighbouring bands stay on the page background.
+    .usa-section.section-publications {
+        background-color: uswds-core.color("blue-5");
+    }
+
+    // Section heading row: h2 left, action link right.
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: uswds-core.units(2);
+
+        h2 {
+            margin: 0;
+        }
+    }
+
+    // Centered view-all button row below a card group.
+    .section-actions {
+        display: flex;
+        justify-content: center;
+        margin-top: uswds-core.units(4);
+    }
+
+    // The ODD renders list[@type='links'] as ul.buttons — lay the buttons out
+    // in a row without list chrome.
+    .buttons {
+        display: flex;
+        gap: uswds-core.units(1);
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    // Tag chips above a card heading.
+    .card-tags {
+        display: flex;
+        gap: uswds-core.units(1);
+        margin-bottom: uswds-core.units(1);
+    }
+
+    // News card footer: date left, read-more button right.
+    .section-news .usa-card__footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    // Flag cards carry book covers: keep the full cover visible instead of
+    // cropping it, and give the media column the Figma width.
+    .usa-card--flag {
+        .usa-card__media {
+            width: uswds-core.units("card-lg");
+            min-width: uswds-core.units("card-lg");
+        }
+
+        .usa-card__img {
+            background-color: uswds-core.color("white");
+
+            img {
+                object-fit: contain;
+            }
+        }
     }
 }
 
