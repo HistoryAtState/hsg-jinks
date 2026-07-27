@@ -1,0 +1,54 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/departmenthistory": { "at": "modules/templates/departmenthistory.xqm", "prefix": "dh" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ dh:visits-index-breadcrumb($context) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="usa-prose">
+        <h1>Visits by Foreign Leaders</h1>
+        <p>This resource presents basic historical information on visits by foreign heads of
+            state or heads of government to the United States that included a meeting with the
+            President, or with the Vice President if the President was indisposed or out of the
+            country. Except for the San Francisco Conference in 1945, visits of leaders attending
+            UN sessions are included only if the leader met separately with the President.
+            Updates are published annually for the prior year. We invite questions and comments
+            about this resource at <a href="mailto:history@state.gov">history@state.gov</a>.</p>
+        <p class="text-right"><em>Last updated, [[ dh:visits-last-updated() ]].</em></p>
+        <div class="grid-row grid-gap">
+            <div class="tablet:grid-col-4">
+                <h2>By Year</h2>
+                [[ dh:visits-years($context) ]]
+            </div>
+            <div class="tablet:grid-col-8">
+                <h2>By Country</h2>
+                [[ dh:visits-countries($context) ]]
+            </div>
+        </div>
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/departmenthistory/sidebar.html" %]
+    [% endtemplate %]
+</template>

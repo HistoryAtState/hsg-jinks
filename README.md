@@ -265,6 +265,41 @@ warning that it's missing until a page 404s.
   install pre-built packages, don't build them from source inside every
   container.
 
+### External data packages (GitHub releases)
+
+Beyond `frus-data-jinks` above, running the app also needs 7 data packages —
+the ones backing `/departmenthistory` and `/countries` — each maintained in
+its own repo under `github.com/HistoryAtState` and, unlike `frus-data-jinks`,
+already published as a versioned `.xar` GitHub release. That means they don't
+need the frozen-baseline treatment: fetch each repo's latest release asset
+and `xst package install` it directly.
+
+| Repo | Latest release |
+|---|---|
+| `gsh` | https://github.com/HistoryAtState/gsh/releases/latest |
+| `other-publications` | https://github.com/HistoryAtState/other-publications/releases/latest |
+| `pocom` | https://github.com/HistoryAtState/pocom/releases/latest |
+| `rdcr` | https://github.com/HistoryAtState/rdcr/releases/latest |
+| `travels` | https://github.com/HistoryAtState/travels/releases/latest |
+| `visits` | https://github.com/HistoryAtState/visits/releases/latest |
+| `wwdai` | https://github.com/HistoryAtState/wwdai/releases/latest |
+
+To refresh all 7 to their latest release and deploy into *this worktree's own*
+devcontainer (never port 8080 — see "Parallel worktrees & the read-only
+mirror" in `CLAUDE.md`):
+
+```sh
+for repo in gsh other-publications pocom rdcr travels visits wwdai; do
+  url=$(gh release view --repo HistoryAtState/$repo --json assets -q '.assets[0].url')
+  curl -sL -o "/tmp/${repo}.xar" "$url"
+  xst --config .xstrc package install "/tmp/${repo}.xar"
+done
+```
+
+These packages are append-only upstream — see `CLAUDE.md` ("Cypress
+assertions on data-package counts") before writing a test that counts
+anything rendered from them.
+
 ## Sync-down: files to exclude
 
 `xst get` the app, then **copy, never mirror** (a mirror deletes `.existdb.json`,

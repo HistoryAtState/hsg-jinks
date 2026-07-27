@@ -1,0 +1,36 @@
+<!--
+    Short History retired-publication notice, full version; shown only on
+    the Short History TOC page (#1134/#1096 PR review). Ported verbatim from
+    hsg-shell's pages/departmenthistory/short-history/index.xml; a red
+    "usa-alert" "error" variant (not the amber "warning" variant used by the
+    POCOM/travels hiatus notices elsewhere in this app) to match the reference
+    site's "alert alert-danger" styling and the review's own "red box"
+    description. Buildings has no equivalent notice in hsg-shell; this
+    partial is Short History-only, included by
+    departmenthistory-monograph-toc.html guarded to
+    $context?request?parameters?publication = 'short-history'.
+
+    The reference markup comments out an inline link to
+    departmenthistory/timeline (a route this app never implements; dropped
+    from the sidebar too, per #1132's own decision); reproduced here as
+    plain text, matching what the reference site actually renders live.
+-->
+<div class="usa-alert usa-alert--error">
+    <div class="usa-alert__body">
+        <h2 class="usa-alert__heading">Note to Readers</h2>
+        <p class="usa-alert__text">This publication, "A Short History of the Department of State," has been
+            retired. The text remains online for reference purposes, but it is no longer being maintained or
+            expanded.</p>
+        <p class="usa-alert__text">Why retire "A Short History"? In mid-2016 the Office of the Historian
+            completed a review of its online offerings and concluded that extensive resources would be needed
+            to revise and expand this publication to meet the Office's standards for accuracy and
+            comprehensiveness. At the same time, the events described in the "A Short History" essays are
+            amply covered by numerous respected secondary sources. Rather than duplicate these efforts, the
+            Office of the Historian has decided to focus its resources on areas where it is uniquely suited to
+            make a contribution, such as coverage of the Department of State's institutional history. In
+            keeping with the publication's new status, it can now be found under "More Resources" in the
+            site-wide menu.</p>
+        <p class="usa-alert__text" style="text-align: right; font-style: italic">Notice posted on April 8,
+            2018.</p>
+    </div>
+</div>

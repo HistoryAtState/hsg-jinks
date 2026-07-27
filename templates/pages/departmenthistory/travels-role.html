@@ -1,0 +1,75 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/departmenthistory": { "at": "modules/templates/departmenthistory.xqm", "prefix": "dh" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    <!--
+        Shared president/secretary travels index page (#1096 optimization
+        pass, one template for two routes that only ever differed by role):
+        dhapi:travels-president / dhapi:travels-secretary pass which "role"
+        via the "role" request parameter, read back through
+        $context?request?parameters?role. dh:travels-index-breadcrumb and
+        dh:travels-destinations already took role as a plain string
+        parameter; only the wrapping template (intro text, hiatus notice,
+        which office-holders function to call) hadn't been unified yet.
+    -->
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ dh:travels-index-breadcrumb($context, $context?request?parameters?role) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="usa-prose">
+        [% if $context?request?parameters?role = 'president' %]
+        <h1>Travels Abroad of the President</h1>
+        [% include "templates/pages/departmenthistory/president-travels-hiatus.html" %]
+        <p>This resource presents basic historical information on all foreign trips by the
+            President.</p>
+        [% else %]
+        <h1>Travels Abroad of the Secretary of State</h1>
+        <p>This resource presents basic historical information on all foreign trips by Secretaries
+            of State. Up-to-date information on the Secretary’s travel is at
+            <a href="https://www.state.gov/travels-with-the-secretary-of-state">Travels With the
+                Secretary</a>. Updates are published annually for the prior year. We invite
+            questions and comments about this resource at
+            <a href="mailto:history@state.gov">history@state.gov</a>.</p>
+        <p class="text-right"><em>Last updated, February 2025.</em></p>
+        [% endif %]
+        <div class="grid-row grid-gap">
+            <div class="tablet:grid-col-8">
+                [% if $context?request?parameters?role = 'president' %]
+                <h2>By President</h2>
+                [[ dh:travels-president-office-holders($context) ]]
+                [% else %]
+                <h2>By Secretary</h2>
+                [[ dh:travels-secretary-office-holders($context) ]]
+                [% endif %]
+            </div>
+            <div class="tablet:grid-col-4">
+                <h2>By Destination</h2>
+                [[ dh:travels-destinations($context, $context?request?parameters?role) ]]
+            </div>
+        </div>
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/departmenthistory/sidebar.html" %]
+    [% endtemplate %]
+</template>

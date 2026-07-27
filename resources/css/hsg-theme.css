@@ -225,3 +225,58 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-link-broken:visited {
     color: var(--hsg-color-link-broken-visited);
 }
+
+/* Department History monograph section pages (#1096/#1135, PR review) render
+   an explicit <h1> from the division's own <head> text (dh:monograph-
+   section-content) rather than relying on the ODD's own heading level for
+   it, which tracks the division's absolute nesting depth in the source
+   document and is inconsistent between a chapter and a subchapter. The ODD
+   still renders that same head as part of the division's normal content
+   (see dh:monograph-section-content's own docstring for why it can't be
+   suppressed at the ODD level); hidden here instead. Scoped to only the
+   entry-point division's own *first* child so nested subchapter heads,
+   rendered inline when viewing their parent chapter, stay visible -- not
+   scoped by tag name, since a division's own base-ODD "behaviour" (and so
+   its wrapper tag) depends on its structural position: a top-level chapter
+   (direct child of tei:body) renders as <section class="tei-div ...">, a
+   nested subchapter as <div class="tei-div ...">, same class either way. */
+.usa-prose > .tei-div > :first-child.tei-head {
+    display: none;
+}
+
+/* Buildings' footnotes (#1096, PR follow-up), collected at the bottom of
+   the section by dh:monograph-section-content (pages:clean-footnotes +
+   nav:output-footnotes) into a <div class="footnotes"> holding the
+   original <dl class="footnote"> elements, matching the reference site's
+   own <div class="footnotes"><ol>...: a slim divider line above the list
+   (border-top, same treatment the reference site's own stylesheet uses),
+   and dl/dt/dd laid out as a compact number + text row instead of the
+   browser's default definition-list indentation. */
+.usa-prose .footnotes {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ccc;
+}
+
+.usa-prose .footnotes dl.footnote {
+    display: flex;
+    gap: 0.5em;
+    margin: 0 0 0.75em;
+}
+
+.usa-prose .footnotes dl.footnote dt {
+    font-weight: 700;
+}
+
+.usa-prose .footnotes dl.footnote dd {
+    margin: 0;
+}
+
+/* The popovers sibling div (also emitted by nav:output-footnotes, holding
+   each note's own <pb-popover> for hover/click preview) carries no visible
+   content of its own -- pb-popover is fixed/absolutely positioned by the
+   component itself when triggered -- but without this the empty div can
+   still take up block space. */
+.usa-prose .popovers {
+    display: contents;
+}

@@ -1,0 +1,41 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/departmenthistory": { "at": "modules/templates/departmenthistory.xqm", "prefix": "dh" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ dh:breadcrumb($context, ()) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="section-landing usa-prose">
+        <h1>
+            <pb-i18n key="departmenthistory.title">Department History</pb-i18n>
+        </h1>
+        <p>This section of our website contains publications and datasets on various aspects of
+            the history of the U.S. Department of State. Please access these materials via the
+            links in the sidebar.</p>
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/departmenthistory/sidebar.html" %]
+    [% endtemplate %]
+</template>

@@ -49,6 +49,11 @@
     "prefix" : "countryapi",
     "id" : "http://teipublisher.com/api/countries",
     "path" : "countries-api.xql"
+  }, {
+    "spec" : "departmenthistory-api.json",
+    "prefix" : "dhapi",
+    "id" : "http://teipublisher.com/api/departmenthistory",
+    "path" : "departmenthistory-api.xql"
   } ],
   "extends" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
   "skip" : [

@@ -1,0 +1,55 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/departmenthistory": { "at": "modules/templates/departmenthistory.xqm", "prefix": "dh" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    <!--
+        Shared president/secretary travels listing page (#1096 optimization
+        pass, one template for two routes that only ever differed by
+        role): dhapi:travels-president-listing / dhapi:travels-secretary-
+        listing pass which "role" via the "role" request parameter, read
+        back through $context?request?parameters?role. dh:travels-listing-
+        breadcrumb / -title / -table already took role as a plain string
+        parameter; only the wrapping template hadn't been unified yet.
+        dh:travels-show-president-hiatus takes only the id, not a role;
+        it checks internally whether that id is a sitting/hiatus president,
+        so it's safe to call unconditionally on the secretary route too
+        (secretary and president ids don't collide in practice; it simply
+        never matches there, same as when this check was only reachable
+        from the president-only template).
+    -->
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ dh:travels-listing-breadcrumb($context, $context?request?parameters?role) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="usa-prose">
+        <h1>[[ dh:travels-listing-title($context?request?parameters?role, $context?request?parameters?personOrCountryId) ]]</h1>
+        [% if dh:travels-show-president-hiatus($context?request?parameters?personOrCountryId) %]
+        [% include "templates/pages/departmenthistory/president-travels-hiatus.html" %]
+        [% endif %]
+        [[ dh:travels-listing-table($context, $context?request?parameters?role) ]]
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/departmenthistory/sidebar.html" %]
+    [% endtemplate %]
+</template>

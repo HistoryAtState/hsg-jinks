@@ -54,7 +54,7 @@
                         "in": "query",
                         "schema": {
                             "type": "string",
-                            "default": "pages/volume-landing.html"
+                            "default": "pages/volume/landing.html"
                         }
                     },
                     {
@@ -106,7 +106,7 @@
                         "in": "query",
                         "schema": {
                             "type": "string",
-                            "default": "pages/volume-interior.html"
+                            "default": "pages/volume/interior.html"
                         }
                     },
                     {

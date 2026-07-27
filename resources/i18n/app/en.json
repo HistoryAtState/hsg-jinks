@@ -4,6 +4,7 @@
         "historicaldocuments": "Historical Documents",
         "countries": "Countries",
         "archives": "Archives",
+        "departmenthistory": "Department History",
         "collection-root": "Collections",
         "document-root": "Collections",
         "demo": "Demo",
@@ -77,5 +78,8 @@
     },
     "countries": {
         "title": "Countries"
+    },
+    "departmenthistory": {
+        "title": "Department History"
     }
 }

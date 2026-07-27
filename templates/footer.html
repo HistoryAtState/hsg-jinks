@@ -7,9 +7,10 @@
     dropped, its placeholder social icons replaced by the office's real
     accounts. Presentation lives in resources/css/hsg-theme.css.
 
-    Links into sections this app does not serve yet (Department History,
-    Countries, About, FAQ) point at the production site for now; they become
-    context-path-relative as those sections land (#1095, #1096, #1097).
+    Links into sections this app does not serve yet (Countries, About, FAQ)
+    point at the production site for now; they become context-path-relative as
+    those sections land (#1095, #1097). Department History (#1096) landed its
+    hub/static pages in this commit.
 --><footer class="usa-footer usa-footer--big hsg-footer">
     <div class="usa-footer__primary-section">
         <div class="grid-container">
@@ -42,7 +43,7 @@
                                     <a href="[[ head(($context?defaults?site-root, $context-path)) ]]/historicaldocuments">Historical Documents</a>
                                 </li>
                                 <li class="usa-footer__secondary-link">
-                                    <a href="https://history.state.gov/departmenthistory/">Department History</a>
+                                    <a href="[[ head(($context?defaults?site-root, $context-path)) ]]/departmenthistory">Department History</a>
                                 </li>
                                 <li class="usa-footer__secondary-link">
                                     <a href="https://history.state.gov/countries/">Countries</a>
