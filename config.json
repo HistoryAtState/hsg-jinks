@@ -69,6 +69,11 @@
     "prefix" : "searchapi",
     "id" : "https://history.state.gov/api/search",
     "path" : "search-api.xql"
+  }, {
+    "spec" : "developer-api.json",
+    "prefix" : "devapi",
+    "id" : "http://teipublisher.com/api/developer",
+    "path" : "developer-api.xql"
   } ],
   "extends" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
   "skip" : [

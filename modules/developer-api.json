@@ -1,0 +1,115 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "HSG Jinks Developer API",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "description": "Endpoint for testing on localhost",
+            "url": "/exist/apps/hsg-jinks"
+        }
+    ],
+    "paths": {
+        "/developer": {
+            "get": {
+                "summary": "Developer Resources landing page",
+                "operationId": "devapi:index",
+                "x-error-handler": "devapi:handle-error",
+                "tags": [
+                    "developer"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/developer/catalog": {
+            "get": {
+                "summary": "Ebook Catalog API documentation",
+                "operationId": "devapi:catalog",
+                "x-error-handler": "devapi:handle-error",
+                "tags": [
+                    "developer"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/developer/{page}": {
+            "get": {
+                "summary": "Catch-all for any other path segment under /developer",
+                "description": "Roaster's route matching regex has no end anchor for static path segments, so without this parameterized route, an unmatched path such as /developer/foo would silently prefix-match the bare /developer route (higher specificity from the {page} placeholder wins instead) and render the landing page with a 200 rather than 404, matching hsg-shell's local:serve-not-found-page() fallback.",
+                "operationId": "devapi:not-found",
+                "x-error-handler": "devapi:handle-error",
+                "tags": [
+                    "developer"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "path",
+                        "description": "Any path segment other than 'catalog'",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "No page exists at this path",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "security": [
+        {
+            "cookieAuth": []
+        },
+        {
+            "basicAuth": []
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "basicAuth": {
+                "scheme": "basic",
+                "type": "http"
+            },
+            "cookieAuth": {
+                "in": "cookie",
+                "name": "teipublisher.com.login",
+                "type": "apiKey"
+            }
+        }
+    }
+}

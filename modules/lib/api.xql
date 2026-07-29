@@ -44,6 +44,8 @@ import module namespace milapi="http://teipublisher.com/api/milestones" at "../m
 
 import module namespace searchapi="https://history.state.gov/api/search" at "../search-api.xql";
 
+import module namespace devapi="http://teipublisher.com/api/developer" at "../developer-api.xql";
+
 
 
 declare option output:indent "no";
@@ -60,6 +62,7 @@ let $resp := roaster:route(
         "modules/about-api.json",
         "modules/countries-api.json",
         "modules/departmenthistory-api.json",
+        "modules/developer-api.json",
         "modules/hsg-api.json",
         "modules/milestones-api.json",
         "modules/search-api.json",
