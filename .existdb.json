@@ -1,7 +1,7 @@
 {
   "servers": {
     "localhost": {
-      "server": "http://127.0.0.1:8080/exist",
+      "server": "http://127.0.0.1:8093/exist",
       "user": "admin",
       "password": "",
       "root": "/db/apps/hsg-jinks"

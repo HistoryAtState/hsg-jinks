@@ -1,0 +1,158 @@
+{
+    "components": {
+        "securitySchemes": {
+            "basicAuth": {
+                "scheme": "basic",
+                "type": "http"
+            },
+            "cookieAuth": {
+                "in": "cookie",
+                "name": "teipublisher.com.login",
+                "type": "apiKey"
+            }
+        }
+    },
+    "info": {
+        "title": "HSG Jinks Conferences API",
+        "version": "1.0.0"
+    },
+    "openapi": "3.0.3",
+    "paths": {
+        "/conferences": {
+            "get": {
+                "summary": "Landing page of the Conferences section: list of all conferences",
+                "operationId": "confapi:index",
+                "x-error-handler": "confapi:handle-error",
+                "tags": [
+                    "conferences"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/conferences/{conferenceId}": {
+            "get": {
+                "summary": "Landing page for one conference",
+                "operationId": "confapi:view",
+                "x-error-handler": "confapi:handle-error",
+                "tags": [
+                    "conferences"
+                ],
+                "parameters": [
+                    {
+                        "name": "conferenceId",
+                        "in": "path",
+                        "description": "Conference document identifier (file name without .xml in the data collection)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9]{4}-[a-z0-9-]+$"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No conference with this id",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/conferences/{conferenceId}/{sectionId}": {
+            "get": {
+                "summary": "Interior page for one section (tei:div) of a conference",
+                "operationId": "confapi:view-section",
+                "x-error-handler": "confapi:handle-error",
+                "tags": [
+                    "conferences"
+                ],
+                "parameters": [
+                    {
+                        "name": "conferenceId",
+                        "in": "path",
+                        "description": "Conference document identifier",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9]{4}-[a-z0-9-]+$"
+                        },
+                        "allowReserved": true
+                    },
+                    {
+                        "name": "sectionId",
+                        "in": "path",
+                        "description": "xml:id of the tei:div to render",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No conference with this id, or no division with this xml:id in it",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "servers": [
+        {
+            "description": "Endpoint for testing on localhost",
+            "url": "/exist/apps/hsg-jinks"
+        }
+    ],
+    "security": [
+        {
+            "cookieAuth": []
+        },
+        {
+            "basicAuth": []
+        }
+    ]
+}

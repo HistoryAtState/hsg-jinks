@@ -1,0 +1,48 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/conferences": { "at": "modules/templates/conferences.xqm", "prefix": "conf" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    <!--
+        Document view: confapi:view resolves/guards the conference server-side
+        and passes conferenceId as a request parameter, read back through
+        $context?request?parameters?conferenceId in conf:document-content /
+        conf:document-breadcrumb / conf:document-sidebar. Renders the whole
+        conference (equivalent of hsg-shell's conference/index.xml with no
+        section-id: the full tei:body, not a summary), with both the TOC and
+        the conference-list sidebar; hsg-shell's document view shows both.
+        No prev/next here: hsg-shell's own next/previous walk resolves from
+        the whole tei:text node, which has no following:: division of its
+        own, so it never actually produces a link on this page either.
+    -->
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ conf:document-breadcrumb($context) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [% template before %]
+    [[ conf:document-sidebar($context) ]]
+    [% endtemplate %]
+
+    <div class="usa-prose">
+        [[ conf:document-content($context) ]]
+    </div>
+</template>

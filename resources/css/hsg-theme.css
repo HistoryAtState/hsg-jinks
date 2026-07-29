@@ -335,3 +335,31 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     display: inline-block;
     margin: var(--s-2) 0;
 }
+
+/* Conferences landing page's "Past Conferences" list (#1099): the reference
+   site's own list (hsg-shell's pages/conferences/index.xml) is numbered.
+   list-style-type alone does not bring the numbers back: USWDS's
+   usa-collection component sets display:flex on .usa-collection__item (for
+   its image/body layout), and flex containers never generate a ::marker
+   box regardless of list-style-type -- confirmed live (a computed-style
+   check reported "decimal" while the screenshot showed no visible number
+   at all). Numbered via a CSS counter instead, which works irrespective of
+   display type. Scoped to the conf-conference-list class -- every other
+   usa-collection list in the app (departmenthistory.xqm's various role/
+   position/travel lists) is an unordered <ul> and must keep no markers. */
+.conf-conference-list {
+    counter-reset: conf-conference;
+}
+
+.conf-conference-list > li.usa-collection__item {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.conf-conference-list > li.usa-collection__item::before {
+    counter-increment: conf-conference;
+    content: counter(conf-conference) ".";
+    position: absolute;
+    left: 0;
+    font-weight: 700;
+}

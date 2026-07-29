@@ -281,20 +281,23 @@ warning that it's missing until a page 404s.
 
 ### External data packages (GitHub releases)
 
-Beyond `frus-data-jinks` above, running the app also needs 9 data packages —
-the ones backing `/departmenthistory`, `/countries`, `/about`, and
-`/milestones` — each maintained in its own repo under `github.com/HistoryAtState`
-and, unlike `frus-data-jinks`, already published as a versioned `.xar` GitHub
-release. That means they don't need the frozen-baseline treatment: they're
-`curl`'d straight into `autodeploy/` in `Dockerfile.dev` — every fresh
-container build already has all 9 installed, no manual step required. `wwdai`
-and `rdcr` are version-pinned (see "Pinned baseline"); the other 7 always
-fetch each repo's `/releases/latest/` asset instead, since they're
-append-only content that should stay current rather than freeze to a
-version.
+Beyond `frus-data-jinks` above, running the app also needs 10 data packages —
+the ones backing `/departmenthistory`, `/countries`, `/conferences`,
+`/milestones`, and `/about` — each maintained in its own repo under
+`github.com/HistoryAtState` and, unlike `frus-data-jinks`, already published
+as a versioned `.xar` GitHub release. That means none of them need the
+frozen-baseline treatment. 9 of the 10 are `curl`'d straight into
+`autodeploy/` in `Dockerfile.dev` — every fresh container build already has
+them installed, no manual step required. `wwdai` and `rdcr` are
+version-pinned (see "Pinned baseline"); the other 7 of those 9 always fetch
+each repo's `/releases/latest/` asset instead, since they're append-only
+content that should stay current rather than freeze to a version.
+`conferences` isn't wired into `Dockerfile.dev` yet, so it still needs the
+manual `xst package install` step below on every fresh container.
 
 | Repo | Latest release |
 |---|---|
+| `conferences` | https://github.com/HistoryAtState/conferences/releases/latest |
 | `gsh` | https://github.com/HistoryAtState/gsh/releases/latest |
 | `milestones` | https://github.com/HistoryAtState/milestones/releases/latest |
 | `other-publications` | https://github.com/HistoryAtState/other-publications/releases/latest |
@@ -306,12 +309,14 @@ version.
 | `hac` | https://github.com/HistoryAtState/hac/releases/latest |
 
 To pick up a newer release without a full image rebuild — e.g. to try a
-just-published fix before bumping the pinned version — refresh one or all of
-them directly into *this worktree's own* devcontainer (never port 8080, see
-"Parallel worktrees & the read-only mirror" in `CLAUDE.md`):
+just-published fix before bumping the pinned version, or to install
+`conferences` at all since it isn't in `Dockerfile.dev`'s autodeploy yet —
+refresh one or all of them directly into *this worktree's own* devcontainer
+(never port 8080, see "Parallel worktrees & the read-only mirror" in
+`CLAUDE.md`):
 
 ```sh
-for repo in gsh milestones other-publications pocom rdcr travels visits wwdai hac; do
+for repo in conferences gsh milestones other-publications pocom rdcr travels visits wwdai hac; do
   url=$(gh release view --repo HistoryAtState/$repo --json assets -q '.assets[0].url')
   curl -sL -o "/tmp/${repo}.xar" "$url"
   xst --config .xstrc package install "/tmp/${repo}.xar"
