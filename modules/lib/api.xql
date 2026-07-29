@@ -20,9 +20,17 @@ import module namespace deploy="https://teipublisher.org/api/deploy" at "api/dep
 
 import module namespace hsgapi="http://teipublisher.com/api/hsg" at "../hsg-api.xql";
 
+ 
+
 import module namespace countryapi="http://teipublisher.com/api/countries" at "../countries-api.xql";
 
+ 
+
 import module namespace dhapi="http://teipublisher.com/api/departmenthistory" at "../departmenthistory-api.xql";
+
+ 
+
+import module namespace tagapi="http://teipublisher.com/api/tags" at "../tags-api.xql";
 
 
 
@@ -37,9 +45,23 @@ let $lookup := function($name as xs:string) {
 }
 let $resp := roaster:route(
     (
-        "modules/countries-api.json",
+        
+        
+        "modules/tags-api.json",
+        
+         
+        
         "modules/departmenthistory-api.json",
+        
+         
+        
+        "modules/countries-api.json",
+        
+         
+        
         "modules/hsg-api.json",
+        
+        
         "modules/lib/api.json"
     ), $lookup)
 return

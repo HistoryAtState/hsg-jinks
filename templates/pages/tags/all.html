@@ -1,0 +1,37 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/tags": { "at": "modules/templates/tags.xqm", "prefix": "tags" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ tags:breadcrumb($context, (map{"label": "Full Taxonomy"})) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="usa-prose">
+        <h1>Full Taxonomy</h1>
+        [[ tags:all-taxonomy-html($context) ]]
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/tags/sidebar.html" %]
+    [% endtemplate %]
+</template>

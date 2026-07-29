@@ -2,9 +2,19 @@
     ---json
     {
         "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/tags": { "at": "modules/templates/tags.xqm", "prefix": "tags" }
+            },
             "extends": "templates/layouts/hsg-content.html"
         }
     }
     ---
     [[ page:transform($doc?content, map { "mode": "volume-landing" }) ]]
+
+    [% template before %]
+    [% if exists($context?doc) %]
+    [[ hsg:volume-toc($context) ]]
+    [[ tags:volume-tags-panel($context) ]]
+    [% endif %]
+    [% endtemplate %]
 </template>

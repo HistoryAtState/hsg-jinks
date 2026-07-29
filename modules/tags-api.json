@@ -1,0 +1,100 @@
+{
+    "components": {
+        "securitySchemes": {
+            "basicAuth": {
+                "scheme": "basic",
+                "type": "http"
+            },
+            "cookieAuth": {
+                "in": "cookie",
+                "name": "teipublisher.com.login",
+                "type": "apiKey"
+            }
+        }
+    },
+    "info": {
+        "title": "HSG Jinks Tags API",
+        "version": "1.0.0"
+    },
+    "openapi": "3.0.3",
+    "tags": [
+        {
+            "name": "tags",
+            "description": "Browse Resources by Subject Tag: the Office of the Historian's 'Subject Taxonomy of the History of U.S. Foreign Relations' (503 ids: 11 categories, 492 tags, nested up to 5 levels under the top-level categories people/places/topics) applied to FRUS volumes and Secretary of State biographies."
+        }
+    ],
+    "paths": {
+        "/tags": {
+            "get": {
+                "summary": "Landing page of the Tags section",
+                "description": "Narrative introduction to the subject taxonomy with live counts (number of taxonomy subjects, number of tagged biographies and tagged FRUS volumes, total tag assignments) and entry links to the three top-level categories (people, places, topics) and to the full taxonomy. Renders through vapi:html with a fixed template file.",
+                "operationId": "tagapi:index",
+                "x-error-handler": "tagapi:handle-error",
+                "tags": [ "tags" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/tags/all": {
+            "get": {
+                "summary": "Full taxonomy listing",
+                "description": "Renders the complete taxonomy as one nested list: every category and tag with its label, inline definition where present, linking each entry to its /tags/{tagId} page. This is a literal path that must win over the templated sibling /tags/{tagId}.",
+                "operationId": "tagapi:all",
+                "x-error-handler": "tagapi:handle-error",
+                "tags": [ "tags" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/tags/{tagId}": {
+            "get": {
+                "summary": "Browse page for one taxonomy entry (category or tag)",
+                "description": "Aggregation page for one taxonomy id: label, optional definition (may contain ptr cross-references to other taxonomy entries, rendered as links), the list of tagged Secretary of State biographies, the list of tagged FRUS volumes, and a drill-down list of child categories/tags with per-entry hit counts. If the entry itself has no directly tagged resources but descendants do, a 'dig deeper' drill-down is shown instead; with no tagged resources anywhere beneath, an empty-state message. An id not present in the taxonomy yields 404.",
+                "operationId": "tagapi:view",
+                "x-error-handler": "tagapi:handle-error",
+                "tags": [ "tags" ],
+                "parameters": [
+                    {
+                        "name": "tagId",
+                        "in": "path",
+                        "description": "Taxonomy id of a category or tag. Ids are lower-cased and hyphen-delimited by the taxonomy's own convention. Values are data-validated against the taxonomy in the handler, not schema-enumerated, so taxonomy growth never requires a spec change.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[a-z0-9-]+$"
+                        },
+                        "example": "lincoln-abraham"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "No taxonomy entry with this id",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        }
+    },
+    "servers": [
+        {
+            "description": "Endpoint for testing on localhost",
+            "url": "/exist/apps/hsg-jinks"
+        }
+    ],
+    "security": [
+        { "cookieAuth": [] },
+        { "basicAuth": [] }
+    ]
+}
