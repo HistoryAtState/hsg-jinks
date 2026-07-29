@@ -309,17 +309,68 @@ declare %private function conf:division-link-label($division as element(tei:div)
 };
 
 (:~
- : Renders one division's content: full content via the ODD if it is a leaf,
- : or a heading (when $includeHeading -- omitted when the division is
- : already the page's own <h1>) + any intro prose that precedes the first
- : child + a plain list of links to its own children if it is a container
- : (conf:is-container-division). Shared by the document view's top-level
- : walk and the section view (in case a container division is visited
- : directly by its own URL).
+ : Renumbers every h1-h6 in a transformed HTML fragment by $delta (clamped
+ : to h1..h6), leaving attributes/content/every other element untouched.
+ :
+ : teipublisher-lib's built-in head-rendering behaviour computes level
+ : purely from source-document nesting depth (count(ancestor::div), see
+ : tei-publisher-lib's html-functions.xql pmf:heading and teipublisher.odd's
+ : head elementSpec) with no notion of "which division is the current
+ : page's own entry point" -- so the same division renders at a different,
+ : structurally-correct-but-contextually-wrong level depending on where it
+ : sits in the source. hsg-shell's own (separate, non-teipublisher)
+ : pipeline has a working equivalent for exactly this (pages:view's
+ : $heading-offset, threaded into frus.odd as
+ : count(ancestor::div) + $parameters?heading-offset, used by e.g.
+ : countries/article.xml and departmenthistory/person.xml) -- but overriding
+ : teipublisher-lib's own "head" elementSpec to do the same is not a safe
+ : option here: ODD mode="change" *replaces* the whole elementSpec rather
+ : than merging with the inherited one (confirmed empirically: the graphic
+ : elementSpec fix earlier in this epic needed its own catch-all precisely
+ : because the base ODD's single unconditional graphic model had vanished
+ : once hsg-jinks.odd declared its own predicated ones), so overriding
+ : "head" would require exactly reproducing all 5 of its existing models
+ : (figure/table/lg/list captions, browse/toc-inline, the generic
+ : parent::div fallback) app-wide, for every section, not just conferences.
+ : Renumbering the already-rendered HTML afterward is fully self-contained
+ : here instead.
  :)
-declare %private function conf:render-division($context as map(*), $conferenceId as xs:string, $division as element(tei:div), $includeHeading as xs:boolean) as element()+ {
+declare %private function conf:shift-headings($nodes as node()*, $delta as xs:integer) as node()* {
+    for $node in $nodes
+    return
+        typeswitch ($node)
+            case element(h1) | element(h2) | element(h3) | element(h4) | element(h5) | element(h6) return
+                let $level := xs:integer(substring-after(local-name($node), "h"))
+                let $newLevel := min((6, max((1, $level + $delta))))
+                return
+                    element { QName((), "h" || $newLevel) } {
+                        $node/@*,
+                        conf:shift-headings($node/node(), $delta)
+                    }
+            case element() return
+                element { node-name($node) } {
+                    $node/@*,
+                    conf:shift-headings($node/node(), $delta)
+                }
+            default return $node
+};
+
+(:~
+ : Renders one division's content at $headingLevel: for a container
+ : (conf:is-container-division), a heading at that literal level + any
+ : intro prose that precedes the first child + a plain list of links to
+ : its own children; for a leaf, the ODD's full content with its own
+ : heading (and everything nested under it) shifted from its natural
+ : source-depth level to $headingLevel via conf:shift-headings. Shared by
+ : the document view's top-level walk (every top-level division becomes an
+ : h2, conference title is the page's own h1) and the section view (the
+ : visited division's own heading becomes the page's only h1 directly,
+ : whatever its nesting depth in the source -- no separate explicit <h1>
+ : wrapper needed, see conf:section-content).
+ :)
+declare %private function conf:render-division($context as map(*), $conferenceId as xs:string, $division as element(tei:div), $headingLevel as xs:integer) as element()+ {
     if (conf:is-container-division($division)) then (
-        if ($includeHeading) then <h2>{normalize-space($division/tei:head[1])}</h2> else (),
+        element { QName((), "h" || $headingLevel) } { normalize-space($division/tei:head[1]) },
         for $p in $division/tei:p[not(preceding-sibling::tei:div)]
         return page:transform($p, map { "mode": "conf-content" }),
         <ul class="usa-list">
@@ -335,7 +386,16 @@ declare %private function conf:render-division($context as map(*), $conferenceId
         </ul>
     )
     else
-        page:transform($division, map { "mode": "conf-content" })
+        let $transformed := page:transform($division, map { "mode": "conf-content" })
+        (: teipublisher-lib's pmf:heading computes level as count(ancestor::div)
+           from the <head> element's own perspective -- which counts the head's
+           immediately-containing division as one of its ancestors. Counting
+           ancestors of $division itself (rather than of its head) undercounts
+           by exactly one and produces an off-by-one heading level (confirmed
+           live: a top-level division rendered h3 instead of h2, a doubly-
+           nested one never reached h1 at all). :)
+        let $delta := $headingLevel - count($division/tei:head[1]/ancestor::tei:div)
+        return conf:shift-headings($transformed, $delta)
 };
 
 (:~
@@ -344,8 +404,10 @@ declare %private function conf:render-division($context as map(*), $conferenceId
  : tei:body, walking each top-level division through conf:render-division
  : rather than a single whole-body page:transform -- the latter inlined
  : every container division's descendants in full, which is not what the
- : reference site does (#1099 PR review)). No footnote consolidation needed
- : -- none of the 5 documents contain tei:note (verified live).
+ : reference site does (#1099 PR review)). Every top-level division is an
+ : h2, leaf or container alike, so there is exactly one h1 on this page:
+ : the conference title. No footnote consolidation needed -- none of the 5
+ : documents contain tei:note (verified live).
  :)
 declare function conf:document-content($context as map(*)) as element()+ {
     let $conferenceId := $context?request?parameters?conferenceId
@@ -353,7 +415,7 @@ declare function conf:document-content($context as map(*)) as element()+ {
     return (
         <h1>{conf:conference-title($doc)}</h1>,
         for $division in $doc/tei:TEI/tei:text/tei:body/tei:div
-        return conf:render-division($context, $conferenceId, $division, true())
+        return conf:render-division($context, $conferenceId, $division, 2)
     )
 };
 
@@ -367,23 +429,23 @@ declare function conf:document-sidebar($context as map(*)) as element()+ {
 };
 
 (:~
- : Body of the requested division, via conf:render-division so a container
- : division visited directly by its own URL (e.g. .../videos-transcripts)
- : renders the same link-list shape it would inline in the document view,
- : rather than recursing into every subchapter's full content. The division
- : node is passed to page:transform (inside conf:render-division) still
- : attached to its source document (needed for base-uri()-dependent
- : rendering, e.g. the graphic/@url resolution model) -- never detach/
- : reconstruct it, same pitfall documented at dh:monograph-section-content.
- : $includeHeading is false: the division's own head is already this page's
- : <h1>.
+ : Body of the requested division, via conf:render-division at heading
+ : level 1: the division's own heading (container: constructed directly;
+ : leaf: its source content with headings shifted, see conf:render-division)
+ : becomes this page's only <h1> directly, whatever its nesting depth in
+ : the source -- no separate explicit <h1> wrapper, which would otherwise
+ : duplicate it. A container division visited directly by its own URL
+ : (e.g. .../videos-transcripts) renders the same link-list shape it would
+ : inline in the document view, rather than recursing into every
+ : subchapter's full content. The division node is passed to page:transform
+ : (inside conf:render-division) still attached to its source document
+ : (needed for base-uri()-dependent rendering, e.g. the graphic/@url
+ : resolution model) -- never detach/reconstruct it, same pitfall documented
+ : at dh:monograph-section-content.
  :)
 declare function conf:section-content($context as map(*)) as element()+ {
     let $s := conf:current-section($context)
-    return (
-        <h1>{normalize-space($s?division/tei:head[1])}</h1>,
-        conf:render-division($context, $s?conferenceId, $s?division, false())
-    )
+    return conf:render-division($context, $s?conferenceId, $s?division, 1)
 };
 
 declare function conf:section-sidebar($context as map(*)) as element(nav) {

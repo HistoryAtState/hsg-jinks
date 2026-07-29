@@ -223,8 +223,18 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    scoped by tag name, since a division's own base-ODD "behaviour" (and so
    its wrapper tag) depends on its structural position: a top-level chapter
    (direct child of tei:body) renders as <section class="tei-div ...">, a
-   nested subchapter as <div class="tei-div ...">, same class either way. */
-.usa-prose > .tei-div > :first-child.tei-head {
+   nested subchapter as <div class="tei-div ...">, same class either way.
+
+   Excludes .conf-content (#1099 PR review): conferences fixes the exact same
+   duplicate-heading problem differently, by renumbering headings in XQuery
+   (conf:shift-headings, modules/templates/conferences.xqm) rather than
+   emitting a second explicit heading to hide -- there is no duplicate to
+   suppress there, and this selector doesn't check tag name, so without the
+   exclusion it would hide conferences' now-correct (and only) heading
+   outright. Confirmed live during the same PR review: it was doing exactly
+   that to the document view's "Program"/"Vietnam Photo Gallery"/
+   "Post-Conference Reviews" headings before this exclusion was added. */
+.usa-prose:not(.conf-content) > .tei-div > :first-child.tei-head {
     display: none;
 }
 
