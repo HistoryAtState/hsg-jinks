@@ -177,38 +177,39 @@ declare function conf:division($doc as document-node(), $sectionId as xs:string)
  : against this markup. usa-sidenav has no such expectation -- it is a plain
  : nav tree, exactly what a cross-page division TOC needs.
  :
+ : Flat: top-level divisions only, one <li> per article (PR review, #1099 --
+ : every division is its own complete page with a single h1; only those
+ : belong in the persistent nav, not their own nested children, which get
+ : their own list on their container's own page instead, via
+ : conf:render-division's "link out, don't inline" treatment). A nested
+ : division (e.g. a subchapter under "Videos and Transcripts") has no entry
+ : of its own here; visiting one highlights its top-level ancestor instead,
+ : since that is the nav's own current article.
+ :
  : Reused on both the document view (no $current) and the section view
- : (marks $current), same reasoning as dh:monograph-toc / hsg:volume-toc.
+ : (marks $current, matching either the top-level division itself or one of
+ : its descendants), same reasoning as dh:monograph-toc / hsg:volume-toc.
  :)
 declare function conf:toc($context as map(*), $doc as document-node(), $conferenceId as xs:string, $current as xs:string?) as element(nav) {
     <nav aria-label="Table of contents" class="toc">
         <h2><pb-i18n key="document.contents">Contents</pb-i18n></h2>
         <ul class="usa-sidenav">
-        { conf:toc-level($context, $doc/tei:TEI/tei:text/tei:body/tei:div, $conferenceId, $current) }
+        {
+            for $division in $doc/tei:TEI/tei:text/tei:body/tei:div[@xml:id]
+            let $id := $division/@xml:id/string()
+            let $isCurrent := $id = $current or exists($division//tei:div[@xml:id = $current])
+            return
+                <li class="usa-sidenav__item">
+                    <a href="{$context?context-path}/conferences/{$conferenceId}/{$id}">
+                    {
+                        if ($isCurrent) then (attribute class {"usa-current"}, attribute aria-current {"page"}) else (),
+                        normalize-space($division/tei:head[1])
+                    }
+                    </a>
+                </li>
+        }
         </ul>
     </nav>
-};
-
-declare %private function conf:toc-level($context as map(*), $divisions as element(tei:div)*, $conferenceId as xs:string, $current as xs:string?) as element(li)* {
-    for $division in $divisions[@xml:id]
-    let $id := $division/@xml:id/string()
-    let $children := $division/tei:div[@xml:id]
-    return
-        <li class="usa-sidenav__item">
-            <a href="{$context?context-path}/conferences/{$conferenceId}/{$id}">
-            {
-                if ($id = $current) then (attribute class {"usa-current"}, attribute aria-current {"page"}) else (),
-                normalize-space($division/tei:head[1])
-            }
-            </a>
-            {
-                if (exists($children)) then
-                    <ul class="usa-sidenav__sublist">
-                    { conf:toc-level($context, $children, $conferenceId, $current) }
-                    </ul>
-                else ()
-            }
-        </li>
 };
 
 (:~

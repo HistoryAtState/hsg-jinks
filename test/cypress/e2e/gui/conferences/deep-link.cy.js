@@ -45,13 +45,15 @@ describe("direct deep link to a conference section", () => {
         cy.location("pathname").should("match", /\/(index\.html)?$/);
     });
 
-    it("the TOC sidebar shows the whole conference with my section highlighted", () => {
+    it("the TOC sidebar lists every top-level article, with my section's top-level ancestor highlighted", () => {
         cy.visit(SECTION_PATH);
+        // The TOC is flat -- top-level articles only (PR review, #1099): a
+        // nested division like this one has no entry of its own, so its
+        // top-level container ("Videos and Transcripts") is what's current.
+        cy.get("nav[aria-label='Table of contents'] a").should("have.length", 5);
         cy.get("nav[aria-label='Table of contents'] a.usa-current")
             .should("have.attr", "aria-current", "page")
-            .and("contain.text", "Clinton");
-        // The wider conference has more than this one section listed.
-        cy.get("nav[aria-label='Table of contents'] a").its("length").should("be.gte", 5);
+            .and("contain.text", "Videos and Transcripts");
     });
 });
 

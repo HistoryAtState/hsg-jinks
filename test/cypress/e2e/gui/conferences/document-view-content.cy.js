@@ -108,3 +108,36 @@ describe("each division is its own complete article, on its own page", () => {
         );
     });
 });
+
+// Persistent TOC sidebar (PR review, further round): it was still nesting a
+// container's own children beneath it (Videos and Transcripts' 11
+// subchapters, Background Materials' 6 sections) in a usa-sidenav__sublist
+// -- correct in isolation, but not what was wanted once every division
+// became its own standalone article: the persistent nav should list only
+// the top-level articles, flat, since a nested division's own list of
+// content lives on its container's own page instead (the same link list
+// tested above), not duplicated into the sidebar too.
+describe("TOC sidebar: flat, top-level articles only", () => {
+    it("2010-southeast-asia: lists exactly the 5 top-level articles, no nested children", () => {
+        cy.visit("conferences/2010-southeast-asia/secretary-clinton");
+        cy.get("nav[aria-label='Table of contents'] ul.usa-sidenav > li").should(
+            "have.length",
+            5,
+        );
+        cy.get("nav[aria-label='Table of contents'] ul.usa-sidenav__sublist").should("not.exist");
+        [
+            "Program",
+            "Videos and Transcripts",
+            "Vietnam Photo Gallery",
+            "Background Materials",
+            "Post-Conference Reviews",
+        ].forEach((label) => {
+            cy.get("nav[aria-label='Table of contents']").contains("a", label).should("exist");
+        });
+        // None of the nested subchapter/section titles appear as entries.
+        cy.get("nav[aria-label='Table of contents']").should(
+            "not.contain.text",
+            "Address by Dr. Henry A. Kissinger",
+        );
+    });
+});

@@ -107,26 +107,44 @@ describe("navigate from the conference landing into a section and back out", () 
         cy.get("main h1").should("be.visible");
     });
 
-    it("moves forward with prev/next without returning to the TOC, TOC highlight follows", () => {
+    it("moves forward with prev/next without returning to the TOC; the TOC is flat (top-level articles only), so its highlight tracks the current top-level ancestor", () => {
         cy.visit(`${CONFERENCE}/secretary-clinton`);
+        // secretary-clinton has no entry of its own in the (flat) TOC -- its
+        // top-level container, Videos and Transcripts, is what's current.
         cy.get("nav[aria-label='Table of contents'] a.usa-current")
             .should("have.attr", "aria-current", "page")
-            .and("contain.text", "Clinton");
+            .and("contain.text", "Videos and Transcripts");
 
         cy.get("nav.usa-pagination .usa-pagination__next-page").click();
         cy.location("pathname").should(
             "match",
             new RegExp(`${CONFERENCE}/secretary-kissinger$`),
         );
+        // Still within the same container: the highlight doesn't move.
         cy.get("nav[aria-label='Table of contents'] a.usa-current").should(
             "contain.text",
-            "Kissinger",
+            "Videos and Transcripts",
         );
 
         cy.get("nav.usa-pagination .usa-pagination__previous-page").click();
         cy.location("pathname").should(
             "match",
             new RegExp(`${CONFERENCE}/secretary-clinton$`),
+        );
+    });
+
+    it("prev/next across a top-level boundary moves the TOC highlight to the new article", () => {
+        cy.visit(`${CONFERENCE}/program`);
+        cy.get("nav[aria-label='Table of contents'] a.usa-current").should(
+            "contain.text",
+            "Program",
+        );
+
+        cy.get("nav.usa-pagination .usa-pagination__next-page").click();
+        cy.location("pathname").should("match", new RegExp(`${CONFERENCE}/videos-transcripts$`));
+        cy.get("nav[aria-label='Table of contents'] a.usa-current").should(
+            "contain.text",
+            "Videos and Transcripts",
         );
     });
 
