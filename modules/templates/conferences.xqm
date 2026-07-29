@@ -356,17 +356,21 @@ declare %private function conf:shift-headings($nodes as node()*, $delta as xs:in
 };
 
 (:~
- : Renders one division's content at $headingLevel: for a container
- : (conf:is-container-division), a heading at that literal level + any
- : intro prose that precedes the first child + a plain list of links to
- : its own children; for a leaf, the ODD's full content with its own
- : heading (and everything nested under it) shifted from its natural
- : source-depth level to $headingLevel via conf:shift-headings. Shared by
- : the document view's top-level walk (every top-level division becomes an
- : h2, conference title is the page's own h1) and the section view (the
- : visited division's own heading becomes the page's only h1 directly,
- : whatever its nesting depth in the source -- no separate explicit <h1>
- : wrapper needed, see conf:section-content).
+ : Renders one division's complete content at $headingLevel -- this is the
+ : whole content of a division's own dedicated page (conf:section-content):
+ : for a container (conf:is-container-division), a heading at that literal
+ : level + any intro prose that precedes the first child + a plain list of
+ : links to its own children (its own full content lives only on each
+ : child's own page in turn); for a leaf, the ODD's full content with its
+ : own heading (and everything nested under it) shifted from its natural
+ : source-depth level to $headingLevel via conf:shift-headings. Always
+ : called with $headingLevel = 1: the division's own heading becomes the
+ : page's only <h1> directly, whatever its nesting depth in the source --
+ : no separate explicit <h1> wrapper needed. The document view
+ : (conf:document-content) never calls this -- it only links to each
+ : top-level division's own page, it does not inline any division's
+ : content (#1099 PR review: only one division/article is ever displayed
+ : at a time).
  :)
 declare %private function conf:render-division($context as map(*), $conferenceId as xs:string, $division as element(tei:div), $headingLevel as xs:integer) as element()+ {
     if (conf:is-container-division($division)) then (
@@ -399,23 +403,33 @@ declare %private function conf:render-division($context as map(*), $conferenceId
 };
 
 (:~
- : Full document content (equivalent of hsg-shell's conference/index.xml
- : with no section-id: pages:load-xml's default view renders the whole
- : tei:body, walking each top-level division through conf:render-division
- : rather than a single whole-body page:transform -- the latter inlined
- : every container division's descendants in full, which is not what the
- : reference site does (#1099 PR review)). Every top-level division is an
- : h2, leaf or container alike, so there is exactly one h1 on this page:
- : the conference title. No footnote consolidation needed -- none of the 5
- : documents contain tei:note (verified live).
+ : Document view: the conference title plus a plain link list, one entry
+ : per top-level division -- leaf or container alike, matching the same
+ : "link out, don't inline" treatment conf:render-division already gives a
+ : container's own children. Each division is a complete, independent
+ : article on its own page (confapi:view-section / conf:section-content),
+ : with exactly one <h1> of its own; the document view is deliberately just
+ : its table of contents, not a second copy of every division's content --
+ : per PR review (#1099), only one article is ever shown at a time, reached
+ : via this list, the persistent TOC sidebar (conf:toc), or prev/next
+ : (conf:section-pagination) on each division's own page.
  :)
 declare function conf:document-content($context as map(*)) as element()+ {
     let $conferenceId := $context?request?parameters?conferenceId
     let $doc := conf:conference-doc($conferenceId)
     return (
         <h1>{conf:conference-title($doc)}</h1>,
-        for $division in $doc/tei:TEI/tei:text/tei:body/tei:div
-        return conf:render-division($context, $conferenceId, $division, 2)
+        <ul class="usa-list">
+        {
+            for $division in $doc/tei:TEI/tei:text/tei:body/tei:div[@xml:id]
+            return
+                <li>
+                    <a href="{$context?context-path}/conferences/{$conferenceId}/{$division/@xml:id}">
+                    { conf:division-link-label($division) }
+                    </a>
+                </li>
+        }
+        </ul>
     )
 };
 
