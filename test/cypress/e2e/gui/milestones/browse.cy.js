@@ -17,7 +17,11 @@ describe("Milestones section landing page", () => {
         // data-package counts"): exactly 19 eras is expected to stay stable,
         // unlike the actively-growing HistoryAtState/* packages.
         cy.get("#milestones-era-select option").should("have.length", 20); // 19 eras + the placeholder option
-        cy.get("nav[aria-label='Side navigation'] .usa-sidenav__item").should("have.length", 19);
+        // 19 eras plus the "All" entry (folded in from the reference site's
+        // separate aside#sections, per the departmenthistory sidebar.html
+        // precedent).
+        cy.get("nav[aria-label='Side navigation'] .usa-sidenav__item").should("have.length", 20);
+        cy.get("nav[aria-label='Side navigation']").contains("a", "All").should("have.attr", "href").and("match", /\/milestones\/all$/);
     });
 
     it("links to the all-milestones listing", () => {

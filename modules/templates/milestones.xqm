@@ -99,6 +99,14 @@ declare function ms:eras() as map(*)* {
  : (ms:era-toc) instead (matches hsg-shell's own article-page behaviour: no
  : separate 19-era picker once you're already inside one).
  :)
+(:~
+ : Reference site markup carries this in a second, separate
+ : `<aside id="sections">` below the era-list aside (a single "All" link,
+ : no other entries) -- folded into the one sidebar list here instead,
+ : same "one sidebar slot, merge in what a second reference aside would
+ : show" convention departmenthistory's own sidebar.html already
+ : established (see its own doc comment on `aside#sections`).
+ :)
 declare function ms:era-sidebar($context as map(*)) as element(nav) {
     let $current := $context?request?parameters?eraId
     return
@@ -115,7 +123,10 @@ declare function ms:era-sidebar($context as map(*)) as element(nav) {
                             $era?title
                         }
                         </a>
-                    </li>
+                    </li>,
+                <li class="usa-sidenav__item">
+                    <a href="{$context?context-path}/milestones/all">All</a>
+                </li>
             }
             </ul>
         </nav>
