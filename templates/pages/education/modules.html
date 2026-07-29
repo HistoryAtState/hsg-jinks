@@ -1,0 +1,50 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/education": { "at": "modules/templates/education.xqm", "prefix": "edu" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ edu:breadcrumb($context, (map{"label": "Curriculum Modules"})) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="usa-prose">
+        <h1>Curriculum Modules</h1>
+
+        <div class="usa-alert usa-alert--error">
+            <div class="usa-alert__body">
+                <h2 class="usa-alert__heading">Note to Readers</h2>
+                <p class="usa-alert__text">The educational materials described here have been
+                    retired. The original text of this section of the website remains online for
+                    reference purposes, but it is no longer being maintained or expanded, nor are
+                    the videos or other printed material available for distribution.</p>
+                <p class="usa-alert__text" style="text-align: right; font-style: italic">Notice
+                    posted on October 2, 2017.</p>
+            </div>
+        </div>
+
+        [[ edu:list-modules-full($context) ]]
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/education/sidebar.html" %]
+    [% endtemplate %]
+</template>

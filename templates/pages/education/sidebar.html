@@ -1,0 +1,12 @@
+<!--
+    Section side navigation, shared by every Education page (#1170's
+    departure from hsg-shell): the modules list (edu:modules-sidebar) is used
+    consistently on all 3 pages, including the landing page. hsg-shell's own
+    landing page instead showed the generic site-wide "About" link list
+    there (Contact Us, FAQ, etc.) and only used the modules list on
+    modules.xml/module.xml; that split added no value since the About
+    links already live natively in /about, and departmenthistory's sidebar
+    is consistently the same on every page of its own section.
+-->
+<h2>Curriculum Modules</h2>
+[[ edu:modules-sidebar($context) ]]
