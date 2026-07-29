@@ -17,20 +17,26 @@
 // `cypress run --config baseUrl=http://localhost:8095/exist/apps/hsg-jinks`.
 
 describe("tags section landing and full taxonomy", () => {
-    it("landing page shows live-computed counts and links into the section", () => {
+    it("landing page shows the reference site's narrative, with live-computed counts and links into the section", () => {
         cy.visit("tags");
-        cy.get("main h1").should("contain.text", "Browse Resources by Subject Tag");
+        cy.get("main h1").should("have.text", "Tags");
 
-        cy.contains(".usa-summary-box li", "taxonomy subjects").invoke("text").then((text) => {
-            const n = parseInt(text, 10);
-            expect(n).to.be.at.least(500);
+        cy.get("main p").eq(0).invoke("text").then((text) => {
+            expect(text).to.include("Subject Taxonomy of the History of U.S.");
+            const match = text.match(/covers\s+(\d+)\s+subjects/);
+            expect(parseInt(match[1], 10)).to.be.at.least(500);
         });
-        cy.contains(".usa-summary-box li", "tagged Secretary of State biographies").invoke("text").then((text) => {
-            const n = parseInt(text, 10);
-            expect(n).to.be.at.least(60);
+        cy.get("main p").eq(1).invoke("text").then((text) => {
+            const match = text.match(/website:\s*(\d+)/);
+            expect(parseInt(match[1], 10)).to.be.at.least(60);
         });
+        cy.get("main a[href$='/tags/people']").should("exist");
+        cy.get("main a[href$='/tags/places']").should("exist");
+        cy.get("main a[href$='/tags/topics']").should("exist");
+        cy.get("main a[href$='/departmenthistory/people/secretaries']").should("exist");
+        cy.get("main a[href$='/historicaldocuments']").should("exist");
 
-        cy.contains("a", "Full Taxonomy").click();
+        cy.contains("main a", "the full").click();
         cy.location("pathname").should("match", /\/tags\/all$/);
     });
 

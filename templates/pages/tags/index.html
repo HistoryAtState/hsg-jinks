@@ -28,33 +28,9 @@
 
     <div class="section-landing usa-prose">
         <h1>
-            <pb-i18n key="tags.title">Browse Resources by Subject Tag</pb-i18n>
+            <pb-i18n key="tags.title">Tags</pb-i18n>
         </h1>
-        <p>The Office of the Historian's Subject Taxonomy of the History of U.S.
-            Foreign Relations applies to Foreign Relations of the United States
-            (FRUS) volumes and to biographies of the Secretaries of State.
-            Browse a top-level category below, or see the full taxonomy.</p>
-
-        <div class="usa-summary-box" role="region" aria-labelledby="tags-summary-heading">
-            <div class="usa-summary-box__body">
-                <h2 class="usa-summary-box__heading" id="tags-summary-heading">At a Glance</h2>
-                <div class="usa-summary-box__text">
-                    <ul class="usa-list usa-list--unstyled">
-                        <li>[[ tags:tag-count() ]] taxonomy subjects</li>
-                        <li>[[ tags:tagged-secretary-count() ]] tagged Secretary of State biographies</li>
-                        <li>[[ tags:tagged-frus-volume-count() ]] tagged <em>Foreign Relations</em> volumes</li>
-                        <li>[[ tags:total-tag-assignments() ]] total tag assignments</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <ul class="usa-list">
-            <li><a href="[[ $context?context-path ]]/tags/people">People</a></li>
-            <li><a href="[[ $context?context-path ]]/tags/places">Places</a></li>
-            <li><a href="[[ $context?context-path ]]/tags/topics">Topics</a></li>
-            <li><a href="[[ $context?context-path ]]/tags/all">Full Taxonomy</a></li>
-        </ul>
+        [[ tags:landing-intro($context) ]]
     </div>
 
     [% template before %]

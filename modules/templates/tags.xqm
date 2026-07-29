@@ -62,6 +62,37 @@ declare function tags:total-tag-assignments() as xs:integer {
     count(tags:all-keywords()/tei:term)
 };
 
+(:~
+ : Landing-page narrative (#1174), ported verbatim from the reference site's
+ : /tags text (curly quotes and all) with the reference's hardcoded counts
+ : replaced by tags:tag-count()/tagged-secretary-count()/
+ : tagged-frus-volume-count()/total-tag-assignments() -- PR #19 review:
+ : the first draft substituted a "usa-summary-box" + bullet list that matched
+ : nothing on the reference site and dropped two of its three paragraphs
+ : along with several inline links; this replaces that with the actual
+ : reference wording and every one of its links (People/Places/Topics/full
+ : taxonomy, the Secretaries biographies list, and the FRUS series itself).
+ :)
+declare function tags:landing-intro($context as map(*)) as element(p)+ {
+    let $cp := $context?context-path
+    return (
+        <p>The Office of the Historian&#x2019;s &#x201C;Subject Taxonomy of the History of U.S.
+            Foreign Relations&#x201D; covers {tags:tag-count()}
+            subjects, organized into three major sections: <a href="{$cp}/tags/people">People</a>, <a href="{$cp}/tags/places">Places</a>, and <a href="{$cp}/tags/topics">Topics</a>. Drill into
+            one of these sections, or view <a href="{$cp}/tags/all">the full
+                taxonomy</a>.</p>,
+        <p>The taxonomy has been applied to a small but growing segment of the
+            resources on the Office of the Historian&#x2019;s website: {tags:tagged-secretary-count()}
+            <a href="{$cp}/departmenthistory/people/secretaries"> biographies of the
+                Secretaries of State</a> and {tags:tagged-frus-volume-count()} volumes from the <a href="{$cp}/historicaldocuments">
+                <em>Foreign Relations of the United States</em>
+            </a> series.</p>,
+        <p>With {format-number(tags:total-tag-assignments(), "#,###")} tags applied to
+            date, this growing resource exposes connections across the accumulated
+            knowledge of the Office of the Historian.</p>
+    )
+};
+
 (:~ FRUS volumes directly tagged with exactly this id (not descendant-inclusive). :)
 declare function tags:tagged-frus-volumes($tagId as xs:string) as element(tei:TEI)* {
     collection($tags:FRUS_COL)//tei:keywords[@scheme eq $tags:SCHEME][tei:term = $tagId]/root(.)/tei:TEI
