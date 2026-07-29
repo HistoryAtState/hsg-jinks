@@ -302,6 +302,21 @@
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
+                <model behaviour="graphic">
+                    <desc>Conferences (#1099 PR review): this elementSpec's mode="change" leaves no
+                        fallback for a @url that already carries a full scheme -- every model above
+                        guards on "not an absolute URL". The conferences photo gallery's graphics are
+                        already fully-qualified (static.history.state.gov/gallery/... baked into the
+                        source data, unlike every other collection's bare filenames), so they matched
+                        no model at all and silently rendered nothing. Catch-all, unconditional,
+                        ordered last: renders @url as-is for anything the predicated models above
+                        didn't already claim.</desc>
+                    <param name="url" value="@url"/>
+                    <param name="width" value="@width"/>
+                    <param name="height" value="@height"/>
+                    <param name="scale" value="@scale"/>
+                    <param name="title" value="desc"/>
+                </model>
             </elementSpec>
             <elementSpec ident="xhtml:div" mode="change">
                 <desc>Conferences (#1114): 12 Brightcove video embeds are pasted verbatim into the

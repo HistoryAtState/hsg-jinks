@@ -277,17 +277,83 @@ declare function conf:breadcrumb($context as map(*), $trail as map(*)*) as eleme
 };
 
 (:~
+ : Whether a division is a container -- has at least one child division that
+ : itself carries a real @type (excluding 'online-supplement') -- rather than
+ : a leaf holding actual prose/figures/tables directly. Mirrors hsg-shell's
+ : frus.odd document-list predicate (reused by conferences via its own
+ : PUBLICATIONS?conferences?transform, passing document-list=true to
+ : pm-frus:transform): a container's own subsections get their full content
+ : only on their own page, never inlined into the parent. Verified live
+ : against the reference site (PR review, #1099): "videos-transcripts" (11
+ : subchapter children) and "background-materials" (6 section children)
+ : render this way on /conferences/2010-southeast-asia; "program", "photos"
+ : and "reviews" have no typed children and render their full content
+ : directly either way.
+ :)
+declare %private function conf:is-container-division($division as element(tei:div)) as xs:boolean {
+    exists($division/tei:div[@type and not(@type = 'online-supplement')])
+};
+
+(:~
+ : A container division's own link-list entry: its head, preserving simple
+ : inline formatting (tei:hi) the way the reference site's own document-list
+ : output does (e.g. an italicized "Foreign Relations of the United States"
+ : within "background-materials"' "frus" child link).
+ :)
+declare %private function conf:division-link-label($division as element(tei:div)) as node()* {
+    for $node in $division/tei:head[1]/node()
+    return
+        typeswitch ($node)
+            case element(tei:hi) return <em>{$node/string()}</em>
+            default return $node
+};
+
+(:~
+ : Renders one division's content: full content via the ODD if it is a leaf,
+ : or a heading (when $includeHeading -- omitted when the division is
+ : already the page's own <h1>) + any intro prose that precedes the first
+ : child + a plain list of links to its own children if it is a container
+ : (conf:is-container-division). Shared by the document view's top-level
+ : walk and the section view (in case a container division is visited
+ : directly by its own URL).
+ :)
+declare %private function conf:render-division($context as map(*), $conferenceId as xs:string, $division as element(tei:div), $includeHeading as xs:boolean) as element()+ {
+    if (conf:is-container-division($division)) then (
+        if ($includeHeading) then <h2>{normalize-space($division/tei:head[1])}</h2> else (),
+        for $p in $division/tei:p[not(preceding-sibling::tei:div)]
+        return page:transform($p, map { "mode": "conf-content" }),
+        <ul class="usa-list">
+        {
+            for $child in $division/tei:div[@xml:id]
+            return
+                <li>
+                    <a href="{$context?context-path}/conferences/{$conferenceId}/{$child/@xml:id}">
+                    { conf:division-link-label($child) }
+                    </a>
+                </li>
+        }
+        </ul>
+    )
+    else
+        page:transform($division, map { "mode": "conf-content" })
+};
+
+(:~
  : Full document content (equivalent of hsg-shell's conference/index.xml
  : with no section-id: pages:load-xml's default view renders the whole
- : tei:body, not a summary). No footnote consolidation needed -- none of the
- : 5 documents contain tei:note (verified live).
+ : tei:body, walking each top-level division through conf:render-division
+ : rather than a single whole-body page:transform -- the latter inlined
+ : every container division's descendants in full, which is not what the
+ : reference site does (#1099 PR review)). No footnote consolidation needed
+ : -- none of the 5 documents contain tei:note (verified live).
  :)
 declare function conf:document-content($context as map(*)) as element()+ {
     let $conferenceId := $context?request?parameters?conferenceId
     let $doc := conf:conference-doc($conferenceId)
     return (
         <h1>{conf:conference-title($doc)}</h1>,
-        page:transform($doc/tei:TEI/tei:text/tei:body, map { "mode": "conf-content" })
+        for $division in $doc/tei:TEI/tei:text/tei:body/tei:div
+        return conf:render-division($context, $conferenceId, $division, true())
     )
 };
 
@@ -301,16 +367,22 @@ declare function conf:document-sidebar($context as map(*)) as element()+ {
 };
 
 (:~
- : Body of the requested division. Passed to page:transform still attached
- : to its source document (needed for base-uri()-dependent rendering, e.g.
- : the graphic/@url resolution model) -- never detach/reconstruct it, same
- : pitfall documented at dh:monograph-section-content.
+ : Body of the requested division, via conf:render-division so a container
+ : division visited directly by its own URL (e.g. .../videos-transcripts)
+ : renders the same link-list shape it would inline in the document view,
+ : rather than recursing into every subchapter's full content. The division
+ : node is passed to page:transform (inside conf:render-division) still
+ : attached to its source document (needed for base-uri()-dependent
+ : rendering, e.g. the graphic/@url resolution model) -- never detach/
+ : reconstruct it, same pitfall documented at dh:monograph-section-content.
+ : $includeHeading is false: the division's own head is already this page's
+ : <h1>.
  :)
 declare function conf:section-content($context as map(*)) as element()+ {
     let $s := conf:current-section($context)
     return (
         <h1>{normalize-space($s?division/tei:head[1])}</h1>,
-        page:transform($s?division, map { "mode": "conf-content" })
+        conf:render-division($context, $s?conferenceId, $s?division, false())
     )
 };
 
