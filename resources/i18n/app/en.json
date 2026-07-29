@@ -5,6 +5,7 @@
         "countries": "Countries",
         "archives": "Archives",
         "departmenthistory": "Department History",
+        "about": "About Us",
         "collection-root": "Collections",
         "document-root": "Collections",
         "demo": "Demo",
@@ -81,5 +82,8 @@
     },
     "departmenthistory": {
         "title": "Department History"
+    },
+    "about": {
+        "title": "About Us"
     }
 }

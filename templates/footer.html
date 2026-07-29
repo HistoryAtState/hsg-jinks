@@ -7,10 +7,11 @@
     dropped, its placeholder social icons replaced by the office's real
     accounts. Presentation lives in resources/css/hsg-theme.css.
 
-    Links into sections this app does not serve yet (Countries, About, FAQ)
-    point at the production site for now; they become context-path-relative as
-    those sections land (#1095, #1097). Department History (#1096) landed its
-    hub/static pages in this commit.
+    Links into sections this app does not serve yet (Countries) point at the
+    production site for now; they become context-path-relative as those
+    sections land. Department History (#1096) and About Us (#1097) landed
+    their hub/static pages in those epics' commits, including the
+    site-wide Content Warning link required by #1097 (OP#1155/#1158).
 --><footer class="usa-footer usa-footer--big hsg-footer">
     <div class="usa-footer__primary-section">
         <div class="grid-container">
@@ -27,10 +28,10 @@
                                     <a href="[[ head(($context?defaults?site-root, $context-path)) ]]/search.html">Search</a>
                                 </li>
                                 <li class="usa-footer__secondary-link">
-                                    <a href="https://history.state.gov/about/">About Us</a>
+                                    <a href="[[ head(($context?defaults?site-root, $context-path)) ]]/about">About Us</a>
                                 </li>
                                 <li class="usa-footer__secondary-link">
-                                    <a href="https://history.state.gov/about/faq">FAQ</a>
+                                    <a href="[[ head(($context?defaults?site-root, $context-path)) ]]/about/faq">FAQ</a>
                                 </li>
                             </ul>
                         </section>
@@ -68,7 +69,7 @@
                                     <a href="https://www.state.gov/copyright-information/">Copyright Information</a>
                                 </li>
                                 <li class="usa-footer__secondary-link">
-                                    <a href="https://history.state.gov/about/content-warning">Content Warning</a>
+                                    <a href="[[ head(($context?defaults?site-root, $context-path)) ]]/about/content-warning">Content Warning</a>
                                 </li>
                             </ul>
                         </section>
@@ -78,7 +79,7 @@
                             <h4 class="usa-footer__primary-link">Contact</h4>
                             <ul class="usa-list usa-list--unstyled">
                                 <li class="usa-footer__secondary-link">
-                                    <a href="https://history.state.gov/about/contact-us">Contact Us</a>
+                                    <a href="[[ head(($context?defaults?site-root, $context-path)) ]]/about/contact-us">Contact Us</a>
                                 </li>
                             </ul>
                             <address class="usa-footer__address">

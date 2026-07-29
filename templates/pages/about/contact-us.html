@@ -1,0 +1,73 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/about": { "at": "modules/templates/about.xqm", "prefix": "about" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ about:breadcrumb($context, (map { "label": "Contact Us" })) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="section-landing usa-prose">
+        <h1>Contact Us</h1>
+        <p>The Office of the Historian welcomes all comments and queries concerning its
+            publications and will advise on research strategies for U.S. diplomatic history and
+            Department of State history.</p>
+        <p>Before contacting our office, please consult the <a href="[[ $context?context-path ]]/about/faq">Frequently Asked
+                Questions</a> page, which includes answers to many common questions.</p>
+        <p>Additionally, our website has numerous resources which may answer your questions,
+            including:</p>
+        <ul class="usa-icon-list">
+            <li class="usa-icon-list__item">
+                <div class="usa-icon-list__content">
+                    <a href="[[ $context?context-path ]]/historicaldocuments">Historical Documents &#8211; <em>Foreign
+                            Relations of the United States</em></a>
+                </div>
+            </li>
+            <li class="usa-icon-list__item">
+                <div class="usa-icon-list__content">
+                    <a href="[[ $context?context-path ]]/departmenthistory">Department History</a>
+                </div>
+            </li>
+            <li class="usa-icon-list__item">
+                <div class="usa-icon-list__content">
+                    <a href="[[ $context?context-path ]]/countries">Countries</a>
+                </div>
+            </li>
+            <li class="usa-icon-list__item">
+                <div class="usa-icon-list__content">
+                    <a href="[[ $context?context-path ]]/milestones">Milestones of U.S. foreign relations</a>
+                </div>
+            </li>
+            <li class="usa-icon-list__item">
+                <div class="usa-icon-list__content">
+                    <a href="[[ $context?context-path ]]/education">Resources for teachers</a>
+                </div>
+            </li>
+        </ul>
+        <p>The Office of the Historian can be reached via email at <a href="mailto:history@state.gov">history@state.gov</a> or
+            by phone at 202-955-0259.</p>
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/about/sidebar.html" %]
+    [% endtemplate %]
+</template>

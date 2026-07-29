@@ -1,0 +1,45 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/about": { "at": "modules/templates/about.xqm", "prefix": "about" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    <!--
+        Shared section page for both FAQ and HAC (OP#1154):
+        aboutapi:view-faq-section / aboutapi:view-hac-section resolve the
+        division server-side and pass "publication" + "sectionId" as request
+        parameters, read back through $context?request?parameters in
+        about:current-section, same pattern as departmenthistory's
+        monograph-section.html.
+    -->
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ about:monograph-section-breadcrumb($context) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [% template before %]
+    [[ about:monograph-section-sidebar($context) ]]
+    [% endtemplate %]
+
+    <div class="usa-prose">
+        [[ about:monograph-section-content($context) ]]
+        [[ about:monograph-section-pagination($context) ]]
+    </div>
+</template>
