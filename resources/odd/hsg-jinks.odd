@@ -244,7 +244,8 @@
                 <desc>Several data collections carry tei:graphic/@url as a bare filename (e.g.
                     "japan-flag.jpg" for rdcr countries #1095/#1128; "sh-bfranklin.jpg" for
                     short-history, "1-homes-cover.jpg" for buildings, "jefferson-thomas.jpg" for
-                    secretary-bios, #1096 PR review) with no base-URI logic anywhere in the base
+                    secretary-bios, #1096 PR review; "wilson-woodrow.jpg" for milestones, #1098)
+                    with no base-URI logic anywhere in the base
                     ODD, so they would render as broken relative srcs. The reference site
                     resolves each against its own static.history.state.gov/{collection}/ prefix
                     (confirmed live per collection); reproduced here as per-collection models,
@@ -275,6 +276,13 @@
                 </model>
                 <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/other-publications/secretary-bios/')" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/secretaries/' || @url"/>
+                    <param name="width" value="@width"/>
+                    <param name="height" value="@height"/>
+                    <param name="scale" value="@scale"/>
+                    <param name="title" value="desc"/>
+                </model>
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/milestones/chapters/')" behaviour="graphic">
+                    <param name="url" value="'https://static.history.state.gov/milestones/' || @url"/>
                     <param name="width" value="@width"/>
                     <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>

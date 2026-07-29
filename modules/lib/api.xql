@@ -26,6 +26,8 @@ import module namespace dhapi="http://teipublisher.com/api/departmenthistory" at
 
 import module namespace aboutapi="http://teipublisher.com/api/about" at "../about-api.xql";
 
+import module namespace milapi="http://teipublisher.com/api/milestones" at "../milestones-api.xql";
+
 
 
 declare option output:indent "no";
@@ -43,6 +45,7 @@ let $resp := roaster:route(
         "modules/countries-api.json",
         "modules/departmenthistory-api.json",
         "modules/hsg-api.json",
+        "modules/milestones-api.json",
         "modules/lib/api.json"
     ), $lookup)
 return
