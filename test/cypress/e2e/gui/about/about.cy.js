@@ -15,6 +15,26 @@ describe("About Us section landing page", () => {
         cy.contains(".usa-sidenav a", "Frequently Asked Questions").should("have.attr", "href").and("match", /\/about\/faq$/);
         cy.contains(".usa-sidenav a", "Historical Advisory Committee").should("have.attr", "href").and("match", /\/about\/hac$/);
     });
+
+    it("sidebar order and labels match the reference site's aside#sections exactly", () => {
+        // https://history.state.gov/about (read-only mirror: /exist/apps/hsg-shell/about)
+        // lists these 7 entries in this order, with no separate "Overview"
+        // self-link -- confirmed live, not just against controller.xql's
+        // route order.
+        cy.visit("about");
+        cy.get(".usa-sidenav a").then(($links) => {
+            const labels = [...$links].map((el) => el.textContent.trim());
+            expect(labels).to.deep.equal([
+                "Contact Us",
+                "Frequently Asked Questions",
+                "The Historian",
+                "Historical Advisory Committee",
+                "Recent Publications",
+                "Reports",
+                "Content Warning",
+            ]);
+        });
+    });
 });
 
 describe("FAQ: TOC, section, prev/next, exact-division guard", () => {
