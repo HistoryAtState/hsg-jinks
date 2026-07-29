@@ -20,7 +20,7 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul>
-                [[ edu:breadcrumb($context, (map{"label": "Curriculum Modules", "href": "/education/modules"}, map{"label": edu:current-module($context)/title/string()})) ]]
+                [[ edu:breadcrumb($context, (map{"label": "Curriculum Modules", "href": "/education/modules"}, map{"label": edu:module-complete-title(edu:current-module($context))})) ]]
             </ul>
         </nav>
     </li>
@@ -39,12 +39,17 @@
             </div>
         </div>
 
+        <h1>[[ edu:module-complete-title(edu:current-module($context)) ]]</h1>
+
         [[ edu:module-availability-block(edu:current-module($context)) ]]
 
         [[ edu:module-content($context) ]]
     </div>
 
     [% template before %]
-    [% include "templates/pages/education/sidebar.html" %]
+    [% include "templates/pages/education/sidebar-modules.html" %]
+
+    <h2>Education</h2>
+    [[ edu:section-nav($context, false()) ]]
     [% endtemplate %]
 </template>

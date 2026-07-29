@@ -45,6 +45,9 @@
     </div>
 
     [% template before %]
-    [% include "templates/pages/education/sidebar.html" %]
+    [% include "templates/pages/education/sidebar-modules.html" %]
+
+    <h2>Education</h2>
+    [[ edu:section-nav($context, true()) ]]
     [% endtemplate %]
 </template>

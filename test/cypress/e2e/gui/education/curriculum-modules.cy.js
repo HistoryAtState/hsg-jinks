@@ -28,6 +28,17 @@ describe("education landing page", () => {
         cy.get("main ol li").first().should("contain.text", "2011");
         cy.get("main ol li").last().should("contain.text", "2002");
     });
+
+    it("shows the site-wide About panel (5 links) and the Education panel (1 link), not the module list (PR #17 review)", () => {
+        cy.visit("education");
+        cy.contains("aside h2", "About").next("ul.usa-sidenav").find("a").should("have.length", 5);
+        cy.contains("aside h2", "About").next("ul.usa-sidenav").find("a").eq(0).should("have.text", "Contact Us");
+        cy.contains("aside h2", "About").next("ul.usa-sidenav").find("a").eq(4).should("have.text", "Recent Publications");
+        cy.contains("aside h2", "Education").next("ul.usa-sidenav").find("a").should("have.length", 1)
+            .and("have.text", "Curriculum Modules")
+            .and("have.attr", "href").and("match", /\/education\/modules$/);
+        cy.get("aside h3").should("not.exist");
+    });
 });
 
 describe("curriculum modules listing", () => {
@@ -42,11 +53,23 @@ describe("curriculum modules listing", () => {
         });
     });
 
+    it("shows the Education/Curriculum Modules sidebar heading pair and marks the section-nav link current (PR #17 review)", () => {
+        cy.visit("education/modules");
+        cy.get("aside h2").should("have.length", 2).and("contain.text", "Education");
+        cy.get("aside h3").should("have.text", "Curriculum Modules");
+        cy.contains("aside h2 + ul a", "Curriculum Modules")
+            .should("have.attr", "aria-current", "page")
+            .and("have.class", "usa-current");
+    });
+
     it("sidebar module order matches the main listing order (#1169 ordering-bug regression)", () => {
         cy.visit("education/modules");
         cy.get(".usa-collection__heading a").then(($links) => {
             const listingOrder = [...$links].map((a) => a.getAttribute("href"));
-            cy.get("aside .usa-sidenav a").then(($sidebarLinks) => {
+            // The modules-list sidebar sits under its own "Curriculum Modules"
+            // h3, distinct from the single-link "Education" section-nav panel
+            // that also renders on this page.
+            cy.get("aside h3 + ul.usa-sidenav a").then(($sidebarLinks) => {
                 const sidebarOrder = [...$sidebarLinks].map((a) => a.getAttribute("href"));
                 expect(sidebarOrder).to.deep.equal(listingOrder);
             });
@@ -64,9 +87,23 @@ describe("curriculum module detail pages", () => {
         });
     });
 
-    it("navigates from the landing page sidebar into a module page", () => {
+    it("shows the intro TEI's complete title as the page heading and breadcrumb leaf, and does not mark the section-nav current (PR #17 review)", () => {
+        cy.visit("education/modules/documents-intro");
+        cy.get("main h1").should("contain.text", "Introduction to Curriculum Packet on");
+        cy.get("main h1").should("contain.text", "Documents on Diplomacy");
+        cy.get("nav[aria-label=breadcrumb] li[aria-current=page]").should("contain.text", "Introduction to Curriculum Packet on");
+        cy.contains("aside h2 + ul a", "Curriculum Modules").should("not.have.attr", "aria-current");
+    });
+
+    it("navigates from the landing page, via the Education sidebar link and the full listing, into a module page", () => {
         cy.visit("education");
-        cy.get("aside .usa-sidenav a").first().click();
+        // The landing page sidebar only links to the listing (its brief
+        // module list is plain text, not links, matching the reference
+        // site); the listing page is where individual modules become
+        // clickable, both from the main usa-collection and its own sidebar.
+        cy.contains("aside h2 + ul a", "Curriculum Modules").click();
+        cy.location("pathname").should("match", /education\/modules$/);
+        cy.get(".usa-collection__heading a").first().click();
         cy.location("pathname").should("match", /education\/modules\/[a-z-]+$/);
         cy.get(".usa-summary-box").should("exist");
     });

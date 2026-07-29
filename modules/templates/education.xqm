@@ -109,12 +109,15 @@ declare function edu:list-modules-brief($context as map(*)) as element(ol) {
 };
 
 (:~
- : Availability/download line shared by the full listing (teaser) and the
- : module detail page (full block): mail-order link when
- : availability-status = 'available', "out of print" text when
- : 'out-of-print'. Neither value appears empty among the 7 live records
- : (verified 2026-07-29 against the seeded devcontainer), but an empty/other
- : value renders no availability text rather than guessing.
+ : Availability text, listing-page wording ("Sorry, ..."): mail-order link
+ : when availability-status = 'available', "Sorry, this title is out of
+ : print." for 'out-of-print'. Ported verbatim from hsg-shell's
+ : edu:list-modules-full (confirmed live against history.state.gov/education/modules,
+ : PR #17 review) -- the module detail page uses different wording
+ : (edu:availability-text-detail), so the two are not shared. Neither value
+ : appears empty among the 7 live records (verified 2026-07-29 against the
+ : seeded devcontainer), but an empty/other value renders no availability
+ : text rather than guessing.
  :)
 declare %private function edu:availability-text($module as element(module)) as item()* {
     let $status := $module/availability-status/string()
@@ -123,6 +126,21 @@ declare %private function edu:availability-text($module as element(module)) as i
             (<a href="http://videodirect.state.gov/">Available for mail order</a>, text { "." })
         else if ($status eq 'out-of-print') then
             text { "Sorry, this title is out of print." }
+        else
+            ()
+};
+
+(:~
+ : Availability text, module-detail-page wording (no "Sorry,"): ported
+ : verbatim from hsg-shell's edu:module-introduction (confirmed live).
+ :)
+declare %private function edu:availability-text-detail($module as element(module)) as item()* {
+    let $status := $module/availability-status/string()
+    return
+        if ($status eq 'available') then
+            (<a href="http://videodirect.state.gov/">Available for mail order</a>, text { "." })
+        else if ($status eq 'out-of-print') then
+            text { "This title is out of print." }
         else
             ()
 };
@@ -150,6 +168,7 @@ declare function edu:list-modules-full($context as map(*)) as element(ul) {
                     <p class="usa-collection__meta">
                         Published in {$module/year-published/string()}.
                         {edu:availability-text($module)}
+                        The full introduction and curriculum materials are <a href="{$context?context-path}/education/modules/{$module/tei-document-name}">available online</a>.
                     </p>
                 </div>
             </li>
@@ -178,7 +197,7 @@ declare function edu:module-availability-block($module as element(module)) as el
         <div class="usa-summary-box__body">
             <h3 class="usa-summary-box__heading" id="edu-availability-heading">Availability</h3>
             <div class="usa-summary-box__text">
-                <p>{edu:availability-text($module)}</p>
+                <p>{edu:availability-text-detail($module)}</p>
                 {
                     let $file := $module/files/file
                     return
@@ -193,7 +212,9 @@ declare function edu:module-availability-block($module as element(module)) as el
 };
 
 (:~
- : Static section breadcrumb: Home > Education Resources > $trail. Same
+ : Static section breadcrumb: Home > Education > $trail. "Education", not
+ : "Education Resources" -- verified against the live reference site's own
+ : breadcrumb text (history.state.gov/education, PR #17 review). Same
  : pattern as dh:breadcrumb (modules/templates/departmenthistory.xqm):
  : $trail as a sequence of maps { "label": ..., "href": ... }, NOT an array
  : -- an array literal's closing "]]" collides with this templating engine's
@@ -207,10 +228,10 @@ declare function edu:breadcrumb($context as map(*), $trail as map(*)*) as elemen
             </a>
         </li>,
         if (empty($trail)) then
-            <li aria-current="page">Education Resources</li>
+            <li aria-current="page">Education</li>
         else
             <li>
-                <a href="{$context?context-path}/education">Education Resources</a>
+                <a href="{$context?context-path}/education">Education</a>
             </li>,
         for $crumb at $pos in $trail
         return
@@ -245,4 +266,57 @@ declare function edu:module-content($context as map(*)) as element()* {
     let $module := edu:current-module($context)
     let $doc := edu:module-intro-doc($module)
     return page:transform($doc, map { "mode": "division" })
+};
+
+(:~
+ : The intro TEI document's own complete title (tei:title[@type='complete']),
+ : e.g. "Introduction to Curriculum Packet on 'Documents on Diplomacy: ...'"
+ : -- distinct from the module record's own <title> field (the shorter,
+ : catalog-style title used in listings/sidebars). Used for the module
+ : detail page's own heading and its breadcrumb leaf, matching the live
+ : reference site exactly (confirmed against history.state.gov/education/modules/*,
+ : PR #17 review).
+ :)
+declare function edu:module-complete-title($module as element(module)?) as xs:string? {
+    if (empty($module)) then
+        ()
+    else
+        normalize-space(edu:module-intro-doc($module)//tei:titleStmt/tei:title[@type = 'complete'])
+};
+
+(:~
+ : The generic site-wide "About" sidebar panel (5 static links), shown only
+ : on the landing page -- ported verbatim from hsg-shell's education/index.xml
+ : (confirmed live against history.state.gov/education, PR #17 review). Not
+ : education-specific content, so a plain static function rather than a
+ : record-driven one; matches the departmenthistory precedent of hand-authored
+ : sidebar content for a fixed, unlikely-to-churn link list.
+ :)
+declare function edu:about-sidebar($context as map(*)) as element(ul) {
+    <ul class="usa-sidenav">
+        <li class="usa-sidenav__item"><a href="{$context?context-path}/about/contact-us">Contact Us</a></li>
+        <li class="usa-sidenav__item"><a href="{$context?context-path}/about/faq">Frequently Asked Questions</a></li>
+        <li class="usa-sidenav__item"><a href="{$context?context-path}/about/the-historian">The Historian</a></li>
+        <li class="usa-sidenav__item"><a href="{$context?context-path}/about/hac">Historical Advisory Committee</a></li>
+        <li class="usa-sidenav__item"><a href="{$context?context-path}/about/recent-publications">Recent Publications</a></li>
+    </ul>
+};
+
+(:~
+ : The small "Education" section-nav panel (one link, "Curriculum Modules")
+ : shown on every education page alongside that page's own sidebar content
+ : (About on the landing page; the full module list on the listing/detail
+ : pages) -- matches the live reference site's persistent section nav
+ : (confirmed against all 3 page types, PR #17 review). $current marks the
+ : link as the active page (usa-current + aria-current="page"), true only on
+ : the listing page itself.
+ :)
+declare function edu:section-nav($context as map(*), $current as xs:boolean) as element(ul) {
+    <ul class="usa-sidenav">
+        <li class="usa-sidenav__item">
+            <a href="{$context?context-path}/education/modules">{
+                if ($current) then (attribute class { "usa-current" }, attribute aria-current { "page" }) else ()
+            }Curriculum Modules</a>
+        </li>
+    </ul>
 };
