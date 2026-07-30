@@ -7,6 +7,30 @@ declare namespace xi="http://www.w3.org/2001/XInclude";
 
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "../config.xqm";
 
+(:~
+ : Resolve one fragment of a header by name (titleStmt, publicationStmt,
+ : seriesStmt): inline at the volume root's chapter/compilation level, but
+ : xincluded from the volume's shared *_includes.xml at the volume-root
+ : level (frus-unbound-alpha) -- so check for an inline child first. Plain
+ : descendant steps like // don't see across an unexpanded xi:include; this
+ : follows the specific include named by $name directly (doc() + id(), the
+ : same pattern already used for footnotes in resources/odd/hsg-jinks.odd
+ : and hsg:document-range below) rather than util:expand()ing the whole
+ : header, which would also expand (and so attempt to resolve) teiHeader's
+ : unrelated encodingDesc include -- a remote https:// URL -- for callers
+ : that only want a title.
+ :)
+declare %private function hsg:resolve-include($header as element()?, $name as xs:string) as element()? {
+    let $inline := $header/tei:fileDesc/*[local-name() = $name]
+    return
+        if (exists($inline)) then $inline
+        else
+            let $inc := $header//xi:include[@xpointer = $name]
+            return
+                if (not(exists($inc))) then ()
+                else id($name, doc(util:collection-name($inc) || '/' || $inc/@href))
+};
+
 
 
 (:~
@@ -140,11 +164,9 @@ declare function hsg:volume-list($context as map(*)) {
     let $path := $config:data-default || "/" || $volume || "/" || $volume || ".xml"
     where doc-available($path)
     (: titleStmt lives in a shared *_includes.xml, xincluded rather than
-       duplicated inline (#1105-ish frus-unbound-alpha change) -- descendant
-       steps like // don't see across an unexpanded xi:include, so this
-       resolved to no title at all until forced with util:expand(). :)
-    let $header := util:expand(doc($path)//tei:teiHeader)
-    let $title := normalize-space(($header//tei:titleStmt/tei:title)[1])
+       duplicated inline (frus-unbound-alpha) -- see hsg:resolve-include. :)
+    let $titleStmt := hsg:resolve-include(doc($path)//tei:teiHeader, 'titleStmt')
+    let $title := normalize-space(($titleStmt/tei:title)[1])
     order by $title
     return
         <li>
@@ -168,10 +190,9 @@ declare function hsg:collection-breadcrumbs($context as map(*)) {
         let $publication := $components[1]
         let $is-landing := count($components) = 2
         let $volume := doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
-        (: see hsg:volume-list -- titleStmt is only reachable via xi:include,
-           so this needs util:expand() too. :)
-        let $volume-header := util:expand($volume//tei:teiHeader)
-        let $volume-title := normalize-space(($volume-header//tei:titleStmt/tei:title)[1])
+        (: see hsg:resolve-include / hsg:volume-list. :)
+        let $volume-titleStmt := hsg:resolve-include($volume//tei:teiHeader, 'titleStmt')
+        let $volume-title := normalize-space(($volume-titleStmt/tei:title)[1])
         let $division-type := ($context?doc?content//tei:bibl[@type='frus-division-type'])[1]/string()
         return (
             <li>
