@@ -95,6 +95,13 @@ time someone refreshes to a newer release, even though nothing actually
 broke — this has already happened once, in
 `test/cypress/e2e/gui/departmenthistory/people.cy.js`.
 
+`milestones` (also in the README's "External data packages" table) is the one
+exception: it backs a **retired** publication whose content has been frozen
+since 2018 — new `.xar` releases only ever touch build/packaging metadata, not
+the 19 era documents themselves. An exact count assertion there (e.g. 19 eras)
+is intentional and expected to stay stable, unlike the 7 actively-growing
+packages above.
+
 When a test counts items rendered from one of these packages, use a lower
 bound instead: `.should("have.length.at.least", N)`, with `N` set a bit
 below the count observed at write-time. This only applies to counts of

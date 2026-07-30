@@ -1,0 +1,45 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/milestones": { "at": "modules/templates/milestones.xqm", "prefix": "ms" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    <!--
+        Article page (OP#1163): one era's division (a body-div article, or
+        its front-matter "foreword"; both resolve identically, no
+        special-casing needed). milapi:view-section already 404s an
+        unresolvable eraId/articleId (or the id()-whitespace-tokenization
+        edge cases OP#1166 flags) before this template is ever reached.
+    -->
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ ms:article-breadcrumb($context) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [% template before %]
+    [[ ms:article-sidebar($context) ]]
+    [% endtemplate %]
+
+    <div class="usa-prose">
+        [% include "templates/pages/milestones/retirement-notice-brief.html" %]
+        [[ ms:article-content($context) ]]
+        [[ ms:article-pagination($context) ]]
+    </div>
+</template>

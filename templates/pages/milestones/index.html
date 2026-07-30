@@ -1,0 +1,68 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/milestones": { "at": "modules/templates/milestones.xqm", "prefix": "ms" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    <!--
+        Milestones section landing page (OP#1160): full retirement notice,
+        intro prose, era select dropdown, and the cross-era sidebar list, all
+        rendered from the data collection (ms:eras()) rather than hsg-shell's
+        hand-authored, staleness-prone static lists.
+    -->
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ ms:breadcrumb($context, ()) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [% template before %]
+    [[ ms:era-sidebar($context) ]]
+    [% endtemplate %]
+
+    <div class="section-landing usa-prose">
+        <h1>Milestones in the History of U.S. Foreign Relations</h1>
+        [% include "templates/pages/milestones/retirement-notice.html" %]
+        <p>"Milestones in the History of U.S. Foreign Relations" provides a general overview of the history of U.S.
+            engagement with the world through short essays on important moments, or milestones, in the diplomatic
+            history of the United States. The basic objective of these essays is to provide a clear, accurate,
+            narrative account of the events being discussed, with a brief discussion of each event's significance
+            for U.S. foreign policy and diplomatic history. The publication is divided into 19 chapters covering
+            time periods from 1750 until 2000, with brief introductions providing context for each period.</p>
+        <form action="" class="usa-form">
+            <label class="usa-label" for="milestones-era-select">Select a period</label>
+            [[ ms:era-select($context) ]]
+        </form>
+        <p>The essays were drafted for the Office of the Historian website by many historians over many years, and
+            we continue to revise and expand the existing periods. Most recently, the essays covering the
+            <a href="[[ $context?context-path ]]/milestones/1961-1968">Kennedy and Johnson (1961–68)</a>,
+            <a href="[[ $context?context-path ]]/milestones/1969-1976">Nixon and Ford (1969–76)</a>,
+            <a href="[[ $context?context-path ]]/milestones/1977-1980">Carter (1977–80)</a>,
+            <a href="[[ $context?context-path ]]/milestones/1981-1988">Reagan (1981–88)</a>,
+            <a href="[[ $context?context-path ]]/milestones/1989-1992">Bush (1989–92)</a>, and
+            <a href="[[ $context?context-path ]]/milestones/1993-2000">Clinton (1993–2000)</a> administrations were
+            revised and expanded. These same essays were also enhanced with "tags," or lists of the key people,
+            places, and topics in the essay. The tags appear as links in the right sidebar of the essay and
+            facilitate discovery of other other essays and resources, including volumes from the <em>Foreign
+            Relations of the United States</em> series, on these subjects. The "tags" feature is still in progress,
+            and over time the Office will extend the tags to all of the essays.</p>
+        <p>To begin, select a period above or from the sidebar, or view a list of
+            <a href="[[ $context?context-path ]]/milestones/all">all milestones</a>.</p>
+    </div>
+</template>

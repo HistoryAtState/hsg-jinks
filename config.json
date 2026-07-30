@@ -64,6 +64,11 @@
     "prefix" : "tagapi",
     "id" : "http://teipublisher.com/api/tags",
     "path" : "tags-api.xql"
+  }, {
+    "spec" : "milestones-api.json",
+    "prefix" : "milapi",
+    "id" : "http://teipublisher.com/api/milestones",
+    "path" : "milestones-api.xql"
   } ],
   "extends" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
   "skip" : [
