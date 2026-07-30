@@ -1,0 +1,58 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/search": { "at": "modules/templates/search.xqm", "prefix": "srch" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                <li><a href="[[ $context-path ]]/search"><pb-i18n key="search.results">Search</pb-i18n></a></li>
+                <li>Results</li>
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="usa-prose">
+        <h1><pb-i18n key="search.results">Search results</pb-i18n></h1>
+        <form class="usa-search usa-search--big" role="search" method="get" action="[[ $context-path ]]/search">
+            <label class="usa-sr-only" for="search-field">Search</label>
+            <input class="usa-input" id="search-field" type="search" name="q" value="[[ page:parameter($context, 'q', '') ]]"/>
+            <button class="usa-button" type="submit">
+                <span class="usa-search__submit-text">Search</span>
+            </button>
+        </form>
+
+        [[ srch:results-summary($context) ]]
+        [[ srch:pagination($context) ]]
+        [[ srch:results-list($context) ]]
+        [[ srch:pagination($context) ]]
+    </div>
+
+    [% template before %]
+    <div class="usa-prose">
+        <h2>Refine Results</h2>
+        <form method="get" action="[[ $context-path ]]/search">
+            <input type="hidden" name="q" value="[[ page:parameter($context, 'q', '') ]]"/>
+            [[ srch:filter-sections($context) ]]
+            [[ srch:filter-volumes($context) ]]
+            <button class="usa-button" type="submit">Apply Filters</button>
+            <a class="usa-button usa-button--outline" href="[[ $context-path ]]/search?q=[[ page:parameter($context, 'q', '') ]]">Reset</a>
+        </form>
+    </div>
+    [% endtemplate %]
+</template>
