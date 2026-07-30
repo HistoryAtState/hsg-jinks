@@ -122,12 +122,13 @@ declare function edu:list-modules-brief($context as map(*)) as element(ol) {
 declare %private function edu:availability-text($module as element(module)) as item()* {
     let $status := $module/availability-status/string()
     return
-        if ($status eq 'available') then
-            (<a href="http://videodirect.state.gov/">Available for mail order</a>, text { "." })
-        else if ($status eq 'out-of-print') then
+        if ($status eq 'available') then (
+            <a href="http://videodirect.state.gov/">Available for mail order</a>,
+            text { "." }
+        ) else if ($status eq 'out-of-print') then (
             text { "Sorry, this title is out of print." }
-        else
-            ()
+        ) else (
+        )
 };
 
 (:~
@@ -137,12 +138,13 @@ declare %private function edu:availability-text($module as element(module)) as i
 declare %private function edu:availability-text-detail($module as element(module)) as item()* {
     let $status := $module/availability-status/string()
     return
-        if ($status eq 'available') then
-            (<a href="http://videodirect.state.gov/">Available for mail order</a>, text { "." })
-        else if ($status eq 'out-of-print') then
+        if ($status eq 'available') then (
+            <a href="http://videodirect.state.gov/">Available for mail order</a>,
+            text { "." }
+        ) else if ($status eq 'out-of-print') then (
             text { "This title is out of print." }
-        else
-            ()
+        ) else (
+        )
 };
 
 (:~
@@ -278,10 +280,10 @@ declare function edu:module-content($context as map(*)) as element()* {
  : PR #17 review).
  :)
 declare function edu:module-complete-title($module as element(module)?) as xs:string? {
-    if (empty($module)) then
-        ()
-    else
+    if (empty($module)) then (
+    ) else (
         normalize-space(edu:module-intro-doc($module)//tei:titleStmt/tei:title[@type = 'complete'])
+    )
 };
 
 (:~
