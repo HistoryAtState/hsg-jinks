@@ -248,29 +248,36 @@ declare function about:recent-publications($context as map(*)) as element(sectio
     let $volumes :=
         for $volumeId in xmldb:get-child-collections($config:data-default)
         let $path := $config:data-default || "/" || $volumeId || "/" || $volumeId || ".xml"
-        where doc-available($path)
-        let $doc := doc($path)
-        let $change := $doc//tei:revisionDesc/tei:change[@status = 'published'][1]
-        where exists($change) and $change/@when castable as xs:date
-        let $year := year-from-date(xs:date($change/@when))
-        where $year >= $minYear
-        let $title := normalize-space(($doc//tei:titleStmt/tei:title)[1])
-        let $title := replace($title, '^Foreign Relations of the United States,\s*', '')
-        return map { "volumeId": $volumeId, "year": $year, "title": $title }
-    for $year in distinct-values($volumes ! ?year)
+        return
+            if (not(doc-available($path))) then ()
+            else
+                let $doc := doc($path)
+                let $change := $doc//tei:revisionDesc/tei:change[@status = 'published'][1]
+                return
+                    if (empty($change) or not($change/@when castable as xs:date)) then ()
+                    else
+                        let $year := year-from-date(xs:date($change/@when))
+                        return
+                            if ($year < $minYear) then ()
+                            else
+                                let $title := normalize-space(($doc//tei:titleStmt/tei:title)[1])
+                                let $title := replace($title, '^Foreign Relations of the United States,\s*', '')
+                                return map { "volumeId": $volumeId, "year": $year, "title": $title }
+    for $volume in $volumes
+    group by $year := $volume?year
     order by $year descending
     return
         <section>
             <h2>{$year}</h2>
             <ul class="usa-collection">
             {
-                for $volume in $volumes[?year = $year]
-                order by $volume?title
+                for $v in $volume
+                order by $v?title
                 return
                     <li class="usa-collection__item">
                         <div class="usa-collection__body">
                             <h3 class="usa-collection__heading">
-                                <a href="{$context?context-path}/historicaldocuments/{$volume?volumeId}">{$volume?title}</a>
+                                <a href="{$context?context-path}/historicaldocuments/{$v?volumeId}">{$v?title}</a>
                             </h3>
                         </div>
                     </li>
