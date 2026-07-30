@@ -1,0 +1,256 @@
+{
+    "openapi": "3.0.4",
+    "info": {
+        "title": "HSG Search section",
+        "description": "Complete route definition for the /search section of history.state.gov, rewritten as an OpenAPI definition to be routed by Roaster (https://github.com/eeditiones/roaster). Analysis artifact of Scope 3 (see 'hsg-shell rewrite analysis.txt' and OpenProject #1102): not yet wired into config.json. Conventions follow modules/hsg-api.json and doc/scope2-conferences-api.json; deviations are deliberate and documented on the operations. Handlers referenced by operationId would live in a search handler module (prefix 'searchapi', e.g. modules/search-api.xql) registered through the jinks `api` extension point, delegating to the jinks-owned vapi:html with a template chosen inside the handler; the rendering template is intentionally NOT declared as a query parameter. Hard requirement carried over from hsg-shell: the query-guard module (modules/query-guard.xqm) MUST be ported and applied to the raw `q` value(s) BEFORE any query work — it rejects SQL-injection-shaped values and any `q` whose total length exceeds 1000 characters with HTTP 400 (rendered as the site's HTML 400 error page via the status-code-fixing error handler pattern of hsg-api.xql). Unsupported Lucene metacharacters (/ \\ ! : ^ [ ] { }) are NOT rejected: they are backslash-escaped at query-build time so they search literally, while the documented operators (\" + - ( ) * ? ~, AND/OR/NOT) pass through as features. The search itself runs Lucene ft:query across the data collections of ELEVEN separate eXist apps (frus, other-publications, conferences, hac, frus-history, rdcr, wwdai, pocom, travels, visits, milestones), relying on the shared collection.xconf index convention (facets hsg-category/hsg-publication, fields hsg-fulltext/hsg-url, plus frus-only date fields) maintained in each data app, not in this app.",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "description": "Endpoint for testing on localhost",
+            "url": "/exist/apps/hsg-jinks"
+        }
+    ],
+    "security": [
+        { "cookieAuth": [] },
+        { "basicAuth": [] }
+    ],
+    "components": {
+        "securitySchemes": {
+            "cookieAuth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "teipublisher.com.login"
+            },
+            "basicAuth": {
+                "type": "http",
+                "scheme": "basic"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "search",
+            "description": "Sitewide full-text search of the Office of the Historian website. One dynamic route (/search) that serves either the search landing form or the results list depending on the query parameters present, plus one static tips page. Results are a single flat, ranked list mixing heterogeneous content types (FRUS document divisions, publication sections, people, presidential/secretary travels, foreign-leader visits, country articles...), each rendered by a per-type heading/summary/href dispatch."
+        }
+    ],
+    "paths": {
+        "/search": {
+            "get": {
+                "summary": "Search landing form, or search results when a query is present",
+                "description": "Single route with a parameter-driven template dispatch, reproduced from hsg-shell's controller.xql: the handler folds over the three parameters `q`, `start-date` and `end-date`; if at least one of them is present and non-empty after normalize-space (a whitespace-only `q` does NOT count), the results template is rendered, otherwise the landing form. `within`, `volume-id`, `sort-by` etc. alone never trigger the results view. Before that dispatch the ported query-guard checks the raw `q` value(s): a SQL-injection-shaped value or a total `q` length over 1000 characters is answered with HTTP 400 (HTML error page) without running any query. The results view executes one Lucene query string (hsg-fulltext clause AND optional frus-search-date-min/max range clauses) with facet filters (hsg-category from `within`, hsg-publication from the section-to-publication map, frus-volume-id from `volume-id`) across the collections of the eleven indexed data apps, sorts by relevance or the binary hsg-date-min field, caches the full hit sequence in an in-memory cache for ~5 minutes (key: sha1 of the normalized parameter set), and pages through it with `start`/`per-page`. Date filtering applies only when the scope is exactly the `documents` section; date strings are interpreted in US Eastern time (hard-coded -05:00 in hsg-shell). Lucene query-parser errors from user syntax are currently swallowed and rendered as zero results (an acknowledged TODO in hsg-shell); the rewrite should keep the 200-with-zero-results behavior for URL preservation unless a deliberate 400 is decided. Sitewide header search boxes on all other pages submit to this route with `q` only.",
+                "operationId": "searchapi:search",
+                "x-error-handler": "searchapi:handle-error",
+                "tags": ["search"],
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Keyword query. Lucene syntax features are supported and documented on /search/tips: phrases in double quotes, AND/OR/NOT (uppercase), + and - prefixes, ? and * wildcards (no leading wildcard), ~N proximity; the default operator between terms is AND. The characters / \\ ! : ^ [ ] { } are escaped and searched literally. Empty or whitespace-only values are treated as absent. Values rejected by the query guard (SQL-injection signatures, or total length over 1000 characters summed across repeated q parameters) yield HTTP 400. May be combined with date parameters or omitted entirely for pure date searches.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 1000
+                        },
+                        "example": "\"peaceful nuclear\" AND Kissinger"
+                    },
+                    {
+                        "name": "within",
+                        "in": "query",
+                        "description": "Section scope filter, repeatable. Known values (mapped to hsg-category/hsg-publication facets in the handler): entire-site, documents, department, countries, conferences, frus-history, about, retired. Deliberately NOT schema-enumerated: hsg-shell answers an unknown value with a normal 200 page and zero results (the value simply matches no facet), and legacy URLs must keep that behavior instead of a Roaster validation 400. Absent or entire-site means no scope filter; absent `within` combined with `start-date` or `volume-id` is treated as documents (compatibility with the retired frus-dates search engine).",
+                        "required": false,
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "maxLength": 100
+                            }
+                        },
+                        "example": ["documents"]
+                    },
+                    {
+                        "name": "volume-id",
+                        "in": "query",
+                        "description": "Restrict hits to specific FRUS volumes (frus-volume-id facet), repeatable. Effective only when the scope is exactly the documents section. Values are TEI xml:id values of volumes (data-validated, not enumerated).",
+                        "required": false,
+                        "explode": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "pattern": "^frus[0-9][0-9a-z.-]*(v[0-9]+[a-z]?|[0-9]+)?$"
+                            }
+                        },
+                        "example": ["frus1969-76v10", "frus1969-76v35"]
+                    },
+                    {
+                        "name": "start-date",
+                        "in": "query",
+                        "description": "Lower bound of the document-date filter (documents scope only). Accepted shapes, per hsg-shell's date normalizer: yyyy, yyyy-mm, yyyy-mm-dd, or a full xs:date/xs:dateTime; partial dates expand to the start of the period, interpreted in US Eastern time. A non-empty value switches the route to the results view even without `q`. If only start-date is given (no end-date), the end of that same period is used as the upper bound (exact-date search). Note: hsg-shell silently ignores unparseable values (200, no date filter); this pattern turns them into a Roaster 400 — flagged as a deliberate hardening in the analysis.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2}(T[0-9]{2}:[0-9]{2}(:[0-9]{2})?)?)?)?$"
+                        },
+                        "example": "1962-10-16"
+                    },
+                    {
+                        "name": "end-date",
+                        "in": "query",
+                        "description": "Upper bound of the document-date filter (documents scope only); same accepted shapes as start-date, partial dates expand to the end of the period (e.g. 1962-10 becomes 1962-10-31T23:59:59). A non-empty value switches the route to the results view. Ignored without a valid start-date (the range only exists when the lower bound parses).",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2}(T[0-9]{2}:[0-9]{2}(:[0-9]{2})?)?)?)?$"
+                        },
+                        "example": "1962-10-28"
+                    },
+                    {
+                        "name": "start-time",
+                        "in": "query",
+                        "description": "Optional 24h time (hh:mm) appended to start-date for time-of-day precision on FRUS document dates. Does NOT trigger the results view on its own and is ignored without start-date.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9]{2}:[0-9]{2}$"
+                        },
+                        "example": "12:00"
+                    },
+                    {
+                        "name": "end-time",
+                        "in": "query",
+                        "description": "Optional 24h time (hh:mm) appended to end-date. Does NOT trigger the results view on its own and is ignored without end-date.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9]{2}:[0-9]{2}$"
+                        },
+                        "example": "18:30"
+                    },
+                    {
+                        "name": "sort-by",
+                        "in": "query",
+                        "description": "Result ordering: relevance, date-asc or date-desc (date sorting uses the binary hsg-date-min index field; undated hits sort last for date-asc, first... i.e. empty-greatest/empty-least as in hsg-shell). Default is relevance, silently replaced by date-asc when no keyword query is present (relevance over a pure date filter would be random). Unknown values fall back to relevance — not schema-enumerated for that reason (legacy URLs must not 400).",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "relevance",
+                            "maxLength": 20
+                        },
+                        "example": "date-asc"
+                    },
+                    {
+                        "name": "start",
+                        "in": "query",
+                        "description": "1-based index of the first hit to display (pagination window start).",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per-page",
+                        "in": "query",
+                        "description": "Number of hits per page. hsg-shell accepts this from the query string (templating default 10); the site UI never varies it. The rewrite should cap it server-side (it directly scales rendering work on unauthenticated requests).",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 10
+                        }
+                    },
+                    {
+                        "name": "order-by",
+                        "in": "query",
+                        "description": "Legacy parameter of the retired frus-dates search engine, kept only so redirected old URLs keep working: the value 'date' is mapped to sort-by=date-asc. Deprecated; do not emit in new links.",
+                        "required": false,
+                        "deprecated": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 20
+                        },
+                        "example": "date"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page: the landing form when none of q/start-date/end-date is present and non-empty, otherwise the results list (flat, ranked, mixed content types; 10 per page with first/prev/numbered/next/last pagination; filter sidebar for sections, dates and FRUS volumes; result-count/scope/sort summary line). A query with zero hits is still a 200 results page.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "The query guard rejected `q`: total length of all q values exceeds 1000 characters, or a value matches a SQL-injection signature (e.g. 'union all select', 'or 1=1', 'waitfor delay', stacked ';select', 'null,null'). Deliberately biased against false positives — bare 'union select Committee' or 'Nixon -- Kissinger' pass. Also returned by Roaster schema validation for malformed date/time/paging parameters (a documented tightening versus hsg-shell). Body is the site's HTML 400 error page; the handler's error handler must fix the status code the same way hsgapi:handle-error does.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/search/tips": {
+            "get": {
+                "summary": "Search Tips page",
+                "description": "Static hand-authored help page documenting defaults (AND between terms, case-insensitivity), scope checkboxes, keyword operators (phrases, booleans, wildcards, proximity), date/time filtering and volume filtering, with many pre-filled example links back into /search. No document behind it: renders through vapi:html with a fixed template, like the conferences landing page. Any other child path of /search (e.g. /search/foo) is a 404, declared explicitly below.",
+                "operationId": "searchapi:tips",
+                "x-error-handler": "searchapi:handle-error",
+                "tags": ["search"],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/search/{other}": {
+            "get": {
+                "summary": "Unknown child of /search -- always 404",
+                "description": "Declared explicitly rather than relying on Roaster's own unmatched-route handling: this app's generic /{docid} catch-all route (jinks' own modules/lib/api.json, docid parameter has allowReserved: true) matches ANY otherwise-unrouted path including multi-segment ones, and its own error handler (vapi:handle-error, unwrapped) hardcodes HTTP 200 -- so without this route, /search/foo would silently 200 through that catch-all instead of 404ing (confirmed live; the same gap exists today for e.g. /departmenthistory/foo, out of this epic's scope to fix elsewhere). This route is more specific (single literal path segment) than that generic one, so Roaster prefers it, and its handler unconditionally errors NOT_FOUND.",
+                "operationId": "searchapi:not-found",
+                "x-error-handler": "searchapi:handle-error",
+                "tags": ["search"],
+                "parameters": [
+                    {
+                        "name": "other",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "Always -- no child of /search exists other than /search/tips.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
