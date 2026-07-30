@@ -1,0 +1,300 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "HSG Jinks About API",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "description": "Endpoint for testing on localhost",
+            "url": "/exist/apps/hsg-jinks"
+        }
+    ],
+    "paths": {
+        "/about": {
+            "get": {
+                "summary": "About Us section landing page",
+                "operationId": "aboutapi:index",
+                "x-error-handler": "aboutapi:handle-error",
+                "tags": [
+                    "about"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rendered HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/about/faq": {
+            "get": {
+                "summary": "Frequently Asked Questions table of contents",
+                "operationId": "aboutapi:view-faq",
+                "x-error-handler": "aboutapi:handle-error",
+                "tags": [
+                    "about"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rendered HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/about/faq/{sectionId}": {
+            "get": {
+                "summary": "FAQ section",
+                "operationId": "aboutapi:view-faq-section",
+                "x-error-handler": "aboutapi:handle-error",
+                "tags": [
+                    "about"
+                ],
+                "parameters": [
+                    {
+                        "name": "sectionId",
+                        "in": "path",
+                        "description": "ID of the FAQ section",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rendered HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The section was not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/about/hac": {
+            "get": {
+                "summary": "Historical Advisory Committee table of contents",
+                "operationId": "aboutapi:view-hac",
+                "x-error-handler": "aboutapi:handle-error",
+                "tags": [
+                    "about"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rendered HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/about/hac/{sectionId}": {
+            "get": {
+                "summary": "HAC section or meeting-notes subchapter",
+                "operationId": "aboutapi:view-hac-section",
+                "x-error-handler": "aboutapi:handle-error",
+                "tags": [
+                    "about"
+                ],
+                "parameters": [
+                    {
+                        "name": "sectionId",
+                        "in": "path",
+                        "description": "ID of the HAC section or meeting subchapter",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rendered HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The section was not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/about/contact-us": {
+            "get": {
+                "summary": "Contact Us page",
+                "operationId": "aboutapi:contact-us",
+                "x-error-handler": "aboutapi:handle-error",
+                "tags": [
+                    "about"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rendered HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/about/the-historian": {
+            "get": {
+                "summary": "The Historian page: list of past directors of the Office of the Historian",
+                "operationId": "aboutapi:the-historian",
+                "x-error-handler": "aboutapi:handle-error",
+                "tags": [
+                    "about"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rendered HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/about/recent-publications": {
+            "get": {
+                "summary": "FRUS volumes published in the current and prior year",
+                "operationId": "aboutapi:recent-publications",
+                "x-error-handler": "aboutapi:handle-error",
+                "tags": [
+                    "about"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rendered HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/about/reports": {
+            "get": {
+                "summary": "Reports to Congress page",
+                "operationId": "aboutapi:reports",
+                "x-error-handler": "aboutapi:handle-error",
+                "tags": [
+                    "about"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rendered HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/about/content-warning": {
+            "get": {
+                "summary": "Content Warning page",
+                "operationId": "aboutapi:content-warning",
+                "x-error-handler": "aboutapi:handle-error",
+                "tags": [
+                    "about"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Rendered HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "security": [
+        {
+            "cookieAuth": []
+        },
+        {
+            "basicAuth": []
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "basicAuth": {
+                "scheme": "basic",
+                "type": "http"
+            },
+            "cookieAuth": {
+                "in": "cookie",
+                "name": "teipublisher.com.login",
+                "type": "apiKey"
+            }
+        }
+    }
+}

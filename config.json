@@ -55,6 +55,11 @@
     "id" : "http://teipublisher.com/api/departmenthistory",
     "path" : "departmenthistory-api.xql"
   }, {
+    "spec" : "about-api.json",
+    "prefix" : "aboutapi",
+    "id" : "http://teipublisher.com/api/about",
+    "path" : "about-api.xql"
+  }, {
     "spec" : "tags-api.json",
     "prefix" : "tagapi",
     "id" : "http://teipublisher.com/api/tags",
