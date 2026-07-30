@@ -91,7 +91,10 @@ declare %private function hsg:toc-entries($division as element(tei:TEI)?, $divis
     let $id := $include/@xpointer/string()
     where map:contains($divisions, $id)
     let $included := $divisions($id)
-    let $title := normalize-space(($included//tei:fileDesc//tei:titleStmt/tei:title)[1])
+    (: A chapter/compilation title may be split across two title elements (a
+       date range plus a descriptive subtitle, frus-unbound-alpha); join both
+       rather than showing only the date range. :)
+    let $title := normalize-space(string-join($included//tei:fileDesc//tei:titleStmt/tei:title, ''))
     (: current when it is the page being viewed, or -- on a document page, where
        the document itself is not listed -- when it is the division including it :)
     let $is-current :=
@@ -136,7 +139,12 @@ declare function hsg:volume-list($context as map(*)) {
     for $volume in xmldb:get-child-collections($config:data-default)
     let $path := $config:data-default || "/" || $volume || "/" || $volume || ".xml"
     where doc-available($path)
-    let $title := normalize-space((doc($path)//tei:titleStmt/tei:title)[1])
+    (: titleStmt lives in a shared *_includes.xml, xincluded rather than
+       duplicated inline (#1105-ish frus-unbound-alpha change) -- descendant
+       steps like // don't see across an unexpanded xi:include, so this
+       resolved to no title at all until forced with util:expand(). :)
+    let $header := util:expand(doc($path)//tei:teiHeader)
+    let $title := normalize-space(($header//tei:titleStmt/tei:title)[1])
     order by $title
     return
         <li>
@@ -160,7 +168,10 @@ declare function hsg:collection-breadcrumbs($context as map(*)) {
         let $publication := $components[1]
         let $is-landing := count($components) = 2
         let $volume := doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
-        let $volume-title := normalize-space(($volume//tei:titleStmt/tei:title)[1])
+        (: see hsg:volume-list -- titleStmt is only reachable via xi:include,
+           so this needs util:expand() too. :)
+        let $volume-header := util:expand($volume//tei:teiHeader)
+        let $volume-title := normalize-space(($volume-header//tei:titleStmt/tei:title)[1])
         let $division-type := ($context?doc?content//tei:bibl[@type='frus-division-type'])[1]/string()
         return (
             <li>
@@ -180,7 +191,9 @@ declare function hsg:collection-breadcrumbs($context as map(*)) {
                     <a href="{$context?context-path}/historicaldocuments/{$publication}">{$volume-title}</a>
                 </li>,
             if (not($is-landing) and $division-type = ('chapter', 'compilation')) then
-                let $own-title := normalize-space(($context?doc?content//tei:titleStmt/tei:title)[1])
+                (: See hsg:toc-entries: the title may be split into a date
+                   range and a subtitle; join both. :)
+                let $own-title := normalize-space(string-join($context?doc?content//tei:titleStmt/tei:title, ''))
                 return <li class="breadcrumb-current" aria-current="page">{$own-title}</li>
             else if (not($is-landing) and $division-type = 'document') then
                 let $number := ($context?doc?content//tei:bibl[@type='frus-document-number'])[1]/string()

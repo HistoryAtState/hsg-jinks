@@ -53,7 +53,7 @@
         </model></elementSpec>
             <elementSpec ident="TEI" mode="change"><model predicate="$parameters?mode=('volume-landing', 'volume-interior')" behaviour="block">
             <param name="content" value="./text/body//xi:include"/>
-            <param name="head" value=".//fileDesc//titleStmt/title"/>
+            <param name="head" value="util:expand(.//teiHeader)//fileDesc//titleStmt/title"/>
             <pb:template xml:space="preserve"><div xmlns="">
   [[head]]
   <ul>
@@ -98,7 +98,7 @@
 </div></pb:template>
         </model><model predicate="$parameters?mode='document-view' and exists(.//standOff//note)" behaviour="block">
             <desc>A document with footnotes (333 of 341). The heading's marker points at the source note, which has no in-body anchor - it belongs to the heading. Its label comes from the note's @n and must not be hardcoded to 1: attachment notes continue their parent's numbering. Footnotes are consolidated from this document and any inlined attachments, ordered by @n.</desc>
-            <param name="overline" value="let $volid := root(.)//bibl[@type='frus-volume-id']/string() let $volcol := substring-before(document-uri(root(.)), '/' || $volid || '/') || '/' || $volid return doc($volcol || '/' || $volid || '.xml')//seriesStmt/title[@type='complete']"/>
+            <param name="overline" value="let $volid := root(.)//bibl[@type='frus-volume-id']/string() let $volcol := substring-before(document-uri(root(.)), '/' || $volid || '/') || '/' || $volid let $volheader := util:expand(doc($volcol || '/' || $volid || '.xml')//teiHeader) return $volheader//seriesStmt/title[@type='complete']"/>
             <param name="number" value=".//bibl[@type='frus-document-number']"/>
             <param name="head" value=".//fileDesc//titleStmt/title"/>
             <param name="srcId" value="substring-after((.//standOff//note[@type='source'])[1]/@corresp, '#')"/>
@@ -107,7 +107,7 @@
             <param name="dateline" value=".//profileDesc//setting"/>
             <param name="content" value="text/body"/>
             <param name="attachments" value="text/back/xi:include"/>
-            <param name="footnotes" value="let $att := (text/back/xi:include ! (id(@xpointer, doc(util:collection-name(.) || '/' || @href))/root()//standOff//note)) return (for $note in (.//standOff//note, $att) order by number($note/@n) return $note)"/>
+            <param name="footnotes" value="let $att := (text/body//xi:include ! (id(@xpointer, doc(util:collection-name(.) || '/' || @href))/root()//standOff//note)) return (for $note in (.//standOff//note, $att) order by number($note/@n) return $note)"/>
             <pb:template xml:space="preserve"><div xmlns="">
   <p class="overline">[[overline]]</p>
   <h1>[[number]]. [[head]]<sup class="footnote-ref"><a id="[[srcRef]]" href="#[[srcId]]">[[srcLabel]]</a></sup></h1>
@@ -119,7 +119,7 @@
 </div></pb:template>
         </model><model predicate="$parameters?mode='document-view'" behaviour="block">
             <desc>A document without footnotes (8 of 341: 7 editorial notes and 1 historical document). No source note exists, so the heading carries no marker and no ruler or footnote list is emitted. None of these documents have attachments.</desc>
-            <param name="overline" value="let $volid := root(.)//bibl[@type='frus-volume-id']/string() let $volcol := substring-before(document-uri(root(.)), '/' || $volid || '/') || '/' || $volid return doc($volcol || '/' || $volid || '.xml')//seriesStmt/title[@type='complete']"/>
+            <param name="overline" value="let $volid := root(.)//bibl[@type='frus-volume-id']/string() let $volcol := substring-before(document-uri(root(.)), '/' || $volid || '/') || '/' || $volid let $volheader := util:expand(doc($volcol || '/' || $volid || '.xml')//teiHeader) return $volheader//seriesStmt/title[@type='complete']"/>
             <param name="number" value=".//bibl[@type='frus-document-number']"/>
             <param name="head" value=".//fileDesc//titleStmt/title"/>
             <param name="dateline" value=".//profileDesc//setting"/>
