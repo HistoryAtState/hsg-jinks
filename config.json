@@ -69,6 +69,11 @@
     "prefix" : "milapi",
     "id" : "http://teipublisher.com/api/milestones",
     "path" : "milestones-api.xql"
+  }, {
+    "spec" : "search-api.json",
+    "prefix" : "searchapi",
+    "id" : "https://history.state.gov/api/search",
+    "path" : "search-api.xql"
   } ],
   "extends" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
   "skip" : [

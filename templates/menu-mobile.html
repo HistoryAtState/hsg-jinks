@@ -4,11 +4,11 @@
             [% if $menu?search %]
             <li>
                 [% if $context('isStatic') %]
-                <form action="[[ $context-path ]]/search.html">
-                    <input type="search" value="" name="query" placeholder="" data-i18n="[placeholder]search.placeholder" />
+                <form action="[[ $context-path ]]/search">
+                    <input type="search" value="" name="q" placeholder="" data-i18n="[placeholder]search.placeholder" />
                 </form>
                 [% else %]
-                <pb-search action="[[ $context-path ]]/search.html" value="[[ page:parameter($context, 'query', '') ]]" redirect="redirect"></pb-search>
+                <pb-search action="[[ $context-path ]]/search" name="q" value="[[ page:parameter($context, 'q', '') ]]" redirect="redirect"></pb-search>
                 [% endif %]
             </li>
             [% endif %]
