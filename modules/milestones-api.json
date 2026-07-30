@@ -1,0 +1,132 @@
+{
+    "components": {
+        "securitySchemes": {
+            "basicAuth": {
+                "scheme": "basic",
+                "type": "http"
+            },
+            "cookieAuth": {
+                "in": "cookie",
+                "name": "teipublisher.com.login",
+                "type": "apiKey"
+            }
+        }
+    },
+    "info": {
+        "title": "HSG Jinks Milestones API",
+        "version": "1.0.0"
+    },
+    "openapi": "3.0.3",
+    "paths": {
+        "/milestones": {
+            "get": {
+                "summary": "Landing page of the Milestones section: full retirement notice, introduction, and era selector",
+                "operationId": "milapi:index",
+                "x-error-handler": "milapi:handle-error",
+                "tags": [ "milestones" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/milestones/all": {
+            "get": {
+                "summary": "Flat listing of every milestone article across all eras",
+                "operationId": "milapi:all",
+                "x-error-handler": "milapi:handle-error",
+                "tags": [ "milestones" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/milestones/{eraId}": {
+            "get": {
+                "summary": "Landing page for one era: table of contents only",
+                "operationId": "milapi:view",
+                "x-error-handler": "milapi:handle-error",
+                "tags": [ "milestones" ],
+                "parameters": [
+                    {
+                        "name": "eraId",
+                        "in": "path",
+                        "description": "Era document identifier (file name without .xml in the chapters collection), a four-digit start year and four-digit end year joined by a hyphen.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9]{4}-[0-9]{4}$"
+                        },
+                        "example": "1914-1920",
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "No era with this id",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/milestones/{eraId}/{articleId}": {
+            "get": {
+                "summary": "Interior page for one article (tei:div) within an era",
+                "operationId": "milapi:view-section",
+                "x-error-handler": "milapi:handle-error",
+                "tags": [ "milestones" ],
+                "parameters": [
+                    {
+                        "name": "eraId",
+                        "in": "path",
+                        "description": "Era document identifier",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9]{4}-[0-9]{4}$"
+                        },
+                        "example": "1914-1920",
+                        "allowReserved": true
+                    },
+                    {
+                        "name": "articleId",
+                        "in": "path",
+                        "description": "xml:id of the tei:div to render (an era's front-matter introduction, xml:id 'foreword', or one of its body-div articles)",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "wwi",
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "No era with this id, or no division with this xml:id in it",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        }
+    },
+    "servers": [
+        {
+            "description": "Endpoint for testing on localhost",
+            "url": "/exist/apps/hsg-jinks"
+        }
+    ],
+    "security": []
+}

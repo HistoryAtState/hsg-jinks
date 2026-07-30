@@ -270,16 +270,18 @@ warning that it's missing until a page 404s.
 
 ### External data packages (GitHub releases)
 
-Beyond `frus-data-jinks` above, running the app also needs 8 data packages —
-the ones backing `/departmenthistory`, `/countries`, and `/about` — each
-maintained in its own repo under `github.com/HistoryAtState` and, unlike
-`frus-data-jinks`, already published as a versioned `.xar` GitHub release.
+Beyond `frus-data-jinks` above, running the app also needs 9 data packages —
+the ones backing `/departmenthistory`, `/countries`, `/about`, and
+`/milestones` — each maintained in its own repo under `github.com/HistoryAtState`
+and, unlike `frus-data-jinks`, already published as a versioned `.xar` GitHub
+release.
 That means they don't need the frozen-baseline treatment: fetch each repo's
 latest release asset and `xst package install` it directly.
 
 | Repo | Latest release |
 |---|---|
 | `gsh` | https://github.com/HistoryAtState/gsh/releases/latest |
+| `milestones` | https://github.com/HistoryAtState/milestones/releases/latest |
 | `other-publications` | https://github.com/HistoryAtState/other-publications/releases/latest |
 | `pocom` | https://github.com/HistoryAtState/pocom/releases/latest |
 | `rdcr` | https://github.com/HistoryAtState/rdcr/releases/latest |
@@ -293,7 +295,7 @@ devcontainer (never port 8080 — see "Parallel worktrees & the read-only
 mirror" in `CLAUDE.md`):
 
 ```sh
-for repo in gsh other-publications pocom rdcr travels visits wwdai hac; do
+for repo in gsh milestones other-publications pocom rdcr travels visits wwdai hac; do
   url=$(gh release view --repo HistoryAtState/$repo --json assets -q '.assets[0].url')
   curl -sL -o "/tmp/${repo}.xar" "$url"
   xst --config .xstrc package install "/tmp/${repo}.xar"
