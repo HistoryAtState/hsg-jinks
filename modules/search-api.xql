@@ -23,44 +23,32 @@ declare variable $searchapi:BAD_REQUEST as xs:QName := xs:QName("searchapi:bad-r
 
 (:~
  : GET /search -- single route, two page shapes (OP#1102 / OP#1179). Folds
- : over q/start-date/end-date exactly like hsg-shell's controller.xql: if any
- : of the three is non-empty after normalize-space (a whitespace-only q does
- : NOT count, and a repeated parameter counts if ANY of its values is
- : non-empty), render the results template, otherwise the landing form.
- : within/volume-id/sort-by alone never trigger the results view.
- :
- : The query guard runs on the RAW request parameter (request:get-parameter,
- : not roaster's schema-coerced $request?parameters?q) so a repeated `q` is
- : checked the same way hsg-shell's query-guard:check($q as xs:string*) always
- : was, independent of how roaster's OpenAPI-declared (scalar) schema for `q`
- : happens to coerce repeats.
+ : over q/start-date/end-date: if any of the three is non-empty after
+ : normalize-space (a whitespace-only q does NOT count), render the results
+ : template, otherwise the landing form. within/volume-id/sort-by alone never
+ : trigger the results view.
  :)
 declare function searchapi:search($request as map(*)) {
-    let $rawQ := request:get-parameter("q", ())
-    return
-        if (query-guard:check($rawQ)) then
-            error($searchapi:BAD_REQUEST, "search query rejected by query guard")
-        else
-            let $showResults :=
-                some $name in ("q", "start-date", "end-date")
-                satisfies (
-                    some $value in request:get-parameter($name, ())
-                    satisfies normalize-space($value) ne ""
-                )
-            let $file := if ($showResults) then "pages/search/results" else "pages/search/landing"
-            return
-                vapi:html(map:merge((
-                    $request,
-                    map {
-                        "parameters": map:merge((
-                            $request?parameters,
-                            map {
-                                "file": $file,
-                                "suppress-sitewide-search-field": "true"
-                            }
-                        ))
-                    }
-                )))
+    if (query-guard:check($request?parameters?q)) then
+        error($searchapi:BAD_REQUEST, "search query rejected by query guard")
+    else
+        let $showResults :=
+            some $name in ("q", "start-date", "end-date")
+            satisfies normalize-space($request?parameters?($name)) ne ""
+        let $file := if ($showResults) then "pages/search/results" else "pages/search/landing"
+        return
+            vapi:html(map:merge((
+                $request,
+                map {
+                    "parameters": map:merge((
+                        $request?parameters,
+                        map {
+                            "file": $file,
+                            "suppress-sitewide-search-field": "true"
+                        }
+                    ))
+                }
+            )))
 };
 
 (:~
@@ -94,8 +82,14 @@ declare function searchapi:not-found($request as map(*)) {
 
 (:~
  : Wrap the jinks-owned vapi:handle-error (renders the error page but
- : hardcodes HTTP 200) to correct the status code -- same pattern as
- : hsgapi:handle-error / dhapi:handle-error / countryapi:handle-error.
+ : hardcodes HTTP 200) to correct the status code -- same base pattern as
+ : hsgapi:handle-error / dhapi:handle-error / countryapi:handle-error, but
+ : those three all fall through to the unmodified (200) response for any
+ : error code they don't explicitly recognize -- meaning a genuine,
+ : unanticipated runtime error would silently render as a 200 "success"
+ : page. Fixed here: anything that isn't a recognized NOT_FOUND/BAD_REQUEST
+ : is a real server-side failure, not a client-facing 404/400, so it maps to
+ : 500 instead of passing the hardcoded 200 through.
  :)
 declare function searchapi:handle-error($error as map(*)) {
     let $response := vapi:handle-error($error)
@@ -105,5 +99,5 @@ declare function searchapi:handle-error($error as map(*)) {
         else if ($error?code eq $searchapi:BAD_REQUEST) then
             map:put($response, xs:QName("router:RESPONSE_CODE"), 400)
         else
-            $response
+            map:put($response, xs:QName("router:RESPONSE_CODE"), 500)
 };
