@@ -264,3 +264,74 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .usa-prose .popovers {
     display: contents;
 }
+
+/* Volume landing page (#1080): cover image, editor/publisher block, a
+   divider before the table of contents, and the "Ways to Explore" sidebar
+   panel -- reference parity with hsg-shell's _frus.scss. */
+.hsg-frus__cover {
+    display: block;
+    max-width: 220px;
+    height: auto;
+    margin: var(--s-1) 0;
+}
+
+.hsg-frus__meta {
+    margin-bottom: var(--s-1);
+}
+
+.hsg-frus__editor-label {
+    font-weight: 700;
+    margin-top: var(--s-2);
+}
+
+.hsg-list-editors {
+    margin: 0 0 var(--s-2);
+    padding-left: 1.25em;
+}
+
+.hsg-frus__published {
+    margin-top: var(--s-1);
+    color: var(--jinks-colors-600, #555);
+}
+
+.hsg-frus__published > span {
+    display: block;
+}
+
+/* The divider itself: a top border on the TOC that follows the cover/editor
+   block, same treatment as .usa-prose .footnotes above. */
+.hsg-frus__toc {
+    margin-top: var(--s-1);
+    padding-top: var(--s-1);
+    border-top: 1px solid var(--jinks-color-border);
+    list-style: none;
+    padding-left: 0;
+}
+
+.hsg-frus__toc ul {
+    list-style: none;
+    padding-left: 1.25em;
+}
+
+.hsg-frus__toc > li {
+    margin-bottom: var(--s-2);
+}
+
+.hsg-frus__ways-to-explore .hsg-sidebar-title {
+    margin-top: 0;
+}
+
+.hsg-frus__ways-to-explore .usa-search {
+    margin-bottom: var(--s-1);
+}
+
+.hsg-ebook-list,
+.hsg-frus__downloads {
+    list-style: none;
+    padding-left: 0;
+}
+
+.hsg-link-button {
+    display: inline-block;
+    margin: var(--s-2) 0;
+}
