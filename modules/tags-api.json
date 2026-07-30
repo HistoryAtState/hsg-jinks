@@ -1,17 +1,4 @@
 {
-    "components": {
-        "securitySchemes": {
-            "basicAuth": {
-                "scheme": "basic",
-                "type": "http"
-            },
-            "cookieAuth": {
-                "in": "cookie",
-                "name": "teipublisher.com.login",
-                "type": "apiKey"
-            }
-        }
-    },
     "info": {
         "title": "HSG Jinks Tags API",
         "version": "1.0.0"
@@ -93,8 +80,5 @@
             "url": "/exist/apps/hsg-jinks"
         }
     ],
-    "security": [
-        { "cookieAuth": [] },
-        { "basicAuth": [] }
-    ]
+    "security": []
 }
