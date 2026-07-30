@@ -245,8 +245,7 @@ declare function about:monograph-section-pagination($context as map(*)) as eleme
  :)
 declare function about:recent-publications($context as map(*)) as element(section)* {
     let $minYear := year-from-date(current-date()) - 1
-    let $volumes :=
-        for $volumeId in xmldb:get-child-collections($config:data-default)
+    let $volume-info := function($volumeId as xs:string) as map(*)? {
         let $path := $config:data-default || "/" || $volumeId || "/" || $volumeId || ".xml"
         return
             if (not(doc-available($path))) then ()
@@ -256,13 +255,16 @@ declare function about:recent-publications($context as map(*)) as element(sectio
                 return
                     if (empty($change) or not($change/@when castable as xs:date)) then ()
                     else
-                        let $year := year-from-date(xs:date($change/@when))
-                        return
-                            if ($year < $minYear) then ()
-                            else
-                                let $title := normalize-space(($doc//tei:titleStmt/tei:title)[1])
-                                let $title := replace($title, '^Foreign Relations of the United States,\s*', '')
-                                return map { "volumeId": $volumeId, "year": $year, "title": $title }
+                        let $title := normalize-space(($doc//tei:titleStmt/tei:title)[1])
+                        let $title := replace($title, '^Foreign Relations of the United States,\s*', '')
+                        return map {
+                            "volumeId": $volumeId,
+                            "year": year-from-date(xs:date($change/@when)),
+                            "title": $title
+                        }
+    }
+    let $candidates := for-each(xmldb:get-child-collections($config:data-default), $volume-info)
+    let $volumes := filter($candidates, function($volume as map(*)) as xs:boolean { $volume?year >= $minYear })
     for $volume in $volumes
     group by $year := $volume?year
     order by $year descending
