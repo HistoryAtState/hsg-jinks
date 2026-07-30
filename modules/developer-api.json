@@ -58,7 +58,6 @@
         "/developer/{page}": {
             "get": {
                 "summary": "Catch-all for any other path segment under /developer",
-                "description": "Roaster's route matching regex has no end anchor for static path segments, so without this parameterized route, an unmatched path such as /developer/foo would silently prefix-match the bare /developer route (higher specificity from the {page} placeholder wins instead) and render the landing page with a 200 rather than 404, matching hsg-shell's local:serve-not-found-page() fallback.",
                 "operationId": "devapi:not-found",
                 "x-error-handler": "devapi:handle-error",
                 "tags": [
@@ -91,25 +90,5 @@
             }
         }
     },
-    "security": [
-        {
-            "cookieAuth": []
-        },
-        {
-            "basicAuth": []
-        }
-    ],
-    "components": {
-        "securitySchemes": {
-            "basicAuth": {
-                "scheme": "basic",
-                "type": "http"
-            },
-            "cookieAuth": {
-                "in": "cookie",
-                "name": "teipublisher.com.login",
-                "type": "apiKey"
-            }
-        }
-    }
+    "security": []
 }
