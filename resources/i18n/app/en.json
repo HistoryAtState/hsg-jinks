@@ -75,7 +75,11 @@
         "previous": "Previous"
     },
     "historicaldocuments": {
-        "title": "Historical Documents"
+        "title": "Historical Documents",
+        "waysToExplore": "Ways to Explore",
+        "searchInsideVolume": "Search inside this volume",
+        "download": "Download:",
+        "browseGpoPrefix": "Browse the"
     },
     "countries": {
         "title": "Countries"
