@@ -270,12 +270,12 @@ warning that it's missing until a page 404s.
 
 ### External data packages (GitHub releases)
 
-Beyond `frus-data-jinks` above, running the app also needs 7 data packages —
-the ones backing `/departmenthistory` and `/countries` — each maintained in
-its own repo under `github.com/HistoryAtState` and, unlike `frus-data-jinks`,
-already published as a versioned `.xar` GitHub release. That means they don't
-need the frozen-baseline treatment: fetch each repo's latest release asset
-and `xst package install` it directly.
+Beyond `frus-data-jinks` above, running the app also needs 8 data packages —
+the ones backing `/departmenthistory`, `/countries`, and `/about` — each
+maintained in its own repo under `github.com/HistoryAtState` and, unlike
+`frus-data-jinks`, already published as a versioned `.xar` GitHub release.
+That means they don't need the frozen-baseline treatment: fetch each repo's
+latest release asset and `xst package install` it directly.
 
 | Repo | Latest release |
 |---|---|
@@ -286,13 +286,14 @@ and `xst package install` it directly.
 | `travels` | https://github.com/HistoryAtState/travels/releases/latest |
 | `visits` | https://github.com/HistoryAtState/visits/releases/latest |
 | `wwdai` | https://github.com/HistoryAtState/wwdai/releases/latest |
+| `hac` | https://github.com/HistoryAtState/hac/releases/latest |
 
-To refresh all 7 to their latest release and deploy into *this worktree's own*
+To refresh all 8 to their latest release and deploy into *this worktree's own*
 devcontainer (never port 8080 — see "Parallel worktrees & the read-only
 mirror" in `CLAUDE.md`):
 
 ```sh
-for repo in gsh other-publications pocom rdcr travels visits wwdai; do
+for repo in gsh other-publications pocom rdcr travels visits wwdai hac; do
   url=$(gh release view --repo HistoryAtState/$repo --json assets -q '.assets[0].url')
   curl -sL -o "/tmp/${repo}.xar" "$url"
   xst --config .xstrc package install "/tmp/${repo}.xar"

@@ -54,6 +54,11 @@
     "prefix" : "dhapi",
     "id" : "http://teipublisher.com/api/departmenthistory",
     "path" : "departmenthistory-api.xql"
+  }, {
+    "spec" : "about-api.json",
+    "prefix" : "aboutapi",
+    "id" : "http://teipublisher.com/api/about",
+    "path" : "about-api.xql"
   } ],
   "extends" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
   "skip" : [
