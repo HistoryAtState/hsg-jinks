@@ -128,8 +128,5 @@
             "url": "/exist/apps/hsg-jinks"
         }
     ],
-    "security": [
-        { "cookieAuth": [] },
-        { "basicAuth": [] }
-    ]
+    "security": []
 }

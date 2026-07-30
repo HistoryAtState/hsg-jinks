@@ -97,14 +97,13 @@ declare function milapi:view-section($request as map(*)) {
 
 (:~
  : Wrap the jinks-owned vapi:handle-error, which renders the error page but
- : hardcodes HTTP 200, so a missing page still reports success to crawlers and
- : link checkers. Keep its markup, correct the status.
+ : hardcodes HTTP 200, so a missing page (or any other failure) still reports
+ : success to crawlers and link checkers. Keep its markup, correct the
+ : status for every error type via roaster's own
+ : errors:get-status-code-from-error (not just NOT_FOUND -> 404), so a real
+ : bug reports 500 instead of silently succeeding.
  :)
 declare function milapi:handle-error($error as map(*)) {
     let $response := vapi:handle-error($error)
-    return
-        if ($error?code eq $errors:NOT_FOUND) then
-            map:put($response, xs:QName("router:RESPONSE_CODE"), 404)
-        else
-            $response
+    return map:put($response, xs:QName("router:RESPONSE_CODE"), errors:get-status-code-from-error($error?code))
 };

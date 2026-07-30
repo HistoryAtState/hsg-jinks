@@ -243,19 +243,19 @@ declare %private function ms:current-article($context as map(*)) as map(*) {
 };
 
 declare function ms:article-breadcrumb($context as map(*)) as element(li)+ {
-    let $a := ms:current-article($context)
+    let $article := ms:current-article($context)
     return ms:breadcrumb($context, (
-        map { "label": ms:era-short-title($a?doc), "href": "/milestones/" || $a?eraId },
-        map { "label": normalize-space($a?division/tei:head[1]) }
+        map { "label": ms:era-short-title($article?doc), "href": "/milestones/" || $article?eraId },
+        map { "label": normalize-space($article?division/tei:head[1]) }
     ))
 };
 
 declare function ms:article-sidebar($context as map(*)) as element(nav) {
-    let $a := ms:current-article($context)
+    let $article := ms:current-article($context)
     return
         <nav aria-label="Side navigation" class="toc">
             <h2><pb-i18n key="document.contents">Contents</pb-i18n></h2>
-            {ms:era-toc($context, $a?doc, $a?eraId, $a?division/@xml:id/string())}
+            {ms:era-toc($context, $article?doc, $article?eraId, $article?division/@xml:id/string())}
         </nav>
 };
 
@@ -276,8 +276,8 @@ declare function ms:article-sidebar($context as map(*)) as element(nav) {
  : altering the node handed to page:transform.
  :)
 declare function ms:article-content($context as map(*)) as element()+ {
-    let $a := ms:current-article($context)
-    let $division := $a?division
+    let $article := ms:current-article($context)
+    let $division := $article?division
     return (
         <h1>{normalize-space($division/tei:head[1])}</h1>,
         page:transform($division, map { "mode": "milestones-section" })
@@ -285,8 +285,8 @@ declare function ms:article-content($context as map(*)) as element()+ {
 };
 
 declare function ms:article-pagination($context as map(*)) as element(nav)? {
-    let $a := ms:current-article($context)
-    let $nav := ms:era-prev-next($a?doc, $a?division/@xml:id/string())
+    let $article := ms:current-article($context)
+    let $nav := ms:era-prev-next($article?doc, $article?division/@xml:id/string())
     return
         if (empty($nav?prev) and empty($nav?next)) then ()
         else
@@ -295,14 +295,14 @@ declare function ms:article-pagination($context as map(*)) as element(nav)? {
                 {
                     if (exists($nav?prev)) then
                         <li class="usa-pagination__item usa-pagination__arrow">
-                            <a href="{$context?context-path}/milestones/{$a?eraId}/{$nav?prev/@xml:id}" class="usa-pagination__link usa-pagination__previous-page">
+                            <a href="{$context?context-path}/milestones/{$article?eraId}/{$nav?prev/@xml:id}" class="usa-pagination__link usa-pagination__previous-page">
                                 <pb-i18n key="odd.previous">Previous</pb-i18n>
                             </a>
                         </li>
                     else (),
                     if (exists($nav?next)) then
                         <li class="usa-pagination__item usa-pagination__arrow">
-                            <a href="{$context?context-path}/milestones/{$a?eraId}/{$nav?next/@xml:id}" class="usa-pagination__link usa-pagination__next-page">
+                            <a href="{$context?context-path}/milestones/{$article?eraId}/{$nav?next/@xml:id}" class="usa-pagination__link usa-pagination__next-page">
                                 <pb-i18n key="odd.next">Next</pb-i18n>
                             </a>
                         </li>
