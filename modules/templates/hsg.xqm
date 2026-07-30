@@ -239,12 +239,13 @@ declare function hsg:volume-landing-content($context as map(*)) {
     if (not(exists($doc))) then ()
     else
         let $volume-id := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
-        (: titleStmt/editor/publicationStmt are xincluded from the volume's
-           shared *_includes.xml; see hsg:volume-list for why this needs
-           util:expand(). notesStmt is inline, so hsg:volume-cover and
-           hsg:volume-ways-to-explore don't need it. :)
-        let $header := util:expand($doc//tei:teiHeader)
-        let $title := normalize-space(($header//tei:titleStmt/tei:title)[1])
+        (: titleStmt/publicationStmt are xincluded from the volume's shared
+           *_includes.xml; see hsg:resolve-include. notesStmt is inline, so
+           hsg:volume-cover and hsg:volume-ways-to-explore don't need it. :)
+        let $header := $doc//tei:teiHeader
+        let $titleStmt := hsg:resolve-include($header, 'titleStmt')
+        let $publicationStmt := hsg:resolve-include($header, 'publicationStmt')
+        let $title := normalize-space(($titleStmt/tei:title)[1])
         (: One root element: the layout's main is a flex row whose children
            each get flex: 1 (resources/css/layout.css, .sticky-layout > main
            > *), so returning these as siblings lays them out as columns
@@ -255,8 +256,8 @@ declare function hsg:volume-landing-content($context as map(*)) {
                 <h1>{$title}</h1>
                 {hsg:volume-cover($doc, $volume-id, $title)}
                 <div class="hsg-frus__meta">
-                    {hsg:volume-editors($header)}
-                    {hsg:volume-published-info($header)}
+                    {hsg:volume-editors($titleStmt)}
+                    {hsg:volume-published-info($publicationStmt)}
                 </div>
                 {hsg:volume-landing-toc($context)}
             </div>
@@ -282,12 +283,12 @@ declare %private function hsg:volume-cover($doc as node(), $volume-id as xs:stri
  : Editor / General Editor bylines. Reference parity with hsg-shell:
  : titleStmt/editor[@role='primary'] labeled "Editor:" ("Editors:" if more
  : than one), editor[@role='general'] labeled "General Editor:". Takes the
- : already-expanded header from hsg:volume-landing-content rather than
- : re-expanding per field.
+ : already-resolved titleStmt from hsg:volume-landing-content rather than
+ : re-resolving it.
  :)
-declare %private function hsg:volume-editors($header as node()?) {
-    let $primary := $header//tei:titleStmt/tei:editor[@role = 'primary'][normalize-space(.) != '']
-    let $general := $header//tei:titleStmt/tei:editor[@role = 'general'][normalize-space(.) != '']
+declare %private function hsg:volume-editors($titleStmt as node()?) {
+    let $primary := $titleStmt/tei:editor[@role = 'primary'][normalize-space(.) != '']
+    let $general := $titleStmt/tei:editor[@role = 'general'][normalize-space(.) != '']
     return (
         if (exists($primary)) then (
             <div class="hsg-frus__editor-label">{if (count($primary) gt 1) then 'Editors:' else 'Editor:'}</div>,
@@ -305,10 +306,10 @@ declare %private function hsg:volume-editors($header as node()?) {
  : publicationStmt/publisher, /pubPlace, /date[@type='publication-date'] --
  : not the content-date range, which hsg-shell doesn't show here either.
  :)
-declare %private function hsg:volume-published-info($header as node()?) {
-    let $publisher := normalize-space($header//tei:publicationStmt/tei:publisher)
-    let $place := normalize-space($header//tei:publicationStmt/tei:pubPlace)
-    let $year := normalize-space($header//tei:publicationStmt/tei:date[@type = 'publication-date'])
+declare %private function hsg:volume-published-info($publicationStmt as node()?) {
+    let $publisher := normalize-space($publicationStmt/tei:publisher)
+    let $place := normalize-space($publicationStmt/tei:pubPlace)
+    let $year := normalize-space($publicationStmt/tei:date[@type = 'publication-date'])
     return
         <div class="hsg-frus__published">
             {if ($publisher != '') then <span class="hsg-frus__publisher">{$publisher}</span> else ()}
