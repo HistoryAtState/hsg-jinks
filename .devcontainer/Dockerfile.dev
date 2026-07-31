@@ -10,6 +10,13 @@ ARG JWT_VERSION=2.0.1
 ARG WWDAI_VERSION=0.6.5
 ARG RDCR_VERSION=0.8.7
 ARG CAROUSEL_VERSION=0.11.10
+ARG GSH_VERSION=0.5.2
+ARG MILESTONES_VERSION=0.6.6
+ARG OTHER_PUBLICATIONS_VERSION=0.6.9
+ARG POCOM_VERSION=0.7.5
+ARG TRAVELS_VERSION=0.8.4
+ARG VISITS_VERSION=0.6.4
+ARG HAC_VERSION=1.1.13
 
 
 ARG HTTP_PORT=8080
@@ -103,6 +110,19 @@ RUN curl -L -o /usr/local/exist/autodeploy/jwt-${JWT_VERSION}.xar https://exist-
 RUN curl -fL -o /usr/local/exist/autodeploy/wwdai-${WWDAI_VERSION}.xar https://github.com/HistoryAtState/wwdai/releases/download/v${WWDAI_VERSION}/wwdai.xar
 RUN curl -fL -o /usr/local/exist/autodeploy/rdcr-${RDCR_VERSION}.xar https://github.com/HistoryAtState/rdcr/releases/download/v${RDCR_VERSION}/rdcr.xar
 RUN curl -fL -o /usr/local/exist/autodeploy/carousel-${CAROUSEL_VERSION}.xar https://github.com/HistoryAtState/carousel/releases/download/v${CAROUSEL_VERSION}/carousel.xar
+
+# departmenthistory (OP#1096: gsh, other-publications, pocom, travels, visits),
+# milestones (OP#1098) and about's HAC documents (OP#1097, hac) -- same
+# pinned-fetch pattern as wwdai/rdcr/carousel above, just not yet added when
+# those sections were still in progress. See README "External data packages"
+# for the full table and the refresh command.
+RUN curl -fL -o /usr/local/exist/autodeploy/gsh-${GSH_VERSION}.xar https://github.com/HistoryAtState/gsh/releases/download/v${GSH_VERSION}/gsh.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/milestones-${MILESTONES_VERSION}.xar https://github.com/HistoryAtState/milestones/releases/download/v${MILESTONES_VERSION}/milestones.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/other-publications-${OTHER_PUBLICATIONS_VERSION}.xar https://github.com/HistoryAtState/other-publications/releases/download/v${OTHER_PUBLICATIONS_VERSION}/other-publications.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/pocom-${POCOM_VERSION}.xar https://github.com/HistoryAtState/pocom/releases/download/v${POCOM_VERSION}/pocom.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/travels-${TRAVELS_VERSION}.xar https://github.com/HistoryAtState/travels/releases/download/v${TRAVELS_VERSION}/travels.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/visits-${VISITS_VERSION}.xar https://github.com/HistoryAtState/visits/releases/download/v${VISITS_VERSION}/visits.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/hac-${HAC_VERSION}.xar https://github.com/HistoryAtState/hac/releases/download/v${HAC_VERSION}/hac.xar
 
 # The jinks generator and the USWDS theme profile are both built from main:
 # we track jinks main, and profile-theme-uswds has no release at all.

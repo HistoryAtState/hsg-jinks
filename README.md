@@ -86,6 +86,13 @@ defaults mirror them):
 | wwdai | 0.6.5 | countries-section data (OP#1095): `HistoryAtState/wwdai` GitHub Release asset |
 | rdcr | 0.8.7 | countries-section data (OP#1095): `HistoryAtState/rdcr` GitHub Release asset |
 | carousel | 0.11.10 | landing-page carousel: `HistoryAtState/carousel` GitHub Release asset |
+| gsh | 0.5.2 | departmenthistory-section data (OP#1096): `HistoryAtState/gsh` GitHub Release asset |
+| other-publications | 0.6.9 | departmenthistory-section data (OP#1096): `HistoryAtState/other-publications` GitHub Release asset |
+| pocom | 0.7.5 | departmenthistory-section data (OP#1096): `HistoryAtState/pocom` GitHub Release asset |
+| travels | 0.8.4 | departmenthistory-section data (OP#1096): `HistoryAtState/travels` GitHub Release asset |
+| visits | 0.6.4 | departmenthistory-section data (OP#1096): `HistoryAtState/visits` GitHub Release asset |
+| milestones | 0.6.6 | milestones-section data (OP#1098): `HistoryAtState/milestones` GitHub Release asset |
+| hac | 1.1.13 | about-section data (OP#1097): `HistoryAtState/hac` GitHub Release asset |
 
 After changing any of them, rebuild the container and confirm with
 `xst package list --versions` — `xst package install` has been seen reporting
@@ -274,9 +281,11 @@ Beyond `frus-data-jinks` above, running the app also needs 9 data packages —
 the ones backing `/departmenthistory`, `/countries`, `/about`, and
 `/milestones` — each maintained in its own repo under `github.com/HistoryAtState`
 and, unlike `frus-data-jinks`, already published as a versioned `.xar` GitHub
-release.
-That means they don't need the frozen-baseline treatment: fetch each repo's
-latest release asset and `xst package install` it directly.
+release. That means they don't need the frozen-baseline treatment: they're
+pinned and `curl`'d straight into `autodeploy/` in `Dockerfile.dev`, same
+pattern as `wwdai`/`rdcr`/`carousel` above (see "Pinned baseline" for the
+version table) — every fresh container build already has all 9 installed, no
+manual step required.
 
 | Repo | Latest release |
 |---|---|
@@ -290,9 +299,10 @@ latest release asset and `xst package install` it directly.
 | `wwdai` | https://github.com/HistoryAtState/wwdai/releases/latest |
 | `hac` | https://github.com/HistoryAtState/hac/releases/latest |
 
-To refresh all 8 to their latest release and deploy into *this worktree's own*
-devcontainer (never port 8080 — see "Parallel worktrees & the read-only
-mirror" in `CLAUDE.md`):
+To pick up a newer release without a full image rebuild — e.g. to try a
+just-published fix before bumping the pinned version — refresh one or all of
+them directly into *this worktree's own* devcontainer (never port 8080, see
+"Parallel worktrees & the read-only mirror" in `CLAUDE.md`):
 
 ```sh
 for repo in gsh milestones other-publications pocom rdcr travels visits wwdai hac; do
@@ -301,6 +311,10 @@ for repo in gsh milestones other-publications pocom rdcr travels visits wwdai ha
   xst --config .xstrc package install "/tmp/${repo}.xar"
 done
 ```
+
+That's a runtime-only change (eXist's database isn't persisted, see "Data"
+above) — update the pinned version in `Dockerfile.dev`/`docker-compose.yml`
+too if the newer release should stick around after the next rebuild.
 
 These packages are append-only upstream — see `CLAUDE.md` ("Cypress
 assertions on data-package counts") before writing a test that counts
