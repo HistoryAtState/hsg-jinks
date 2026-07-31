@@ -25,15 +25,15 @@
       "name" : "target"
     } ]
   } ],
-  "profiles" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
+  "profiles" : [ "base10", "landing-page", "docker", "profile-theme-uswds" ],
   "label" : "hsg-jinks",
-  "version" : "1.3.1",
+  "version" : "1.4.0",
   "id" : "https://e-editiones.org/apps/hsg-jinks",
   "_update" : true,
   "styles" : [ "https://cdn.jsdelivr.net/npm/theme-toggles@4.10.1/css/classic.min.css", "resources/css/layout.css", "resources/css/jinks-variables.css", "resources/css/components.css", "resources/css/hsg-theme.css" ],
   "_noDeploy" : false,
   "profile-versions" : {
-    "profile-theme-uswds" : "1.3.1",
+    "profile-theme-uswds" : "1.4.0",
     "docker" : "1.0.0",
     "base10" : "1.0.0",
     "landing-page" : "1.0.0"
@@ -48,18 +48,111 @@
     "delete" : true,
     "dark-mode" : false,
     "items" : [ {
-      "url" : "browse.html",
-      "id" : "Start"
+      "url" : "",
+      "id" : "home"
+    }, {
+      "subitems" : [ {
+        "url" : "historicaldocuments",
+        "id" : "hd-overview"
+      }, {
+        "url" : "historicaldocuments/about-frus",
+        "id" : "hd-about-frus"
+      }, {
+        "url" : "historicaldocuments/status-of-the-series",
+        "id" : "hd-status"
+      }, {
+        "url" : "historicaldocuments/frus-history",
+        "id" : "hd-history"
+      }, {
+        "url" : "historicaldocuments/ebooks",
+        "id" : "hd-ebooks"
+      }, {
+        "url" : "historicaldocuments/quarterly-releases",
+        "id" : "hd-quarterly"
+      } ],
+      "id" : "historicaldocuments"
+    }, {
+      "subitems" : [ {
+        "url" : "departmenthistory",
+        "id" : "dh-overview"
+      }, {
+        "url" : "departmenthistory/timeline",
+        "id" : "dh-timeline"
+      }, {
+        "url" : "departmenthistory/people/secretaries",
+        "id" : "dh-secretaries"
+      }, {
+        "url" : "departmenthistory/people/principals-chiefs",
+        "id" : "dh-principals"
+      }, {
+        "url" : "departmenthistory/travels/secretary",
+        "id" : "dh-travels-secretary"
+      }, {
+        "url" : "departmenthistory/travels/president",
+        "id" : "dh-travels-president"
+      }, {
+        "url" : "departmenthistory/visits",
+        "id" : "dh-visits"
+      }, {
+        "url" : "departmenthistory/buildings",
+        "id" : "dh-buildings"
+      } ],
+      "id" : "departmenthistory"
+    }, {
+      "subitems" : [ {
+        "url" : "countries",
+        "id" : "co-guide"
+      }, {
+        "url" : "countries/archives",
+        "id" : "co-archives"
+      } ],
+      "id" : "countries"
+    }, {
+      "subitems" : [ {
+        "url" : "tags",
+        "id" : "re-tags"
+      }, {
+        "url" : "conferences",
+        "id" : "re-conferences"
+      }, {
+        "url" : "developer",
+        "id" : "re-developer"
+      }, {
+        "url" : "education",
+        "id" : "re-education"
+      }, {
+        "url" : "milestones",
+        "id" : "re-milestones"
+      }, {
+        "url" : "open",
+        "id" : "re-open"
+      }, {
+        "url" : "about/faq",
+        "id" : "re-faq"
+      }, {
+        "url" : "about/contact-us",
+        "id" : "re-contact"
+      } ],
+      "id" : "resources"
+    }, {
+      "url" : "about",
+      "id" : "about"
     } ],
     "login" : false,
     "download" : true,
     "search" : true
   },
   "theme" : {
+    "banner" : {
+      "enabled" : true
+    },
     "logo" : {
       "width" : "1280px",
       "image" : "oh-logo.png",
       "height" : "141px"
+    },
+    "identifier" : {
+      "enabled" : false
     },
     "layout" : {
       "class" : "fixed-layout",
@@ -86,10 +179,10 @@
         "background-position" : "center",
         "background-color" : "rgba(0, 0, 0, 0.6)",
         "class" : "two-column",
-        "label" : "Placeholder image; the hero photograph is still to be provided",
+        "label" : "U.S. Department of State",
         "height" : "25rem",
         "background-size" : "cover",
-        "background-image" : "../images/mount-rushmore.jpg",
+        "background-image" : "../images/hero.jpg",
         "background-repeat" : "no-repeat"
       },
       "bottom" : {
@@ -97,6 +190,78 @@
         "background-size" : "cover",
         "background-image" : "../images/typewriter3.jpg",
         "background-repeat" : "no-repeat"
+      }
+    },
+    "footer" : {
+      "signup" : {
+        "enabled" : false
+      },
+      "required-links" : [ {
+        "label" : "Accessibility Statement",
+        "url" : "https://www.state.gov/section-508-accessibility-statement/"
+      }, {
+        "label" : "Privacy Policy",
+        "url" : "https://www.state.gov/privacy-policy/"
+      }, {
+        "label" : "External Link Policy",
+        "url" : "https://www.state.gov/external-link-policy-and-disclaimers/"
+      }, {
+        "label" : "Copyright Information",
+        "url" : "https://www.state.gov/copyright-information/"
+      }, {
+        "label" : "Content Warning",
+        "url" : "about/content-warning"
+      } ],
+      "columns" : [ {
+        "links" : [ {
+          "label" : "Home",
+          "url" : ""
+        }, {
+          "label" : "Search",
+          "url" : "search"
+        }, {
+          "label" : "About Us",
+          "url" : "about"
+        }, {
+          "label" : "FAQ",
+          "url" : "about/faq"
+        } ],
+        "heading" : "Learn more"
+      }, {
+        "links" : [ {
+          "label" : "Historical Documents",
+          "url" : "historicaldocuments"
+        }, {
+          "label" : "Department History",
+          "url" : "departmenthistory"
+        }, {
+          "label" : "Countries",
+          "url" : "https://history.state.gov/countries/"
+        } ],
+        "heading" : "Topics"
+      } ],
+      "agency" : {
+        "parent" : {
+          "label" : "United States Department of State",
+          "url" : "https://www.state.gov"
+        },
+        "name" : "Office of the Historian, Shared Knowledge Services, Bureau of Administration"
+      },
+      "social" : [ {
+        "icon" : "x.svg",
+        "label" : "X",
+        "url" : "https://x.com/HistoryAtState"
+      }, {
+        "icon" : "github.svg",
+        "label" : "GitHub",
+        "url" : "https://github.com/HistoryAtState"
+      } ],
+      "class" : "hsg-footer",
+      "return-to-top" : true,
+      "contact" : {
+        "phone" : "202-955-0200",
+        "email" : "history@state.gov",
+        "heading" : "Contact"
       }
     },
     "colors" : {
@@ -174,7 +339,7 @@
   "data" : {
     "landing" : "/db/apps/hsg-jinks/data/landing/landing.xml"
   },
-  "_lastModified" : "2026-07-24T20:56:41.57Z",
+  "_lastModified" : "2026-07-31T15:55:11.014Z",
   "overwrite" : "default",
   "pkg" : {
     "website" : "http://tei-publisher.org",
@@ -203,7 +368,7 @@
   "_dry" : false,
   "source" : "/db/apps//profile-theme-uswds",
   "type" : "theme",
-  "skip" : [ "^doc/.*$", "^data/landing/landing\\.xml", "^resources/images/team/", "^resources/images/(typewriter[12]|books|header-bg|paper-texture)\\.jpg", "^resources/images/type\\.jpeg", "^resources/images/gplv3-rounded-grey-180x60\\.jpg", "^resources/images/(tei-with-text|e-editiones-logo-color|jinntec|tei-publisher-logo-color|arrow-right)\\.svg", "^resources/scripts/header\\.js", "^test/cypress/e2e/gui/landing-page\\.cy\\.js", "setup.xql", "config.json" ],
+  "skip" : [ "^doc/.*$", "^data/landing/landing\\.xml", "^resources/images/team/", "^resources/images/(typewriter[12]|books|header-bg|paper-texture)\\.jpg", "^resources/images/type\\.jpeg", "^resources/images/gplv3-rounded-grey-180x60\\.jpg", "^resources/images/(tei-with-text|e-editiones-logo-color|jinntec|tei-publisher-logo-color|arrow-right)\\.svg", "^resources/scripts/header\\.js", "^test/cypress/e2e/gui/landing-page\\.cy\\.js", "^test/cypress/e2e/landing\\.cy\\.js", "setup.xql", "config.json" ],
   "odds" : [ "teipublisher.odd", "landing.odd", "uswds-landing.odd", "hsg-jinks.odd" ],
   "docker" : {
     "eXist" : "6.4.0",
@@ -224,7 +389,7 @@
     "ant" : "1.10.15",
     "jinks-templates" : "1.4.1"
   },
-  "category" : "components",
+  "category" : "development",
   "_overwrite" : "all",
   "defaults" : {
     "language" : "en",
@@ -250,7 +415,7 @@
     "register-root" : "registers"
   },
   "templating" : {
-    "use" : [ "templates/uswds-blocks.html", "templates/hsg-blocks.html" ],
+    "use" : [ "templates/uswds-blocks.html", "templates/hsg-blocks.html", "templates/hsg-landing.html" ],
     "modules" : {
       "http://teipublisher.com/ns/templates/browse" : {
         "at" : "modules/templates/browse.xqm",
@@ -263,6 +428,14 @@
       "http://teipublisher.com/ns/templates/page" : {
         "at" : "modules/templates/page.xqm",
         "prefix" : "page"
+      },
+      "https://history.state.gov/ns/templates/hsg" : {
+        "at" : "modules/templates/hsg.xqm",
+        "prefix" : "hsg"
+      },
+      "https://e-editiones.org/ns/templates/uswds" : {
+        "at" : "modules/templates/uswds-landing.xqm",
+        "prefix" : "uswds"
       },
       "http://history.state.gov/ns/templates/landing" : {
         "at" : "modules/templates/hsg-landing.xqm",
@@ -289,5 +462,25 @@
     "prefix" : "countryapi",
     "id" : "http://teipublisher.com/api/countries",
     "path" : "countries-api.xql"
+  }, {
+    "spec" : "departmenthistory-api.json",
+    "prefix" : "dhapi",
+    "id" : "http://teipublisher.com/api/departmenthistory",
+    "path" : "departmenthistory-api.xql"
+  }, {
+    "spec" : "about-api.json",
+    "prefix" : "aboutapi",
+    "id" : "http://teipublisher.com/api/about",
+    "path" : "about-api.xql"
+  }, {
+    "spec" : "milestones-api.json",
+    "prefix" : "milapi",
+    "id" : "http://teipublisher.com/api/milestones",
+    "path" : "milestones-api.xql"
+  }, {
+    "spec" : "search-api.json",
+    "prefix" : "searchapi",
+    "id" : "https://history.state.gov/api/search",
+    "path" : "search-api.xql"
   } ]
 }

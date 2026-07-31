@@ -42,43 +42,23 @@ this template will be used as the default landing page
     <div class="hero-media" role="img" aria-label="[[ $theme?landing?hero?label ]]"/>
     [% endif %]
     [% endtemplate %]
-    [% if $landing?content//tei:div[@type='intro'] %]
-    <section class="usa-section section-intro">
-        [[ landing:section($context, 'intro', $landing?content, 'uswds-landing.odd') ]]
-    </section>
-    [% endif %]
-    [% if $landing?content//tei:div[@type='publications'] %]
-    <section class="usa-section section-publications">
-        [[ landing:section($context, 'publications', $landing?content, 'uswds-landing.odd') ]]
-    </section>
-    [% endif %]
-    [% block news %]
-    [% if $landing?content//tei:div[@type='news'] %]
-    <section class="usa-section section-news">
-        [[ landing:section($context, 'news', $landing?content, 'uswds-landing.odd') ]]
-    </section>
-    [% endif %]
+    [% block landing-intro %]
+    [[ uswds:section($context, 'intro', $landing?content, 'uswds-landing.odd', 'section-intro') ]]
     [% endblock %]
-    [% if $landing?content//tei:div[@type='about'] %]
-    <section class="usa-section">
-        [[ landing:section($context, 'about', $landing?content, 'uswds-landing.odd') ]]
-    </section>
-    [% endif %]
-    [% if $landing?content//tei:div[@type='highlights'] %]
-    <section class="usa-section">
-        [[ landing:section($context, 'highlights', $landing?content, 'uswds-landing.odd') ]]
-    </section>
-    [% endif %]
-    [% if $landing?content//tei:div[@type='team'] %]
-    <section class="usa-section">
-        [[ landing:section($context, 'team', $landing?content, 'uswds-landing.odd') ]]
-    </section>
-    [% endif %]
-    [% if $landing?content//tei:div[@type='section'] %]
-    <section class="usa-section">
-        [[ landing:section($context, 'section', $landing?content, 'uswds-landing.odd') ]]
-    </section>
-    [% endif %]
+    [% block landing-publications %]
+    [[ uswds:cards($context, 'publications', $landing?content, 'uswds-landing.odd', ()) ]]
+    [% endblock %]
+    [% block landing-news %]
+    [[ uswds:cards($context, 'news', $landing?content, 'uswds-landing.odd', ()) ]]
+    [% endblock %]
+    [[ uswds:section($context, 'about', $landing?content, 'uswds-landing.odd', ()) ]] [[
+    uswds:section($context, 'highlights', $landing?content, 'uswds-landing.odd', ()) ]] [[
+    uswds:section($context, 'team', $landing?content, 'uswds-landing.odd', ()) ]] [[
+    uswds:section($context, 'section', $landing?content, 'uswds-landing.odd', ()) ]]
+    [% template footer %]
     [% include "templates/footer.html" %]
+    [% if $theme?identifier?enabled %]
     [% include "templates/identifier.html" %]
+    [% endif %]
+    [% endtemplate %]
 </template>

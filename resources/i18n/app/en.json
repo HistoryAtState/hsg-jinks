@@ -1,93 +1,122 @@
 {
-    "breadcrumb": {
-        "home": "Home",
-        "historicaldocuments": "Historical Documents",
-        "countries": "Countries",
-        "archives": "Archives",
-        "departmenthistory": "Department History",
-        "about": "About Us",
-        "collection-root": "Collections",
-        "document-root": "Collections",
-        "demo": "Demo",
-        "jats": "JATS",
-        "docx": "DOCX",
-        "letters": "Letters",
-        "doc": "Documentation"
+  "breadcrumb": {
+    "home": "Home",
+    "historicaldocuments": "Historical Documents",
+    "countries": "Countries",
+    "archives": "Archives",
+    "departmenthistory": "Department History",
+    "about": "About Us",
+    "collection-root": "Collections",
+    "document-root": "Collections",
+    "demo": "Demo",
+    "jats": "JATS",
+    "docx": "DOCX",
+    "letters": "Letters",
+    "doc": "Documentation"
+  },
+  "menu": {
+    "explore": "Explore",
+    "collections": "Collections",
+    "quickstart": "Quickstart",
+    "about": "About Us",
+    "team": "Team",
+    "contact": "Contact",
+    "project": "Project",
+    "cite": "How to cite",
+    "cookies": "Cookies",
+    "credits": "Credits",
+    "partners": "Partners",
+    "home": "Home",
+    "historicaldocuments": "Historical Documents",
+    "departmenthistory": "Department History",
+    "countries": "Guide to Countries",
+    "resources": "More Resources",
+    "hd-overview": "Overview",
+    "hd-about-frus": "About the Foreign Relations Series",
+    "hd-status": "Status of the Series",
+    "hd-history": "History of the Foreign Relations Series",
+    "hd-ebooks": "Ebooks Initiative",
+    "hd-quarterly": "Quarterly Releases",
+    "dh-overview": "Overview",
+    "dh-timeline": "Administrative Timeline",
+    "dh-secretaries": "Biographies of the Secretaries of State",
+    "dh-principals": "Principal Officers and Chiefs of Mission",
+    "dh-travels-secretary": "Travels of the Secretary of State",
+    "dh-travels-president": "Travels of the President",
+    "dh-visits": "Visits by Foreign Heads of State",
+    "dh-buildings": "Buildings of the Department of State",
+    "co-guide": "Guide to Country Recognition and Relations",
+    "co-archives": "World Wide Diplomatic Archives Index",
+    "re-tags": "Browse Resources by Subject Tag",
+    "re-conferences": "Conferences",
+    "re-developer": "Developer Resources & APIs",
+    "re-education": "Educational Resources",
+    "re-milestones": "Milestones in the History of U.S. Foreign Relations",
+    "re-open": "Open Government Initiative",
+    "re-faq": "Frequently Asked Questions",
+    "re-contact": "Contact Us"
+  },
+  "timeline": {
+    "range": "Time range: "
+  },
+  "browse": {
+    "category": "Category",
+    "author": "Author",
+    "title": "Title"
+  },
+  "download": {
+    "label": "Download",
+    "title": "Download"
+  },
+  "search": {
+    "title": "Title",
+    "content": "Content",
+    "results": "Search results"
+  },
+  "register-details": {
+    "document-list": "Documents",
+    "people": "People",
+    "places": "Places"
+  },
+  "odd": {
+    "licence": "Licence",
+    "sources": "Sources",
+    "metadata": "Metadata",
+    "previous": "Previous",
+    "next": "Next",
+    "birth": "b. ",
+    "death": "d. ",
+    "nav-previous": {
+      "before": "",
+      "after": ""
     },
-    "menu": {
-        "explore": "Explore",
-        "collections": "Collections",
-        "quickstart": "Quickstart",
-        "about": "About",
-        "team": "Team",
-        "contact": "Contact",
-        "project": "Project",
-        "cite": "How to cite",
-        "cookies": "Cookies",
-        "credits": "Credits",
-        "partners": "Partners"
-    },
-    "timeline": {
-        "range": "Time range: "
-    },
-    "browse": {
-        "category": "Category",
-        "author": "Author",
-        "title": "Title"
-    },
-    "download": {
-        "label": "Download",
-        "title": "Download"
-    },
-    "search": {
-        "title": "Title",
-        "content": "Content",
-        "results": "Search results"
-    },
-    "register-details": {
-        "document-list": "Documents",
-        "people": "People",
-        "places": "Places"
-    },
-    "odd": {
-        "licence": "Licence",
-        "sources": "Sources",
-        "metadata": "Metadata",
-        "previous": "Previous",
-        "next": "Next",
-        "birth": "b. ",
-        "death": "d. ",
-        "nav-previous": {
-            "before": "",
-            "after": ""
-        },
-        "nav-next": {
-            "before": "",
-            "after": ""
-        }
-    },
-    "facets": {
-        "place": "Place",
-        "author": "Author"
-    },
-    "toolbar": {
-        "next": "Next",
-        "previous": "Previous"
-    },
-    "historicaldocuments": {
-        "title": "Historical Documents",
-        "waysToExplore": "Ways to Explore",
-        "searchInsideVolume": "Search inside this volume",
-        "download": "Download:",
-        "browseGpoPrefix": "Browse the"
-    },
-    "countries": {
-        "title": "Countries"
-    },
-    "departmenthistory": {
-        "title": "Department History"
-    },
-    "about": {
-        "title": "About Us"
+    "nav-next": {
+      "before": "",
+      "after": ""
     }
+  },
+  "facets": {
+    "place": "Place",
+    "author": "Author"
+  },
+  "toolbar": {
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "historicaldocuments": {
+    "title": "Historical Documents",
+    "waysToExplore": "Ways to Explore",
+    "searchInsideVolume": "Search inside this volume",
+    "download": "Download:",
+    "browseGpoPrefix": "Browse the"
+  },
+  "countries": {
+    "title": "Countries"
+  },
+  "departmenthistory": {
+    "title": "Department History"
+  },
+  "about": {
+    "title": "About Us"
+  }
 }

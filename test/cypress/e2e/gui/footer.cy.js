@@ -26,13 +26,24 @@ const VOLUME = "historicaldocuments/frus1981-88v05";
 describe("footer content", () => {
     beforeEach(() => cy.visit(`${VOLUME}/ch1`));
 
-    it("has the four link columns of the design", () => {
+    it("has the three link columns of the design", () => {
         cy.get("footer.usa-footer .usa-footer__primary-link").then(($h) =>
             expect([...$h].map((el) => el.textContent.trim())).to.deep.equal([
                 "Learn more",
                 "Topics",
-                "Policies",
                 "Contact",
+            ])
+        );
+    });
+
+    it("carries the policy links in the bottom required-links row", () => {
+        cy.get("footer.usa-footer .usa-footer__required-links a").then(($a) =>
+            expect([...$a].map((el) => el.textContent.trim())).to.deep.equal([
+                "Accessibility Statement",
+                "Privacy Policy",
+                "External Link Policy",
+                "Copyright Information",
+                "Content Warning",
             ])
         );
     });
@@ -47,9 +58,10 @@ describe("footer content", () => {
             .should("have.attr", "href", "https://www.state.gov/privacy-policy/");
     });
 
-    it("reaches the office by mail", () => {
+    it("reaches the office by phone and mail", () => {
         cy.get("footer.usa-footer .usa-footer__address a").then(($a) =>
             expect([...$a].map((el) => el.getAttribute("href"))).to.deep.equal([
+                "tel:2029550200",
                 "mailto:history@state.gov",
             ])
         );
@@ -68,7 +80,7 @@ describe("footer content", () => {
         cy.get("footer.usa-footer .usa-footer__logo-img")
             .should("have.attr", "alt")
             .and("contain", "Office of the Historian");
-        cy.get("footer.usa-footer .hsg-footer__agency").should(
+        cy.get("footer.usa-footer .usa-footer__agency").should(
             "contain.text",
             "United States Department of State"
         );
