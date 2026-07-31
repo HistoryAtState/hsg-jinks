@@ -1,0 +1,42 @@
+<div class="mobile menubar hidden">
+    <nav>
+        <ul>
+            [% if $menu?search %]
+            <li>
+                <form action="[[ $context-path ]]/search">
+                    <input type="search" value="" name="q" placeholder="" data-i18n="[placeholder]search.placeholder" />
+                </form>
+            </li>
+            [% endif %]
+        </ul>
+    </nav>
+    <aside>
+        <nav>
+            [# Public primary navigation only -- context-independent so this fragment can be nginx-SSI-composed and cached under its own key. No document Download submenu, no login/language. See OP#1284. #]
+            <ul>
+                [% for $item in $menu?items?* %]
+                [% if $item?url or $item?url = '' %]
+                [% let $url = if (starts-with($item?url, 'http')) then $item?url else $context-path || '/' || $item?url %]
+                <li>
+                    <a href="[[ replace($url, 'browse\.html', $context?defaults?browse) ]]"><pb-i18n key="menu.[[ $item?id ]]">[[ $item?id ]]</pb-i18n></a>
+                </li>
+                [% endlet %]
+                [% elif exists($item?subitems) %]
+                <li>
+                    <details class="dropdown">
+                        <summary><pb-i18n key="menu.[[ $item?id ]]">[[ $item?id ]]</pb-i18n></summary>
+                        <ul>
+                            [% for $subitem in $item?subitems?* %]
+                            <li>
+                                <a href="[[ $context-path ]]/[[ $subitem?url ]]"><pb-i18n key="menu.[[ $subitem?id ]]">[[ $subitem?id ]]</pb-i18n></a>
+                            </li>
+                            [% endfor %]
+                        </ul>
+                    </details>
+                </li>
+                [% endif %]
+                [% endfor %]
+            </ul>
+        </nav>
+    </aside>
+</div>

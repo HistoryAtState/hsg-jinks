@@ -44,6 +44,8 @@ import module namespace milapi="http://teipublisher.com/api/milestones" at "../m
 
 import module namespace searchapi="https://history.state.gov/api/search" at "../search-api.xql";
 
+import module namespace menuapi="https://history.state.gov/api/menu" at "../menu-api.xql";
+
 
 
 declare option output:indent "no";
@@ -63,6 +65,7 @@ let $resp := roaster:route(
         "modules/hsg-api.json",
         "modules/milestones-api.json",
         "modules/search-api.json",
+        "modules/menu-api.json",
         "modules/lib/api.json"
     ), $lookup)
 return
