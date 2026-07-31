@@ -73,7 +73,8 @@ USWDS ships ~2600). Remove when Jinks fixes it.
 
 ### Pinned baseline
 
-Everything except `jinks` itself is pinned to a release, in
+Software dependencies (and `wwdai`/`rdcr`/`carousel`, all released via
+semantic-release) are pinned to a release, in
 `.devcontainer/docker-compose.yml` → `build.args` (the `Dockerfile.dev` `ARG`
 defaults mirror them):
 
@@ -86,17 +87,20 @@ defaults mirror them):
 | wwdai | 0.6.5 | countries-section data (OP#1095): `HistoryAtState/wwdai` GitHub Release asset |
 | rdcr | 0.8.7 | countries-section data (OP#1095): `HistoryAtState/rdcr` GitHub Release asset |
 | carousel | 0.11.10 | landing-page carousel: `HistoryAtState/carousel` GitHub Release asset |
-| gsh | 0.5.2 | departmenthistory-section data (OP#1096): `HistoryAtState/gsh` GitHub Release asset |
-| other-publications | 0.6.9 | departmenthistory-section data (OP#1096): `HistoryAtState/other-publications` GitHub Release asset |
-| pocom | 0.7.5 | departmenthistory-section data (OP#1096): `HistoryAtState/pocom` GitHub Release asset |
-| travels | 0.8.4 | departmenthistory-section data (OP#1096): `HistoryAtState/travels` GitHub Release asset |
-| visits | 0.6.4 | departmenthistory-section data (OP#1096): `HistoryAtState/visits` GitHub Release asset |
-| milestones | 0.6.6 | milestones-section data (OP#1098): `HistoryAtState/milestones` GitHub Release asset |
-| hac | 1.1.13 | about-section data (OP#1097): `HistoryAtState/hac` GitHub Release asset |
 
 After changing any of them, rebuild the container and confirm with
 `xst package list --versions` — `xst package install` has been seen reporting
 `updated to X@<new>` while the deployed collection stayed on the old version.
+
+The remaining data packages — `gsh`, `other-publications`, `pocom`,
+`travels`, `visits`, `milestones`, `hac` — are deliberately **not**
+version-pinned; `Dockerfile.dev` fetches each one's `/releases/latest/`
+asset. They're append-only content packages (see CLAUDE.md "Cypress
+assertions on data-package counts"), so the devcontainer should always
+reflect whatever's currently published rather than freeze to a version that
+goes stale the moment a new record is added upstream. Docker's layer cache
+means a plain rebuild won't refetch once cached — use `docker compose build
+--no-cache` to actually pick up newly-published releases.
 
 ## Parallel worktrees
 
@@ -282,10 +286,12 @@ the ones backing `/departmenthistory`, `/countries`, `/about`, and
 `/milestones` — each maintained in its own repo under `github.com/HistoryAtState`
 and, unlike `frus-data-jinks`, already published as a versioned `.xar` GitHub
 release. That means they don't need the frozen-baseline treatment: they're
-pinned and `curl`'d straight into `autodeploy/` in `Dockerfile.dev`, same
-pattern as `wwdai`/`rdcr`/`carousel` above (see "Pinned baseline" for the
-version table) — every fresh container build already has all 9 installed, no
-manual step required.
+`curl`'d straight into `autodeploy/` in `Dockerfile.dev` — every fresh
+container build already has all 9 installed, no manual step required. `wwdai`
+and `rdcr` are version-pinned (see "Pinned baseline"); the other 7 always
+fetch each repo's `/releases/latest/` asset instead, since they're
+append-only content that should stay current rather than freeze to a
+version.
 
 | Repo | Latest release |
 |---|---|
@@ -313,8 +319,10 @@ done
 ```
 
 That's a runtime-only change (eXist's database isn't persisted, see "Data"
-above) — update the pinned version in `Dockerfile.dev`/`docker-compose.yml`
-too if the newer release should stick around after the next rebuild.
+above) — it won't survive the next container recreation. For `wwdai`/`rdcr`,
+also bump the pinned version in `Dockerfile.dev`/`docker-compose.yml` if the
+newer release should stick around after a rebuild; the other 7 already
+refetch `/releases/latest/` on every `docker compose build --no-cache`.
 
 These packages are append-only upstream — see `CLAUDE.md` ("Cypress
 assertions on data-package counts") before writing a test that counts
