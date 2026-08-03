@@ -50,7 +50,7 @@ import module namespace eduapi="http://teipublisher.com/api/education" at "../ed
 
 import module namespace confapi="http://teipublisher.com/api/conferences" at "../conferences-api.xql";
 
-import module namespace ogapi="http://teipublisher.com/api/open" at "../open-api.xql";
+import module namespace ogapi="http://teipublisher.com/api/open" at "../opengov-api.xql";
 
 
 
@@ -70,7 +70,7 @@ let $resp := roaster:route(
         "modules/departmenthistory-api.json",
         "modules/developer-api.json",
         "modules/education-api.json",
-        "modules/open-api.json",
+        "modules/opengov-api.json",
         "modules/hsg-api.json",
         "modules/milestones-api.json",
         "modules/search-api.json",

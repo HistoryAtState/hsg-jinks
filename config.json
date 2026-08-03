@@ -85,10 +85,10 @@
     "id" : "http://teipublisher.com/api/conferences",
     "path" : "conferences-api.xql"
   }, {
-    "spec" : "open-api.json",
+    "spec" : "opengov-api.json",
     "prefix" : "ogapi",
     "id" : "http://teipublisher.com/api/open",
-    "path" : "open-api.xql"
+    "path" : "opengov-api.xql"
   } ],
   "extends" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
   "skip" : [
