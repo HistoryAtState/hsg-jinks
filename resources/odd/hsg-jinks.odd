@@ -1,4 +1,4 @@
-<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:pb="http://teipublisher.com/1.0" xml:lang="en"><teiHeader><fileDesc>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:pb="http://teipublisher.com/1.0" xmlns:xhtml="http://www.w3.org/1999/xhtml" xml:lang="en"><teiHeader><fileDesc>
             <titleStmt><title>hsg-jinks</title></titleStmt>
             <publicationStmt>
                 <publisher>e-editiones</publisher>
@@ -288,12 +288,58 @@
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/conferences/data/')" behaviour="graphic">
+                    <param name="url" value="'https://static.history.state.gov/conferences/' || @url"/>
+                    <param name="width" value="@width"/>
+                    <param name="height" value="@height"/>
+                    <param name="scale" value="@scale"/>
+                    <param name="title" value="desc"/>
+                </model>
                 <model predicate="not(matches(@url, '^(?:[a-z]+://|/)'))" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/countries/' || @url"/>
                     <param name="width" value="@width"/>
                     <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
+                </model>
+                <model behaviour="graphic">
+                    <desc>Conferences (#1099 PR review): this elementSpec's mode="change" leaves no
+                        fallback for a @url that already carries a full scheme -- every model above
+                        guards on "not an absolute URL". The conferences photo gallery's graphics are
+                        already fully-qualified (static.history.state.gov/gallery/... baked into the
+                        source data, unlike every other collection's bare filenames), so they matched
+                        no model at all and silently rendered nothing. Catch-all, unconditional,
+                        ordered last: renders @url as-is for anything the predicated models above
+                        didn't already claim.</desc>
+                    <param name="url" value="@url"/>
+                    <param name="width" value="@width"/>
+                    <param name="height" value="@height"/>
+                    <param name="scale" value="@scale"/>
+                    <param name="title" value="desc"/>
+                </model>
+            </elementSpec>
+            <elementSpec ident="xhtml:div" mode="change">
+                <desc>Conferences (#1114): 12 Brightcove video embeds are pasted verbatim into the
+                    TEI as raw xhtml-namespaced markup -- an outer div wrapping a padding-ratio div
+                    wrapping a video.video-js element plus a sibling script tag that loads
+                    players.brightcove.net's embed script and executes inline. Third-party inline
+                    scripts pasted into data are a CSP/data-hygiene liability (this app's CSP would
+                    have to special-case a third-party host to let them run at all), so this model
+                    matches only that specific shape (outer div whose grandchild is a video.video-js
+                    carrying data-account/data-player/data-video-id) and replaces the whole subtree
+                    -- video, script, and all -- with Brightcove's own iframe embed URL built from
+                    those three ids. The original script node is never rendered or executed; nothing
+                    in this ODD passes xhtml:script/xhtml:object through generically (unlike
+                    hsg-shell's frus.odd, which whitelists them app-wide -- the exact escape hatch
+                    this model exists to avoid repeating). Scoped narrowly enough that any other
+                    stray xhtml content (e.g. dead/commented-out markup elsewhere in the same
+                    documents, which page:transform never sees since XML comments aren't nodes) has
+                    no matching model and is simply omitted.</desc>
+                <model predicate="xhtml:div/xhtml:video[contains(concat(' ', @class, ' '), ' video-js ')][@data-account][@data-player][@data-video-id]" behaviour="pass-through">
+                    <param name="account" value="(.//xhtml:video/@data-account)[1]/string()"/>
+                    <param name="player" value="(.//xhtml:video/@data-player)[1]/string()"/>
+                    <param name="videoId" value="(.//xhtml:video/@data-video-id)[1]/string()"/>
+                    <pb:template xml:space="preserve"><div xmlns="" class="conf-video-embed" style="position: relative; padding-top: 56.25%;"><iframe src="https://players.brightcove.net/[[account]]/[[player]]_default/index.html?videoId=[[videoId]]" allowfullscreen="allowfullscreen" allow="encrypted-media" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe></div></pb:template>
                 </model>
             </elementSpec></schemaSpec>
         </body>

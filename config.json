@@ -84,6 +84,11 @@
     "prefix" : "eduapi",
     "id" : "http://teipublisher.com/api/education",
     "path" : "education-api.xql"
+  }, {
+    "spec" : "conferences-api.json",
+    "prefix" : "confapi",
+    "id" : "http://teipublisher.com/api/conferences",
+    "path" : "conferences-api.xql"
   } ],
   "extends" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
   "skip" : [
