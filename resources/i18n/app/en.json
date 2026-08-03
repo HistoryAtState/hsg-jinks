@@ -6,6 +6,7 @@
         "archives": "Archives",
         "departmenthistory": "Department History",
         "about": "About Us",
+        "developer": "Developer Resources",
         "collection-root": "Collections",
         "document-root": "Collections",
         "demo": "Demo",
@@ -89,5 +90,8 @@
     },
     "about": {
         "title": "About Us"
+    },
+    "developer": {
+        "title": "Developer Resources"
     }
 }

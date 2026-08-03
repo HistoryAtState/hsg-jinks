@@ -1,0 +1,75 @@
+{
+    "info": {
+        "title": "HSG Jinks Education API",
+        "version": "1.0.0"
+    },
+    "openapi": "3.0.3",
+    "paths": {
+        "/education": {
+            "get": {
+                "summary": "Education section landing page",
+                "description": "Retired 'Education Resources' section landing page: retirement notice plus an abbreviated prose list of published curriculum modules, generated from the module record collection.",
+                "operationId": "eduapi:index",
+                "x-error-handler": "eduapi:handle-error",
+                "tags": [ "education" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/education/modules": {
+            "get": {
+                "summary": "Full list of curriculum modules",
+                "description": "Data-driven listing of all published curriculum modules (title, teaser, year, availability/download), generated from the module record collection.",
+                "operationId": "eduapi:modules",
+                "x-error-handler": "eduapi:handle-error",
+                "tags": [ "education" ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        },
+        "/education/modules/{moduleId}": {
+            "get": {
+                "summary": "One curriculum module's introduction",
+                "description": "Renders a published module's TEI introduction document in full plus its availability/download line. moduleId is the module record's tei-document-name, not its own id field.",
+                "operationId": "eduapi:view-module",
+                "x-error-handler": "eduapi:handle-error",
+                "tags": [ "education" ],
+                "parameters": [
+                    {
+                        "name": "moduleId",
+                        "in": "path",
+                        "description": "Module document identifier: the module record's tei-document-name (introduction document filename without .xml)",
+                        "required": true,
+                        "schema": { "type": "string" },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    },
+                    "404": {
+                        "description": "No published module with this tei-document-name",
+                        "content": { "text/html": { "schema": { "type": "string" } } }
+                    }
+                }
+            }
+        }
+    },
+    "servers": [
+        {
+            "description": "Endpoint for testing on localhost",
+            "url": "/exist/apps/hsg-jinks"
+        }
+    ],
+    "security": []
+}

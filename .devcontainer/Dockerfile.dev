@@ -104,6 +104,25 @@ RUN curl -fL -o /usr/local/exist/autodeploy/wwdai-${WWDAI_VERSION}.xar https://g
 RUN curl -fL -o /usr/local/exist/autodeploy/rdcr-${RDCR_VERSION}.xar https://github.com/HistoryAtState/rdcr/releases/download/v${RDCR_VERSION}/rdcr.xar
 RUN curl -fL -o /usr/local/exist/autodeploy/carousel-${CAROUSEL_VERSION}.xar https://github.com/HistoryAtState/carousel/releases/download/v${CAROUSEL_VERSION}/carousel.xar
 
+# departmenthistory (OP#1096: gsh, other-publications, pocom, travels, visits),
+# milestones (OP#1098) and about's HAC documents (OP#1097, hac): unlike
+# wwdai/rdcr/carousel above these are NOT version-pinned -- they're
+# append-only content packages (see CLAUDE.md "Cypress assertions on
+# data-package counts"), so the devcontainer should always track each repo's
+# latest release rather than freeze to whatever was current when this line
+# was added. GitHub's /releases/latest/download/ redirect resolves that
+# without needing a version number or an API call. Docker layer caching means
+# a plain rebuild won't refetch once cached -- use `docker compose build
+# --no-cache` (or bump something above this line) to actually pick up a new
+# release.
+RUN curl -fL -o /usr/local/exist/autodeploy/gsh.xar https://github.com/HistoryAtState/gsh/releases/latest/download/gsh.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/milestones.xar https://github.com/HistoryAtState/milestones/releases/latest/download/milestones.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/other-publications.xar https://github.com/HistoryAtState/other-publications/releases/latest/download/other-publications.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/pocom.xar https://github.com/HistoryAtState/pocom/releases/latest/download/pocom.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/travels.xar https://github.com/HistoryAtState/travels/releases/latest/download/travels.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/visits.xar https://github.com/HistoryAtState/visits/releases/latest/download/visits.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/hac.xar https://github.com/HistoryAtState/hac/releases/latest/download/hac.xar
+
 # The jinks generator and the USWDS theme profile are both built from main:
 # we track jinks main, and profile-theme-uswds has no release at all.
 # eXist autodeploys alphabetically, so the zz-/zzz- prefixes force these to
