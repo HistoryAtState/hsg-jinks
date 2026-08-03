@@ -74,6 +74,11 @@
     "prefix" : "devapi",
     "id" : "http://teipublisher.com/api/developer",
     "path" : "developer-api.xql"
+  }, {
+    "spec" : "education-api.json",
+    "prefix" : "eduapi",
+    "id" : "http://teipublisher.com/api/education",
+    "path" : "education-api.xql"
   } ],
   "extends" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
   "skip" : [

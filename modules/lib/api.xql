@@ -47,6 +47,7 @@ import module namespace milapi="http://teipublisher.com/api/milestones" at "../m
 import module namespace searchapi="https://history.state.gov/api/search" at "../search-api.xql";
 
 import module namespace devapi="http://teipublisher.com/api/developer" at "../developer-api.xql";
+import module namespace eduapi="http://teipublisher.com/api/education" at "../education-api.xql";
 
 
 
@@ -65,6 +66,7 @@ let $resp := roaster:route(
         "modules/countries-api.json",
         "modules/departmenthistory-api.json",
         "modules/developer-api.json",
+        "modules/education-api.json",
         "modules/hsg-api.json",
         "modules/milestones-api.json",
         "modules/search-api.json",
