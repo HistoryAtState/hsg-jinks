@@ -9,7 +9,8 @@ services:
       dockerfile: Dockerfile.dev
       args:
         # Pinned baseline -- see README "Pinned baseline" before changing.
-        EXIST_VERSION: "6.4.0"
+        # EXIST_VERSION dropped (OP#1288 experiment): eXist now comes from
+        # the existdb/existdb:debug base image itself, not a pinned tarball.
         PUBLISHER_LIB_VERSION: "6.1.0"
         JINKS_TEMPLATES_VERSION: "1.4.2"
         ROUTER_VERSION: "1.12.2"
