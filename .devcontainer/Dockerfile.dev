@@ -1,4 +1,4 @@
-FROM existdb/existdb:6.4.1-DEBUG
+FROM existdb/existdb:debug
 
 ARG PUBLISHER_LIB_VERSION=6.1.0
 ARG JINKS_TEMPLATES_VERSION=1.4.2
