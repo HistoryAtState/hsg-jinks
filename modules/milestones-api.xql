@@ -20,15 +20,15 @@ declare namespace router="http://e-editiones.org/roaster/router";
  : hsgapi:view-section and every dhapi:render call.
  :)
 declare %private function milapi:render($request as map(*), $file as xs:string) {
-    vapi:html(map:merge((
-        $request,
-        map {
-            "parameters": map:merge((
-                $request?parameters,
-                map { "file": $file }
-            ))
-        }
-    )))
+    (: map:put, not an outer map:merge((`$request`, map{"parameters": ...})): both
+       operands would carry a "parameters" key, and map:merge's default
+       "use-first" duplicate policy silently keeps $request's original
+       (unmerged) "parameters" map, discarding this function's own. map:put
+       has no such ambiguity -- it always overwrites the single named key. :)
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
+        map { "file": $file }
+    ))))
 };
 
 declare function milapi:index($request as map(*)) {
@@ -54,15 +54,10 @@ declare function milapi:view($request as map(*)) {
         if (empty($doc)) then
             error($errors:NOT_FOUND, "no era " || $eraId)
         else
-            vapi:html(map:merge((
-                $request,
-                map {
-                    "parameters": map:merge((
-                        $request?parameters,
-                        map { "file": "pages/milestones/view" }
-                    ))
-                }
-            )))
+            vapi:html(map:put($request, "parameters", map:merge((
+                $request?parameters,
+                map { "file": "pages/milestones/view" }
+            ))))
 };
 
 (:~
@@ -84,15 +79,10 @@ declare function milapi:view-section($request as map(*)) {
         if (count($division) ne 1) then
             error($errors:NOT_FOUND, "no article " || $articleId || " in era " || $eraId)
         else
-            vapi:html(map:merge((
-                $request,
-                map {
-                    "parameters": map:merge((
-                        $request?parameters,
-                        map { "file": "pages/milestones/view-section" }
-                    ))
-                }
-            )))
+            vapi:html(map:put($request, "parameters", map:merge((
+                $request?parameters,
+                map { "file": "pages/milestones/view-section" }
+            ))))
 };
 
 (:~

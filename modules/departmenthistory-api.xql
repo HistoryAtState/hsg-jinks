@@ -23,15 +23,15 @@ declare namespace router="http://e-editiones.org/roaster/router";
  : countryapi:index/list/archives-index/archives-list operation.
  :)
 declare %private function dhapi:render($request as map(*), $file as xs:string) {
-    vapi:html(map:merge((
-        $request,
-        map {
-            "parameters": map:merge((
-                $request?parameters,
-                map { "file": $file }
-            ))
-        }
-    )))
+    (: map:put, not an outer map:merge((`$request`, map{"parameters": ...})): both
+       operands would carry a "parameters" key, and map:merge's default
+       "use-first" duplicate policy silently keeps $request's original
+       (unmerged) "parameters" map, discarding this function's own. map:put
+       has no such ambiguity -- it always overwrites the single named key. :)
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
+        map { "file": $file }
+    ))))
 };
 
 declare function dhapi:index($request as map(*)) {
@@ -85,18 +85,13 @@ declare function dhapi:courier-film($request as map(*)) {
 };
 
 declare %private function dhapi:monograph-toc($request as map(*), $publication as xs:string) {
-    vapi:html(map:merge((
-        $request,
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
         map {
-            "parameters": map:merge((
-                $request?parameters,
-                map {
-                    "file": "pages/departmenthistory/monograph-toc",
-                    "publication": $publication
-                }
-            ))
+            "file": "pages/departmenthistory/monograph-toc",
+            "publication": $publication
         }
-    )))
+    ))))
 };
 
 declare function dhapi:short-history($request as map(*)) {
@@ -123,19 +118,14 @@ declare %private function dhapi:monograph-section($request as map(*), $publicati
         if (count($division) ne 1) then
             error($errors:NOT_FOUND, "no section " || $sectionId || " in " || $publication)
         else
-            vapi:html(map:merge((
-                $request,
+            vapi:html(map:put($request, "parameters", map:merge((
+                $request?parameters,
                 map {
-                    "parameters": map:merge((
-                        $request?parameters,
-                        map {
-                            "file": "pages/departmenthistory/monograph-section",
-                            "publication": $publication,
-                            "sectionId": $sectionId
-                        }
-                    ))
+                    "file": "pages/departmenthistory/monograph-section",
+                    "publication": $publication,
+                    "sectionId": $sectionId
                 }
-            )))
+            ))))
 };
 
 declare function dhapi:short-history-section($request as map(*)) {
@@ -274,18 +264,13 @@ declare function dhapi:principal-officers-role($request as map(*)) {
  : uses for "publication" -- not a URL path parameter.
  :)
 declare %private function dhapi:chiefs-by-kind($request as map(*), $kind as xs:string) {
-    vapi:html(map:merge((
-        $request,
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
         map {
-            "parameters": map:merge((
-                $request?parameters,
-                map {
-                    "file": "pages/departmenthistory/chiefs-by-kind",
-                    "kind": $kind
-                }
-            ))
+            "file": "pages/departmenthistory/chiefs-by-kind",
+            "kind": $kind
         }
-    )))
+    ))))
 };
 
 declare function dhapi:chiefs-by-country($request as map(*)) {
@@ -327,18 +312,13 @@ declare function dhapi:chiefs-listing($request as map(*)) {
  : uses for "publication" -- not a URL path parameter.
  :)
 declare %private function dhapi:travels-role($request as map(*), $role as xs:string) {
-    vapi:html(map:merge((
-        $request,
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
         map {
-            "parameters": map:merge((
-                $request?parameters,
-                map {
-                    "file": "pages/departmenthistory/travels-role",
-                    "role": $role
-                }
-            ))
+            "file": "pages/departmenthistory/travels-role",
+            "role": $role
         }
-    )))
+    ))))
 };
 
 declare function dhapi:travels-president($request as map(*)) {
@@ -358,18 +338,13 @@ declare function dhapi:travels-secretary($request as map(*)) {
  : itself was duplicated.
  :)
 declare %private function dhapi:travels-listing($request as map(*), $role as xs:string) {
-    vapi:html(map:merge((
-        $request,
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
         map {
-            "parameters": map:merge((
-                $request?parameters,
-                map {
-                    "file": "pages/departmenthistory/travels-listing",
-                    "role": $role
-                }
-            ))
+            "file": "pages/departmenthistory/travels-listing",
+            "role": $role
         }
-    )))
+    ))))
 };
 
 (:~

@@ -37,18 +37,18 @@ declare function searchapi:search($request as map(*)) {
             satisfies normalize-space($request?parameters?($name)) ne ""
         let $file := if ($showResults) then "pages/search/results" else "pages/search/landing"
         return
-            vapi:html(map:merge((
-                $request,
+            (: map:put, not an outer map:merge((`$request`, map{"parameters": ...})):
+               both operands would carry a "parameters" key, and map:merge's default
+               "use-first" duplicate policy silently keeps $request's original
+               (unmerged) "parameters" map, discarding this function's own. map:put
+               has no such ambiguity -- it always overwrites the single named key. :)
+            vapi:html(map:put($request, "parameters", map:merge((
+                $request?parameters,
                 map {
-                    "parameters": map:merge((
-                        $request?parameters,
-                        map {
-                            "file": $file,
-                            "suppress-sitewide-search-field": "true"
-                        }
-                    ))
+                    "file": $file,
+                    "suppress-sitewide-search-field": "true"
                 }
-            )))
+            ))))
 };
 
 (:~
@@ -57,15 +57,10 @@ declare function searchapi:search($request as map(*)) {
  : Roaster's own unmatched-route 404, matching #1182's own note.
  :)
 declare function searchapi:tips($request as map(*)) {
-    vapi:html(map:merge((
-        $request,
-        map {
-            "parameters": map:merge((
-                $request?parameters,
-                map { "file": "pages/search/tips" }
-            ))
-        }
-    )))
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
+        map { "file": "pages/search/tips" }
+    ))))
 };
 
 (:~

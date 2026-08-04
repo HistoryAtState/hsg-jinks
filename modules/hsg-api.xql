@@ -22,15 +22,15 @@ declare namespace router="http://e-editiones.org/roaster/router";
  : steered from the query string.
  :)
 declare %private function hsgapi:render($request as map(*), $file as xs:string) {
-    vapi:html(map:merge((
-        $request,
-        map {
-            "parameters": map:merge((
-                $request?parameters,
-                map { "file": $file }
-            ))
-        }
-    )))
+    (: map:put, not an outer map:merge((`$request`, map{"parameters": ...})): both
+       operands would carry a "parameters" key, and map:merge's default
+       "use-first" duplicate policy silently keeps $request's original
+       (unmerged) "parameters" map, discarding this function's own. map:put
+       has no such ambiguity -- it always overwrites the single named key. :)
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
+        map { "file": $file }
+    ))))
 };
 
 (:~
@@ -198,29 +198,19 @@ declare function hsgapi:view($request as map(*)) {
     return
         if (exists(hsg:administration($publicationId))) then
             vapi:html(
-                map:merge((
-                    $request,
-                    map {
-                        "parameters": map:merge((
-                            $request?parameters,
-                            map { "file": "pages/historicaldocuments/administration" }
-                        ))
-                    }
-                )),
+                map:put($request, "parameters", map:merge((
+                    $request?parameters,
+                    map { "file": "pages/historicaldocuments/administration" }
+                ))),
                 map { "administration-id": $publicationId }
             )
         else
-            vapi:view(map:merge((
-                $request,
+            vapi:view(map:put($request, "parameters", map:merge((
+                $request?parameters,
                 map {
-                    "parameters": map:merge((
-                        $request?parameters,
-                        map {
-                            "docid": $config:frus-volumes || "/" || $publicationId || "/" || $publicationId || ".xml"
-                        }
-                    ))
+                    "docid": $config:frus-volumes || "/" || $publicationId || "/" || $publicationId || ".xml"
                 }
-            )))
+            ))))
 };
 
 declare function hsgapi:view-interior($request as map(*)) {
@@ -246,17 +236,12 @@ declare function hsgapi:view-interior($request as map(*)) {
             error($errors:NOT_FOUND, "division " || $divisionId || " is an attachment of "
                 || hsgapi:attachment-parent($doc) || " and has no page of its own")
         else
-            vapi:view(map:merge((
-                $request,
+            vapi:view(map:put($request, "parameters", map:merge((
+                $request?parameters,
                 map {
-                    "parameters": map:merge((
-                        $request?parameters,
-                        map {
-                            "docid": substring-after(document-uri(root($doc)), $config:data-root || '/')
-                        }
-                    ))
+                    "docid": substring-after(document-uri(root($doc)), $config:data-root || '/')
                 }
-            )))
+            ))))
 };
 
 (:~
