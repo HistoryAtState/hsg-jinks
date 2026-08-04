@@ -399,6 +399,16 @@ declare %private function dh:principal-chain-end($principal as element(principal
  :)
 declare function dh:principal-position-officeholders($context as map(*), $position as element(principal-position)) as element(ol) {
     let $principals := $position/principals/principal
+    (: Pre-fetch once rather than letting each iteration below call
+       dh:person-doc (collection(...)/person[id = ...]) fresh: eXist 7's
+       query compiler doesn't hoist that collection() out of the loop the
+       way 6.4's did, so each of the ~70+ iterations was re-scanning the
+       whole 4000+-document /people collection from scratch (~280ms each,
+       measured flat regardless of cache state -- ruled out via direct
+       testing) instead of filtering one pre-fetched sequence (~30ms each) --
+       a 10x difference, enough to push /departmenthistory/people/secretaries
+       from sub-second to a ~20s timeout. :)
+    let $people := collection($dh:POCOM_COL || "/people")/person
     return
         <ol class="usa-prose">
         {
@@ -406,7 +416,7 @@ declare function dh:principal-position-officeholders($context as map(*), $positi
             where not($p/@treatAsConsecutive = 'yes')
             let $following := subsequence($principals, $pos + 1)
             let $chain-end := dh:principal-chain-end($p, $following)
-            let $person := dh:person-doc($p/person-id)
+            let $person := $people[id = $p/person-id]
             let $start-year := substring($p/started/date, 1, 4)
             let $end-date := normalize-space($chain-end/ended/date)
             let $end-year := if ($end-date != '') then substring($end-date, 1, 4) else 'present'
