@@ -38,7 +38,7 @@ declare variable $config:register-root := $config:data-root || "/registers";
  : The default data collection.
  :)
 
-  declare variable $config:data-default as xs:string :=   $config:data-root || "/Publications";
+  declare variable $config:data-default as xs:string :=   $config:data-root || "/frus-v2-data";
 
 
 (:~

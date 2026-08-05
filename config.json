@@ -22,7 +22,7 @@
   },
   "defaults" : {
     "data" : "/db/apps/frus-data-jinks/data",
-    "data-default" : "Publications",
+    "data-default" : "frus-v2-data",
     "odd" : "hsg-jinks.odd",
     "template" : "volume-landing.html"
   },
@@ -38,7 +38,7 @@
     "language" : false
   },
   "$schema" : "../jinks/schema/jinks.json",
-  "styles" : [ "resources/css/hsg-theme.css" ],
+  "styles" : [ "resources/css/hsg-theme.css", "resources/css/frus-renditions.css" ],
   "api" : [ {
     "spec" : "hsg-api.json",
     "prefix" : "hsgapi",

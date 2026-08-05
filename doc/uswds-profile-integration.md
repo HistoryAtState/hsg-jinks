@@ -337,9 +337,11 @@ package deploying to `/db/apps/frus-data-jinks`.
 It is a slimmed data-model sample, not production data: the most recent commit
 ("remove-old-samples") trimmed it to a single FRUS publication —
 `frus1981-88v05` ("Foreign Relations of the United States, 1981–1988, Volume V,
-Soviet Union, March 1985–October 1986"), 361 TEI XML docs — plus a `Resources`
-apparatus (`frus.odd`, `frus.rnc`, encoding desc, placeholders, Author authority
-project).
+Soviet Union, March 1985–October 1986"), 361 TEI XML docs — plus a
+`frus-tei-guidelines-resources` apparatus (`frus.odd`, `frus.rnc`, encoding
+desc, placeholders, Author authority project). (Volumes now live under
+`data/frus-v2-data/`; both collections were renamed from the earlier
+`Publications` / `Resources` when the full legacy corpus landed.)
 
 The devcontainer does **not** install data automatically (it only deploys the
 app + jinks + theme profile). Load it manually:

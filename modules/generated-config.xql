@@ -25,7 +25,7 @@ declare variable $config:sort-default := "category";
 
 
     
-    declare variable $config:data-default := $config:data-root || "/Publications";
+    declare variable $config:data-default := $config:data-root || "/frus-v2-data";
     
 
 
