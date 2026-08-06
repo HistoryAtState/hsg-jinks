@@ -285,8 +285,19 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin: var(--s-1) 0;
 }
 
+/* On wider screens the cover floats left and the editor/publisher metadata
+   flows to its right, reference parity with hsg-shell (_frus.scss: cover
+   float:left, following block to the right, TOC clears). */
+@media (min-width: 30em) {
+    .hsg-frus__cover {
+        float: left;
+        margin: var(--s-1) 2rem var(--s-1) 0;
+    }
+}
+
 .hsg-frus__meta {
     margin-bottom: var(--s-1);
+    overflow: hidden;
 }
 
 .hsg-frus__editor-label {
@@ -311,11 +322,126 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 /* The divider itself: a top border on the TOC that follows the cover/editor
    block, same treatment as .usa-prose .footnotes above. */
 .hsg-frus__toc {
+    clear: both;
     margin-top: var(--s-1);
     padding-top: var(--s-1);
     border-top: 1px solid var(--jinks-color-border);
     list-style: none;
     padding-left: 0;
+}
+
+/* Unpublished (pending) divisions in the table of contents render muted and
+   italic, in a non-link colour -- reference parity with hsg-shell's li.pending.
+   Applied to both the landing-page TOC and the left sidebar (usa-sidenav). */
+.hsg-frus__toc li.pending > a,
+.usa-sidenav__item.pending > a {
+    color: #565c65;
+    font-style: italic;
+}
+
+.hsg-frus__toc li.pending > a:hover,
+.usa-sidenav__item.pending > a:hover {
+    color: #1a4480;
+}
+
+/* Persons / terms front-matter lists: no bullets, hanging indent per entry
+   (class list-person), reference parity with hsg-shell. */
+.list-person {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+.list-person li {
+    list-style: none;
+    padding-left: 1.5em;
+    text-indent: -1.5em;
+}
+
+.list-person .list-person {
+    margin-left: 0;
+}
+
+/* Chapter listing page (#PR-review): each document as a titled entry with its
+   dateline, summary and source note, reference parity with hsg-shell's
+   toc:document-list -- replacing the old bulleted list of bare title links. */
+.hsg-frus__doclist {
+    margin-top: var(--s0);
+}
+
+.hsg-frus__doc-entry {
+    padding: var(--s-1) 0;
+    border-top: 1px solid var(--jinks-color-border);
+}
+
+.hsg-frus__doc-title {
+    margin: 0 0 var(--s-2);
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.hsg-frus__doc-entry .dateline {
+    color: #565c65;
+    font-style: italic;
+    margin: 0 0 var(--s-2);
+}
+
+.hsg-frus__doc-entry .summary {
+    margin: 0 0 var(--s-2);
+}
+
+.hsg-frus__doc-entry .sourcenote {
+    color: #565c65;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.hsg-frus__doc-entry.pending .hsg-frus__doc-title {
+    color: #565c65;
+    font-style: italic;
+    font-weight: 400;
+}
+
+/* Previous / next pager on chapter and document pages. */
+.hsg-frus__pager {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--s-1);
+    margin: var(--s0) 0;
+}
+
+.hsg-frus__pager-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4em;
+    max-width: 46%;
+    text-decoration: none;
+}
+
+.hsg-frus__pager-link:hover .hsg-frus__pager-label {
+    text-decoration: underline;
+}
+
+.hsg-frus__pager-next {
+    margin-left: auto;
+    text-align: right;
+}
+
+.hsg-frus__pager-empty {
+    visibility: hidden;
+}
+
+.hsg-frus__pager-arrow {
+    font-weight: 700;
+}
+
+.hsg-frus__pager-label {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .hsg-frus__toc ul {

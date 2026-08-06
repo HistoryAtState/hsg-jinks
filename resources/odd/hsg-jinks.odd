@@ -97,37 +97,24 @@
   [[content]]
 </div></pb:template>
         </model><model predicate="$parameters?mode='document-view' and exists(.//standOff//note)" behaviour="block">
-            <desc>A document with footnotes (333 of 341). The heading's marker points at the source note, which has no in-body anchor - it belongs to the heading. Its label comes from the note's @n and must not be hardcoded to 1: attachment notes continue their parent's numbering. Footnotes are consolidated from this document and any inlined attachments, ordered by @n.</desc>
+            <desc>A document with footnotes (333 of 341). Reference parity with hsg-shell: render the body div only -- its own head (which already carries the number, e.g. "72. Telegram...", and the source-note marker as an in-body anchor) and its opener (print page number and dateline). The teiHeader title/dateline are metadata for page chrome (breadcrumb, title), not rendered inline, so head, place and date each appear once. Footnotes are consolidated from this document and any inlined attachments, ordered by @n.</desc>
             <param name="overline" value="let $volid := root(.)//bibl[@type='frus-volume-id']/string() let $volcol := substring-before(document-uri(root(.)), '/' || $volid || '/') || '/' || $volid let $inc := doc($volcol || '/' || $volid || '.xml')//teiHeader/fileDesc/xi:include[@xpointer='seriesStmt'] return id('seriesStmt', doc(util:collection-name($inc) || '/' || $inc/@href))/title[@type='complete']"/>
-            <param name="number" value=".//bibl[@type='frus-document-number']"/>
-            <param name="head" value=".//fileDesc//titleStmt/title"/>
-            <param name="srcId" value="substring-after((.//standOff//note[@type='source'])[1]/@corresp, '#')"/>
-            <param name="srcRef" value="substring-after((.//standOff//note[@type='source'])[1]/@corresp, '#') || 'ref'"/>
-            <param name="srcLabel" value="(.//standOff//note[@type='source'])[1]/@n/string()"/>
-            <param name="dateline" value=".//profileDesc//setting"/>
             <param name="content" value="text/body"/>
             <param name="attachments" value="text/back/xi:include"/>
             <param name="footnotes" value="let $att := (text/body//xi:include ! (id(@xpointer, doc(util:collection-name(.) || '/' || @href))/root()//standOff//note)) return (for $note in (.//standOff//note, $att) order by number($note/@n) return $note)"/>
             <pb:template xml:space="preserve"><div xmlns="">
   <p class="overline">[[overline]]</p>
-  <h1>[[number]]. [[head]]<sup class="footnote-ref"><a id="[[srcRef]]" href="#[[srcId]]">[[srcLabel]]</a></sup></h1>
-  [[dateline]]
   [[content]]
   [[attachments]]
   <hr class="footnotes-divider"/>
   <ol class="footnotes">[[footnotes]]</ol>
 </div></pb:template>
         </model><model predicate="$parameters?mode='document-view'" behaviour="block">
-            <desc>A document without footnotes (8 of 341: 7 editorial notes and 1 historical document). No source note exists, so the heading carries no marker and no ruler or footnote list is emitted. None of these documents have attachments.</desc>
+            <desc>A document without footnotes (8 of 341: 7 editorial notes and 1 historical document). Same body-only rendering as above; no source note exists, so no ruler or footnote list is emitted.</desc>
             <param name="overline" value="let $volid := root(.)//bibl[@type='frus-volume-id']/string() let $volcol := substring-before(document-uri(root(.)), '/' || $volid || '/') || '/' || $volid let $inc := doc($volcol || '/' || $volid || '.xml')//teiHeader/fileDesc/xi:include[@xpointer='seriesStmt'] return id('seriesStmt', doc(util:collection-name($inc) || '/' || $inc/@href))/title[@type='complete']"/>
-            <param name="number" value=".//bibl[@type='frus-document-number']"/>
-            <param name="head" value=".//fileDesc//titleStmt/title"/>
-            <param name="dateline" value=".//profileDesc//setting"/>
             <param name="content" value="text/body"/>
             <pb:template xml:space="preserve"><div xmlns="">
   <p class="overline">[[overline]]</p>
-  <h1>[[number]]. [[head]]</h1>
-  [[dateline]]
   [[content]]
 </div></pb:template>
         </model><model predicate="$parameters?mode='division'" behaviour="pass-through">
@@ -216,6 +203,8 @@
                 relying on source data that was never encoded with it.</desc>
             <param name="place" value="'foot'"/>
             <param name="label" value="@n"/>
+        </model><model predicate="@rend='inline'" behaviour="paragraph">
+            <desc>An inline prose note that is not a footnote (e.g. the prefatory "[This list of persons ...]" note on the persons and terms front-matter pages). Render as a plain paragraph with no footnote marker or number, reference parity with hsg-shell's frus.odd note[@rend='inline']. Without this it fell through to the note behaviour below and was numbered "1" as a footnote.</desc>
         </model><model behaviour="note">
             <param name="place" value="@place"/>
             <param name="label" value="@n"/>
@@ -340,6 +329,12 @@
                     <param name="player" value="(.//xhtml:video/@data-player)[1]/string()"/>
                     <param name="videoId" value="(.//xhtml:video/@data-video-id)[1]/string()"/>
                     <pb:template xml:space="preserve"><div xmlns="" class="conf-video-embed" style="position: relative; padding-top: 56.25%;"><iframe src="https://players.brightcove.net/[[account]]/[[player]]_default/index.html?videoId=[[videoId]]" allowfullscreen="allowfullscreen" allow="encrypted-media" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe></div></pb:template>
+                </model>
+            </elementSpec>
+            <elementSpec ident="list" mode="change">
+                <desc>The persons and terms front-matter lists render without bullets and with a hanging indent (class list-person), reference parity with hsg-shell (app/scss/_tei.scss .list-person). The base teipublisher.odd list model shows default disc bullets; scope by the enclosing division id so only these front-matter lists are affected, and cover the nested sublists too (ancestor-or-self).</desc>
+                <model predicate="ancestor-or-self::div[@xml:id = ('persons', 'terms')]" behaviour="list" cssClass="list-person" useSourceRendition="true">
+                    <param name="content" value="item"/>
                 </model>
             </elementSpec></schemaSpec>
         </body>

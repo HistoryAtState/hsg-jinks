@@ -87,9 +87,19 @@ declare function hsg:volume-toc($context as map(*)) {
  :)
 declare %private function hsg:toc-divisions($publication as xs:string) as map(*) {
     map:merge(
+        (: Keep only listable divisions: those carrying a frus-division-type that
+           is neither 'document' nor 'document-pending'. Excluding only
+           'document' let a pending chapter's 71 document-pending includes leak
+           into the table of contents as "Document 1..71" child entries. The
+           empty-string guard also drops the volume root (and anything else with
+           no frus-division-type), which carries no frus-division-id either and
+           would give map:entry below an empty key -- exactly what the original
+           '!= "document"' comparison excluded implicitly. :)
         for $division in collection($config:data-default || "/" || $publication)/tei:TEI
-            [tei:teiHeader//tei:bibl[@type='frus-division-type'] != 'document']
-        where normalize-space(($division//tei:bibl[@type='frus-division-subtype'])[1]) != 'table-of-contents'
+        let $division-type := normalize-space(($division/tei:teiHeader//tei:bibl[@type='frus-division-type'])[1])
+        where $division-type != ''
+            and not(starts-with($division-type, 'document'))
+            and normalize-space(($division//tei:bibl[@type='frus-division-subtype'])[1]) != 'table-of-contents'
         return
             map:entry(($division//tei:bibl[@type='frus-division-id'])[1]/string(), $division)
     )
@@ -124,9 +134,13 @@ declare %private function hsg:toc-entries($division as element(tei:TEI)?, $divis
     let $is-current :=
         $id = $current or
         ($current-is-document and exists($included//tei:text//xi:include[@xpointer = $current]))
+    (: An unpublished division ('chapter-pending', 'section-pending', ...) is
+       shown muted (italic, non-link colour), reference parity with hsg-shell's
+       li.pending -- here on the sidebar too, not only the landing TOC. :)
+    let $is-pending := ends-with(normalize-space(($included//tei:bibl[@type='frus-division-type'])[1]), '-pending')
     let $children := hsg:toc-entries($included, $divisions, $publication, $current, $current-is-document, $context)
     return
-        <li class="usa-sidenav__item">
+        <li class="usa-sidenav__item{if ($is-pending) then ' pending' else ''}">
             {
                 element a {
                     attribute href {
@@ -365,9 +379,12 @@ declare %private function hsg:landing-toc-entries($division as element(tei:TEI)?
         ) else
             normalize-space($title-parts)
     let $range-label := hsg:document-range-label(hsg:document-range($included))
+    (: Unpublished division: muted, reference parity with hsg-shell's
+       li.pending. See hsg:toc-entries. :)
+    let $is-pending := ends-with(normalize-space(($included//tei:bibl[@type='frus-division-type'])[1]), '-pending')
     let $children := hsg:landing-toc-entries($included, $divisions, $publication, $context)
     return
-        <li>
+        <li class="{if ($is-pending) then 'pending' else ''}">
             <a href="{$context?context-path}/historicaldocuments/{$publication}/{$id}">{$title}</a>
             {$range-label}
             {if (exists($children)) then <ul>{$children}</ul> else ()}
@@ -491,4 +508,169 @@ declare %private function hsg:bytes-to-readable($bytes as xs:integer?) as xs:str
     else if ($bytes gt 1000000) then (round($bytes div 10000) div 100) || 'mb'
     else if ($bytes gt 1000) then round($bytes div 1000) || 'kb'
     else $bytes || ' bytes'
+};
+
+(:~
+ : A chapter or compilation listing page: the division title, previous/next
+ : navigation, and each child as an entry -- documents with their number,
+ : title, dateline, source note and (when present) a summary; child divisions
+ : (a compilation's chapters) as a titled link with a document range. Replaces
+ : the ODD's bare bulleted list of titles, reference parity with hsg-shell's
+ : toc:document-list. Rendered by templates/pages/volume/interior.html for a
+ : chapter or compilation instead of the volume-interior ODD transform.
+ :)
+declare function hsg:division-listing($context as map(*)) {
+    let $doc := $context?doc?content
+    return
+    if (not(exists($doc))) then ()
+    else
+        let $publication := ($doc//tei:bibl[@type='frus-volume-id'])[1]/string()
+        let $title := normalize-space(string-join($doc//tei:teiHeader//tei:titleStmt/tei:title, ' '))
+        return
+            <div class="hsg-frus__division">
+                <h1>{$title}</h1>
+                {hsg:prev-next($context)}
+                <div class="hsg-frus__doclist">
+                    {
+                        (: Walk the parent's xi:include order -- that is document
+                           order -- opening each target file once (as
+                           hsg:toc-divisions notes, a chapter has ~18-70 of
+                           these, an acceptable cost for a listing page). :)
+                        for $inc in $doc//tei:text//xi:include
+                        let $target := doc(util:collection-name($inc) || '/' || $inc/@href)/tei:TEI
+                        where exists($target)
+                        let $type := normalize-space(($target//tei:bibl[@type='frus-division-type'])[1])
+                        return
+                            if (starts-with($type, 'document')) then
+                                hsg:doclist-document($target, $publication, $type, $context)
+                            else
+                                hsg:doclist-division($target, $publication, $type, $context)
+                    }
+                </div>
+            </div>
+};
+
+(:~ One document entry in a chapter listing: number-prefixed title link,
+ : dateline, summary and source note. An unpublished ('document-pending')
+ : document is shown muted and unlinked -- it has no page of its own yet. :)
+declare %private function hsg:doclist-document($target as element(tei:TEI), $publication as xs:string,
+        $type as xs:string, $context as map(*)) {
+    let $number := normalize-space(($target//tei:bibl[@type='frus-document-number'])[1])
+    let $id := normalize-space(($target//tei:bibl[@type='frus-division-id'])[1])
+    let $head := normalize-space(($target//tei:text/tei:body//tei:head)[1])
+    (: The head already begins with the number ("72. Telegram..."); fall back
+       to a synthesised label only for a pending document with no real head. :)
+    let $title := if ($head != '') then $head else ('Document ' || $number)
+    let $dateline := normalize-space(($target//tei:text/tei:body//tei:opener/tei:dateline)[1])
+    let $summary := normalize-space(($target//tei:standOff//tei:note[@type='summary'])[1])
+    let $source := normalize-space(($target//tei:standOff//tei:note[@type='source'])[1])
+    let $pending := ends-with($type, '-pending')
+    return
+        <div class="hsg-frus__doc-entry{if ($pending) then ' pending' else ''}">
+            <h4 class="hsg-frus__doc-title">
+                {
+                    if ($pending or $id = '') then
+                        <span>{$title}</span>
+                    else
+                        <a href="{$context?context-path}/historicaldocuments/{$publication}/{$id}">{$title}</a>
+                }
+            </h4>
+            {if ($dateline != '') then <p class="dateline">{$dateline}</p> else ()}
+            {if ($summary != '') then <p class="summary">{$summary}</p> else ()}
+            {if ($source != '') then <p class="sourcenote">{$source}</p> else ()}
+        </div>
+};
+
+(:~ A child division (e.g. a compilation's chapters): a titled link with its
+ : document range, muted when unpublished. :)
+declare %private function hsg:doclist-division($target as element(tei:TEI), $publication as xs:string,
+        $type as xs:string, $context as map(*)) {
+    let $id := normalize-space(($target//tei:bibl[@type='frus-division-id'])[1])
+    let $title := normalize-space(string-join($target//tei:teiHeader//tei:titleStmt/tei:title, ' '))
+    let $range := hsg:document-range-label(hsg:document-range($target))
+    let $pending := ends-with($type, '-pending')
+    return
+        <div class="hsg-frus__doc-entry hsg-frus__division-entry{if ($pending) then ' pending' else ''}">
+            <h4 class="hsg-frus__doc-title">
+                <a href="{$context?context-path}/historicaldocuments/{$publication}/{$id}">{$title}</a>
+                {$range}
+            </h4>
+        </div>
+};
+
+(:~
+ : Previous / next navigation for a division page, built from the document's own
+ : relatedItem prev/next targets (relative file paths in notesStmt). Reference
+ : parity with hsg-shell's reading order, which descends into and ascends out of
+ : the volume tree (a chapter's "next" is its first document; a document's
+ : "next" is the following document, or the next chapter at a boundary).
+ :)
+declare function hsg:prev-next($context as map(*)) {
+    let $doc := $context?doc?content
+    return
+    if (not(exists($doc))) then ()
+    else
+        let $base := util:collection-name(root($doc))
+        let $prev := hsg:nav-target($base, ($doc//tei:notesStmt/tei:relatedItem[@type='prev']/@target)[1])
+        let $next := hsg:nav-target($base, ($doc//tei:notesStmt/tei:relatedItem[@type='next']/@target)[1])
+        return
+            if (empty($prev) and empty($next)) then ()
+            else
+                <nav class="hsg-frus__pager" aria-label="Document navigation">
+                    {
+                        if (exists($prev)) then
+                            <a class="hsg-frus__pager-link hsg-frus__pager-prev" rel="prev"
+                                href="{$context?context-path}/historicaldocuments/{$prev?publication}/{$prev?id}">
+                                <span class="hsg-frus__pager-arrow" aria-hidden="true">&#8592;</span>
+                                <span class="hsg-frus__pager-label">{$prev?label}</span>
+                            </a>
+                        else <span class="hsg-frus__pager-link hsg-frus__pager-empty"/>
+                    }
+                    {
+                        if (exists($next)) then
+                            <a class="hsg-frus__pager-link hsg-frus__pager-next" rel="next"
+                                href="{$context?context-path}/historicaldocuments/{$next?publication}/{$next?id}">
+                                <span class="hsg-frus__pager-label">{$next?label}</span>
+                                <span class="hsg-frus__pager-arrow" aria-hidden="true">&#8594;</span>
+                            </a>
+                        else <span class="hsg-frus__pager-link hsg-frus__pager-empty"/>
+                    }
+                </nav>
+};
+
+(:~ Resolve one relatedItem target (a file path relative to the current
+ : division's own file) to the linked division's id, publication and a short
+ : label. :)
+declare %private function hsg:nav-target($base as xs:string, $rel as xs:string?) as map(*)? {
+    if (empty($rel) or normalize-space($rel) = '') then ()
+    else
+        let $path := hsg:resolve-relative($base, $rel)
+        let $target := doc($path)/tei:TEI
+        return
+            if (not(exists($target))) then ()
+            else
+                let $id := normalize-space(($target//tei:bibl[@type='frus-division-id'])[1])
+                let $type := normalize-space(($target//tei:bibl[@type='frus-division-type'])[1])
+                let $publication := normalize-space(($target//tei:bibl[@type='frus-volume-id'])[1])
+                let $label :=
+                    if (starts-with($type, 'document')) then
+                        'Document ' || normalize-space(($target//tei:bibl[@type='frus-document-number'])[1])
+                    else
+                        normalize-space(string-join($target//tei:teiHeader//tei:titleStmt/tei:title, ' '))
+                return
+                    if ($id = '' or $publication = '') then ()
+                    else map { "id": $id, "publication": $publication, "label": $label }
+};
+
+(:~ Resolve a "../a/b.xml"-style relative path against a base collection path,
+ : returning the absolute database path. Used to follow relatedItem targets. :)
+declare %private function hsg:resolve-relative($base as xs:string, $rel as xs:string) as xs:string {
+    let $baseParts := tokenize($base, '/')[. != '']
+    let $relParts := tokenize($rel, '/')[. != '']
+    let $combined :=
+        fold-left($relParts, $baseParts, function($acc, $part) {
+            if ($part = '..') then $acc[position() != last()]
+            else ($acc, $part)
+        })
+    return '/' || string-join($combined, '/')
 };
