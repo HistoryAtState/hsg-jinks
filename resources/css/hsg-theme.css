@@ -344,6 +344,20 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: #1a4480;
 }
 
+/* Sidebar TOC: indent nested chapters under their compilation, and show the
+   document-count range in a muted colour, reference parity with hsg-shell. */
+.toc .usa-sidenav__sublist {
+    margin-left: 0;
+    padding-left: 1em;
+    border-left: 1px solid var(--jinks-color-border);
+}
+
+.toc-range {
+    color: #565c65;
+    font-size: 0.85em;
+    margin-left: 0.35em;
+}
+
 /* Persons / terms front-matter lists: no bullets, hanging indent per entry
    (class list-person), reference parity with hsg-shell. */
 .list-person {
@@ -442,6 +456,66 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.hsg-frus__contents {
+    font-size: 1.15rem;
+    margin: var(--s0) 0 var(--s-2);
+}
+
+/* Opener: the print page number (#float-left) and the dateline (#float-right)
+   share one line; clear the floats so the document body starts below them. */
+.tei-opener::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* FRUS document lists, reference parity with hsg-shell. Head-introduced lists
+   (Ref:, SUBJECT) get a bold heading with no-bullet indented items; label/item
+   lists (numbered "1." / lettered "(A)") render as a definition list with the
+   label inline, on the same line as the item text. */
+.frus-list-head {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0.6em 0 0.15em;
+}
+
+.frus-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 0.6em;
+}
+
+.frus-list-head + .frus-list li {
+    margin-left: 2em;
+}
+
+.frus-labeled-list {
+    margin: 0.6em 0;
+}
+
+.frus-labeled-list dt {
+    float: left;
+    clear: left;
+    font-weight: 400;
+}
+
+.frus-labeled-list dd {
+    margin-left: 2.5em;
+    margin-bottom: 0.4em;
+}
+
+/* A description pair ("SUBJECT" + value): term bold, on its own line, value
+   indented beneath -- not inline. */
+.frus-description-list dt {
+    float: none;
+    font-weight: 700;
+}
+
+.frus-description-list dd {
+    margin-left: 2em;
+    margin-bottom: 0.3em;
 }
 
 .hsg-frus__toc ul {

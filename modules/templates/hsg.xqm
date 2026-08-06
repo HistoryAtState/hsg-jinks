@@ -138,6 +138,9 @@ declare %private function hsg:toc-entries($division as element(tei:TEI)?, $divis
        shown muted (italic, non-link colour), reference parity with hsg-shell's
        li.pending -- here on the sidebar too, not only the landing TOC. :)
     let $is-pending := ends-with(normalize-space(($included//tei:bibl[@type='frus-division-type'])[1]), '-pending')
+    (: Document range "(Documents N-M)", reference parity with hsg-shell's
+       sidebar, shown after divisions that contain documents. :)
+    let $range-label := hsg:document-range-label(hsg:document-range($included))
     let $children := hsg:toc-entries($included, $divisions, $publication, $current, $current-is-document, $context)
     return
         <li class="usa-sidenav__item{if ($is-pending) then ' pending' else ''}">
@@ -153,6 +156,7 @@ declare %private function hsg:toc-entries($division as element(tei:TEI)?, $divis
                     $title
                 }
             }
+            {if (exists($range-label)) then <span class="toc-range">{$range-label}</span> else ()}
             {
                 if (exists($children)) then
                     <ul class="usa-sidenav__sublist">{$children}</ul>
@@ -415,8 +419,16 @@ declare %private function hsg:leading-document-number($include as element(xi:inc
     let $root := root(id($include/@xpointer, doc(util:collection-name($include) || '/' || $include/@href)))
     let $type := ($root//tei:bibl[@type = 'frus-division-type'])[1]/string()
     return
-        if ($type = 'document') then
-            ($root//tei:bibl[@type = 'frus-document-number'])[1]/string()
+        (: Documents, published ('document') or not ('document-pending'). An
+           unpublished document carries no frus-document-number, so fall back to
+           the number encoded in its division id ("d148" -> "148"). This is what
+           lets a pending chapter (France) still show "(Documents 148-214)",
+           reference parity with hsg-shell. :)
+        if (starts-with($type, 'document')) then
+            let $num := normalize-space(($root//tei:bibl[@type = 'frus-document-number'])[1])
+            return
+                if ($num != '') then $num
+                else tokenize(replace(normalize-space(($root//tei:bibl[@type = 'frus-division-id'])[1]), '^d', ''), '-')[1]
         else
             let $inner := $root//tei:text//xi:include
             return
@@ -526,10 +538,14 @@ declare function hsg:division-listing($context as map(*)) {
     else
         let $publication := ($doc//tei:bibl[@type='frus-volume-id'])[1]/string()
         let $title := normalize-space(string-join($doc//tei:teiHeader//tei:titleStmt/tei:title, ' '))
+        let $type := normalize-space(($doc//tei:bibl[@type='frus-division-type'])[1])
         return
             <div class="hsg-frus__division">
                 <h1>{$title}</h1>
                 {hsg:prev-next($context)}
+                {(: A compilation lists its chapters under a "Contents" heading,
+                    reference parity with hsg-shell's document-list. :)
+                 if ($type = 'compilation') then <h2 class="hsg-frus__contents">Contents</h2> else ()}
                 <div class="hsg-frus__doclist">
                     {
                         (: Walk the parent's xi:include order -- that is document
@@ -611,8 +627,21 @@ declare function hsg:prev-next($context as map(*)) {
     if (not(exists($doc))) then ()
     else
         let $base := util:collection-name(root($doc))
-        let $prev := hsg:nav-target($base, ($doc//tei:notesStmt/tei:relatedItem[@type='prev']/@target)[1])
-        let $next := hsg:nav-target($base, ($doc//tei:notesStmt/tei:relatedItem[@type='next']/@target)[1])
+        let $type := normalize-space(($doc//tei:bibl[@type='frus-division-type'])[1])
+        let $notesStmt := $doc//tei:notesStmt
+        (: A chapter's "previous" is its parent compilation -- one level up, e.g.
+           back to "Western Europe" -- not the previous chapter's last document
+           (which for a pending chapter would be an unnumbered "Document"). Its
+           "next" is its first document. Reference parity with hsg-shell, where
+           both Canada and FRG point back to the compilation. Documents keep the
+           encoded prev/next reading order. :)
+        let $prevTarget :=
+            if (starts-with($type, 'chapter')) then
+                ($notesStmt/tei:relatedItem[@type='parent']/@target)[1]
+            else
+                ($notesStmt/tei:relatedItem[@type='prev']/@target)[1]
+        let $prev := hsg:nav-target($base, $prevTarget)
+        let $next := hsg:nav-target($base, ($notesStmt/tei:relatedItem[@type='next']/@target)[1])
         return
             if (empty($prev) and empty($next)) then ()
             else

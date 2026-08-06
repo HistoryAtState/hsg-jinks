@@ -12,7 +12,6 @@
     [% if $doc?content//tei:bibl[@type='frus-division-type'] = ('chapter', 'chapter-pending', 'compilation') %]
         [[ hsg:division-listing($context) ]]
     [% elif starts-with(normalize-space(($doc?content//tei:bibl[@type='frus-division-type'])[1]), 'document') %]
-        [[ hsg:prev-next($context) ]]
         [[ page:transform($doc?content, map { "mode": "document-view" }) ]]
         [[ hsg:prev-next($context) ]]
     [% else %]

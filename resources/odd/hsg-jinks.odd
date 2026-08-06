@@ -331,10 +331,36 @@
                     <pb:template xml:space="preserve"><div xmlns="" class="conf-video-embed" style="position: relative; padding-top: 56.25%;"><iframe src="https://players.brightcove.net/[[account]]/[[player]]_default/index.html?videoId=[[videoId]]" allowfullscreen="allowfullscreen" allow="encrypted-media" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe></div></pb:template>
                 </model>
             </elementSpec>
+            <elementSpec ident="dateline" mode="change">
+                <desc>A FRUS opener dateline carries rendition="#float-right" so it sits on the same line as the print page number (a #float-left seg, e.g. "434."). The base teipublisher.odd model is a plain block that drops the source rendition, so the dateline stacked below the page number instead of floating opposite it; keep the source rendition here.</desc>
+                <model behaviour="block" useSourceRendition="true"/>
+            </elementSpec>
             <elementSpec ident="list" mode="change">
-                <desc>The persons and terms front-matter lists render without bullets and with a hanging indent (class list-person), reference parity with hsg-shell (app/scss/_tei.scss .list-person). The base teipublisher.odd list model shows default disc bullets; scope by the enclosing division id so only these front-matter lists are affected, and cover the nested sublists too (ancestor-or-self).</desc>
+                <desc>FRUS document lists, reference parity with hsg-shell's frus.odd list model. The base teipublisher.odd model renders every list with disc bullets and, worse, passes child::node() so a label is emitted twice -- once as raw text and once as the definition-list term (the "SUBJECT SUBJECT" / "1. 1." duplication). Each model below passes only the items, so pmf:list pairs each item with its preceding label into a dt/dd with no duplication:
+                    - persons/terms front-matter name lists: no bullets, hanging indent (list-person).
+                    - a list opened by a head (e.g. "Ref:"): the head as a bold heading, items as a no-bullet indented list.
+                    - a description list (label + item, e.g. "SUBJECT"): a definition list whose term is bold and sits above its indented value.
+                    - a label/item list (the numbered paragraphs "1.", "2." and lettered "(A)"..): a definition list whose label sits inline, on the same line as the item text, with no bullets and no auto-numbering.</desc>
                 <model predicate="ancestor-or-self::div[@xml:id = ('persons', 'terms')]" behaviour="list" cssClass="list-person" useSourceRendition="true">
                     <param name="content" value="item"/>
+                </model>
+                <modelSequence predicate="tei:head">
+                    <model behaviour="heading" cssClass="frus-list-head">
+                        <param name="content" value="tei:head/node()"/>
+                        <param name="level" value="4"/>
+                    </model>
+                    <model behaviour="list" cssClass="frus-list">
+                        <param name="content" value="tei:item"/>
+                    </model>
+                </modelSequence>
+                <model predicate="@type = 'description' and tei:label" behaviour="list" cssClass="frus-labeled-list frus-description-list">
+                    <param name="content" value="tei:item"/>
+                </model>
+                <model predicate="tei:label" behaviour="list" cssClass="frus-labeled-list">
+                    <param name="content" value="tei:item"/>
+                </model>
+                <model behaviour="list" useSourceRendition="true">
+                    <param name="content" value="child::node()"/>
                 </model>
             </elementSpec></schemaSpec>
         </body>
