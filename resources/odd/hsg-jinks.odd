@@ -381,6 +381,64 @@
                     <param name="content" value="child::node()"/>
                 </model>
             </elementSpec>
+            <elementSpec ident="ref" mode="change">
+                <desc>FRUS cross-reference resolution (PR #32 review: "BL-5 / BL-15 anchors do
+                    not resolve"). Reference parity with hsg-shell's pmf:ref (ext-html.xql). The
+                    corpus encodes three link conventions that the base teipublisher.odd ref model
+                    renders as dead hrefs, because it emits @target verbatim:
+                    "#bl_d5" (27,826 refs) points at another division of the same volume, not an
+                    anchor on the current page (zero same-file targets exist corpus-wide; in the
+                    per-division v2 data the target is a different file, so a bare fragment goes
+                    nowhere); "frus1977-80v26#d271" (175, mostly footnotes) points into another
+                    volume; "frus1958-60v10p2" (80) at another volume's landing page. Each becomes
+                    an app URL under /historicaldocuments/. The volume id for same-volume refs
+                    comes from base-uri(/) (see the graphic elementSpec on why not the teiHeader).
+                    Scoped to the frus-v2-data collection; other collections keep the base
+                    behaviour via the copied fallback models below (including the base
+                    correspondence models, which deployed data still matches). http/mailto targets
+                    do not match the predicates and fall through verbatim.</desc>
+                <model predicate="@subtype='placeholder'" behaviour="pass-through">
+                    <desc>placeholder for unavailable next/prev links</desc>
+                    <param name="type" value="if (@type='prev') then 'previous' else @type"/>
+                    <param name="svg" value="$parameters?context-path || '/resources/css/correspondence-icons.svg'"/>
+                    <pb:template xmlns="" xml:space="preserve"><li class="unavailable">
+                                <pb-i18n key="odd.nav-[[type]].before"/>
+                                <svg class="icon">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="[[svg]]#[[type]]"/>
+                                </svg>
+                                <pb-i18n key="odd.nav-[[type]].after"/>
+                            </li></pb:template>
+                </model>
+                <model predicate="parent::correspContext and @type" behaviour="pass-through">
+                    <desc>refs inside the correspContext are interpreted as links for next/previous elements in the corpus (copied from the base spec unchanged)</desc>
+                    <param name="type" value="if (@type='prev') then 'previous' else @type"/>
+                    <param name="target" value="@target"/>
+                    <param name="svg" value="$parameters?context-path || '/resources/css/correspondence-icons.svg'"/>
+                    <pb:template xmlns="" xml:space="preserve"><li><pb-popover>
+                            <a href="[[target]]" emit="transcription" subscribe="transcription" slot="default">
+                                <pb-i18n key="odd.nav-[[type]].before"/>
+                                <svg class="icon">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="[[svg]]#[[type]]"/>
+                                </svg>
+                                <pb-i18n key="odd.nav-[[type]].after"/>
+                            </a>
+                            <template slot="alternate"><pb-i18n key="odd.[[type]]"/>:  [[ content ]]</template>
+            </pb-popover></li></pb:template>
+                </model>
+                <model predicate="contains(base-uri(/), '/frus-v2-data/') and starts-with(@target, 'frus') and contains(@target, '#')" behaviour="link">
+                    <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || substring-before(@target, '#') || '/' || substring-after(@target, '#')"/>
+                </model>
+                <model predicate="contains(base-uri(/), '/frus-v2-data/') and starts-with(@target, 'frus')" behaviour="link">
+                    <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || @target"/>
+                </model>
+                <model predicate="contains(base-uri(/), '/frus-v2-data/') and starts-with(@target, '#')" behaviour="link">
+                    <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || substring-before(substring-after(base-uri(/), '/frus-v2-data/'), '/') || '/' || substring-after(@target, '#')"/>
+                </model>
+                <model predicate="@target" behaviour="link">
+                    <param name="uri" value="@target"/>
+                </model>
+                <model behaviour="inline"/>
+            </elementSpec>
             <elementSpec ident="table" mode="change">
                 <desc>PR #32 review audit: the base teipublisher.odd table/row/cell models drop
                     @rendition, so FRUS table renditions (cell-border-*, #middle, cell-num etc.,

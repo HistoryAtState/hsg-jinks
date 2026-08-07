@@ -101,6 +101,34 @@ describe("container pages keep the sidebar minimal", () => {
     });
 });
 
+describe("FRUS cross-reference resolution (PR #32 review)", () => {
+    // The corpus encodes document references as bare fragments ("#bl_d5")
+    // and cross-volume pointers ("frusXXX#dN"); both must become app URLs
+    // (shell's pmf:ref parity), since in the per-division v2 data the
+    // target is a different file and a fragment href goes nowhere.
+    it("resolves same-volume document refs on a section page", () => {
+        cy.visit("historicaldocuments/frus1958-60v05mSupp/sec2");
+        cy.contains("main a", "BL–5")
+            .should("have.attr", "href")
+            .and("match", /\/historicaldocuments\/frus1958-60v05mSupp\/bl_d5$/);
+        cy.contains("main a", "BL–15")
+            .should("have.attr", "href")
+            .and("match", /\/historicaldocuments\/frus1958-60v05mSupp\/bl_d15$/);
+    });
+
+    it("navigates a document ref to the document page", () => {
+        cy.visit("historicaldocuments/frus1958-60v05mSupp/sec2");
+        cy.contains("main a", "BL–5").click();
+        cy.location("pathname").should("match", /historicaldocuments\/frus1958-60v05mSupp\/bl_d5$/);
+        cy.get("main h2.hsg-navigation-title").should("contain.text", "Microfiche Supplement");
+    });
+
+    it("resolves cross-volume refs to the other volume's document URL", () => {
+        cy.visit("historicaldocuments/frus1958-60v05mSupp/eta_d1");
+        cy.get('main a[href$="/historicaldocuments/frus1958-60v10p2/d303"]').should("exist");
+    });
+});
+
 describe("ODD audit regressions (PR #32 review)", () => {
     it("resolves FRUS document graphics against static.history.state.gov/frus", () => {
         cy.visit("historicaldocuments/frus1981-88v05/appC");
