@@ -73,8 +73,8 @@ USWDS ships ~2600). Remove when Jinks fixes it.
 
 ### Pinned baseline
 
-Software dependencies (and `wwdai`/`rdcr`/`carousel`, all released via
-semantic-release) are pinned to a release, in
+Software dependencies (and `carousel`, released via semantic-release) are
+pinned to a release, in
 `.devcontainer/docker-compose.yml` → `build.args` (the `Dockerfile.dev` `ARG`
 defaults mirror them):
 
@@ -294,14 +294,15 @@ the ones backing `/departmenthistory`, `/countries`, `/conferences`,
 `/milestones`, and `/about` — each maintained in its own repo under
 `github.com/HistoryAtState` and, unlike `frus-data-jinks`, already published
 as a versioned `.xar` GitHub release. That means none of them need the
-frozen-baseline treatment. 9 of the 10 are `curl`'d straight into
-`autodeploy/` in `Dockerfile.dev` — every fresh container build already has
-them installed, no manual step required. `wwdai` and `rdcr` are
-version-pinned (see "Pinned baseline"); the other 7 of those 9 always fetch
-each repo's `/releases/latest/` asset instead, since they're append-only
-content that should stay current rather than freeze to a version.
-`conferences` isn't wired into `Dockerfile.dev` yet, so it still needs the
-manual `xst package install` step below on every fresh container.
+frozen-baseline treatment. All 10 are `curl`'d straight into `autodeploy/`
+in `Dockerfile.dev` — every fresh container build already has them
+installed, no manual step required — and every one of them always fetches
+its repo's `/releases/latest/` asset (decision 2026-08-07, after the
+milestones/conferences/education epics merged: no data package stays
+pinned, and the full Cypress suite is expected to run green against the
+current releases; when a count-style test breaks on a refresh, fix the
+test per "Cypress assertions on data-package counts" in `CLAUDE.md`, don't
+pin the data).
 
 | Repo | Latest release |
 |---|---|
@@ -316,10 +317,8 @@ manual `xst package install` step below on every fresh container.
 | `wwdai` | https://github.com/HistoryAtState/wwdai/releases/latest |
 | `hac` | https://github.com/HistoryAtState/hac/releases/latest |
 
-To pick up a newer release without a full image rebuild — e.g. to try a
-just-published fix before bumping the pinned version, or to install
-`conferences` at all since it isn't in `Dockerfile.dev`'s autodeploy yet —
-refresh one or all of them directly into *this worktree's own* devcontainer
+To pick up a newer release without a full image rebuild, refresh one or
+all of them directly into *this worktree's own* devcontainer
 (never port 8080, see "Parallel worktrees & the read-only mirror" in
 `CLAUDE.md`):
 
@@ -332,10 +331,9 @@ done
 ```
 
 That's a runtime-only change (eXist's database isn't persisted, see "Data"
-above) — it won't survive the next container recreation. For `wwdai`/`rdcr`,
-also bump the pinned version in `Dockerfile.dev`/`docker-compose.yml` if the
-newer release should stick around after a rebuild; the other 7 already
-refetch `/releases/latest/` on every `docker compose build --no-cache`.
+above) — it won't survive the next container recreation, but the container
+already refetches every package's `/releases/latest/` on the next
+`docker compose build --no-cache`, so nothing needs pinning or bumping.
 
 These packages are append-only upstream — see `CLAUDE.md` ("Cypress
 assertions on data-package counts") before writing a test that counts

@@ -34,17 +34,18 @@ const DOCS = [
         heading:
             "1. Letter From President Reagan to Soviet General Secretary Gorbachev",
         dateline: "Washington, March 11, 1985",
-        // note @n, in document order; ids are TEI-derived (decision: #d1fn2,
-        // not the legacy #fn:1.7.4.4.8.8.8.5 scheme, which was a node path into
-        // the old monolithic volume file and is not derivable from split TEI).
-        footnotes: ["d1fn1", "d1fn2"],
+        // note @n, in document order; ids are division-qualified TEI-derived
+        // ids ({file stem}-f{n}, e.g. #d1-f2) -- not the legacy
+        // #fn:1.7.4.4.8.8.8.5 scheme, which was a node path into the old
+        // monolithic volume file and is not derivable from split TEI.
+        footnotes: ["d1-f1", "d1-f2"],
     },
     {
         id: "d3",
         heading:
             "3. Memorandum From John Lenczowski of the National Security Council Staff to the President’s Assistant for National Security Affairs (McFarlane)",
         dateline: "Washington, March 12, 1985",
-        footnotes: ["d3fn1", "d3fn2", "d3fn3", "d3fn4", "d3fn5"],
+        footnotes: ["d3-f1", "d3-f2", "d3-f3", "d3-f4", "d3-f5"],
     },
 ];
 
@@ -72,7 +73,10 @@ describe("document view", () => {
             });
 
             it("renders the place and date as a dateline", () => {
-                cy.get("main .dateline")
+                // The opener's own tei:dateline, reference parity with
+                // hsg-shell -- not the setting-derived .dateline block, which
+                // only attachments use (they have no opener of their own).
+                cy.get("main .tei-dateline")
                     .should("be.visible")
                     .invoke("text")
                     .then((t) => t.replace(/\s+/g, " ").trim())
@@ -158,17 +162,17 @@ describe("document view", () => {
                 .then(($lis) => {
                     const ids = [...$lis].map((li) => li.id);
                     expect(ids).to.deep.eq([
-                        "d96fn1",
-                        "d96fn2",
-                        "d96fn3",
-                        "d96fn4",
-                        "d96fn5",
-                        "d96-a1fn6",
-                        "d96-a1fn7",
-                        "d96-a1fn8",
-                        "d96-a2fn9",
-                        "d96-a2fn10",
-                        "d96-a2fn11",
+                        "d96-f1",
+                        "d96-f2",
+                        "d96-f3",
+                        "d96-f4",
+                        "d96-f5",
+                        "d96-a1-f6",
+                        "d96-a1-f7",
+                        "d96-a1-f8",
+                        "d96-a2-f9",
+                        "d96-a2-f10",
+                        "d96-a2-f11",
                     ]);
                     // numbering runs 1..11 across the parent and both attachments
                     const values = [...$lis].map((li) => li.getAttribute("value"));
@@ -253,6 +257,7 @@ describe("document view", () => {
 
         it("d304: renders no dateline, since its setting is empty", () => {
             cy.visit(`${VOLUME}/d304`);
+            cy.get("main .tei-dateline").should("not.exist");
             cy.get("main .dateline").should("not.exist");
         });
     });
@@ -260,7 +265,7 @@ describe("document view", () => {
     it("d299: renders a date-only dateline without a leading comma", () => {
         // 4 documents have a date but no placeName.
         cy.visit(`${VOLUME}/d299`);
-        cy.get("main .dateline")
+        cy.get("main .tei-dateline")
             .invoke("text")
             .then((t) => t.replace(/\s+/g, " ").trim())
             .should("eq", "October 9, 1986");
