@@ -73,7 +73,8 @@ USWDS ships ~2600). Remove when Jinks fixes it.
 
 ### Pinned baseline
 
-Everything except `jinks` itself is pinned to a release, in
+Software dependencies (and `wwdai`/`rdcr`/`carousel`, all released via
+semantic-release) are pinned to a release, in
 `.devcontainer/docker-compose.yml` → `build.args` (the `Dockerfile.dev` `ARG`
 defaults mirror them):
 
@@ -90,6 +91,16 @@ defaults mirror them):
 After changing any of them, rebuild the container and confirm with
 `xst package list --versions` — `xst package install` has been seen reporting
 `updated to X@<new>` while the deployed collection stayed on the old version.
+
+The remaining data packages — `gsh`, `other-publications`, `pocom`,
+`travels`, `visits`, `milestones`, `hac` — are deliberately **not**
+version-pinned; `Dockerfile.dev` fetches each one's `/releases/latest/`
+asset. They're append-only content packages (see CLAUDE.md "Cypress
+assertions on data-package counts"), so the devcontainer should always
+reflect whatever's currently published rather than freeze to a version that
+goes stale the moment a new record is added upstream. Docker's layer cache
+means a plain rebuild won't refetch once cached — use `docker compose build
+--no-cache` to actually pick up newly-published releases.
 
 ## Parallel worktrees
 
@@ -270,41 +281,67 @@ warning that it's missing until a page 404s.
 
 ### External data packages (GitHub releases)
 
-Beyond `frus-data-jinks` above, running the app also needs 9 data packages —
-the ones backing `/departmenthistory`, `/countries`, `/about`, and
-`/milestones` — each maintained in its own repo under `github.com/HistoryAtState`
-and, unlike `frus-data-jinks`, already published as a versioned `.xar` GitHub
-release.
-That means they don't need the frozen-baseline treatment: fetch each repo's
-latest release asset and `xst package install` it directly.
+Beyond `frus-data-jinks` above, running the app also needs 11 data packages —
+the ones backing `/departmenthistory`, `/countries`, `/conferences`,
+`/about`, `/tags`, and `/milestones` — each maintained in its own repo under
+`github.com/HistoryAtState` and, unlike `frus-data-jinks`, already published
+as a versioned `.xar` GitHub release. That means none of them need the
+frozen-baseline treatment. 10 of the 11 are `curl`'d straight into
+`autodeploy/` in `Dockerfile.dev` — every fresh container build already has
+them installed, no manual step required. `wwdai` and `rdcr` are
+version-pinned (see "Pinned baseline"); the other 8 of those 10 always fetch
+each repo's `/releases/latest/` asset instead, since they're append-only
+content that should stay current rather than freeze to a version.
+`conferences` isn't wired into `Dockerfile.dev` yet, so it still needs the
+manual `xst package install` step below on every fresh container.
 
 | Repo | Latest release |
 |---|---|
+| `conferences` | https://github.com/HistoryAtState/conferences/releases/latest |
 | `gsh` | https://github.com/HistoryAtState/gsh/releases/latest |
 | `milestones` | https://github.com/HistoryAtState/milestones/releases/latest |
 | `other-publications` | https://github.com/HistoryAtState/other-publications/releases/latest |
 | `pocom` | https://github.com/HistoryAtState/pocom/releases/latest |
 | `rdcr` | https://github.com/HistoryAtState/rdcr/releases/latest |
+| `tags` | https://github.com/HistoryAtState/tags/releases/latest |
 | `travels` | https://github.com/HistoryAtState/travels/releases/latest |
 | `visits` | https://github.com/HistoryAtState/visits/releases/latest |
 | `wwdai` | https://github.com/HistoryAtState/wwdai/releases/latest |
 | `hac` | https://github.com/HistoryAtState/hac/releases/latest |
 
-To refresh all 8 to their latest release and deploy into *this worktree's own*
-devcontainer (never port 8080 — see "Parallel worktrees & the read-only
-mirror" in `CLAUDE.md`):
+To pick up a newer release without a full image rebuild — e.g. to try a
+just-published fix before bumping the pinned version, or to install
+`conferences` at all since it isn't in `Dockerfile.dev`'s autodeploy yet —
+refresh one or all of them directly into *this worktree's own* devcontainer
+(never port 8080, see "Parallel worktrees & the read-only mirror" in
+`CLAUDE.md`):
 
 ```sh
-for repo in gsh milestones other-publications pocom rdcr travels visits wwdai hac; do
+for repo in conferences gsh milestones other-publications pocom rdcr tags travels visits wwdai hac; do
   url=$(gh release view --repo HistoryAtState/$repo --json assets -q '.assets[0].url')
   curl -sL -o "/tmp/${repo}.xar" "$url"
   xst --config .xstrc package install "/tmp/${repo}.xar"
 done
 ```
 
+That's a runtime-only change (eXist's database isn't persisted, see "Data"
+above) — it won't survive the next container recreation. For `wwdai`/`rdcr`,
+also bump the pinned version in `Dockerfile.dev`/`docker-compose.yml` if the
+newer release should stick around after a rebuild; the other 8 already
+refetch `/releases/latest/` on every `docker compose build --no-cache`.
+
 These packages are append-only upstream — see `CLAUDE.md` ("Cypress
 assertions on data-package counts") before writing a test that counts
 anything rendered from them.
+
+`tags`'s own bespoke, non-TEI `taxonomy.xml` is deployed as-is at
+`/db/apps/tags` but never queried directly by the app — `tools/convert-
+taxonomy.xql` (OP#1177) re-encodes it as native TEI
+(`tei:taxonomy`/`tei:category`/`tei:catDesc`) into this app's own
+`data/tags/taxonomy.xml`, which *is* checked in and deploys with the rest of
+`data/`. Re-run that script (`xst --config .xstrc execute -f tools/convert-taxonomy.xql`) and
+commit the refreshed `data/tags/taxonomy.xml` whenever the `tags` package is
+refreshed to a newer release.
 
 ## Sync-down: files to exclude
 
