@@ -99,7 +99,12 @@ describe("page-width alignment", () => {
     });
 
     it("footer is pinned to the bottom of the viewport on a short page", () => {
-        cy.viewport(1440, 1200);
+        // Tall enough to stay "short" relative to the viewport even with
+        // the #1101 tags sidebar panel this volume now carries (OP#1101
+        // tagged frus1981-88v05 specifically, to have a real fixture for
+        // the tags feature's own tests) -- 1200 was tuned to this volume's
+        // pre-tags-panel content height and no longer fits.
+        cy.viewport(1440, 1800);
         cy.visit(VOLUME); // volume landing: short page
         cy.window().then((win) => {
             cy.get("footer.usa-footer")
