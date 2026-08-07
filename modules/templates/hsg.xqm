@@ -285,12 +285,14 @@ declare function hsg:volume-landing-content($context as map(*)) {
  : The volume's cover image, if it has one. Reference parity with hsg-shell
  : (fh:cover-uri): the URL is built from the volume id rather than read from
  : notesStmt's own @target -- matches the data in practice, and is what the
- : reference site does. Gated on the jpg relatedItem's existence, not the
- : constructed URL's reachability, so a volume with no cover renders no
- : <img>, same as hsg-shell.
+ : reference site does. Gated on the *volume-scoped* jpg relatedItem's
+ : existence (@corresp = "#" || the volume id, as fh:exists-cover-image
+ : does; see hsg:volume-ways-to-explore on why the bare @type is not
+ : enough), not the constructed URL's reachability, so a volume with no
+ : cover renders no <img>, same as hsg-shell.
  :)
 declare %private function hsg:volume-cover($doc as node(), $volume-id as xs:string, $title as xs:string) as element(img)? {
-    if (exists($doc//tei:notesStmt/tei:relatedItem[@type = 'jpg'])) then
+    if (exists($doc//tei:notesStmt/tei:relatedItem[@type = 'jpg'][@corresp = '#' || $volume-id])) then
         <img class="hsg-frus__cover"
             src="https://static.history.state.gov/frus/{$volume-id}/covers/{$volume-id}.jpg"
             alt="Book Cover of {$title}"/>
@@ -463,7 +465,16 @@ declare function hsg:volume-ways-to-explore($context as map(*)) {
     if (not(exists($doc))) then ()
     else
         let $volume-id := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
-        let $related := $doc//tei:notesStmt/tei:relatedItem
+        (: Volume-scoped items only. A volume's notesStmt also carries a
+           relatedItem per *associated file* -- frus1958-60v05mSupp, a
+           microfiche supplement, has 562 type="pdf" entries, one per
+           document -- and those are told apart from the volume's own
+           download solely by @corresp pointing at the volume id. Reference
+           parity with hsg-shell's fh:exists-pdf / fh:exists-epub / etc.,
+           which all gate on @corresp eq "#" || $vol-id for this reason.
+           Without the gate the ebook links below select all 562 and die
+           with a cardinality error. :)
+        let $related := $doc//tei:notesStmt/tei:relatedItem[@corresp = '#' || $volume-id]
         return
             <div class="hsg-panel hsg-frus__ways-to-explore">
                 <h2 class="hsg-sidebar-title">
@@ -498,12 +509,15 @@ declare function hsg:volume-ways-to-explore($context as map(*)) {
 };
 
 declare %private function hsg:ebook-link($related as element()*, $type as xs:string, $label as xs:string) {
-    let $item := $related[@type = $type]
+    (: [1]: callers pass the volume-scoped relatedItems, so one per type is
+       expected; take the first regardless rather than let stray duplicate
+       encoding turn a download link into a 500. :)
+    let $item := ($related[@type = $type])[1]
     return
     if (not(exists($item))) then ()
     else
-        let $href := $item//tei:ref/@target/string()
-        let $bytes := xs:integer($item//tei:measure/@quantity)
+        let $href := ($item//tei:ref/@target/string())[1]
+        let $bytes := ($item//tei:measure/@quantity)[1] ! xs:integer(.)
         return
             <li>
                 <a class="hsg-link-button" href="{$href}">{$label} (<span>{hsg:bytes-to-readable($bytes)}</span>)</a>

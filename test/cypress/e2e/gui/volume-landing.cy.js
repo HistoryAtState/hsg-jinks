@@ -69,3 +69,35 @@ describe("volume landing page", () => {
         });
     });
 });
+
+// Regression: a microfiche supplement's notesStmt carries one relatedItem per
+// associated file (frus1958-60v05mSupp has 562 type="pdf" entries, one per
+// document) alongside the volume's own downloads. Selecting ebook links by
+// @type alone matched all 562 and the page died with an XPTY0004 cardinality
+// error; the volume's own items are identified by @corresp = "#<volume-id>",
+// the same gate hsg-shell's fh:exists-pdf and friends use.
+describe("volume landing page for a microfiche supplement", () => {
+    const SUPPLEMENT = "historicaldocuments/frus1958-60v05mSupp";
+
+    beforeEach(() => cy.visit(SUPPLEMENT));
+
+    it("renders instead of erroring on the per-document relatedItems", () => {
+        cy.get("main h1").should("contain.text", "Microfiche Supplement");
+        cy.get(".hsg-frus__ways-to-explore").should("exist");
+    });
+
+    it("links only the volume-level ebook downloads, not the per-document PDFs", () => {
+        cy.get(".hsg-frus__ways-to-explore").within(() => {
+            cy.get("a.hsg-link-button").should("have.length", 3);
+            cy.get("a.hsg-link-button[href$='frus1958-60v05mSupp.epub']").should("exist");
+            cy.get("a.hsg-link-button[href$='frus1958-60v05mSupp.mobi']").should("exist");
+            // The volume PDF, not one of the 562 per-document ones.
+            cy.get("a.hsg-link-button[href$='frus1958-60v05mSupp.pdf']").should("exist");
+        });
+    });
+
+    it("still shows the cover image", () => {
+        cy.get("img.hsg-frus__cover")
+            .should("have.attr", "src", "https://static.history.state.gov/frus/frus1958-60v05mSupp/covers/frus1958-60v05mSupp.jpg");
+    });
+});
