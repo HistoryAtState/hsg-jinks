@@ -1,0 +1,68 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/conferences": { "at": "modules/templates/conferences.xqm", "prefix": "conf" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    <!--
+        Section landing: confapi:index renders through vapi:html (no backing
+        document), so the layout's default breadcrumb/before blocks, both
+        gated on exists($context?doc), render nothing here. Both overridden
+        below with conf:* equivalents, same technique as
+        templates/pages/departmenthistory/monograph-toc.html.
+    -->
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ conf:breadcrumb($context, ()) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [% template before %]
+    [[ conf:conference-sidebar-list($context) ]]
+    [% endtemplate %]
+
+    <!-- One root element: the layout's main is a flex row whose children each
+         get flex: 1 (resources/css/layout.css, .sticky-layout > main), same
+         constraint as templates/pages/historicaldocuments.html.
+
+         Intro/closing prose and the "Past Conferences" heading below are
+         verbatim from hsg-shell's pages/conferences/index.xml: reference
+         parity, not newly authored text. -->
+    <div class="section-landing usa-prose">
+        <h1>
+            <pb-i18n key="conferences.title">Conferences</pb-i18n>
+        </h1>
+        <p>The Office of the Historian periodically hosts or co-hosts scholarly
+            conferences on specific topics of interest related to the history of
+            U.S. foreign relations. These conferences typically aim to bring
+            together former diplomats and policymakers with respected scholars of
+            U.S. foreign relations. The Office of the Historian has also been
+            successful in including current policymakers in these conferences. These
+            conferences are generally open to the public, although pre-registration
+            might be required.</p>
+        <h3>Past Conferences</h3>
+        [[ conf:conference-list($context) ]]
+        <p>The Office of the Historian also participates in other events and forums
+            relating to the history of U.S. foreign relations and the <em>Foreign
+                Relations of the United States series</em>. For example, see the
+            Commemorating 150 Years of the <em>Foreign Relations of the United
+                States series</em>&#160;<a href="[[ $context?context-path ]]/historicaldocuments/frus-history/events">Events</a>
+            page.</p>
+    </div>
+</template>

@@ -85,22 +85,25 @@ doesn't involve XML/the database at all (e.g. validating plain JSON syntax).
 
 ## Cypress assertions on data-package counts
 
-The 7 external `HistoryAtState/*` data packages this app depends on (`gsh`,
-`other-publications`, `pocom`, `rdcr`, `travels`, `visits`, `wwdai` — see
-README "External data packages") are append-only upstream: new records get
-added over time (e.g. a new Secretary of State), existing ones are never
-removed. A Cypress assertion that pins an *exact* count of data-derived
-content (e.g. `have.length(71)` officeholders) will spuriously fail the next
-time someone refreshes to a newer release, even though nothing actually
-broke — this has already happened once, in
+8 of the 10 external `HistoryAtState/*` data packages this app depends on
+(`gsh`, `other-publications`, `pocom`, `rdcr`, `travels`, `visits`, `wwdai`,
+`hac` — see README "External data packages") are append-only upstream: new
+records get added over time (e.g. a new Secretary of State), existing ones
+are never removed. A Cypress assertion that pins an *exact* count of
+data-derived content (e.g. `have.length(71)` officeholders) will spuriously
+fail the next time someone refreshes to a newer release, even though nothing
+actually broke — this has already happened once, in
 `test/cypress/e2e/gui/departmenthistory/people.cy.js`.
 
-`milestones` (also in the README's "External data packages" table) is the one
-exception: it backs a **retired** publication whose content has been frozen
-since 2018 — new `.xar` releases only ever touch build/packaging metadata, not
-the 19 era documents themselves. An exact count assertion there (e.g. 19 eras)
-is intentional and expected to stay stable, unlike the 7 actively-growing
-packages above.
+The other 2 packages are exceptions, both frozen rather than append-only:
+
+- `milestones` backs a **retired** publication whose content has been frozen
+  since 2018 — new `.xar` releases only ever touch build/packaging metadata,
+  not the 19 era documents themselves. An exact count assertion there (e.g.
+  19 eras) is intentional and expected to stay stable.
+- `conferences` backs 5 frozen conference-proceedings documents (last
+  addition 2012) that are not expected to grow, so exact counts against it
+  (e.g. the 5-conference landing-page listing) are fine too.
 
 When a test counts items rendered from one of these packages, use a lower
 bound instead: `.should("have.length.at.least", N)`, with `N` set a bit

@@ -223,8 +223,18 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    scoped by tag name, since a division's own base-ODD "behaviour" (and so
    its wrapper tag) depends on its structural position: a top-level chapter
    (direct child of tei:body) renders as <section class="tei-div ...">, a
-   nested subchapter as <div class="tei-div ...">, same class either way. */
-.usa-prose > .tei-div > :first-child.tei-head {
+   nested subchapter as <div class="tei-div ...">, same class either way.
+
+   Excludes .conf-content (#1099 PR review): conferences fixes the exact same
+   duplicate-heading problem differently, by renumbering headings in XQuery
+   (conf:shift-headings, modules/templates/conferences.xqm) rather than
+   emitting a second explicit heading to hide -- there is no duplicate to
+   suppress there, and this selector doesn't check tag name, so without the
+   exclusion it would hide conferences' now-correct (and only) heading
+   outright. Confirmed live during the same PR review: it was doing exactly
+   that to the document view's "Program"/"Vietnam Photo Gallery"/
+   "Post-Conference Reviews" headings before this exclusion was added. */
+.usa-prose:not(.conf-content) > .tei-div > :first-child.tei-head {
     display: none;
 }
 
@@ -334,4 +344,32 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-link-button {
     display: inline-block;
     margin: var(--s-2) 0;
+}
+
+/* Conferences landing page's "Past Conferences" list (#1099): the reference
+   site's own list (hsg-shell's pages/conferences/index.xml) is numbered.
+   list-style-type alone does not bring the numbers back: USWDS's
+   usa-collection component sets display:flex on .usa-collection__item (for
+   its image/body layout), and flex containers never generate a ::marker
+   box regardless of list-style-type -- confirmed live (a computed-style
+   check reported "decimal" while the screenshot showed no visible number
+   at all). Numbered via a CSS counter instead, which works irrespective of
+   display type. Scoped to the conf-conference-list class -- every other
+   usa-collection list in the app (departmenthistory.xqm's various role/
+   position/travel lists) is an unordered <ul> and must keep no markers. */
+.conf-conference-list {
+    counter-reset: conf-conference;
+}
+
+.conf-conference-list > li.usa-collection__item {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.conf-conference-list > li.usa-collection__item::before {
+    counter-increment: conf-conference;
+    content: counter(conf-conference) ".";
+    position: absolute;
+    left: 0;
+    font-weight: 700;
 }

@@ -304,6 +304,12 @@
       "path" : "about-api.xql"
     },
     {
+      "spec" : "tags-api.json",
+      "prefix" : "tagapi",
+      "id" : "http://teipublisher.com/api/tags",
+      "path" : "tags-api.xql"
+    },
+    {
       "spec" : "milestones-api.json",
       "prefix" : "milapi",
       "id" : "http://teipublisher.com/api/milestones",
@@ -314,6 +320,24 @@
       "prefix" : "searchapi",
       "id" : "https://history.state.gov/api/search",
       "path" : "search-api.xql"
+    },
+    {
+      "spec" : "developer-api.json",
+      "prefix" : "devapi",
+      "id" : "http://teipublisher.com/api/developer",
+      "path" : "developer-api.xql"
+    },
+    {
+      "spec" : "education-api.json",
+      "prefix" : "eduapi",
+      "id" : "http://teipublisher.com/api/education",
+      "path" : "education-api.xql"
+    },
+    {
+      "spec" : "conferences-api.json",
+      "prefix" : "confapi",
+      "id" : "http://teipublisher.com/api/conferences",
+      "path" : "conferences-api.xql"
     }
   ],
   "extends" : [

@@ -1,0 +1,14 @@
+<!--
+    Landing-page sidebar: "About" (5 static links) + the "Education"
+    section-nav single link. Reverts an earlier draft's "modules sidebar
+    everywhere" simplification; confirmed live against the reference site
+    (history.state.gov/education, PR #17 review) that the landing page shows
+    the generic site-wide "About" panel here, not the module list. The
+    module list only appears on the listing/detail pages
+    (sidebar-modules.html).
+-->
+<h2>About</h2>
+[[ edu:about-sidebar($context) ]]
+
+<h2>Education</h2>
+[[ edu:section-nav($context, false()) ]]

@@ -1,0 +1,103 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                <li>
+                    <a href="[[ $context?context-path ]]/">
+                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
+                    </a>
+                </li>
+                <li aria-current="page">
+                    <pb-i18n key="breadcrumb.developer">Developer Resources</pb-i18n>
+                </li>
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="section-landing usa-prose">
+        <h1>
+            <pb-i18n key="developer.title">Developer Resources</pb-i18n>
+        </h1>
+
+        <h2>Overview</h2>
+        <p>In keeping with the goal of the Digital Government Strategy to deliver better digital
+            services to the American people, the Office of the Historian has created its first
+            public <a href="https://en.wikipedia.org/wiki/Application_programming_interface"
+                >Application Programming Interface</a> (API) and has established this page to
+            house information for developers. We invite developers to use our API and provide
+            feedback.</p>
+
+        <h2>Ebook Catalog API</h2>
+        <p>The <a href="[[ $context?context-path ]]/developer/catalog">Office of the Historian
+                Ebook Catalog API</a> is a RESTful, OPDS-formatted catalog of the growing number
+            of free ebooks from the <em>Foreign Relations of the United States</em> series. Use
+            this API to embed our live, up-to-date, searchable, and browsable ebook catalog in
+            your application and to locate download links to the ebooks and their cover
+            images.</p>
+
+        <h2>Support</h2>
+        <p>Developers are welcome to visit our organizational account
+            <a href="https://github.com/HistoryAtState">on GitHub</a>. Requests or inquiries may
+            be submitted as issues.</p>
+
+        <h2>Technologies &amp; Standards</h2>
+        <p>This website is powered by <a href="https://exist-db.org/">eXist-db</a>, a free, open
+            source XML server and the open standard W3C technologies it supports, including
+            XQuery 3.0, EXPath, and EXQuery.</p>
+        <p>Our digitization initiatives center around the <a href="http://www.tei-c.org">Text
+                Encoding Initiative</a> (TEI), an open, mature, XML-based standard used widely in
+            libraries and the humanities. All our article- and book-length content is encoded as
+            TEI. A single digital master TEI file can store an entire <em>FRUS</em> volume. We
+            store this TEI in eXist-db and convert it to TEI into HTML or ebook forms using
+            XQuery.</p>
+        <p>Our ebook catalog API uses the Open Publication Distribution System (OPDS), an Atom
+            XML-based standard for encoding ebook catalogs.</p>
+
+        <aside class="usa-card">
+            <div class="usa-card__container">
+                <div class="usa-card__header">
+                    <h2 class="usa-card__heading">Related Links</h2>
+                </div>
+                <div class="usa-card__body">
+                    <ul class="usa-icon-list">
+                        <li class="usa-icon-list__item">
+                            <div class="usa-icon-list__content">
+                                <a href="https://exist-db.org/">eXist-db</a>
+                            </div>
+                        </li>
+                        <li class="usa-icon-list__item">
+                            <div class="usa-icon-list__content">
+                                <a href="http://www.tei-c.org">Text Encoding Initiative (TEI)</a>
+                            </div>
+                        </li>
+                        <li class="usa-icon-list__item">
+                            <div class="usa-icon-list__content">
+                                <a href="https://github.com/HistoryAtState">Project on GitHub</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/developer/sidebar.html" %]
+    [% endtemplate %]
+</template>
