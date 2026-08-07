@@ -60,6 +60,11 @@
     "id" : "http://teipublisher.com/api/about",
     "path" : "about-api.xql"
   }, {
+    "spec" : "tags-api.json",
+    "prefix" : "tagapi",
+    "id" : "http://teipublisher.com/api/tags",
+    "path" : "tags-api.xql"
+  }, {
     "spec" : "milestones-api.json",
     "prefix" : "milapi",
     "id" : "http://teipublisher.com/api/milestones",

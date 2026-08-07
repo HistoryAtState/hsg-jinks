@@ -3,13 +3,21 @@
     {
         "templating": {
             "modules": {
-                "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
+                "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" },
+                "https://history.state.gov/ns/templates/tags": { "at": "modules/templates/tags.xqm", "prefix": "tags" }
             },
             "extends": "templates/layouts/hsg-content.html"
         }
     }
     ---
     [[ hsg:volume-landing-content($context) ]]
+
+    [% template before %]
+    [% if exists($context?doc) %]
+    [[ hsg:volume-toc($context) ]]
+    [[ tags:volume-tags-panel($context) ]]
+    [% endif %]
+    [% endtemplate %]
 
     [% template after %]
     [[ hsg:volume-ways-to-explore($context) ]]
