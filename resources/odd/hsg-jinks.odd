@@ -84,8 +84,8 @@
             <desc>An attachment ("Tab I") inlined into its parent document, as the reference site renders it. It carries no overline and no footnote list of its own: its notes are merged into the parent's consolidated list, which is why their @n continue the parent's sequence. It has no document number either - its frus-document-number bibl is present but empty.</desc>
             <param name="label" value=".//bibl[@type='frus-attachment-label']"/>
             <param name="head" value=".//fileDesc//titleStmt/title"/>
-            <param name="srcId" value="substring-after((.//standOff//note[@type='source'])[1]/@corresp, '#')"/>
-            <param name="srcRef" value="substring-after((.//standOff//note[@type='source'])[1]/@corresp, '#') || 'ref'"/>
+            <param name="srcId" value="replace(base-uri(/), '^.*/([^/]+)\.xml$', '$1') || '-f' || (.//standOff//note[@type='source'])[1]/@n"/>
+            <param name="srcRef" value="replace(base-uri(/), '^.*/([^/]+)\.xml$', '$1') || '-f' || (.//standOff//note[@type='source'])[1]/@n || 'ref'"/>
             <param name="srcLabel" value="(.//standOff//note[@type='source'])[1]/@n/string()"/>
             <param name="dateline" value=".//profileDesc//setting"/>
             <param name="content" value="text/body"/>
@@ -159,9 +159,11 @@
             <desc>No dateline (10 documents, e.g. d304 and the appendices). The setting element is always present but is empty for these, so render nothing rather than an empty line.</desc>
         </model></elementSpec>
             <elementSpec ident="anchor" mode="change"><model predicate="$parameters?mode='document-view' and @xml:id" behaviour="pass-through">
-            <desc>FRUS footnote marker. The note points at the anchor (note/@corresp = '#' || anchor/@xml:id), the reverse of the base models below, which expect the anchor to point at the note - so those never match FRUS data and the marker fell through to the bare anchor model, rendering an empty span. Every in-body anchor in the corpus resolves to a note, so no fallback is needed.</desc>
-            <param name="noteId" value="@xml:id/string()"/>
-            <param name="refId" value="@xml:id || 'ref'"/>
+            <desc>FRUS footnote marker. The note points at the anchor (note/@corresp = '#' || anchor/@xml:id), the reverse of the base models below, which expect the anchor to point at the note - so those never match FRUS data and the marker fell through to the bare anchor model, rendering an empty span. Every in-body anchor in the corpus resolves to a note, so no fallback is needed.
+                The rendered id is division-qualified ({file stem}-f{note @n}), NOT the anchor's raw @xml:id: each attachment file restarts its anchor ids at {parent}-f1 (d96-a1.xml and d96-a2.xml both carry d96-f1..f3), so a consolidated page built from @xml:id verbatim repeated the same DOM id three times and every marker resolved to the parent's note. @n continues the parent's sequence across attachments, so the pair is unique on the page. For a stand-alone document ({div}.xml with anchors {div}-f{seq} and @n = seq, the corpus norm) this yields exactly the same ids as before.
+                Expression-shape caveat, learned the hard way: wrapping the note lookup as a parenthesized-then-[1] step ("(root(.)//...)[1]/@n") comes back empty when compiled into a model param, while the plain path with a trailing /@n/string() works; keep these params in the plain shape (@corresp is unique within a file, so no [1] is needed).</desc>
+            <param name="noteId" value="let $target := '#' || @xml:id return replace(base-uri(/), '^.*/([^/]+)\.xml$', '$1') || '-f' || root(.)//standOff//note[@corresp = $target]/@n/string()"/>
+            <param name="refId" value="let $target := '#' || @xml:id return replace(base-uri(/), '^.*/([^/]+)\.xml$', '$1') || '-f' || root(.)//standOff//note[@corresp = $target]/@n/string() || 'ref'"/>
             <param name="label" value="let $target := '#' || @xml:id return root(.)//standOff//note[@corresp = $target]/@n/string()"/>
             <pb:template xml:space="preserve"><sup xmlns="" class="footnote-ref"><a id="[[refId]]" href="#[[noteId]]">[[label]]</a></sup></pb:template>
         </model><model predicate="$parameters?mode=('toc', 'breadcrumb')" behaviour="omit"/><model predicate="@corresp" behaviour="note">
@@ -178,10 +180,10 @@
             <param name="id" value="@xml:id"/>
         </model></elementSpec>
             <elementSpec ident="note" mode="change"><model predicate="$parameters?mode='document-view' and ancestor::listAnnotation" behaviour="pass-through">
-            <desc>FRUS footnote, rendered as an item of the document's consolidated list. @value carries the encoded number rather than relying on the ol's own counter, because an inlined attachment's notes continue the parent's sequence and so do not start at 1. The source note has no in-body anchor, so its backlink targets the marker on the heading.</desc>
+            <desc>FRUS footnote, rendered as an item of the document's consolidated list. @value carries the encoded number rather than relying on the ol's own counter, because an inlined attachment's notes continue the parent's sequence and so do not start at 1. The source note has no in-body anchor, so its backlink targets the marker on the heading. The id is division-qualified ({file stem}-f{@n}) for the same reason as the anchor marker above; @corresp taken verbatim collided across a parent and its attachments.</desc>
             <param name="n" value="@n/string()"/>
-            <param name="noteId" value="substring-after(@corresp, '#')"/>
-            <param name="refId" value="substring-after(@corresp, '#') || 'ref'"/>
+            <param name="noteId" value="replace(base-uri(/), '^.*/([^/]+)\.xml$', '$1') || '-f' || @n"/>
+            <param name="refId" value="replace(base-uri(/), '^.*/([^/]+)\.xml$', '$1') || '-f' || @n || 'ref'"/>
             <param name="content" value="node()"/>
             <pb:template xml:space="preserve"><li xmlns="" id="[[noteId]]" value="[[n]]">[[content]] <a class="footnote-backlink" href="#[[refId]]" aria-label="Back to content">↩</a></li></pb:template>
         </model><model predicate="$parameters?mode='register-overview' and $parameters?show-notes and text()" behaviour="block">
