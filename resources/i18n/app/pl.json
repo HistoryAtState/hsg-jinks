@@ -71,6 +71,8 @@
         "previous": "Wstecz"
     },
     "historicaldocuments": {
-        "title": "Dokumenty historyczne"
+        "title": "Dokumenty historyczne",
+        "persons": "Osoby",
+        "terms": "Skróty i terminy"
     }
 }

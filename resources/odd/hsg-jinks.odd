@@ -249,6 +249,24 @@
                     to only the "bare filename" shape (no scheme, no leading slash) so it doesn't
                     touch any graphic that already carries a full path/URL elsewhere in the
                     app.</desc>
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/frus-v2-data/')" behaviour="graphic">
+                    <desc>FRUS document graphics (PR #32 review audit): the v2 corpus encodes
+                        graphic/@url as a bare, extension-less basename (e.g. "d312p1" in
+                        frus1981-88v05 appC). Reference parity with hsg-shell's frus.odd graphic
+                        model: resolve against static.history.state.gov/frus/{volume-id}/ and
+                        append ".png" unless the name already carries an image extension. Without
+                        this model such graphics fell through to the countries fallback below and
+                        rendered a broken countries/ URL. The volume id is the path segment after
+                        frus-v2-data/ in base-uri(/) -- not the division's frus-volume-id bibl,
+                        because the transform may receive a fragment whose root no longer carries
+                        the teiHeader (root(.)//bibl came back empty at runtime) while the base
+                        URI survives.</desc>
+                    <param name="url" value="'https://static.history.state.gov/frus/' || substring-before(substring-after(base-uri(/), '/frus-v2-data/'), '/') || '/' || @url || (if (matches(@url, '\.(jpg|jpeg|png|gif|svg)$')) then '' else '.png')"/>
+                    <param name="width" value="@width"/>
+                    <param name="height" value="@height"/>
+                    <param name="scale" value="@scale"/>
+                    <param name="title" value="(../desc, ../figDesc) => head() => normalize-space()"/>
+                </model>
                 <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/other-publications/short-history/')" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/short-history/' || @url"/>
                     <param name="width" value="@width"/>
@@ -361,6 +379,67 @@
                 </model>
                 <model behaviour="list" useSourceRendition="true">
                     <param name="content" value="child::node()"/>
+                </model>
+            </elementSpec>
+            <elementSpec ident="table" mode="change">
+                <desc>PR #32 review audit: the base teipublisher.odd table/row/cell models drop
+                    @rendition, so FRUS table renditions (cell-border-*, #middle, cell-num etc.,
+                    from frus-encodingDesc.xml) rendered unstyled -- e.g. frus1861 d180's
+                    attachment tables lost their vertical-align and border cells. Reference parity
+                    with hsg-shell's frus.odd, whose whole table family carries
+                    useSourceRendition. Like shell, a table containing renditions renders plain
+                    (the renditions carry the styling); one without gets the design system's
+                    default table dress (usa-table here, bootstrap there).</desc>
+                <model predicate=".//row/@rendition or .//cell/@rendition" behaviour="table" useSourceRendition="true"/>
+                <model behaviour="table" useSourceRendition="true" cssClass="usa-table"/>
+            </elementSpec>
+            <elementSpec ident="row" mode="change">
+                <desc>See the table elementSpec above: keep source renditions.</desc>
+                <model predicate="@role='label'" behaviour="row" cssClass="row-label" useSourceRendition="true"/>
+                <model behaviour="row" useSourceRendition="true"/>
+            </elementSpec>
+            <elementSpec ident="cell" mode="change">
+                <desc>See the table elementSpec above: keep source renditions.</desc>
+                <model behaviour="cell" useSourceRendition="true"/>
+            </elementSpec>
+            <elementSpec ident="gap" mode="change">
+                <desc>Reference parity with hsg-shell's frus.odd: a gap is rendered (as an
+                    ellipsis with extent) only when it is quantifiable (@unit plus an integer
+                    @quantity); anything else -- the corpus has e.g. a bare gap
+                    reason="deleted" -- is omitted, where the base ODD's fallback rendered an
+                    empty inline span.</desc>
+                <model predicate="exists(@unit) and @quantity castable as xs:integer" behaviour="gap">
+                    <param name="unit" value="@unit"/>
+                    <param name="quantity" value="@quantity cast as xs:integer"/>
+                </model>
+                <model behaviour="omit"/>
+            </elementSpec>
+            <elementSpec ident="pb" mode="change">
+                <desc>Reference parity with hsg-shell's frus.odd pb model: the visible text of a
+                    page-break facsimile link is "Page N", not the bare page number -- the base
+                    teipublisher.odd renders just @n, which reads as stray text in the prose (a
+                    lone "66" before a section heading, PR #32 review). Same model chain as the
+                    base spec (print omit, then the @facs IIIF webcomponent, then the no-facsimile
+                    fallback), with only the visible content changed and an hsg-facs-link class
+                    added for the grey right-floated margin styling (resources/css/hsg-theme.css;
+                    shell equivalent: hsg-facsilime-link). The base spec's title-mode,
+                    pb-facsimile-viewer and static-site variants are dropped: this app renders pb
+                    only through page:transform document/division views, which pass none of those
+                    parameters.</desc>
+                <model output="print" behaviour="omit"/>
+                <model predicate="@facs" behaviour="webcomponent" cssClass="facs pb hsg-facs-link">
+                    <param name="name" value="'pb-facs-link'"/>
+                    <param name="content" value="'Page ' || @n"/>
+                    <param name="emit" value="'transcription'"/>
+                    <param name="subscribe" value="'transcription'"/>
+                    <param name="order" value="count($get(.)/preceding::pb) + 1"/>
+                    <param name="emit-on-load" value="'emit-on-load'"/>
+                    <param name="facs" value="let $ref := if ($global:address-by-id)                          then                              root($parameters?root)/descendant-or-self::TEI/@xml:id                          else                              substring-after(document-uri(root($parameters?root)), $global:data-root || '/')                         return 'api/iiif/' || $ref"/>
+                </model>
+                <model behaviour="break" cssClass="pb hsg-facs-link" useSourceRendition="true">
+                    <desc>Output Page label when no facsimile information is available</desc>
+                    <param name="type" value="'page'"/>
+                    <param name="label" value="'Page ' || @n"/>
                 </model>
             </elementSpec></schemaSpec>
         </body>

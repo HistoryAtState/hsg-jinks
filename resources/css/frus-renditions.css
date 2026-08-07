@@ -83,3 +83,12 @@
  * #center uses are opener segs. Flagged in hsg-jinks-data PR #8.
  */
 .tei-seg.document_center { display: block; }
+
+/*
+ * The encodingDesc's own block comment prescribes element-context refinements:
+ * "#center on a table or figure is margin-left/right auto" (text-align cannot
+ * center the box itself). No instance in the deployed subset yet; added ahead
+ * of the full corpus (PR #32 review audit).
+ */
+table.document_center,
+.tei-figure.document_center { margin-left: auto; margin-right: auto; }

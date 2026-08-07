@@ -63,6 +63,8 @@
         "previous": "Vorherige"
     },
     "historicaldocuments": {
-        "title": "Historische Dokumente"
+        "title": "Historische Dokumente",
+        "persons": "Personen",
+        "terms": "Abkürzungen & Begriffe"
     }
 }

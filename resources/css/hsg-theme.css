@@ -416,6 +416,42 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-weight: 400;
 }
 
+/* Both sidebars are populated on interior division pages now (left TOC +
+   right division asides). The layout grid's middle track is 1fr, but a grid
+   item's automatic minimum is its min-content, so wide content in main
+   (tables, long headings) pushed the three columns past the page box
+   (hsg-jinks#1217 alignment: band wider than the header) once the second
+   sidebar landed. min-width: 0 restores the 1fr track's ability to shrink;
+   wide content wraps or scrolls inside main instead of widening the band. */
+.sticky-layout > main {
+    min-width: 0;
+}
+
+/* "Page N" page-break facsimile markers in document and section prose
+   (pb elementSpec in resources/odd/hsg-jinks.odd): a grey right-floated
+   margin marker, reference parity with hsg-shell's facsimile-link rule
+   (display block, 4pt left margin, grey, float right). */
+.hsg-facs-link {
+    display: block;
+    margin-left: 4pt;
+    color: grey;
+    float: right;
+    font-size: 0.9rem;
+}
+
+/* Volume-title heading above the content of every interior division page
+   (chapter, document, section); hsg:navigation-title, reference parity with
+   hsg-shell's navigation title. Rendered as quiet chrome, not the page's own
+   h1: the division heading below it stays the visually dominant title. */
+.hsg-navigation-title {
+    margin: 0 0 var(--s0);
+    padding-bottom: var(--s-2);
+    border-bottom: 1px solid #dfe1e2;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #565c65;
+}
+
 /* Previous / next pager on chapter and document pages. */
 .hsg-frus__pager {
     display: flex;
@@ -529,6 +565,31 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-frus__ways-to-explore .hsg-sidebar-title {
     margin-top: 0;
+}
+
+/* Interior-page right sidebar (hsg:division-asides): the Persons and
+   Abbreviations and Terms register panels plus the Historical Documents
+   section navigation. Same quiet chrome as the landing sidebar's
+   ways-to-explore panel; consecutive panels get breathing room. */
+.hsg-frus__register .hsg-sidebar-title,
+.hsg-frus__section-nav .hsg-sidebar-title {
+    margin-top: 0;
+}
+
+.hsg-panel + .hsg-panel {
+    margin-top: var(--s2);
+}
+
+.hsg-frus__register .hsg-list-group,
+.hsg-frus__section-nav .hsg-list-group {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.hsg-frus__register .hsg-list-group li,
+.hsg-frus__section-nav .hsg-list-group li {
+    margin-bottom: var(--s-2);
 }
 
 .hsg-frus__ways-to-explore .usa-search {

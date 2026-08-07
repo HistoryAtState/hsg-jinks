@@ -31,7 +31,34 @@ declare %private function hsg:resolve-include($header as element()?, $name as xs
                 else id($name, doc(util:collection-name($inc) || '/' || $inc/@href))
 };
 
+(:~
+ : The full title of the publication a division belongs to, resolved from the
+ : volume root document (whose titleStmt is xincluded from the shared
+ : *_includes.xml; see hsg:resolve-include). Shared by
+ : hsg:collection-breadcrumbs and hsg:navigation-title.
+ :)
+declare %private function hsg:volume-title($doc as node()?) as xs:string? {
+    if (not(exists($doc))) then ()
+    else
+        let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
+        let $volume := doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
+        let $titleStmt := hsg:resolve-include($volume//tei:teiHeader, 'titleStmt')
+        return normalize-space(($titleStmt/tei:title)[1])
+};
 
+(:~
+ : The volume-title heading rendered above the content of every interior
+ : division page (chapter, document, section). Reference parity with
+ : hsg-shell's pages:navigation-title, which puts this h2 on all
+ : volume-interior pages.
+ :)
+declare function hsg:navigation-title($context as map(*)) as element(h2)? {
+    let $title := hsg:volume-title($context?doc?content)
+    return
+        if ($title != '') then
+            <h2 class="hsg-navigation-title" id="navigation-title">{$title}</h2>
+        else ()
+};
 
 (:~
  : The volume's table of contents, as a USWDS side navigation (#1089).
@@ -207,10 +234,7 @@ declare function hsg:collection-breadcrumbs($context as map(*)) {
         let $components := config:get-relpath($context?doc?content, $config:data-default) => tokenize("/")
         let $publication := $components[1]
         let $is-landing := count($components) = 2
-        let $volume := doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
-        (: see hsg:resolve-include / hsg:volume-list. :)
-        let $volume-titleStmt := hsg:resolve-include($volume//tei:teiHeader, 'titleStmt')
-        let $volume-title := normalize-space(($volume-titleStmt/tei:title)[1])
+        let $volume-title := hsg:volume-title($context?doc?content)
         let $division-type := ($context?doc?content//tei:bibl[@type='frus-division-type'])[1]/string()
         return (
             <li>
@@ -534,6 +558,123 @@ declare %private function hsg:bytes-to-readable($bytes as xs:integer?) as xs:str
     else if ($bytes gt 1000000) then (round($bytes div 10000) div 100) || 'mb'
     else if ($bytes gt 1000) then round($bytes div 1000) || 'kb'
     else $bytes || ' bytes'
+};
+
+(:~
+ : Right-hand sidebar panels for interior division pages (PR #32 review):
+ : Persons and Abbreviations &amp; Terms panels listing the registered
+ : entities the current division references, then the static Historical
+ : Documents section navigation. Rendered into the layout's `after` block by
+ : templates/pages/volume/interior.html, mirroring how the volume landing
+ : mounts hsg:volume-ways-to-explore.
+ :
+ : Reference parity with hsg-shell's fh:facets/fh:view-persons/fh:view-gloss
+ : plus the site.xml "sections" aside, with one structural difference: shell
+ : resolved #p_X / #t_X ids with id() inside the same monolithic volume
+ : document, while frus-v2-data keeps the registers in separate front-matter
+ : files (front/persons.xml, front/terms.xml) where the entries are marked
+ : persName/term @sameAs="#p_X" rather than @xml:id -- so the lookup is a
+ : cross-file @sameAs match.
+ :)
+declare function hsg:division-asides($context as map(*)) {
+    let $doc := $context?doc?content
+    return
+    if (not(exists($doc))) then ()
+    else
+        let $type := normalize-space(($doc//tei:bibl[@type='frus-division-type'])[1])
+        let $subtype := normalize-space(($doc//tei:bibl[@type='frus-division-subtype'])[1])
+        (: fh:facets parity: no persons/terms panels on container listings
+           (compilation, chapter) or the index. Other divisions collect their
+           references below; the register list pages themselves mark entries
+           with @sameAs, not @corresp/@target, so they naturally list
+           nothing. :)
+        let $show-registers := not($type = 'compilation' or starts-with($type, 'chapter') or $subtype = 'index')
+        let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
+        return (
+            if ($show-registers) then (
+                hsg:register-panel($context, $publication,
+                    'historicaldocuments.persons', 'Persons', 'persons',
+                    distinct-values($doc//tei:persName/@corresp),
+                    doc($config:data-default || "/" || $publication || "/front/persons.xml")//tei:persName[@sameAs]),
+                hsg:register-panel($context, $publication,
+                    'historicaldocuments.terms', 'Abbreviations &amp; Terms', 'terms',
+                    distinct-values($doc//tei:gloss/@target),
+                    doc($config:data-default || "/" || $publication || "/front/terms.xml")//tei:term[@sameAs])
+            ) else (),
+            hsg:section-nav()
+        )
+};
+
+(:~
+ : One register panel (Persons or Abbreviations &amp; Terms): every distinct
+ : reference the division makes, resolved against the volume's register list
+ : and rendered as a link to the register page with the entry's description
+ : as its tooltip -- fh:get-persons/fh:get-gloss parity, including the
+ : name-sorted order and the hide-if-empty behaviour (a division with no
+ : references gets no panel).
+ :)
+declare %private function hsg:register-panel($context as map(*), $publication as xs:string,
+        $key as xs:string, $label as xs:string, $page as xs:string,
+        $idrefs as xs:string*, $register as element()*) {
+    let $entries :=
+        for $idref in $idrefs
+        let $name := ($register[@sameAs = $idref])[1]
+        where exists($name)
+        let $display := normalize-space($name)
+        order by $display
+        return
+            <li>
+                <a href="{$context?context-path}/historicaldocuments/{$publication}/{$page}{$idref}"
+                    title="{hsg:register-description($name)}">{$display}</a>
+            </li>
+    return
+        if (empty($entries)) then ()
+        else
+            <div class="hsg-panel hsg-frus__register">
+                <h2 class="hsg-sidebar-title">
+                    <pb-i18n key="{$key}">{$label}</pb-i18n>
+                </h2>
+                <ul class="hsg-list-group">{$entries}</ul>
+            </div>
+};
+
+(:~
+ : A register entry's description: the text following the name -- following
+ : siblings of the wrapping hi when the name sits inside one (the usual
+ : encoding: item/hi/persName), of the name itself otherwise -- with the
+ : leading comma stripped. fh:get-persons/fh:get-gloss parity.
+ :)
+declare %private function hsg:register-description($name as element()) as xs:string {
+    let $following :=
+        if ($name/parent::tei:hi) then
+            $name/parent::tei:hi/following-sibling::node()
+        else
+            $name/following-sibling::node()
+    return normalize-space(replace(string-join($following, ''), '^\s*,\s*', ''))
+};
+
+(:~
+ : The static Historical Documents section navigation, reference parity with
+ : hsg-shell's site.xml "sections" aside (7 links). None of these routes
+ : exist in this app yet, so the links point at the production site -- the
+ : same policy as templates/footer.html's links into unported sections; make
+ : them context-path-relative as each page lands.
+ :)
+declare %private function hsg:section-nav() {
+    <div class="hsg-panel hsg-frus__section-nav">
+        <h2 class="hsg-sidebar-title">
+            <pb-i18n key="historicaldocuments.title">Historical Documents</pb-i18n>
+        </h2>
+        <ul class="hsg-list-group">
+            <li><a href="https://history.state.gov/historicaldocuments/about-frus">About the <em>Foreign Relations</em> Series</a></li>
+            <li><a href="https://history.state.gov/historicaldocuments/status-of-the-series">Status of the <em>Foreign Relations</em> Series</a></li>
+            <li><a href="https://history.state.gov/historicaldocuments/frus-history">History of the <em>Foreign Relations</em> Series</a></li>
+            <li><a href="https://history.state.gov/historicaldocuments/ebooks"><em>Foreign Relations</em> Ebooks</a></li>
+            <li><a href="https://history.state.gov/historicaldocuments/other-electronic-resources">Other Electronic Resources</a></li>
+            <li><a href="https://history.state.gov/historicaldocuments/guide-to-sources-on-vietnam-1969-1975">Guide to Sources on Vietnam, 1969-1975</a></li>
+            <li><a href="https://history.state.gov/historicaldocuments/citing-frus">Citing the <em>Foreign Relations</em> series</a></li>
+        </ul>
+    </div>
 };
 
 (:~

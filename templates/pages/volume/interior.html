@@ -9,12 +9,27 @@
         }
     }
     ---
-    [% if $doc?content//tei:bibl[@type='frus-division-type'] = ('chapter', 'chapter-pending', 'compilation') %]
-        [[ hsg:division-listing($context) ]]
-    [% elif starts-with(normalize-space(($doc?content//tei:bibl[@type='frus-division-type'])[1]), 'document') %]
-        [[ page:transform($doc?content, map { "mode": "document-view" }) ]]
-        [[ hsg:prev-next($context) ]]
-    [% else %]
-        [[ page:transform($doc?content, map { "mode": "division" }) ]]
-    [% endif %]
+    <!-- One root element: the layout's main is a flex row whose children each
+         get flex: 1 (resources/css/layout.css, .sticky-layout > main > *), so
+         siblings here would lay out as columns; the wrapper stacks the volume
+         title, content and pager instead. The h2 volume title on every
+         interior page mirrors hsg-shell's navigation title. Sections (front
+         and back matter essays) get the same prev/next pager as documents;
+         their data carries the same relatedItem targets. -->
+    <div class="hsg-frus__interior">
+        [[ hsg:navigation-title($context) ]]
+        [% if $doc?content//tei:bibl[@type='frus-division-type'] = ('chapter', 'chapter-pending', 'compilation') %]
+            [[ hsg:division-listing($context) ]]
+        [% elif starts-with(normalize-space(($doc?content//tei:bibl[@type='frus-division-type'])[1]), 'document') %]
+            [[ page:transform($doc?content, map { "mode": "document-view" }) ]]
+            [[ hsg:prev-next($context) ]]
+        [% else %]
+            [[ page:transform($doc?content, map { "mode": "division" }) ]]
+            [[ hsg:prev-next($context) ]]
+        [% endif %]
+    </div>
+
+    [% template after %]
+    [[ hsg:division-asides($context) ]]
+    [% endtemplate %]
 </template>

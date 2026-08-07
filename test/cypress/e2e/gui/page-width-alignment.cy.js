@@ -89,8 +89,11 @@ describe("page-width alignment", () => {
                     cy.get(".before")
                         .then(($el) => $el[0].getBoundingClientRect().left)
                         .should("be.closeTo", pageLeft, 2);
-                    // ... and main ends where the header's content ends
-                    cy.get("main")
+                    // ... and the band ends where the header's content ends.
+                    // Interior pages carry a populated right sidebar (the
+                    // division asides, PR #32 review), so the band's right
+                    // edge is .after's; main itself stops at the sidebar.
+                    cy.get(".after")
                         .then(($el) => $el[0].getBoundingClientRect().right)
                         .should("be.closeTo", pageRight, 2);
                 });
