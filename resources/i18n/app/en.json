@@ -8,6 +8,7 @@
     "about": "About Us",
     "developer": "Developer Resources",
     "conferences": "Conferences",
+    "open": "Open Government Initiative",
     "collection-root": "Collections",
     "document-root": "Collections",
     "demo": "Demo",
@@ -126,5 +127,8 @@
   },
   "conferences": {
     "title": "Conferences"
+  },
+  "open": {
+    "title": "Open Government Initiative"
   }
 }

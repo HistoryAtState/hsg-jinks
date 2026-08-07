@@ -1,0 +1,56 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                <li>
+                    <a href="[[ $context?context-path ]]/">
+                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/open">
+                        <pb-i18n key="breadcrumb.open">Open Government Initiative</pb-i18n>
+                    </a>
+                </li>
+                <li aria-current="page">Latest Volumes of <em>Foreign Relations of the United
+                        States</em> Series</li>
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="section-landing usa-prose">
+        <h1>Latest Volumes of <em>Foreign Relations of the United States</em> Series</h1>
+
+        <p>The Office of the Historian is responsible, under law, for the preparation and
+            publication of the official historical documentary record of U.S. foreign policy in
+            the <a href="[[ $context?context-path ]]/historicaldocuments">Foreign Relations of
+                the United States</a> series. This dataset is an Atom feed containing an
+            up-to-date list of the most recently published volumes in the <em>Foreign Relations
+                of the United States</em> series. Each record in the dataset contains a volume's
+            title, year of publication, summary, and link to the online volumes.</p>
+        <p><a href="[[ $context?context-path ]]/open/frus-latest.xml">View the feed</a> (Atom)</p>
+        <p>Visit the <a
+                href="https://catalog.data.gov/dataset/latest-volumes-of-foreign-relations-of-the-united-states"
+                >Data.gov catalog entry</a> for this dataset.</p>
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/open/sidebar.html" %]
+    [% endtemplate %]
+</template>
