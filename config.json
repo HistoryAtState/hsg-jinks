@@ -89,6 +89,11 @@
     "prefix" : "confapi",
     "id" : "http://teipublisher.com/api/conferences",
     "path" : "conferences-api.xql"
+  }, {
+    "spec" : "opengov-api.json",
+    "prefix" : "ogapi",
+    "id" : "http://teipublisher.com/api/open",
+    "path" : "opengov-api.xql"
   } ],
   "extends" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
   "skip" : [
