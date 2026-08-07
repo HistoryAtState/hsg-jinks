@@ -1,0 +1,194 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "HSG Jinks Open Government Initiative API",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "description": "Endpoint for testing on localhost",
+            "url": "/exist/apps/hsg-jinks"
+        }
+    ],
+    "paths": {
+        "/open": {
+            "get": {
+                "summary": "Landing page of the Open Government Initiative section",
+                "operationId": "ogapi:index",
+                "x-error-handler": "ogapi:handle-error",
+                "tags": [
+                    "open"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/open/frus-latest": {
+            "get": {
+                "summary": "Explainer page for the \"Latest Volumes\" Atom feed",
+                "operationId": "ogapi:frus-latest-page",
+                "x-error-handler": "ogapi:handle-error",
+                "tags": [
+                    "open"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/open/frus-metadata": {
+            "get": {
+                "summary": "Explainer page for the bibliographic-metadata dump",
+                "operationId": "ogapi:frus-metadata-page",
+                "x-error-handler": "ogapi:handle-error",
+                "tags": [
+                    "open"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/open/frus-latest.xml": {
+            "get": {
+                "summary": "Atom feed of the most recently published FRUS volumes",
+                "operationId": "ogapi:frus-latest-feed",
+                "x-error-handler": "ogapi:handle-error",
+                "tags": [
+                    "open"
+                ],
+                "parameters": [
+                    {
+                        "name": "n",
+                        "in": "query",
+                        "description": "Maximum number of volumes to include, most recently published first.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 10
+                        },
+                        "example": 10
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Atom feed, served as text/xml",
+                        "content": {
+                            "text/xml": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/open/frus-metadata.xml": {
+            "get": {
+                "summary": "Bulk XML dump of FRUS volume bibliographic metadata",
+                "operationId": "ogapi:frus-metadata-feed",
+                "x-error-handler": "ogapi:handle-error",
+                "tags": [
+                    "open"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bibliographic metadata XML dump, served as text/xml",
+                        "content": {
+                            "text/xml": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/open/{page}": {
+            "get": {
+                "summary": "Catch-all for any other path segment under /open",
+                "operationId": "ogapi:not-found",
+                "x-error-handler": "ogapi:handle-error",
+                "tags": [
+                    "open"
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "path",
+                        "description": "Any path segment other than frus-latest, frus-metadata, frus-latest.xml or frus-metadata.xml",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "No page exists at this path",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "security": [
+        {
+            "cookieAuth": []
+        },
+        {
+            "basicAuth": []
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "basicAuth": {
+                "scheme": "basic",
+                "type": "http"
+            },
+            "cookieAuth": {
+                "in": "cookie",
+                "name": "teipublisher.com.login",
+                "type": "apiKey"
+            }
+        }
+    }
+}

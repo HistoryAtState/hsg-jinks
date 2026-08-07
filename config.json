@@ -135,6 +135,11 @@
     "id" : "http://teipublisher.com/api/conferences",
     "path" : "conferences-api.xql"
   }, {
+    "spec" : "opengov-api.json",
+    "prefix" : "ogapi",
+    "id" : "http://teipublisher.com/api/open",
+    "path" : "opengov-api.xql"
+  }, {
     "spec" : "menu-api.json",
     "prefix" : "menuapi",
     "id" : "https://history.state.gov/api/menu",
