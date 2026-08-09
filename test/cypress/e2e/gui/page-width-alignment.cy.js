@@ -112,9 +112,10 @@ describe("page-width alignment", () => {
 
     it("footer is pinned to the bottom of the viewport on a short page", () => {
         // A static page whose content is fixed UI chrome, at a viewport
-        // taller than its content. The volume landing this used to visit is
-        // no longer short: it gained the full table of contents (#1080), so
-        // its footer correctly sits below the fold there.
+        // taller than its content. The volume landing this used to visit
+        // keeps outgrowing whatever viewport the test picks -- first the
+        // full table of contents (#1080), then the tags sidebar panel
+        // (#1101) -- so a data-independent fixture ends the chase.
         cy.viewport(1440, 1600);
         cy.visit("about/contact-us");
         cy.window().then((win) => {

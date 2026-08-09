@@ -99,10 +99,10 @@ RUN curl -L -o /usr/local/exist/autodeploy/jwt-${JWT_VERSION}.xar https://exist-
 # different host.
 RUN curl -fL -o /usr/local/exist/autodeploy/carousel-${CAROUSEL_VERSION}.xar https://github.com/HistoryAtState/carousel/releases/download/v${CAROUSEL_VERSION}/carousel.xar
 
-# All 10 external HistoryAtState data packages -- countries (rdcr, wwdai,
+# All 11 external HistoryAtState data packages -- countries (rdcr, wwdai,
 # OP#1095), departmenthistory (gsh, other-publications, pocom, travels,
 # visits, OP#1096), milestones (OP#1098), about's HAC documents (hac,
-# OP#1097) and conferences (OP#1099) -- always track each repo's LATEST
+# OP#1097), conferences (OP#1099) and tags (OP#1101) -- always track each repo's LATEST
 # GitHub release (decision 2026-08-07, after the milestones/conferences/
 # education epics merged: no data package stays pinned; the full Cypress
 # suite is expected green against current releases). GitHub's
@@ -120,6 +120,7 @@ RUN curl -fL -o /usr/local/exist/autodeploy/pocom.xar https://github.com/History
 RUN curl -fL -o /usr/local/exist/autodeploy/travels.xar https://github.com/HistoryAtState/travels/releases/latest/download/travels.xar
 RUN curl -fL -o /usr/local/exist/autodeploy/visits.xar https://github.com/HistoryAtState/visits/releases/latest/download/visits.xar
 RUN curl -fL -o /usr/local/exist/autodeploy/hac.xar https://github.com/HistoryAtState/hac/releases/latest/download/hac.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/tags.xar https://github.com/HistoryAtState/tags/releases/latest/download/tags.xar
 
 # The jinks generator and the USWDS theme profile are both built from main:
 # we track jinks main, and profile-theme-uswds has no release at all.

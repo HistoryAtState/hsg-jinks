@@ -1,0 +1,26 @@
+<!--
+    Section side navigation, shared by every Tags page (#1173), mirroring the
+    three top-level taxonomy categories (people, places, topics) plus the
+    full taxonomy listing; same static-quick-links shape hsg-shell's own
+    pages/tags/*.xml asides used.
+-->
+<h2>
+    <pb-i18n key="tags.title">Tags</pb-i18n>
+</h2>
+<ul class="usa-sidenav">
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/tags">Overview</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/tags/people">People</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/tags/places">Places</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/tags/topics">Topics</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/tags/all">Full Taxonomy</a>
+    </li>
+</ul>

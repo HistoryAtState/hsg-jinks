@@ -289,12 +289,12 @@ warning that it's missing until a page 404s.
 
 ### External data packages (GitHub releases)
 
-Beyond `frus-data-jinks` above, running the app also needs 10 data packages —
+Beyond `frus-data-jinks` above, running the app also needs 11 data packages —
 the ones backing `/departmenthistory`, `/countries`, `/conferences`,
-`/milestones`, and `/about` — each maintained in its own repo under
+`/about`, `/tags`, and `/milestones` — each maintained in its own repo under
 `github.com/HistoryAtState` and, unlike `frus-data-jinks`, already published
 as a versioned `.xar` GitHub release. That means none of them need the
-frozen-baseline treatment. All 10 are `curl`'d straight into `autodeploy/`
+frozen-baseline treatment. All 11 are `curl`'d straight into `autodeploy/`
 in `Dockerfile.dev` — every fresh container build already has them
 installed, no manual step required — and every one of them always fetches
 its repo's `/releases/latest/` asset (decision 2026-08-07, after the
@@ -312,6 +312,7 @@ pin the data).
 | `other-publications` | https://github.com/HistoryAtState/other-publications/releases/latest |
 | `pocom` | https://github.com/HistoryAtState/pocom/releases/latest |
 | `rdcr` | https://github.com/HistoryAtState/rdcr/releases/latest |
+| `tags` | https://github.com/HistoryAtState/tags/releases/latest |
 | `travels` | https://github.com/HistoryAtState/travels/releases/latest |
 | `visits` | https://github.com/HistoryAtState/visits/releases/latest |
 | `wwdai` | https://github.com/HistoryAtState/wwdai/releases/latest |
@@ -323,7 +324,7 @@ all of them directly into *this worktree's own* devcontainer
 `CLAUDE.md`):
 
 ```sh
-for repo in conferences gsh milestones other-publications pocom rdcr travels visits wwdai hac; do
+for repo in conferences gsh milestones other-publications pocom rdcr tags travels visits wwdai hac; do
   url=$(gh release view --repo HistoryAtState/$repo --json assets -q '.assets[0].url')
   curl -sL -o "/tmp/${repo}.xar" "$url"
   xst --config .xstrc package install "/tmp/${repo}.xar"
@@ -338,6 +339,15 @@ already refetches every package's `/releases/latest/` on the next
 These packages are append-only upstream — see `CLAUDE.md` ("Cypress
 assertions on data-package counts") before writing a test that counts
 anything rendered from them.
+
+`tags`'s own bespoke, non-TEI `taxonomy.xml` is deployed as-is at
+`/db/apps/tags` but never queried directly by the app — `tools/convert-
+taxonomy.xql` (OP#1177) re-encodes it as native TEI
+(`tei:taxonomy`/`tei:category`/`tei:catDesc`) into this app's own
+`data/tags/taxonomy.xml`, which *is* checked in and deploys with the rest of
+`data/`. Re-run that script (`xst --config .xstrc execute -f tools/convert-taxonomy.xql`) and
+commit the refreshed `data/tags/taxonomy.xml` whenever the `tags` package is
+refreshed to a newer release.
 
 ## Sync-down: files to exclude
 

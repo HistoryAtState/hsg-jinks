@@ -1,0 +1,2685 @@
+<tei:TEI xmlns:tei="http://www.tei-c.org/ns/1.0">
+    <tei:teiHeader>
+        <tei:fileDesc>
+            <tei:titleStmt>
+                <tei:title>Office of the Historian Subject Taxonomy of the History of U.S. Foreign Relations</tei:title>
+            </tei:titleStmt>
+            <tei:publicationStmt>
+                <tei:p>Converted from HistoryAtState/tags taxonomy.xml by tools/convert-taxonomy.xql (#1177).</tei:p>
+            </tei:publicationStmt>
+            <tei:sourceDesc>
+                <tei:p>The Subject Taxonomy of the History of U.S. Foreign Relations is a hierarchical taxonomy
+            that consists of categories and tags. The taxonomy is organized into three top-level
+            categories: People, Places, and Topics. Below these top-level categories are additional
+            nested levels of categories and tags, becoming more specific at deeper levels.</tei:p>
+                <tei:p>Each category and tag conforms to the following structure: it must contain an "id" and
+            "label", and optionally can contain a "definition" and/or "usage-hint". The "id"
+            uniquely identifies a tag in the taxonomy and should be lower-cased and
+            hyphen-delimited. The "label" is how the item is displayed to end users. The
+            "definition" defines the item and will be displayed to all users. The "usage-hint"
+            contains instructions to staff who perform the tagging about how to use. To create a
+            definition for a tag, place a "definition" element after an entry's label. To add a
+            usage hint for a tag, place a "usage-hint" element after the label (or after the
+            "definition" element, if one already exists).</tei:p>
+            </tei:sourceDesc>
+        </tei:fileDesc>
+        <tei:encodingDesc>
+            <tei:classDecl>
+                <tei:taxonomy xml:id="hsg-tags">
+                    <tei:category xml:id="people" resp="cozensef" when="2013-04-08">
+                        <tei:catDesc>
+                            <tei:term>People</tei:term>
+                            <tei:p>Contains lists of Presidents and Secretaries of State in chronological
+            order.</tei:p>
+                        </tei:catDesc>
+                        <tei:note type="usage-hint">For people named in resources, only use a person tag if the resource is relevant
+            to their service as President or Secretary.</tei:note>
+                        <tei:category xml:id="presidents" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Presidents</tei:term>
+                                <tei:p>Presidential administrations in chronological order. (P) is appended to a
+                President's name in cases where the President also served as Secretary of State. A
+                range of years is appended in cases where the President served in two
+                non-consecutive administrations.</tei:p>
+                            </tei:catDesc>
+                            <tei:category xml:id="washington-george" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Washington, George</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="adams-john" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Adams, John</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="jefferson-thomas-p" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Jefferson, Thomas (P)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="madison-james-p" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Madison, James (P)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="monroe-james-p" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Monroe, James (P)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="adams-john-quincy-p" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Adams, John Quincy (P)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="jackson-andrew" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Jackson, Andrew</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="van-buren-martin-p" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Van Buren, Martin (P)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="harrison-william-henry" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Harrison, William Henry</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="tyler-john" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Tyler, John</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="polk-james-k" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Polk, James K.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="taylor-zachary" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Taylor, Zachary</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="fillmore-millard" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Fillmore, Millard</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="pierce-franklin" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Pierce, Franklin</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="buchanan-james-p" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Buchanan, James (P)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="lincoln-abraham" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Lincoln, Abraham</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="johnson-andrew" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Johnson, Andrew</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="grant-ulysses-s" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Grant, Ulysses S.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="hayes-rutherford-b" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Hayes, Rutherford B.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="garfield-james-a" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Garfield, James A.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="arthur-chester-a" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Arthur, Chester A.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="cleveland-grover-1885-1889" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Cleveland, Grover (1885–1889)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="harrison-benjamin" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Harrison, Benjamin</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="cleveland-grover-1893-1897" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Cleveland, Grover (1893–1897)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="mckinley-william" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>McKinley, William</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="roosevelt-theodore" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Roosevelt, Theodore</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="taft-william-howard" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Taft, William Howard</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="wilson-woodrow" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Wilson, Woodrow</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="harding-warren-g" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Harding, Warren G.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="coolidge-calvin" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Coolidge, Calvin</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="hoover-herbert" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Hoover, Herbert</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="roosevelt-franklin-d" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Roosevelt, Franklin D.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="truman-harry-s" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Truman, Harry S.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="eisenhower-dwight-d" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Eisenhower, Dwight D.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="kennedy-john-f" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Kennedy, John F.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="johnson-lyndon-b" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Johnson, Lyndon B.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="nixon-richard" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Nixon, Richard</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="ford-gerald" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Ford, Gerald</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="carter-jimmy" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Carter, Jimmy</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="reagan-ronald" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Reagan, Ronald</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="bush-george-h-w" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Bush, George H.W.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="clinton-william-j" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Clinton, William J.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="bush-george-w" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Bush, George W.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="obama-barack" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Obama, Barack</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="trump-donald-j-45" resp="wicentowskijc" when="2025-01-24">
+                                <tei:catDesc>
+                                    <tei:term>Trump, Donald J. (2017–2021)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="biden-joseph-r" resp="wicentowskijc" when="2025-01-24">
+                                <tei:catDesc>
+                                    <tei:term>Biden, Joseph R.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="trump-donald-j-47" resp="wicentowskijc" when="2025-01-24">
+                                <tei:catDesc>
+                                    <tei:term>Trump, Donald J. (2025–)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                        <tei:category xml:id="secretaries-of-state" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Secretaries of State</tei:term>
+                                <tei:p>Secretaries of State in chronological order. (S) is appended to a
+                Secretary's name in cases where the Secretary also served as President. A range of
+                years is appended in cases where the Secretary served
+                non-consecutively.</tei:p>
+                            </tei:catDesc>
+                            <tei:category xml:id="jefferson-thomas-s" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Jefferson, Thomas (S)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="randolph-edmund-jennings" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Randolph, Edmund Jennings</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="pickering-timothy" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Pickering, Timothy</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="marshall-john" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Marshall, John</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="madison-james-s" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Madison, James (S)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="smith-robert" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Smith, Robert</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="monroe-james-s" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Monroe, James (S)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="adams-john-quincy-s" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Adams, John Quincy (S)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="clay-henry" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Clay, Henry</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="van-buren-martin-s" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Van Buren, Martin (S)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="livingston-edward" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Livingston, Edward</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="mclane-louis" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>McLane, Louis</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="forsyth-john" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Forsyth, John</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="webster-daniel-1841-1843" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Webster, Daniel (1841–1843)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="upshur-abel-parker" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Upshur, Abel Parker</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="calhoun-john-caldwell" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Calhoun, John Caldwell</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="buchanan-james-s" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Buchanan, James (S)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="clayton-john-middleton" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Clayton, John Middleton</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="webster-daniel-1850-1852" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Webster, Daniel (1850–1852)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="everett-edward" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Everett, Edward</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="marcy-william-learned" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Marcy, William Learned</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="cass-lewis" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Cass, Lewis</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="black-jeremiah-sullivan" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Black, Jeremiah Sullivan</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="seward-william-henry" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Seward, William Henry</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="washburne-elihu-benjamin" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Washburne, Elihu Benjamin</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="fish-hamilton" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Fish, Hamilton</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="evarts-william-maxwell" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Evarts, William Maxwell</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="blaine-james-gillespie-1881" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Blaine, James Gillespie (1881)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="frelinghuysen-frederick-theodore" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Frelinghuysen, Frederick Theodore</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="bayard-thomas-francis" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Bayard, Thomas Francis</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="blaine-james-gillespie-1889-1892" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Blaine, James Gillespie (1889–1892)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="foster-john-watson" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Foster, John Watson</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="gresham-walter-quintin" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Gresham, Walter Quintin</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="olney-richard" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Olney, Richard</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="sherman-john" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Sherman, John</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="day-william-rufus" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Day, William Rufus</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="hay-john-milton" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Hay, John Milton</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="root-elihu" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Root, Elihu</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="bacon-robert" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Bacon, Robert</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="knox-philander-chase" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Knox, Philander Chase</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="bryan-william-jennings" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Bryan, William Jennings</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="lansing-robert" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Lansing, Robert</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="colby-bainbridge" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Colby, Bainbridge</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="hughes-charles-evans" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Hughes, Charles Evans</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="kellogg-frank-billings" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Kellogg, Frank Billings</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="stimson-henry-lewis" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Stimson, Henry Lewis</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="hull-cordell" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Hull, Cordell</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="stettinius-edward-reilly" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Stettinius, Edward Reilly</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="byrnes-james-francis" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Byrnes, James Francis</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="marshall-george-catlett" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Marshall, George Catlett</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="acheson-dean-gooderham" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Acheson, Dean Gooderham</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="dulles-john-foster" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Dulles, John Foster</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="herter-christian-archibald" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Herter, Christian Archibald</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="rusk-david-dean" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Rusk, David Dean</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="rogers-william-pierce" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Rogers, William Pierce</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="kissinger-henry-a" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Kissinger, Henry A.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="vance-cyrus-roberts" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Vance, Cyrus Roberts</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="muskie-edmund-sixtus" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Muskie, Edmund Sixtus</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="haig-alexander-meigs" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Haig, Alexander Meigs</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="shultz-george-pratt" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Shultz, George Pratt</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="baker-james-addison" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Baker, James Addison</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="eagleburger-lawrence-sidney" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Eagleburger, Lawrence Sidney</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="christopher-warren-minor" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Christopher, Warren Minor</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="albright-madeleine-korbel" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Albright, Madeleine Korbel</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="powell-colin-luther" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Powell, Colin Luther</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="rice-condoleezza" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Rice, Condoleezza</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="clinton-hillary-rodham" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Clinton, Hillary Rodham</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="kerry-john-forbes" resp="wicentowskijc" when="2025-01-24">
+                                <tei:catDesc>
+                                    <tei:term>Kerry, John Forbes</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="tillerson-rex-w" resp="wicentowskijc" when="2025-01-24">
+                                <tei:catDesc>
+                                    <tei:term>Tillerson, Rex W.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="pompeo-michael-r" resp="wicentowskijc" when="2025-01-24">
+                                <tei:catDesc>
+                                    <tei:term>Pompeo, Michael R.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="blinken-antony" resp="wicentowskijc" when="2025-01-24">
+                                <tei:catDesc>
+                                    <tei:term>Blinken, Antony</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="rubio-marco" resp="wicentowskijc" when="2025-01-24">
+                                <tei:catDesc>
+                                    <tei:term>Rubio, Marco</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                    </tei:category>
+                    <tei:category xml:id="places" resp="cozensef" when="2013-04-08">
+                        <tei:catDesc>
+                            <tei:term>Places</tei:term>
+                            <tei:p>Territories on today's map of the world, as classified by status and region by
+            the Bureau of Intelligence and Research, U.S. Department of State. (The current list was
+            taken from <tei:ref target="http://www.state.gov/s/inr/states/index.htm">Independent States and
+                Dependencies</tei:ref>, accessed on January 3, 2013.)</tei:p>
+                        </tei:catDesc>
+                        <tei:category xml:id="sovereign-territories" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Sovereign Territories</tei:term>
+                            </tei:catDesc>
+                            <tei:category xml:id="sub-saharan-africa" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Sub-Saharan Africa</tei:term>
+                                </tei:catDesc>
+                                <tei:category xml:id="angola" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Angola</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="benin" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Benin</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="botswana" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Botswana</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="burkina-faso" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Burkina Faso</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="burundi" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Burundi</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="cameroon" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Cameroon</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="cape-verde" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Cape Verde</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="central-african-republic" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Central African Republic</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="chad" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Chad</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="comoros" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Comoros</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="congo-brazzaville" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Congo (Brazzaville)</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="cote-divoire" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Cote d’Ivoire</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="democratic-republic-of-the-congo-kinshasa" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Democratic Republic of the Congo (Kinshasa)</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="djibouti" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Djibouti</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="equatorial-guinea" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Equatorial Guinea</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="eritrea" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Eritrea</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="ethiopia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Ethiopia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="gabon" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Gabon</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="the-gambia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>The Gambia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="ghana" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Ghana</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="guinea" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Guinea</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="guinea-bissau" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Guinea-Bissau</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="kenya" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Kenya</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="lesotho" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Lesotho</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="liberia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Liberia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="madagascar" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Madagascar</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="malawi" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Malawi</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="mali" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Mali</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="mauritania" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Mauritania</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="mauritius" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Mauritius</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="mozambique" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Mozambique</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="namibia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Namibia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="niger" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Niger</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="nigeria" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Nigeria</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="rwanda" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Rwanda</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="sao-tome-and-principe" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Sao Tome and Principe</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="senegal" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Senegal</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="seychelles" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Seychelles</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="sierra-leone" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Sierra Leone</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="somalia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Somalia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="south-africa" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>South Africa</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="south-sudan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>South Sudan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="sudan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Sudan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="swaziland" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Swaziland</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="tanzania" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Tanzania</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="togo" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Togo</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="uganda" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Uganda</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="zambia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Zambia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="zimbabwe" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Zimbabwe</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                            </tei:category>
+                            <tei:category xml:id="east-asia-and-pacific" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>East Asia and Pacific</tei:term>
+                                </tei:catDesc>
+                                <tei:category xml:id="australia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Australia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="brunei" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Brunei</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="burma" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Burma</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="cambodia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Cambodia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="china" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>China</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="the-federated-states-of-micronesia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>The Federated States of Micronesia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="fiji" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Fiji</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="indonesia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Indonesia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="japan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Japan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="kiribati" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Kiribati</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="laos" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Laos</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="malaysia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Malaysia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="marshall-islands" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Marshall Islands</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="mongolia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Mongolia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="nauru" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Nauru</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="new-zealand" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>New Zealand</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="north-korea" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>North Korea</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="palau" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Palau</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="papua-new-guinea" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Papua New Guinea</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="philippines" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Philippines</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="samoa" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Samoa</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="singapore" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Singapore</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="solomon-islands" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Solomon Islands</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="south-korea" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>South Korea</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="taiwan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Taiwan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="thailand" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Thailand</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="timor-leste" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Timor-Leste</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="tonga" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Tonga</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="tuvalu" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Tuvalu</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="vanuatu" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Vanuatu</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="vietnam" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Vietnam</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                            </tei:category>
+                            <tei:category xml:id="europe" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Europe</tei:term>
+                                </tei:catDesc>
+                                <tei:category xml:id="albania" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Albania</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="andorra" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Andorra</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="armenia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Armenia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="austria" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Austria</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="azerbaijan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Azerbaijan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="belarus" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Belarus</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="belgium" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Belgium</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="bosnia-and-herzegovina" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Bosnia and Herzegovina</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="bulgaria" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Bulgaria</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="croatia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Croatia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="cyprus" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Cyprus</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="czech-republic" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Czech Republic</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="denmark" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Denmark</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="estonia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Estonia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="finland" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Finland</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="france" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>France</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="georgia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Georgia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="germany" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Germany</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="greece" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Greece</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="holy-see" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Holy See</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="hungary" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Hungary</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="iceland" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Iceland</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="ireland" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Ireland</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="italy" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Italy</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="kosovo" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Kosovo</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="latvia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Latvia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="liechtenstein" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Liechtenstein</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="lithuania" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Lithuania</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="luxembourg" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Luxembourg</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="macedonia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Macedonia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="malta" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Malta</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="moldova" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Moldova</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="monaco" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Monaco</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="montenegro" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Montenegro</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="netherlands" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Netherlands</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="norway" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Norway</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="poland" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Poland</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="portugal" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Portugal</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="romania" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Romania</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="russia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Russia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="san-marino" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>San Marino</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="serbia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Serbia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="slovakia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Slovakia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="slovenia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Slovenia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="spain" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Spain</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="sweden" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Sweden</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="switzerland" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Switzerland</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="turkey" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Turkey</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="ukraine" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Ukraine</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="united-kingdom" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>United Kingdom</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                            </tei:category>
+                            <tei:category xml:id="near-east" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Near East</tei:term>
+                                </tei:catDesc>
+                                <tei:category xml:id="algeria" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Algeria</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="bahrain" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Bahrain</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="egypt" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Egypt</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="iran" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Iran</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="iraq" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Iraq</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="israel" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Israel</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="jordan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Jordan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="kuwait" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Kuwait</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="lebanon" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Lebanon</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="libya" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Libya</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="morocco" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Morocco</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="oman" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Oman</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="qatar" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Qatar</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="saudi-arabia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Saudi Arabia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="syria" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Syria</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="tunisia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Tunisia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="united-arab-emirates" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>United Arab Emirates</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="yemen" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Yemen</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                            </tei:category>
+                            <tei:category xml:id="south-and-central-asia" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>South and Central Asia</tei:term>
+                                </tei:catDesc>
+                                <tei:category xml:id="afghanistan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Afghanistan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="bangladesh" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Bangladesh</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="bhutan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Bhutan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="india" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>India</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="kazakhstan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Kazakhstan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="kyrgyzstan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Kyrgyzstan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="maldives" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Maldives</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="nepal" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Nepal</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="pakistan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Pakistan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="sri-lanka" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Sri Lanka</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="tajikistan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Tajikistan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="turkmenistan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Turkmenistan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="uzbekistan" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Uzbekistan</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                            </tei:category>
+                            <tei:category xml:id="western-hemisphere" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Western Hemisphere</tei:term>
+                                </tei:catDesc>
+                                <tei:category xml:id="antigua-and-barbuda" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Antigua and Barbuda</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="argentina" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Argentina</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="the-bahamas" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>The Bahamas</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="barbados" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Barbados</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="belize" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Belize</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="bolivia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Bolivia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="brazil" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Brazil</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="canada" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Canada</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="chile" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Chile</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="colombia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Colombia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="costa-rica" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Costa Rica</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="cuba" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Cuba</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="dominica" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Dominica</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="dominican-republic" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Dominican Republic</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="ecuador" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Ecuador</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="el-salvador" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>El Salvador</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="grenada" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Grenada</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="guatemala" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Guatemala</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="guyana" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Guyana</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="haiti" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Haiti</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="honduras" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Honduras</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="jamaica" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Jamaica</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="mexico" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Mexico</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="nicaragua" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Nicaragua</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="panama" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Panama</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="paraguay" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Paraguay</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="peru" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Peru</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="st-kitts-and-nevis" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>St. Kitts and Nevis</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="st-lucia" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>St. Lucia</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="st-vincent-and-the-grenadines" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>St. Vincent and the Grenadines</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="suriname" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Suriname</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="trinidad-and-tobago" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Trinidad and Tobago</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="uruguay" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Uruguay</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="venezuela" resp="cozensef" when="2013-04-08">
+                                    <tei:catDesc>
+                                        <tei:term>Venezuela</tei:term>
+                                    </tei:catDesc>
+                                </tei:category>
+                            </tei:category>
+                        </tei:category>
+                        <tei:category xml:id="dependencies-and-areas-of-special-sovereignty" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Dependencies and Areas of Special Sovereignty</tei:term>
+                            </tei:catDesc>
+                            <tei:category xml:id="akrotiri" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Akrotiri</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="american-samoa" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>American Samoa</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="anguilla" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Anguilla</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="aruba" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Aruba</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="ashmore-and-cartier-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Ashmore and Cartier Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="azores" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Azores</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="baker-island" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Baker Island</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="bermuda" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Bermuda</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="bouvet-island" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Bouvet Island</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="british-indian-ocean-territory" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>British Indian Ocean Territory</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="cayman-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Cayman Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="christmas-island" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Christmas Island</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="clipperton-island" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Clipperton Island</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="cocos-keeling-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Cocos (Keeling) Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="cook-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Cook Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="coral-sea-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Coral Sea Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="curacao" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Curacao</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="dhekelia" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Dhekelia</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="falkland-islands-islas-malvinas" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Falkland Islands (Islas Malvinas)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="faroe-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Faroe Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="french-guiana" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>French Guiana</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="french-polynesia" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>French Polynesia</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="french-southern-and-antarctic-lands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>French Southern and Antarctic Lands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="gibraltar" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Gibraltar</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="greenland" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Greenland</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="guadeloupe" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Guadeloupe</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="guam" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Guam</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="guernsey" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Guernsey</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="heard-island-and-mcdonald-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Heard Island and McDonald Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="hong-kong" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Hong Kong</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="howland-island" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Howland Island</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="isle-of-man" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Isle of Man</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="jan-mayen" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Jan Mayen</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="jarvis-island" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Jarvis Island</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="jersey" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Jersey</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="johnson-atoll" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Johnson Atoll</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="kingman-reef" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Kingman Reef</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="macau" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Macau</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="martinique" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Martinique</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="mayotte" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Mayotte</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="midway-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Midway Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="monterserrat" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Monterserrat</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="navassa-island" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Navassa Island</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="new-caledonia" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>New Caledonia</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="niue" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Niue</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="norfolk-island" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Norfolk Island</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="northern-mariana-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Northern Mariana Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="palmyra-atoll" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Palmyra Atoll</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="pitcairn-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Pitcairn Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="puerto-rico" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Puerto Rico</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="reunion" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Reunion</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="saint-barthelemy" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Saint Barthelemy</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="saint-helena" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Saint Helena</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="saint-martin" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Saint Martin</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="saint-pierre-and-miquelon" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Saint Pierre and Miquelon</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="sint-maarten" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Sint Maarten</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="south-georgia-and-the-south-sandwich-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>South Georgia and the South Sandwich Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="svalbard" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Svalbard</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="tokelau" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Tokelau</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="turks-and-caicos-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Turks and Caicos Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="virgin-islands-british" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Virgin Islands, British</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="virgin-islands-u-s" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Virgin Islands, U.S.</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="wake-island" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Wake Island</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="wallis-and-futuna" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Wallis and Futuna</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="zanzibar" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Zanzibar</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                        <tei:category xml:id="other" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Other</tei:term>
+                            </tei:catDesc>
+                            <tei:category xml:id="antarctica" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Antarctica</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="palestine" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Palestine</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="paracel-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Paracel Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="spratly-islands" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Spratly Islands</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="western-sahara" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Western Sahara</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                    </tei:category>
+                    <tei:category xml:id="topics" resp="cozensef" when="2013-04-08">
+                        <tei:catDesc>
+                            <tei:term>Topics</tei:term>
+                        </tei:catDesc>
+                        <tei:category xml:id="arms-control-and-disarmament" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Arms Control and Disarmament</tei:term>
+                            </tei:catDesc>
+                            <tei:category xml:id="arms-embargoes" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Arms Embargoes</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="arms-transfers" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Arms Transfers</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="chemical-and-bacteriological-warfare" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Chemical and Bacteriological Warfare</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="collective-security" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Collective Security</tei:term>
+                                    <tei:p>The general concept of collective security. Specific treaties and
+                    organizations have their own tags.</tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="confidence-building-measures" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Confidence-Building Measures</tei:term>
+                                    <tei:p>Measures taken to reduce fear of attack.</tei:p>
+                                </tei:catDesc>
+                                <tei:note type="usage-hint">These measures will usually be explicitly be labeled as such by
+                    negotiating partners.</tei:note>
+                            </tei:category>
+                            <tei:category xml:id="nuclear-nonproliferation" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Nuclear Nonproliferation</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="nuclear-weapons" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Nuclear Weapons</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                        <tei:category xml:id="department-of-state" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Department of State</tei:term>
+                            </tei:catDesc>
+                            <tei:note type="usage-hint">Do not use as tag; this term is too general.</tei:note>
+                            <tei:category xml:id="buildings-domestic" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Buildings: Domestic</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="buildings-foreign" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Buildings: Foreign</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="congressional-relations" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Congressional Relations</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="organization-and-management" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Organization and Management</tei:term>
+                                    <tei:p>Internal management of the Department itself—i.e., rules, regulations,
+                    (re-)organization, etc.—rather than the management of foreign
+                    relations.</tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="personnel-civil-service" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Personnel: Civil Service</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="personnel-demographics" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Personnel: Demographics</tei:term>
+                                    <tei:p>Analyses or censuses of the composition of Department personnel—e.g.,
+                    race, gender, educational background, etc.</tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="personnel-foreign-service" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Personnel: Foreign Service</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="personnel-locally-employed-staff" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Personnel: Locally Employed Staff</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="protection-of-americans-abroad" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Protection of Americans Abroad</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="protocol" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Protocol</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                        <tei:category xml:id="foreign-economic-policy" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Foreign Economic Policy</tei:term>
+                            </tei:catDesc>
+                            <tei:category xml:id="agriculture" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Agriculture</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="economic-sanctions" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Economic Sanctions</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="economic-summit-meetings" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Economic Summit Meetings</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="energy-and-natural-resources" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Energy and Natural Resources</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="financial-and-monetary-policy" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Financial and Monetary Policy</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="foreign-aid" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Foreign Aid</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="foreign-investment" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Foreign Investment</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="labor" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Labor</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="new-international-economic-order" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>New International Economic Order</tei:term>
+                                    <tei:p>The proposal made in the 1970s by developing countries to replace the
+                    Bretton Woods system</tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="trade-and-commercial-policy-agreements" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Trade and Commercial Policy/Agreements</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                        <tei:category xml:id="global-issues" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Global Issues</tei:term>
+                            </tei:catDesc>
+                            <tei:note type="usage-hint">Do not use as tag; this term is too general.</tei:note>
+                            <tei:category xml:id="border-administration" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Border Administration</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="decolonization" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Decolonization</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="elections" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Elections</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="immigration" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Immigration</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="narcotics" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Narcotics</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="outer-space" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Outer Space</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="peace" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Peace</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="polar-affairs" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Polar Affairs</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="population-demographics" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Population Demographics</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="self-determination" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Self-Determination</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                        <tei:category xml:id="human-rights" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Human Rights</tei:term>
+                            </tei:catDesc>
+                            <tei:category xml:id="antisemitism" resp="rossat" when="2020-08-25">
+                                <tei:catDesc>
+                                    <tei:term>Antisemitism</tei:term>
+                                    <tei:p>Includes anti-Jewish attitudes and policies as well as programs to
+                    combat anti-Jewish sentiments, discrimination, and governmental action against
+                    individuals, property, community institutions, and/or religious facilities
+                    affiliated or perceived to be affiliated with Jewish persons or
+                    faith.</tei:p>
+                                </tei:catDesc>
+                                <tei:note type="usage-hint">As delineated in a 2010 fact sheet by the U.S. Department of State's
+                    Special Envoy to Monitor and Combat Anti-Semitism and affirmed by the Office of
+                    Religious Freedom in 2020, criticism of Israel similar to that leveled against
+                    any other country should not be categorized as anti-Semitic. (References: •
+                    https://2009-2017.state.gov/j/drl/rls/fs/2010/122352.htm •
+                    https://www.state.gov/defining-anti-semitism/ )</tei:note>
+                                <tei:category xml:id="antisemitism-europe" resp="kinniburghva" when="2023-03-20">
+                                    <tei:catDesc>
+                                        <tei:term>Antisemitism: Europe, 1919–1939</tei:term>
+                                        <tei:p>Documents that chronicle the U.S. foreign policy establishment’s
+                        response to the rise of anti-Jewish sentiment, discrimination, and actions
+                        in Europe in the period between the end of World War I and the start of
+                        World War II.</tei:p>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="antisemitism-world-war-ii" resp="kinniburghva" when="2023-03-20">
+                                    <tei:catDesc>
+                                        <tei:term>Antisemitism: World War II</tei:term>
+                                        <tei:p>Documents that chronicle the U.S. foreign policy establishment’s
+                        response to the systematic persecution of persons of Jewish descent during
+                        World War II.</tei:p>
+                                    </tei:catDesc>
+                                </tei:category>
+                                <tei:category xml:id="antisemitism-post-world-war-ii" resp="kinniburghva" when="2023-03-20">
+                                    <tei:catDesc>
+                                        <tei:term>Antisemitism: Soviet Union and Eastern Europe, post-1945</tei:term>
+                                        <tei:p>Documents that chronicle the the U.S. foreign policy establishment’s
+                        response to continued anti-Jewish attitudes and policies in the Soviet Union
+                        and Eastern Europe in the aftermath of World War II.</tei:p>
+                                    </tei:catDesc>
+                                </tei:category>
+                            </tei:category>
+                            <tei:category xml:id="asylum" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Asylum</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="chinese-exclusion-act-1882" resp="kinniburghva" when="2023-05-08">
+                                <tei:catDesc>
+                                    <tei:term>Chinese Exclusion Act (1882)</tei:term>
+                                    <tei:p>The Chinese Exclusion Act of 1882 suspended the immigration of Chinese
+                    laborers for a period of 10 years. It was the first in American history to place
+                    broad restrictions on immigration. More severe exclusion followed in subsequent
+                    legislation. The Act was repealed in 1943.</tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="civil-rights" resp="rossat" when="2020-08-25">
+                                <tei:catDesc>
+                                    <tei:term>Civil Rights</tei:term>
+                                    <tei:p>Citizens’ rights as established by law and protected by national or
+                    state constitution in domestic and foreign contexts.</tei:p>
+                                </tei:catDesc>
+                                <tei:note type="usage-hint">Works on the rights of persons regardless of their legal, socioeconomic
+                    or cultural status and as recognized by the international community should be
+                    entered under the broader term <tei:ptr target="#human-rights"/>.</tei:note>
+                                <tei:category xml:id="civil-rights-domestic" resp="kinniburghva" when="2023-03-20">
+                                    <tei:catDesc>
+                                        <tei:term>Civil Rights: Domestic</tei:term>
+                                        <tei:p>Documents that chronicle the civil rights movement against racial
+                        segregation and discrimination in the United States, including events and
+                        policies leading up to and following the passage of the Civil Rights Act of
+                        1964.</tei:p>
+                                    </tei:catDesc>
+                                    <tei:note type="usage-hint">Works on the rights of persons regardless of their legal,
+                        socioeconomic or cultural status and as recognized by the international
+                        community should be entered under the broader term <tei:ptr target="#human-rights"/>.</tei:note>
+                                </tei:category>
+                                <tei:category xml:id="civil-rights-foreign" resp="kinniburghva" when="2023-03-20">
+                                    <tei:catDesc>
+                                        <tei:term>Civil Rights: Foreign</tei:term>
+                                        <tei:p>Citizens’ rights outside the United States as established by law of
+                        a nation or sovereign territory and protected by national or state
+                        constitution.</tei:p>
+                                    </tei:catDesc>
+                                    <tei:note type="usage-hint">Works on the rights of persons regardless of their legal,
+                        socioeconomic or cultural status and as recognized by the international
+                        community should be entered under the broader term <tei:ptr target="#human-rights"/>.</tei:note>
+                                </tei:category>
+                            </tei:category>
+                            <tei:category xml:id="detainees" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Detainees</tei:term>
+                                    <tei:p>People held in custody or confinement who are not accorded the legal
+                    status of other terms in this taxonomy—i.e., <tei:ptr target="#asylum"/> or <tei:ptr target="#refugees"/>
+                </tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="disability-rights" resp="kinniburghva" when="2023-03-20">
+                                <tei:catDesc>
+                                    <tei:term>Disability Rights</tei:term>
+                                    <tei:p>Includes policies, programs, negotiations, and treatment related to the
+                    equal employment, accomodations, and rights of individuals with disabilities,
+                    including veterans and employees of the federal government.</tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="genocide" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Genocide</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="hiv-aids" resp="rossat" when="2020-08-25">
+                                <tei:catDesc>
+                                    <tei:term>HIV/AIDS</tei:term>
+                                    <tei:p>Includes monitoring, research, and efforts to treat and control human
+                    immunodeficiency virus (HIV) infections and acquired immunodeficiency syndrome
+                    (AIDS) disease as well as policies affecting individuals and communities
+                    impacted by HIV/AIDS.</tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="political-prisoners" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Political Prisoners</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="refugees" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Refugees</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                        <tei:category xml:id="information-programs" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Information Programs</tei:term>
+                                <tei:p>U.S. information activity in foreign countries</tei:p>
+                            </tei:catDesc>
+                        </tei:category>
+                        <tei:category xml:id="international-law" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>International Law</tei:term>
+                            </tei:catDesc>
+                            <tei:category xml:id="domestic-protest-against-u-s-activity" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Domestic Protest against U.S. Activity</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="foreign-protest-against-u-s-activity" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Foreign Protest against U.S. Activity</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="law-of-the-sea" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Law of the Sea</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="property-claims" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Property Claims</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                        <tei:category xml:id="international-organizations" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>International Organizations</tei:term>
+                                <tei:p>Organizations which do not have specific tags, or for general works on
+                international organizations.</tei:p>
+                            </tei:catDesc>
+                            <tei:note type="usage-hint">If an organization begins to appear frequently, please suggest a separate
+                tag for the organization.</tei:note>
+                            <tei:category xml:id="association-of-southeast-asian-nations" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Association of Southeast Asian Nations</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="conference-on-security-and-cooperation-in-europe" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Conference on Security and Cooperation in Europe</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="european-advisory-commission" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>European Advisory Commission</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="european-economic-community" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>European Economic Community</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="far-eastern-commission" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Far Eastern Commission</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="general-agreement-on-tariffs-and-trade" resp="eckrothsl" when="2022-09-01">
+                                <tei:catDesc>
+                                    <tei:term>General Agreement on Tariffs and Trade</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="international-monetary-fund" resp="cozensef" when="2013-10-15">
+                                <tei:catDesc>
+                                    <tei:term>International Monetary Fund</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="league-of-nations" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>League of Nations</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="international-atomic-energy-agency" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>International Atomic Energy Agency</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="non-governmental-organizations" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Non-governmental Organizations</tei:term>
+                                    <tei:p>Organizations which are not affiliated with governments—e.g., Red Cross,
+                    Human Rights Watch, Doctors without Borders.</tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="north-atlantic-treaty-organization" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>North Atlantic Treaty Organization</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="organization-of-american-states" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Organization of American States</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="organization-of-petroleum-exporting-countries" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Organization of Petroleum Exporting Countries</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="southeast-asia-treaty-organization" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Southeast Asia Treaty Organization</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="united-nations" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>United Nations</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="universal-postal-union" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Universal Postal Union</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="world-trade-organization" resp="cozensef" when="2013-10-15">
+                                <tei:catDesc>
+                                    <tei:term>World Trade Organization</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                        <tei:category xml:id="politico-military-issues" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Politico-Military issues</tei:term>
+                            </tei:catDesc>
+                            <tei:note type="usage-hint">Do not use as tag; this term is too general.</tei:note>
+                            <tei:category xml:id="alliances" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Alliances</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="armistices" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Armistices</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="covert-actions" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Covert Action</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="diplomatic-recognition" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Diplomatic Recognition</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="military-bases" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Military Bases</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="military-intervention-presence-and-withdrawal" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Military Intervention, Presence and Withdrawal</tei:term>
+                                    <tei:p>Military action not covered by a specific tag under <tei:ptr target="#warfare"/>
+                </tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="national-security-council" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>National Security Council</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="national-security-policy" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>National Security Policy</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="quarantine-blockade" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Quarantine (Blockade)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="terrorism" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Terrorism</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                        <tei:category xml:id="science-and-technology" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Science and Technology</tei:term>
+                            </tei:catDesc>
+                            <tei:category xml:id="atomic-energy" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Atomic Energy</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                        <tei:category xml:id="warfare" resp="cozensef" when="2013-04-08">
+                            <tei:catDesc>
+                                <tei:term>Warfare</tei:term>
+                            </tei:catDesc>
+                            <tei:category xml:id="afghanistan-conflict-2001" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Afghanistan Conflict (2001)</tei:term>
+                                    <tei:p>U.S. military presence in Afghanistan post-2001</tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="american-revolutionary-war" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>American Revolutionary War</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="arab-israeli-dispute" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Arab-Israeli Dispute</tei:term>
+                                    <tei:p>The ongoing conflict in the Middle East</tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="civil-war-u-s" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Civil War (U.S.)</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="cuban-missile-crisis" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Cuban Missile Crisis</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="geneva-convention" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Geneva Convention</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="iraq-war-2003" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Iraq War (2003)</tei:term>
+                                    <tei:p>U.S. military presence in Iraq post-2003</tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="korean-war" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Korean War</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="mexican-american-war" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Mexican-American War</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="neutrality" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Neutrality</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="prisoners-of-war" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Prisoners of War</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="spanish-american-war" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Spanish-American War</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="suez-canal" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Suez Canal</tei:term>
+                                    <tei:p>Suez Crisis of 1956</tei:p>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="vietnam-conflict" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>Vietnam Conflict</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="war-crimes-and-war-criminals" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>War Crimes and War Criminals</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="war-of-1812" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>War of 1812</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="world-war-i" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>World War I</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                            <tei:category xml:id="world-war-ii" resp="cozensef" when="2013-04-08">
+                                <tei:catDesc>
+                                    <tei:term>World War II</tei:term>
+                                </tei:catDesc>
+                            </tei:category>
+                        </tei:category>
+                    </tei:category>
+                </tei:taxonomy>
+            </tei:classDecl>
+        </tei:encodingDesc>
+    </tei:teiHeader>
+</tei:TEI>
