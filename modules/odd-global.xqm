@@ -35,10 +35,20 @@ declare variable $config:app-root :=
 declare variable $config:register-root := $config:data-root || "/registers";
 
 (:~
+ : The name of the FRUS volumes collection inside the data directory
+ : (PR #32 review): compiled ODD transforms import this module under the
+ : global: prefix, so models reference it as $global:frus-volumes instead
+ : of hardcoding the literal. Keep in sync with generated-config.xql's
+ : $config:frus-volumes (this module cannot import it: odd-global must
+ : stay dependency-free for the transform pipeline).
+ :)
+declare variable $config:frus-volumes as xs:string := "frus-v2-data";
+
+(:~
  : The default data collection.
  :)
 
-  declare variable $config:data-default as xs:string :=   $config:data-root || "/frus-v2-data";
+  declare variable $config:data-default as xs:string :=   $config:data-root || "/" || $config:frus-volumes;
 
 
 (:~

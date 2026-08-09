@@ -329,8 +329,13 @@ Visually confirmed in the browser on the host port.
 
 ## Data
 
-The app's `defaults.data` points at `/db/apps/frus-data-jinks/data` (default
-collection `Publications`). That is supplied by the sibling repo
+The path splits into two configuration values (PR #32 review), never one
+hardcoded string: the **data directory** (`config.json` `"data"` →
+`$config:data-root`, `/db/apps/frus-data-jinks/data`) and the **FRUS
+volumes collection inside it** (`config.json` `"data-default"` →
+`$config:frus-volumes`, `frus-v2-data`; mirrored for compiled ODD
+transforms as `$global:frus-volumes` in `modules/odd-global.xqm`).
+`$config:data-default` is their join. The data is supplied by the sibling repo
 **`../../hsg-jinks-data`** (git `HistoryAtState/hsg-jinks-data`), an eXist data
 package deploying to `/db/apps/frus-data-jinks`.
 

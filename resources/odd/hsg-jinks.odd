@@ -251,7 +251,7 @@
                     to only the "bare filename" shape (no scheme, no leading slash) so it doesn't
                     touch any graphic that already carries a full path/URL elsewhere in the
                     app.</desc>
-                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/frus-v2-data/')" behaviour="graphic">
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/' || $global:frus-volumes || '/')" behaviour="graphic">
                     <desc>FRUS document graphics (PR #32 review audit): the v2 corpus encodes
                         graphic/@url as a bare, extension-less basename (e.g. "d312p1" in
                         frus1981-88v05 appC). Reference parity with hsg-shell's frus.odd graphic
@@ -263,7 +263,7 @@
                         because the transform may receive a fragment whose root no longer carries
                         the teiHeader (root(.)//bibl came back empty at runtime) while the base
                         URI survives.</desc>
-                    <param name="url" value="'https://static.history.state.gov/frus/' || substring-before(substring-after(base-uri(/), '/frus-v2-data/'), '/') || '/' || @url || (if (matches(@url, '\.(jpg|jpeg|png|gif|svg)$')) then '' else '.png')"/>
+                    <param name="url" value="'https://static.history.state.gov/frus/' || substring-before(substring-after(base-uri(/), '/' || $global:frus-volumes || '/'), '/') || '/' || @url || (if (matches(@url, '\.(jpg|jpeg|png|gif|svg)$')) then '' else '.png')"/>
                     <param name="width" value="@width"/>
                     <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
@@ -427,14 +427,14 @@
                             <template slot="alternate"><pb-i18n key="odd.[[type]]"/>:  [[ content ]]</template>
             </pb-popover></li></pb:template>
                 </model>
-                <model predicate="contains(base-uri(/), '/frus-v2-data/') and starts-with(@target, 'frus') and contains(@target, '#')" behaviour="link">
+                <model predicate="contains(base-uri(/), '/' || $global:frus-volumes || '/') and starts-with(@target, 'frus') and contains(@target, '#')" behaviour="link">
                     <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || substring-before(@target, '#') || '/' || substring-after(@target, '#')"/>
                 </model>
-                <model predicate="contains(base-uri(/), '/frus-v2-data/') and starts-with(@target, 'frus')" behaviour="link">
+                <model predicate="contains(base-uri(/), '/' || $global:frus-volumes || '/') and starts-with(@target, 'frus')" behaviour="link">
                     <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || @target"/>
                 </model>
-                <model predicate="contains(base-uri(/), '/frus-v2-data/') and starts-with(@target, '#')" behaviour="link">
-                    <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || substring-before(substring-after(base-uri(/), '/frus-v2-data/'), '/') || '/' || substring-after(@target, '#')"/>
+                <model predicate="contains(base-uri(/), '/' || $global:frus-volumes || '/') and starts-with(@target, '#')" behaviour="link">
+                    <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || substring-before(substring-after(base-uri(/), '/' || $global:frus-volumes || '/'), '/') || '/' || substring-after(@target, '#')"/>
                 </model>
                 <model predicate="@target" behaviour="link">
                     <param name="uri" value="@target"/>
