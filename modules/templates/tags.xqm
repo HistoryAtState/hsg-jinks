@@ -4,6 +4,9 @@ module namespace tags="https://history.state.gov/ns/templates/tags";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
+import module namespace config="http://www.tei-c.org/tei-simple/config" at "../config.xqm";
+import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
+
 (:~
  : Ported from hsg-shell's tags-html.xqm (not its %templates:wrap machinery,
  : which Jinks doesn't use -- same porting discipline #1096 applied to
@@ -21,7 +24,10 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
  :)
 declare variable $tags:SCHEME := "https://history.state.gov/tags";
 declare variable $tags:TAXONOMY_DOC := "/db/apps/hsg-jinks/data/tags/taxonomy.xml";
-declare variable $tags:FRUS_COL := "/db/apps/frus-data-jinks/data/Publications";
+(: The FRUS volumes collection. #1101 was built on main against the old
+   data/Publications layout; this branch renamed it to frus-v2-data, so use
+   the config global (PR #32 review) rather than either literal. :)
+declare variable $tags:FRUS_COL := $config:data-default;
 declare variable $tags:SECRETARY_BIOS_COL := "/db/apps/other-publications/secretary-bios";
 
 (:~ Every tei:keywords element carrying this section's scheme, across both tagged collections. :)
@@ -306,7 +312,10 @@ declare function tags:show-tag($context as map(*)) as element(div) {
                                         return
                                             <li class="usa-collection__item">
                                                 <a href="{$context?context-path}/historicaldocuments/{$vol/@xml:id}">
-                                                    {normalize-space(($vol/tei:teiHeader//tei:titleStmt/tei:title)[1])}
+                                                    {(: v2 volume roots xinclude their titleStmt from the shared
+                                                       *_includes.xml, so a direct child lookup is empty --
+                                                       hsg:volume-title follows the include. :)
+                                                     hsg:volume-title($vol)}
                                                 </a>
                                             </li>
                                     }

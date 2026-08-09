@@ -35,9 +35,11 @@ declare %private function hsg:resolve-include($header as element()?, $name as xs
  : The full title of the publication a division belongs to, resolved from the
  : volume root document (whose titleStmt is xincluded from the shared
  : *_includes.xml; see hsg:resolve-include). Shared by
- : hsg:collection-breadcrumbs and hsg:navigation-title.
+ : hsg:collection-breadcrumbs and hsg:navigation-title, and public for
+ : tags.xqm's resource listings (the direct titleStmt lookup #1101 used
+ : misses the xincluded titleStmt of the v2 volume roots).
  :)
-declare %private function hsg:volume-title($doc as node()?) as xs:string? {
+declare function hsg:volume-title($doc as node()?) as xs:string? {
     if (not(exists($doc))) then ()
     else
         let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
