@@ -14,7 +14,7 @@
     /* Image backgrounds */
 
     /* Landing page: hero section */
-    --jinks-hero-background-image: url("../images/mount-rushmore.jpg");
+    --jinks-hero-background-image: url("../images/hero.jpg");
     --jinks-hero-background-size: cover;
     --jinks-hero-background-position: center;
     --jinks-hero-background-repeat: no-repeat;

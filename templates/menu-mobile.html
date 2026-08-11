@@ -1,4 +1,8 @@
 <div class="mobile menubar hidden">
+    [# Same SSI-vs-inline switch as templates/menu.html, for the mobile menubar: with proxy caching on, nginx composes the /menu-mobile fragment innards in; otherwise render inline. The stable wrapper div stays in the page body in both modes; see the comment in templates/menu.html for why the if must sit inside a literal root element. See OP#1284 and doc/nginx-ssi-menu.conf. #]
+    [% if $config:enable-proxy-caching %]
+    [[ comment { '#include virtual="' || $context-path || '/menu-mobile" ' } ]]
+    [% else %]
     <nav>
         <ul>
             [% if $menu?search %]
@@ -117,4 +121,5 @@
             </ul>
         </nav>
     </aside>
+    [% endif %]
 </div>

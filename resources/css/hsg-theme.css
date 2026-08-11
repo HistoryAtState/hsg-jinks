@@ -145,29 +145,29 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     width: 100%;
 }
 
-.hsg-footer__agency {
+.hsg-footer .usa-footer__agency {
     align-self: end;
     text-align: right;
 }
 
-.hsg-footer__agency .usa-footer__logo-heading,
-.hsg-footer__agency .usa-footer__contact-heading {
+.hsg-footer .usa-footer__agency .usa-footer__logo-heading,
+.hsg-footer .usa-footer__agency .usa-footer__contact-heading {
     color: var(--hsg-footer-text);
     font-family: "Merriweather Web", Georgia, Cambria, "Times New Roman", Times, serif;
     font-size: 1rem;
     margin: 0;
 }
 
-.hsg-footer__agency .usa-footer__logo-heading {
+.hsg-footer .usa-footer__agency .usa-footer__logo-heading {
     font-weight: 400;
 }
 
-.hsg-footer__agency .usa-footer__contact-heading {
+.hsg-footer .usa-footer__agency .usa-footer__contact-heading {
     font-weight: 700;
 }
 
 @media (max-width: 640px) {
-    .hsg-footer__agency {
+    .hsg-footer .usa-footer__agency {
         margin-top: 1.5rem;
         text-align: left;
     }
@@ -605,6 +605,22 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-link-button {
     display: inline-block;
     margin: var(--s-2) 0;
+}
+
+/* Active primary-nav item (set by resources/scripts/nav-active.js; OP#1283).
+   USWDS marks the current item with a colored bottom border on desktop; make
+   it follow the navy theme and read as bold. On the mobile accordion the
+   border reads as a left rule instead. */
+.usa-nav__primary-item > .usa-current,
+.usa-nav__primary-item > a.usa-current {
+    font-weight: 700;
+}
+
+@media (min-width: 64em) {
+    .usa-nav__primary-item > .usa-current::after,
+    .usa-nav__primary-item > a.usa-current::after {
+        background-color: var(--theme-color-primary, #005ea2);
+    }
 }
 
 /* Conferences landing page's "Past Conferences" list (#1099): the reference

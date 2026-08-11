@@ -1,107 +1,129 @@
 {
-    "breadcrumb": {
+  "breadcrumb": {
+    "home": "Home",
+    "historicaldocuments": "Historical Documents",
+    "countries": "Countries",
+    "archives": "Archives",
+    "departmenthistory": "Department History",
+    "about": "About Us",
+    "developer": "Developer Resources",
+    "conferences": "Conferences",
+    "open": "Open Government Initiative",
+    "collection-root": "Collections",
+    "document-root": "Collections",
+    "demo": "Demo",
+    "jats": "JATS",
+    "docx": "DOCX",
+    "letters": "Letters",
+    "doc": "Documentation"
+  },
+  "menu": {
         "home": "Home",
         "historicaldocuments": "Historical Documents",
-        "countries": "Countries",
-        "archives": "Archives",
+        "frus": "Foreign Relations of the United States",
+        "about-frus": "About the Foreign Relations Series",
+        "status-of-the-series": "Status of the Foreign Relations Series",
+        "frus-history": "History of the Foreign Relations Series",
+        "ebooks": "Ebooks Initiative",
+        "quarterly-releases": "Quarterly Releases",
         "departmenthistory": "Department History",
-        "about": "About Us",
-        "developer": "Developer Resources",
+        "dh-overview": "Overview",
+        "secretaries": "Biographies of the Secretaries of State",
+        "principals-chiefs": "Principal Officers and Chiefs of Mission",
+        "travels-secretary": "Travels of the Secretary of State",
+        "travels-president": "Travels of the President",
+        "visits": "Visits by Foreign Heads of State",
+        "wwi": "World War I and the Department",
+        "buildings": "Buildings of the Department of State",
+        "diplomatic-couriers": "U.S. Diplomatic Couriers",
+        "marine-corps": "U.S. Marine Corps",
+        "countries": "Guide to Countries",
+        "countries-recognition": "Guide to Country Recognition and Relations",
+        "archives": "World Wide Diplomatic Archives Index",
+        "resources": "More Resources",
+        "tags": "Browse Resources by Subject Tag",
         "conferences": "Conferences",
+        "contact-us": "Contact Us",
+        "developer": "Developer Resources & APIs",
+        "education": "Educational Resources",
+        "faq": "Frequently Asked Questions",
+        "milestones": "Key Milestones",
         "open": "Open Government Initiative",
-        "collection-root": "Collections",
-        "document-root": "Collections",
-        "demo": "Demo",
-        "jats": "JATS",
-        "docx": "DOCX",
-        "letters": "Letters",
-        "doc": "Documentation"
+        "short-history": "A Short History of the Department",
+        "about": "About Us"
     },
-    "menu": {
-        "explore": "Explore",
-        "collections": "Collections",
-        "quickstart": "Quickstart",
-        "about": "About",
-        "team": "Team",
-        "contact": "Contact",
-        "project": "Project",
-        "cite": "How to cite",
-        "cookies": "Cookies",
-        "credits": "Credits",
-        "partners": "Partners"
+  "timeline": {
+    "range": "Time range: "
+  },
+  "browse": {
+    "category": "Category",
+    "author": "Author",
+    "title": "Title"
+  },
+  "download": {
+    "label": "Download",
+    "title": "Download"
+  },
+  "search": {
+    "title": "Title",
+    "content": "Content",
+    "results": "Search results"
+  },
+  "register-details": {
+    "document-list": "Documents",
+    "people": "People",
+    "places": "Places"
+  },
+  "odd": {
+    "licence": "Licence",
+    "sources": "Sources",
+    "metadata": "Metadata",
+    "previous": "Previous",
+    "next": "Next",
+    "birth": "b. ",
+    "death": "d. ",
+    "nav-previous": {
+      "before": "",
+      "after": ""
     },
-    "timeline": {
-        "range": "Time range: "
-    },
-    "browse": {
-        "category": "Category",
-        "author": "Author",
-        "title": "Title"
-    },
-    "download": {
-        "label": "Download",
-        "title": "Download"
-    },
-    "search": {
-        "title": "Title",
-        "content": "Content",
-        "results": "Search results"
-    },
-    "register-details": {
-        "document-list": "Documents",
-        "people": "People",
-        "places": "Places"
-    },
-    "odd": {
-        "licence": "Licence",
-        "sources": "Sources",
-        "metadata": "Metadata",
-        "previous": "Previous",
-        "next": "Next",
-        "birth": "b. ",
-        "death": "d. ",
-        "nav-previous": {
-            "before": "",
-            "after": ""
-        },
-        "nav-next": {
-            "before": "",
-            "after": ""
-        }
-    },
-    "facets": {
-        "place": "Place",
-        "author": "Author"
-    },
-    "toolbar": {
-        "next": "Next",
-        "previous": "Previous"
-    },
-    "historicaldocuments": {
-        "title": "Historical Documents",
-        "waysToExplore": "Ways to Explore",
-        "searchInsideVolume": "Search inside this volume",
-        "download": "Download:",
-        "browseGpoPrefix": "Browse the",
-        "persons": "Persons",
-        "terms": "Abbreviations & Terms"
-    },
-    "countries": {
-        "title": "Countries"
-    },
-    "departmenthistory": {
-        "title": "Department History"
-    },
-    "about": {
-        "title": "About Us"
-    },
-    "developer": {
-        "title": "Developer Resources"
-    },
-    "conferences": {
-        "title": "Conferences"
-    },
-    "open": {
-        "title": "Open Government Initiative"
+    "nav-next": {
+      "before": "",
+      "after": ""
     }
+  },
+  "facets": {
+    "place": "Place",
+    "author": "Author"
+  },
+  "toolbar": {
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "historicaldocuments": {
+    "title": "Historical Documents",
+    "waysToExplore": "Ways to Explore",
+    "searchInsideVolume": "Search inside this volume",
+    "download": "Download:",
+    "browseGpoPrefix": "Browse the",
+    "persons": "Persons",
+    "terms": "Abbreviations & Terms"
+  },
+  "countries": {
+    "title": "Countries"
+  },
+  "departmenthistory": {
+    "title": "Department History"
+  },
+  "about": {
+    "title": "About Us"
+  },
+  "developer": {
+    "title": "Developer Resources"
+  },
+  "conferences": {
+    "title": "Conferences"
+  },
+  "open": {
+    "title": "Open Government Initiative"
+  }
 }

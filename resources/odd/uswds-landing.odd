@@ -128,6 +128,15 @@
   <div class="team-members">[[content]]</div>
 </div></pb:template>
         </model>
+        <model predicate="@type='about' and not(head)" behaviour="pass-through">
+            <desc>Headless about/intro band: a lead paragraph followed by a primary action button (Figma intro band)</desc>
+            <param name="content" value="p/node()"/>
+            <param name="links" value="list[@type='links']"/>
+            <pb:template xml:space="preserve"><div xmlns="" class="grid-container">
+    <p class="usa-intro">[[content]]</p>
+    [[links]]
+</div></pb:template>
+        </model>
         <model predicate="@type='about'" behaviour="pass-through">
             <param name="label" value="@n"/>
             <param name="header" value="head/text()"/>
@@ -429,7 +438,10 @@
                     <model behaviour="inline"/>
                 </elementSpec>
             <elementSpec ident="list" mode="change">
-                    <model predicate="@type='links'" behaviour="list" cssClass="buttons"/>
+                    <model predicate="@type='links' and ancestor::div[@type=('hero', 'intro', 'about')]" behaviour="list" cssClass="buttons">
+            <desc>Action links inside the hero/intro/about bands render as a button row; header-action link lists elsewhere stay plain</desc>
+        </model>
+                    <model predicate="@type='links'" behaviour="list"/>
                     <model behaviour="list" useSourceRendition="true">
             <param name="content" value="item"/>
         </model>
