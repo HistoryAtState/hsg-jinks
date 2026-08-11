@@ -140,18 +140,32 @@ describe("document view", () => {
             });
         });
 
-        it("gives each attachment its own title and dateline", () => {
+        // Title and dateline come out of the attachment's own body, exactly
+        // once each: the body already carries them (the head holds the source
+        // note's anchor too), so the ODD renders the body rather than
+        // synthesizing a second copy from the teiHeader.
+        it("gives each attachment its own title and dateline, once", () => {
             cy.get("main .attachment").each(($att) => {
                 cy.wrap($att)
-                    .find(".attachment-title")
+                    .find(".tei-head")
+                    .should("have.length", 1)
                     .invoke("text")
                     .then((t) => t.replace(/\s+/g, " ").trim())
                     .should("contain", "Paper Prepared by an Interagency Working Group");
                 cy.wrap($att)
-                    .find(".dateline")
+                    .find(".tei-dateline")
+                    .should("have.length", 1)
                     .invoke("text")
                     .then((t) => t.replace(/\s+/g, " ").trim())
                     .should("eq", "Washington, undated");
+            });
+        });
+
+        it("carries no duplicate element ids", () => {
+            cy.get("main [id]").then(($els) => {
+                const ids = [...$els].map((el) => el.id);
+                const duplicates = ids.filter((id, i) => ids.indexOf(id) !== i);
+                expect(duplicates, "duplicate ids in main").to.deep.eq([]);
             });
         });
 
@@ -160,20 +174,16 @@ describe("document view", () => {
             cy.get("main ol.footnotes > li")
                 .should("have.length", 11)
                 .then(($lis) => {
+                    // Every id is qualified with the division the page shows,
+                    // not with the file each note happens to live in: the
+                    // attachments' own anchor xml:ids restart at d96-f1, and
+                    // @n is what keeps them apart (PR #32 review, which moved
+                    // the ODD off base-uri(/) onto the root the view pipeline
+                    // carries in $parameters?root).
                     const ids = [...$lis].map((li) => li.id);
-                    expect(ids).to.deep.eq([
-                        "d96-f1",
-                        "d96-f2",
-                        "d96-f3",
-                        "d96-f4",
-                        "d96-f5",
-                        "d96-a1-f6",
-                        "d96-a1-f7",
-                        "d96-a1-f8",
-                        "d96-a2-f9",
-                        "d96-a2-f10",
-                        "d96-a2-f11",
-                    ]);
+                    expect(ids).to.deep.eq(
+                        Array.from({ length: 11 }, (_, i) => `d96-f${i + 1}`),
+                    );
                     // numbering runs 1..11 across the parent and both attachments
                     const values = [...$lis].map((li) => li.getAttribute("value"));
                     expect(values).to.deep.eq(

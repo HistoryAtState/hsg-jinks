@@ -2,6 +2,9 @@ xquery version "3.1";
 
 module namespace config="http://e-editiones.org/tei-publisher/odd-global";
 
+declare namespace tei="http://www.tei-c.org/ns/1.0";
+declare namespace xi="http://www.w3.org/2001/XInclude";
+
 (:
     Determine the application root collection from the current module load path.
 :)
@@ -59,3 +62,97 @@ declare variable $config:frus-volumes as xs:string := "frus-v2-data";
 
 
 declare variable $config:browse-page := "browse.html";
+
+(:~
+ : Database path of the document a node being rendered belongs to.
+ :
+ : ODD models must not derive this from base-uri(/) (PR #32 review). "/" is
+ : shorthand for the root of the *context* item, so the expression only means
+ : what a model intends while a context node happens to be in scope: run the
+ : same string anywhere else (eXide, a unit test) and it resolves to every
+ : document in the database instead, raising XPTY0004. The view pipeline
+ : already carries the node it is rendering in $parameters?root
+ : (page:transform sets it, and the base ODD's own pb model reads it the same
+ : way), so take it from there.
+ :
+ : The node is only a fallback, for transforms invoked without that parameter.
+ : Both are checked because either may be an in-memory fragment, which has no
+ : document URI at all; when neither is a stored document the result is the
+ : empty string, so callers can string-test it without a cardinality guard.
+ :)
+declare function config:source-uri($parameters as map(*)?, $node as node()?) as xs:string {
+    head((
+        for $candidate in ($parameters?root, $node)
+        let $uri := document-uri(root($candidate))
+        where exists($uri)
+        return string($uri),
+        ""
+    ))
+};
+
+(:~
+ : Identifier of a FRUS division: the file stem ("d275") of the document being
+ : rendered. Empty when the node is not from a stored document.
+ :
+ : Footnote ids are qualified with it because a document and the attachments
+ : xincluded into it are separate files whose anchor xml:ids collide (both
+ : d96-a1.xml and d96-a2.xml carry d96-f1..f3). Deriving it from the page root
+ : rather than from each node's own file gives every note on one page the same
+ : prefix, distinguished by @n, which continues the parent's sequence across
+ : the attachments.
+ :)
+declare function config:division-id($parameters as map(*)?, $node as node()?) as xs:string {
+    replace(config:source-uri($parameters, $node), '^.*/([^/]+)\.xml$', '$1')
+};
+
+(:~
+ : Identifier of the FRUS volume a node belongs to ("frus1977-80v27"), read
+ : from the collection path: the segment right below $config:frus-volumes.
+ :
+ : Not read from the division's frus-volume-id bibl, because a transform may
+ : receive a fragment whose root no longer carries the teiHeader. Empty for
+ : anything outside the FRUS collection, so models can use it as their
+ : "is this FRUS?" test as well.
+ :)
+declare function config:volume-id($parameters as map(*)?, $node as node()?) as xs:string {
+    substring-before(
+        substring-after(config:source-uri($parameters, $node), "/" || $config:frus-volumes || "/"),
+        "/"
+    )
+};
+
+(:~
+ : Collection holding the FRUS volume a node belongs to, or the empty string
+ : outside the FRUS collection. The volume root document is
+ : {this}/{volume-id}.xml.
+ :)
+declare function config:volume-collection($parameters as map(*)?, $node as node()?) as xs:string {
+    let $id := config:volume-id($parameters, $node)
+    return
+        if ($id = "") then "" else $config:data-default || "/" || $id
+};
+
+(:~
+ : The complete series title of a FRUS volume ("Foreign Relations of the
+ : United States, 1977-1980, Volume XXVII, Western Europe"), rendered as the
+ : overline above every document.
+ :
+ : It lives in the volume root's seriesStmt, which is itself xincluded from
+ : the volume's shared _includes.xml, so it takes two hops to reach: division
+ : files carry no copy of it.
+ :)
+declare function config:volume-series-title($parameters as map(*)?, $node as node()?) as node()* {
+    let $collection := config:volume-collection($parameters, $node)
+    let $path := $collection || "/" || config:volume-id($parameters, $node) || ".xml"
+    let $include :=
+        if ($collection != "" and doc-available($path)) then
+            doc($path)//tei:teiHeader/tei:fileDesc/xi:include[@xpointer = "seriesStmt"]
+        else
+            ()
+    let $target := head($include ! (util:collection-name(.) || "/" || @href))
+    return
+        if (empty($target) or not(doc-available($target))) then
+            ()
+        else
+            id("seriesStmt", doc($target))/tei:title[@type = "complete"]
+};

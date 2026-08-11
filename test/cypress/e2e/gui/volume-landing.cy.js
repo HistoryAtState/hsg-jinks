@@ -76,6 +76,30 @@ describe("volume landing page", () => {
 // @type alone matched all 562 and the page died with an XPTY0004 cardinality
 // error; the volume's own items are identified by @corresp = "#<volume-id>",
 // the same gate hsg-shell's fh:exists-pdf and friends use.
+// Unpublished ("pending") chapters, which the reference site marks with
+// li.pending on this page. The muted colour is the point here: on the landing
+// page the surrounding links are blue, so it is what sets a pending entry
+// apart. Asserted as a computed value because the rule has to survive the
+// theme's own link colours (resources/css/hsg-theme.css explains where it
+// deliberately does not fight them).
+describe("volume landing page, unpublished chapters", () => {
+    const PARTIAL = "historicaldocuments/frus1977-80v27";
+
+    beforeEach(() => cy.visit(PARTIAL));
+
+    it("marks chapters with no published documents as pending", () => {
+        cy.get(".hsg-frus__toc li.pending").should("have.length.at.least", 1);
+        cy.get(".hsg-frus__toc li.pending > a")
+            .first()
+            .should("have.css", "color", "rgb(86, 92, 101)") // --hsg-color-muted
+            .and("have.css", "font-style", "italic");
+    });
+
+    it("leaves chapters that do have published documents unmarked", () => {
+        cy.contains(".hsg-frus__toc li", "Canada").should("not.have.class", "pending");
+    });
+});
+
 describe("volume landing page for a microfiche supplement", () => {
     const SUPPLEMENT = "historicaldocuments/frus1958-60v05mSupp";
 

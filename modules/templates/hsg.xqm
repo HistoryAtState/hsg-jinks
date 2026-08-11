@@ -596,11 +596,11 @@ declare function hsg:division-asides($context as map(*)) {
             if ($show-registers) then (
                 hsg:register-panel($context, $publication,
                     'historicaldocuments.persons', 'Persons', 'persons',
-                    distinct-values($doc//tei:persName/@corresp),
+                    $doc//tei:persName/@corresp,
                     doc($config:data-default || "/" || $publication || "/front/persons.xml")//tei:persName[@sameAs]),
                 hsg:register-panel($context, $publication,
                     'historicaldocuments.terms', 'Abbreviations &amp; Terms', 'terms',
-                    distinct-values($doc//tei:gloss/@target),
+                    $doc//tei:gloss/@target,
                     doc($config:data-default || "/" || $publication || "/front/terms.xml")//tei:term[@sameAs])
             ) else (),
             hsg:section-nav()
@@ -614,13 +614,26 @@ declare function hsg:division-asides($context as map(*)) {
  : as its tooltip -- fh:get-persons/fh:get-gloss parity, including the
  : name-sorted order and the hide-if-empty behaviour (a division with no
  : references gets no panel).
+ :
+ : Both sides are grouped rather than scanned (PR #32 review): $idrefs arrives
+ : with duplicates (a division names the same person up to 249 times) and the
+ : register runs to 441 entries, so pairing them with a predicate lookup per
+ : reference walked the register once per distinct id. One group-by pass over
+ : each side turns that into a map lookup, and drops the caller's own
+ : distinct-values with it -- grouping the references dedupes them anyway.
  :)
 declare %private function hsg:register-panel($context as map(*), $publication as xs:string,
         $key as xs:string, $label as xs:string, $page as xs:string,
-        $idrefs as xs:string*, $register as element()*) {
+        $idrefs as node()*, $register as element()*) {
+    let $byId := map:merge(
+        for $entry in $register
+        group by $id := string($entry/@sameAs)
+        return map:entry($id, head($entry))
+    )
     let $entries :=
-        for $idref in $idrefs
-        let $name := ($register[@sameAs = $idref])[1]
+        for $ref in $idrefs
+        group by $idref := string($ref)
+        let $name := $byId($idref)
         where exists($name)
         let $display := normalize-space($name)
         order by $display

@@ -1,29 +1,18 @@
 /*
- * FRUS rendition styles.
+ * FRUS rendition styles -- GENERATED, do not edit by hand.
  *
- * The FRUS v2 corpus (hsg-jinks-data, data/frus-v2-data) styles inline and
- * block markup with @rendition="#token" tokens. TEI Publisher's
- * useSourceRendition compiles each token to a class named "document_<token>"
- * (see css:get-rendition in tei-publisher-lib) and, at runtime, would generate
- * the matching CSS by resolving the token's <rendition> definition by id() in
- * the rendered document. FRUS ships those 42 definitions in
- * data/frus-tei-guidelines-resources/frus-encodingDesc.xml, xi:included into
- * every volume's teiHeader — but division files reference it only by its remote
- * canonical URL and the view pipeline does not expand XIncludes, so id() finds
- * nothing and the document_* classes render unstyled.
+ * Regenerate with tools/generate-frus-renditions.xq (see its header for why
+ * this is generated ahead of time rather than resolved at render time, and
+ * for how to run it).
  *
- * Rather than force a per-request remote XInclude expansion of the encodingDesc
- * (which the FRUS ODD explicitly warns against), the rules below are generated
- * once from that same canonical encodingDesc — one ".document_<id>" rule per
- * rendition — so the styling stays faithful to the source vocabulary while
- * being browser-testable and independent of runtime XInclude resolution.
- *
- * Regenerate after the encodingDesc rendition vocabulary changes:
- *   for $r in doc('.../frus-encodingDesc.xml')//tei:rendition[@xml:id]
- *   return '.document_' || $r/@xml:id || ' { ' || normalize-space($r) || ' }'
+ * Source vocabulary: the 42 tei:rendition definitions in
+ * hsg-jinks-data's frus-tei-guidelines-resources/frus-encodingDesc.xml, one
+ * ".document_<id>" rule each -- the class name TEI Publisher's
+ * useSourceRendition emits for @rendition="#<id>" (css:get-rendition in
+ * tei-publisher-lib).
  */
 
-/* Character-level */
+/* inline (typographic) */
 .document_bold { font-weight: bold; }
 .document_italic { font-style: italic; }
 .document_roman { font-style: normal; }
@@ -35,7 +24,9 @@
 .document_subscript { position: relative; top: 0.36em; font-size: 0.69em; line-height: 0; }
 .document_letter-spaced { letter-spacing: 0.125em; }
 
-/* Alignment and indentation */
+/* block (paragraph-level; ids name visual intent — element context in
+   consumer CSS refines the implementation, e.g. #center on a table or
+   figure is margin-left/right auto; #tab-level-1 on a cell is 1em) */
 .document_center { text-align: center; text-indent: 0; }
 .document_flush { text-indent: 0; }
 .document_right { text-indent: 0; text-align: right; }
@@ -48,11 +39,12 @@
 .document_set-solid { line-height: 1.1; }
 .document_columns-2 { columns: 2; column-gap: 2em; }
 
-/* Floats */
+/* position (same-line layout) */
 .document_float-left { display: inline; float: left; }
 .document_float-right { display: inline; float: right; }
 
-/* Table cells */
+/* table / cell (unmarked cells are left-aligned; renditions mark the
+   exceptions and may sit on row for whole-row application) */
 .document_cell-tab-level-1 { padding-left: 1em; }
 .document_cell-tab-level-2 { padding-left: 2em; }
 .document_cell-num { text-align: right; }
@@ -62,19 +54,18 @@
 .document_cell-border-bottom { border-bottom: 1px solid black; }
 .document_cell-border-left { border-left: 1px solid black; }
 .document_cell-border-right { border-right: 1px solid black; }
-
-/* Borders */
 .document_border-top { border-top: 1px solid black; }
 .document_border-bottom { border-bottom: 1px solid black; }
 .document_border-left { border-left: 1px solid black; }
 .document_border-right { border-right: 1px solid black; }
-
-/* Misc */
 .document_nowrap { white-space: nowrap; }
 .document_top { vertical-align: top; }
 .document_middle { vertical-align: middle; }
 .document_bottom { vertical-align: bottom; }
 .document_nopad { padding-right: 0.5em; }
+
+/* experimental (d998 3e): a labelled list rendered as run-in dashed
+   paragraphs */
 .document_run-in { display: run-in; }
 
 /*
@@ -87,8 +78,8 @@
 /*
  * The encodingDesc's own block comment prescribes element-context refinements:
  * "#center on a table or figure is margin-left/right auto" (text-align cannot
- * center the box itself). No instance in the deployed subset yet; added ahead
- * of the full corpus (PR #32 review audit).
+ * center the box itself).
  */
 table.document_center,
 .tei-figure.document_center { margin-left: auto; margin-right: auto; }
+

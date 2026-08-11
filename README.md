@@ -369,6 +369,12 @@ by hand.
 
 - `tools/inspect-page.xq` — fetch a deployed page server-side, assert on rendered
   markup by CSS class (excluded from the app build; run with `xst`, see header).
+- `tools/generate-frus-renditions.xq` — regenerate `resources/css/frus-renditions.css`
+  from the FRUS rendition vocabulary (the `tei:rendition` definitions in
+  hsg-jinks-data's `frus-tei-guidelines-resources/frus-encodingDesc.xml`). That
+  stylesheet is generated, not hand-maintained: re-run the script and commit the
+  result whenever the vocabulary changes.
+  `xst --config .xstrc run -f tools/generate-frus-renditions.xq > resources/css/frus-renditions.css`
 - `test/cypress/e2e/gui/breadcrumb.cy.js` — run against the worktree's own
   container: `dotenv -e .env -- npx cypress run --spec …` (Cypress reads
   `CYPRESS_BASE_URL` from the environment, not from `.env` itself).
