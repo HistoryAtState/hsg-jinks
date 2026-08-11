@@ -492,3 +492,64 @@ declare %private function hsg:bytes-to-readable($bytes as xs:integer?) as xs:str
     else if ($bytes gt 1000) then round($bytes div 1000) || 'kb'
     else $bytes || ' bytes'
 };
+
+(:~
+ : Newest FRUS volumes as landing-page "Latest Publications" cards (#1258).
+ :
+ : Enumerates the volume collections under $config:data-default (mirrors
+ : about:recent-publications / hsg:volume-list), reads each volume header's
+ : publication date -- publicationStmt/date/@when when the encoding carries it,
+ : otherwise the published revisionDesc/change -- and returns the newest $n as
+ : tei:item elements in the shared landing card encoding consumed by
+ : uswds:cards / uswds-landing.odd: a figure/graphic cover, the "Historical
+ : Documents" + year tags, a head linking to the volume landing page, and a
+ : teaser drawn from the volume abstract when present.
+ :
+ : Returns the empty sequence when no dated volume is found (or the collection
+ : is absent), so uswds:cards falls back to the editorially authored items in
+ : the landing document -- the hybrid data contract of OP#1094.
+ :)
+declare function hsg:latest-publications($context as map(*), $n as xs:integer) as element(tei:item)* {
+    try {
+        let $base := $config:data-default
+        let $cards :=
+            for $id in xmldb:get-child-collections($base)
+            let $path := $base || "/" || $id || "/" || $id || ".xml"
+            where doc-available($path)
+            let $header := doc($path)//tei:teiHeader
+            (: titleStmt/publicationStmt are xincluded from the volume's shared
+               *_includes.xml in the frus-unbound-alpha model, so resolve them
+               through hsg:resolve-include rather than a plain descendant step. :)
+            let $when := head((
+                hsg:resolve-include($header, 'publicationStmt')//tei:date/@when[. castable as xs:date],
+                $header//tei:revisionDesc/tei:change[@status = 'published']/@when[. castable as xs:date]
+            ))
+            where exists($when)
+            let $title := normalize-space((hsg:resolve-include($header, 'titleStmt')//tei:title)[1])
+            where $title != ""
+            let $teaser := normalize-space(($header/root()//tei:abstract//tei:p)[1])
+            order by xs:date($when) descending
+            return map {
+                "id": $id,
+                "year": year-from-date(xs:date($when)),
+                "title": $title,
+                "teaser": $teaser
+            }
+        for $card in subsequence($cards, 1, $n)
+        return
+            <tei:item>
+                <tei:figure>
+                    <tei:graphic url="https://static.history.state.gov/frus/{$card?id}/covers/{$card?id}.jpg"/>
+                    <tei:figDesc>Cover of {$card?title}</tei:figDesc>
+                </tei:figure>
+                <tei:term>Historical Documents</tei:term>
+                <tei:term>{string($card?year)}</tei:term>
+                <tei:head>
+                    <tei:ref target="historicaldocuments/{$card?id}">{$card?title}</tei:ref>
+                </tei:head>
+                { if ($card?teaser != "") then <tei:p>{$card?teaser}</tei:p> else () }
+            </tei:item>
+    } catch * {
+        ()
+    }
+};

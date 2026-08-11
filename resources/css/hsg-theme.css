@@ -145,29 +145,29 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     width: 100%;
 }
 
-.hsg-footer__agency {
+.hsg-footer .usa-footer__agency {
     align-self: end;
     text-align: right;
 }
 
-.hsg-footer__agency .usa-footer__logo-heading,
-.hsg-footer__agency .usa-footer__contact-heading {
+.hsg-footer .usa-footer__agency .usa-footer__logo-heading,
+.hsg-footer .usa-footer__agency .usa-footer__contact-heading {
     color: var(--hsg-footer-text);
     font-family: "Merriweather Web", Georgia, Cambria, "Times New Roman", Times, serif;
     font-size: 1rem;
     margin: 0;
 }
 
-.hsg-footer__agency .usa-footer__logo-heading {
+.hsg-footer .usa-footer__agency .usa-footer__logo-heading {
     font-weight: 400;
 }
 
-.hsg-footer__agency .usa-footer__contact-heading {
+.hsg-footer .usa-footer__agency .usa-footer__contact-heading {
     font-weight: 700;
 }
 
 @media (max-width: 640px) {
-    .hsg-footer__agency {
+    .hsg-footer .usa-footer__agency {
         margin-top: 1.5rem;
         text-align: left;
     }

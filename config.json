@@ -1,21 +1,129 @@
 {
   "theme" : {
+    "banner" : {
+      "enabled" : true
+    },
+    "identifier" : {
+      "enabled" : false
+    },
     "colors" : {
       "palette" : "navy"
     },
     "landing" : {
       "hero" : {
-        "label" : "Placeholder image; the hero photograph is still to be provided"
+        "background-image" : "../images/hero.jpg",
+        "background-size" : "cover",
+        "background-position" : "center",
+        "background-repeat" : "no-repeat",
+        "height" : "25rem",
+        "label" : "U.S. Department of State"
       }
     },
     "logo" : {
       "image" : "oh-logo.png",
       "width" : "1280px",
       "height" : "141px"
+    },
+    "footer" : {
+      "$replace" : [
+        "columns",
+        "social",
+        "required-links"
+      ],
+      "class" : "hsg-footer",
+      "return-to-top" : true,
+      "columns" : [
+        {
+          "heading" : "Learn more",
+          "links" : [
+            {
+              "label" : "Home",
+              "url" : ""
+            },
+            {
+              "label" : "Search",
+              "url" : "search"
+            },
+            {
+              "label" : "About Us",
+              "url" : "about"
+            },
+            {
+              "label" : "FAQ",
+              "url" : "about/faq"
+            }
+          ]
+        },
+        {
+          "heading" : "Topics",
+          "links" : [
+            {
+              "label" : "Historical Documents",
+              "url" : "historicaldocuments"
+            },
+            {
+              "label" : "Department History",
+              "url" : "departmenthistory"
+            },
+            {
+              "label" : "Countries",
+              "url" : "https://history.state.gov/countries/"
+            }
+          ]
+        }
+      ],
+      "contact" : {
+        "heading" : "Contact",
+        "phone" : "202-955-0200",
+        "email" : "history@state.gov"
+      },
+      "social" : [
+        {
+          "label" : "X",
+          "icon" : "x.svg",
+          "url" : "https://x.com/HistoryAtState"
+        },
+        {
+          "label" : "GitHub",
+          "icon" : "github.svg",
+          "url" : "https://github.com/HistoryAtState"
+        }
+      ],
+      "required-links" : [
+        {
+          "label" : "Accessibility Statement",
+          "url" : "https://www.state.gov/section-508-accessibility-statement/"
+        },
+        {
+          "label" : "Privacy Policy",
+          "url" : "https://www.state.gov/privacy-policy/"
+        },
+        {
+          "label" : "External Link Policy",
+          "url" : "https://www.state.gov/external-link-policy-and-disclaimers/"
+        },
+        {
+          "label" : "Copyright Information",
+          "url" : "https://www.state.gov/copyright-information/"
+        },
+        {
+          "label" : "Content Warning",
+          "url" : "about/content-warning"
+        }
+      ],
+      "agency" : {
+        "name" : "Office of the Historian, Shared Knowledge Services, Bureau of Administration",
+        "parent" : {
+          "label" : "United States Department of State",
+          "url" : "https://www.state.gov"
+        }
+      }
     }
   },
   "label" : "hsg-jinks",
-  "odds" : [ "hsg-jinks.odd" ],
+  "odds" : [
+    "hsg-jinks.odd"
+  ],
   "id" : "https://e-editiones.org/apps/hsg-jinks",
   "data" : {
     "landing" : "/db/apps/hsg-jinks/data/landing/landing.xml"
@@ -25,8 +133,12 @@
     "data-default" : "Publications",
     "odd" : "hsg-jinks.odd",
     "template" : "volume-landing.html",
-    "$replace" : [ "languages" ],
-    "languages" : [ "en" ]
+    "$replace" : [
+      "languages"
+    ],
+    "languages" : [
+      "en"
+    ]
   },
   "features" : {
     "toolbar" : {
@@ -38,7 +150,9 @@
   "menu" : {
     "login" : false,
     "language" : false,
-    "$replace" : [ "items" ],
+    "$replace" : [
+      "items"
+    ],
     "items" : [
       { "id" : "home", "url" : "" },
       { "id" : "historicaldocuments", "subitems" : [
@@ -80,72 +194,94 @@
     ]
   },
   "$schema" : "../jinks/schema/jinks.json",
-  "styles" : [ "resources/css/hsg-theme.css" ],
+  "styles" : [
+    "resources/css/hsg-theme.css"
+  ],
   "script" : {
-    "custom" : [ "resources/scripts/nav-active.js" ]
+    "custom" : [
+      "resources/scripts/nav-active.js"
+    ]
   },
-  "api" : [ {
-    "spec" : "hsg-api.json",
-    "prefix" : "hsgapi",
-    "id" : "http://teipublisher.com/api/hsg",
-    "path" : "hsg-api.xql"
-  }, {
-    "spec" : "countries-api.json",
-    "prefix" : "countryapi",
-    "id" : "http://teipublisher.com/api/countries",
-    "path" : "countries-api.xql"
-  }, {
-    "spec" : "departmenthistory-api.json",
-    "prefix" : "dhapi",
-    "id" : "http://teipublisher.com/api/departmenthistory",
-    "path" : "departmenthistory-api.xql"
-  }, {
-    "spec" : "about-api.json",
-    "prefix" : "aboutapi",
-    "id" : "http://teipublisher.com/api/about",
-    "path" : "about-api.xql"
-  }, {
-    "spec" : "tags-api.json",
-    "prefix" : "tagapi",
-    "id" : "http://teipublisher.com/api/tags",
-    "path" : "tags-api.xql"
-  }, {
-    "spec" : "milestones-api.json",
-    "prefix" : "milapi",
-    "id" : "http://teipublisher.com/api/milestones",
-    "path" : "milestones-api.xql"
-  }, {
-    "spec" : "search-api.json",
-    "prefix" : "searchapi",
-    "id" : "https://history.state.gov/api/search",
-    "path" : "search-api.xql"
-  }, {
-    "spec" : "developer-api.json",
-    "prefix" : "devapi",
-    "id" : "http://teipublisher.com/api/developer",
-    "path" : "developer-api.xql"
-  }, {
-    "spec" : "education-api.json",
-    "prefix" : "eduapi",
-    "id" : "http://teipublisher.com/api/education",
-    "path" : "education-api.xql"
-  }, {
-    "spec" : "conferences-api.json",
-    "prefix" : "confapi",
-    "id" : "http://teipublisher.com/api/conferences",
-    "path" : "conferences-api.xql"
-  }, {
-    "spec" : "opengov-api.json",
-    "prefix" : "ogapi",
-    "id" : "http://teipublisher.com/api/open",
-    "path" : "opengov-api.xql"
-  }, {
-    "spec" : "menu-api.json",
-    "prefix" : "menuapi",
-    "id" : "https://history.state.gov/api/menu",
-    "path" : "menu-api.xql"
-  } ],
-  "extends" : [ "base10", "docker", "landing-page", "profile-theme-uswds" ],
+  "api" : [
+    {
+      "spec" : "hsg-api.json",
+      "prefix" : "hsgapi",
+      "id" : "http://teipublisher.com/api/hsg",
+      "path" : "hsg-api.xql"
+    },
+    {
+      "spec" : "countries-api.json",
+      "prefix" : "countryapi",
+      "id" : "http://teipublisher.com/api/countries",
+      "path" : "countries-api.xql"
+    },
+    {
+      "spec" : "departmenthistory-api.json",
+      "prefix" : "dhapi",
+      "id" : "http://teipublisher.com/api/departmenthistory",
+      "path" : "departmenthistory-api.xql"
+    },
+    {
+      "spec" : "about-api.json",
+      "prefix" : "aboutapi",
+      "id" : "http://teipublisher.com/api/about",
+      "path" : "about-api.xql"
+    },
+    {
+      "spec" : "tags-api.json",
+      "prefix" : "tagapi",
+      "id" : "http://teipublisher.com/api/tags",
+      "path" : "tags-api.xql"
+    },
+    {
+      "spec" : "milestones-api.json",
+      "prefix" : "milapi",
+      "id" : "http://teipublisher.com/api/milestones",
+      "path" : "milestones-api.xql"
+    },
+    {
+      "spec" : "search-api.json",
+      "prefix" : "searchapi",
+      "id" : "https://history.state.gov/api/search",
+      "path" : "search-api.xql"
+    },
+    {
+      "spec" : "developer-api.json",
+      "prefix" : "devapi",
+      "id" : "http://teipublisher.com/api/developer",
+      "path" : "developer-api.xql"
+    },
+    {
+      "spec" : "education-api.json",
+      "prefix" : "eduapi",
+      "id" : "http://teipublisher.com/api/education",
+      "path" : "education-api.xql"
+    },
+    {
+      "spec" : "conferences-api.json",
+      "prefix" : "confapi",
+      "id" : "http://teipublisher.com/api/conferences",
+      "path" : "conferences-api.xql"
+    },
+    {
+      "spec" : "opengov-api.json",
+      "prefix" : "ogapi",
+      "id" : "http://teipublisher.com/api/open",
+      "path" : "opengov-api.xql"
+    },
+    {
+      "spec" : "menu-api.json",
+      "prefix" : "menuapi",
+      "id" : "https://history.state.gov/api/menu",
+      "path" : "menu-api.xql"
+    }
+  ],
+  "extends" : [
+    "base10",
+    "landing-page",
+    "docker",
+    "profile-theme-uswds"
+  ],
   "skip" : [
     "^data/landing/landing\\.xml",
     "^resources/images/team/",
@@ -157,14 +293,22 @@
     "^resources/i18n/app/en\\.json",
     "^templates/menu\\.html",
     "^templates/menu-mobile\\.html",
-    "^test/cypress/e2e/gui/landing-page\\.cy\\.js"
+    "^test/cypress/e2e/gui/landing-page\\.cy\\.js",
+    "^test/cypress/e2e/landing\\.cy\\.js"
   ],
   "templating" : {
-    "use" : [ "templates/hsg-blocks.html" ],
+    "use" : [
+      "templates/hsg-blocks.html",
+      "templates/hsg-landing.html"
+    ],
     "modules" : {
       "http://history.state.gov/ns/templates/landing" : {
         "prefix" : "hsg-landing",
         "at" : "modules/templates/hsg-landing.xqm"
+      },
+      "https://history.state.gov/ns/templates/hsg" : {
+        "prefix" : "hsg",
+        "at" : "modules/templates/hsg.xqm"
       }
     }
   },

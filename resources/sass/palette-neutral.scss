@@ -4,7 +4,11 @@
 @use "uswds-core" with (
     $theme-show-compile-warnings: false,
     $theme-show-notifications: false,
-    $theme-image-path: "../images"
+    $theme-image-path: "../images",
+
+    // Serif display headings (Merriweather ships in resources/fonts/merriweather)
+    $theme-font-type-serif: "merriweather",
+    $theme-font-role-heading: "serif"
 );
 
 @forward "uswds";

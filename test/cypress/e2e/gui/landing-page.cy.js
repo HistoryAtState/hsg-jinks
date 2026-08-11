@@ -38,8 +38,13 @@ describe('HSG Landing Page', () => {
   })
 
   describe('Latest Publications', () => {
-    it('renders three flag cards with tags and titles', () => {
-      cy.get('.section-publications .usa-card--flag').should('have.length', 3)
+    // Latest Publications is driven by hsg:latest-publications over the FRUS
+    // data (newest volumes first), falling back to the items authored in
+    // landing.xml. The count tracks how many volumes are deployed (>=1), so
+    // assert a lower bound rather than an exact 3 — see CLAUDE.md on
+    // data-derived counts.
+    it('renders flag cards with tags and titles', () => {
+      cy.get('.section-publications .usa-card--flag').should('have.length.at.least', 1)
       cy.get('.section-publications .usa-card--flag').each(($card) => {
         cy.wrap($card).find('.card-tags .usa-tag').should('have.length.at.least', 1)
         cy.wrap($card).find('h3.usa-card__heading a').should('have.attr', 'href')
