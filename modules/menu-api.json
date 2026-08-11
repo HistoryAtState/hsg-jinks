@@ -1,0 +1,69 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "HSG navigation menu fragment",
+    "description": "Single route serving the site's primary navigation as a bare, context-independent HTML fragment (no <html>/<pb-page> wrapper, and no usa-header wrapper either: the stable wrapper stays in every cached page body, rendered by templates/menu.html), driven by config.json `menu.items`. Exists so production nginx can edge-compose the menu into aggressively-cached page bodies via an SSI `<!--#include virtual=\".../menu\" -->` and cache this fragment under its own key: a menu change refreshes the nav site-wide by purging only /menu, leaving page bodies cached. The fragment omits the document Download submenu, editor Admin submenu, and login/language so it stays identical on every page. See OP#1284 and doc/nginx-ssi-menu.conf.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "description": "Endpoint for testing on localhost",
+      "url": "/exist/apps/hsg-jinks"
+    }
+  ],
+  "security": [],
+  "tags": [
+    {
+      "name": "menu",
+      "description": "Site primary-navigation fragment for nginx SSI edge-composition."
+    }
+  ],
+  "paths": {
+    "/menu": {
+      "get": {
+        "summary": "Primary navigation as a cacheable HTML fragment",
+        "description": "Renders templates/menu-fragment.html with the shared config context. Response carries Cache-Control: public with a long max-age ($menuapi:max-age in menu-api.xql); when proxy-caching is enabled a Last-Modified header (keyed on the fragment template's mtime) is added and If-Modified-Since is honoured with a 304. Intended to be fetched by nginx as an SSI subrequest and cached independently of page bodies. Served as application/xml (roaster's xml output method): a bare fragment with no DOCTYPE, which text/html (the html5 method) would prepend and which is invalid spliced mid-page by SSI.",
+        "operationId": "menuapi:menu",
+        "x-error-handler": "menuapi:handle-error",
+        "tags": [
+          "menu"
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML of the primary-navigation fragment",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/menu-mobile": {
+      "get": {
+        "summary": "Primary navigation as the mobile menubar fragment",
+        "description": "Same primary navigation as /menu, rendered as the collapsible mobile menubar (Pico <details> dropdowns) from templates/menu-mobile-fragment.html. Same caching contract as /menu so the mobile nav is edge-composed via SSI and refreshed independently of page bodies.",
+        "operationId": "menuapi:menu-mobile",
+        "x-error-handler": "menuapi:handle-error",
+        "tags": [
+          "menu"
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML of the mobile navigation fragment",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

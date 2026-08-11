@@ -1,4 +1,8 @@
 <div class="usa-header usa-header--extended usa-header--megamenu">
+    [# When proxy caching is on (production nginx), emit an SSI include pulling the menu innards from the app-owned /menu fragment endpoint, so page bodies cache aggressively while the menu is refreshed independently by purging only /menu. Off (dev, no nginx): render inline below. The stable usa-header wrapper above stays in the page body in both modes; it must be the literal root of this file, because jinks-templates (1.4.2) mis-compiles an [% include %] of a partial whose root is an if-block (XPST0003 at page compile time), while an if nested inside a literal element is fine. The include directive is built as a comment node because interpolation is not evaluated inside a literal HTML comment. See OP#1284 and doc/nginx-ssi-menu.conf. #]
+    [% if $config:enable-proxy-caching %]
+    [[ comment { '#include virtual="' || $context-path || '/menu" ' } ]]
+    [% else %]
     <div class="usa-navbar">
         [% if $theme?logo?image %]
         <div class="usa-logo">
@@ -177,4 +181,5 @@
             </div>
         </div>
     </nav>
+    [% endif %]
 </div>

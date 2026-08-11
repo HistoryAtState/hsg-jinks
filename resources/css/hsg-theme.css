@@ -346,6 +346,22 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin: var(--s-2) 0;
 }
 
+/* Active primary-nav item (set by resources/scripts/nav-active.js; OP#1283).
+   USWDS marks the current item with a colored bottom border on desktop; make
+   it follow the navy theme and read as bold. On the mobile accordion the
+   border reads as a left rule instead. */
+.usa-nav__primary-item > .usa-current,
+.usa-nav__primary-item > a.usa-current {
+    font-weight: 700;
+}
+
+@media (min-width: 64em) {
+    .usa-nav__primary-item > .usa-current::after,
+    .usa-nav__primary-item > a.usa-current::after {
+        background-color: var(--theme-color-primary, #005ea2);
+    }
+}
+
 /* Conferences landing page's "Past Conferences" list (#1099): the reference
    site's own list (hsg-shell's pages/conferences/index.xml) is numbered.
    list-style-type alone does not bring the numbers back: USWDS's
