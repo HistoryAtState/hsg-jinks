@@ -48,96 +48,105 @@
     "delete" : true,
     "dark-mode" : false,
     "items" : [ {
-      "url" : "",
-      "id" : "home"
-    }, {
-      "subitems" : [ {
-        "url" : "historicaldocuments",
-        "id" : "hd-overview"
+        "id" : "home",
+        "url" : ""
       }, {
-        "url" : "historicaldocuments/about-frus",
-        "id" : "hd-about-frus"
+        "id" : "historicaldocuments",
+        "subitems" : [ {
+            "id" : "frus",
+            "url" : "historicaldocuments"
+          }, {
+            "id" : "about-frus",
+            "url" : "historicaldocuments/about-frus"
+          }, {
+            "id" : "status-of-the-series",
+            "url" : "historicaldocuments/status-of-the-series"
+          }, {
+            "id" : "frus-history",
+            "url" : "historicaldocuments/frus-history"
+          }, {
+            "id" : "ebooks",
+            "url" : "historicaldocuments/ebooks"
+          }, {
+            "id" : "quarterly-releases",
+            "url" : "historicaldocuments/quarterly-releases"
+          } ]
       }, {
-        "url" : "historicaldocuments/status-of-the-series",
-        "id" : "hd-status"
+        "id" : "departmenthistory",
+        "subitems" : [ {
+            "id" : "dh-overview",
+            "url" : "departmenthistory"
+          }, {
+            "id" : "secretaries",
+            "url" : "departmenthistory/people/secretaries"
+          }, {
+            "id" : "principals-chiefs",
+            "url" : "departmenthistory/people/principals-chiefs"
+          }, {
+            "id" : "travels-secretary",
+            "url" : "departmenthistory/travels/secretary"
+          }, {
+            "id" : "travels-president",
+            "url" : "departmenthistory/travels/president"
+          }, {
+            "id" : "visits",
+            "url" : "departmenthistory/visits"
+          }, {
+            "id" : "wwi",
+            "url" : "departmenthistory/wwi"
+          }, {
+            "id" : "buildings",
+            "url" : "departmenthistory/buildings"
+          }, {
+            "id" : "diplomatic-couriers",
+            "url" : "departmenthistory/diplomatic-couriers"
+          }, {
+            "id" : "marine-corps",
+            "url" : "departmenthistory/marine-corps"
+          } ]
       }, {
-        "url" : "historicaldocuments/frus-history",
-        "id" : "hd-history"
+        "id" : "countries",
+        "subitems" : [ {
+            "id" : "countries-recognition",
+            "url" : "countries"
+          }, {
+            "id" : "archives",
+            "url" : "countries/archives"
+          } ]
       }, {
-        "url" : "historicaldocuments/ebooks",
-        "id" : "hd-ebooks"
+        "id" : "resources",
+        "subitems" : [ {
+            "id" : "tags",
+            "url" : "tags"
+          }, {
+            "id" : "conferences",
+            "url" : "conferences"
+          }, {
+            "id" : "contact-us",
+            "url" : "about/contact-us"
+          }, {
+            "id" : "developer",
+            "url" : "developer"
+          }, {
+            "id" : "education",
+            "url" : "education"
+          }, {
+            "id" : "faq",
+            "url" : "about/faq"
+          }, {
+            "id" : "milestones",
+            "url" : "milestones"
+          }, {
+            "id" : "open",
+            "url" : "open"
+          }, {
+            "id" : "short-history",
+            "url" : "departmenthistory/short-history"
+          } ]
       }, {
-        "url" : "historicaldocuments/quarterly-releases",
-        "id" : "hd-quarterly"
+        "id" : "about",
+        "url" : "about"
       } ],
-      "id" : "historicaldocuments"
-    }, {
-      "subitems" : [ {
-        "url" : "departmenthistory",
-        "id" : "dh-overview"
-      }, {
-        "url" : "departmenthistory/timeline",
-        "id" : "dh-timeline"
-      }, {
-        "url" : "departmenthistory/people/secretaries",
-        "id" : "dh-secretaries"
-      }, {
-        "url" : "departmenthistory/people/principals-chiefs",
-        "id" : "dh-principals"
-      }, {
-        "url" : "departmenthistory/travels/secretary",
-        "id" : "dh-travels-secretary"
-      }, {
-        "url" : "departmenthistory/travels/president",
-        "id" : "dh-travels-president"
-      }, {
-        "url" : "departmenthistory/visits",
-        "id" : "dh-visits"
-      }, {
-        "url" : "departmenthistory/buildings",
-        "id" : "dh-buildings"
-      } ],
-      "id" : "departmenthistory"
-    }, {
-      "subitems" : [ {
-        "url" : "countries",
-        "id" : "co-guide"
-      }, {
-        "url" : "countries/archives",
-        "id" : "co-archives"
-      } ],
-      "id" : "countries"
-    }, {
-      "subitems" : [ {
-        "url" : "tags",
-        "id" : "re-tags"
-      }, {
-        "url" : "conferences",
-        "id" : "re-conferences"
-      }, {
-        "url" : "developer",
-        "id" : "re-developer"
-      }, {
-        "url" : "education",
-        "id" : "re-education"
-      }, {
-        "url" : "milestones",
-        "id" : "re-milestones"
-      }, {
-        "url" : "open",
-        "id" : "re-open"
-      }, {
-        "url" : "about/faq",
-        "id" : "re-faq"
-      }, {
-        "url" : "about/contact-us",
-        "id" : "re-contact"
-      } ],
-      "id" : "resources"
-    }, {
-      "url" : "about",
-      "id" : "about"
-    } ],
     "login" : false,
     "download" : true,
     "search" : true
@@ -398,7 +407,7 @@
     "landing" : "index.html",
     "address-by-id" : false,
     "odd-root" : "resources/odd",
-    "languages" : [ "bg", "cs", "zh_CN", "zh_TW", "de", "en", "es", "el", "fr", "fi", "it", "ka", "nl", "no", "pl", "pt", "ro", "ru", "sl", "sv", "tr", "uk" ],
+    "languages" : [ "en" ],
     "data-default" : "Publications",
     "direction" : "ltr",
     "template" : "volume-landing.html",
@@ -444,7 +453,7 @@
     }
   },
   "script" : {
-    "custom" : [ ],
+    "custom" : [ "resources/scripts/nav-active.js" ],
     "webcomponents" : "3.0.0-next-4.21",
     "extra-components" : [ ],
     "cdn" : "https://cdn.jsdelivr.net/npm/@teipublisher/pb-components"

@@ -62,6 +62,8 @@ import module namespace confapi="http://teipublisher.com/api/conferences" at "..
 
 import module namespace ogapi="http://teipublisher.com/api/open" at "../opengov-api.xql";
 
+import module namespace menuapi="https://history.state.gov/api/menu" at "../menu-api.xql";
+
 
 
 declare option output:indent "no";
@@ -82,6 +84,7 @@ let $resp := roaster:route(
         "modules/developer-api.json",
         "modules/education-api.json",
         "modules/hsg-api.json",
+        "modules/menu-api.json",
         "modules/milestones-api.json",
         "modules/opengov-api.json",
         "modules/search-api.json",

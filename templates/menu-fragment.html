@@ -1,0 +1,63 @@
+[# Menu innards only: the stable "usa-header" wrapper stays in every (cached) page body, rendered by templates/menu.html, which SSI-includes this fragment inside it when proxy caching is on. Keep this fragment's markup in sync with menu.html's inline else-branch. See OP#1284. #]
+<div class="usa-navbar">
+        [% if $theme?logo?image %]
+        <div class="usa-logo">
+            <a class="usa-logo__text" href="[[ head(($context?defaults?site-root, $context-path)) ]]"><img class="usa-logo__img" src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/css/[[ $theme?logo?image ]]" alt="[[ $context?description ]]"/></a>
+        </div>
+        [% else %]
+        <div class="usa-logo">
+            <a class="usa-logo__text" href="[[ head(($context?defaults?site-root, $context-path)) ]]">[[ $context?description ]]</a>
+        </div>
+        [% endif %]
+        <button type="button" class="usa-menu-btn">Menu</button>
+    </div>
+
+    <nav class="usa-nav" aria-label="Primary navigation">
+        <div class="usa-nav__inner">
+            <button type="button" class="usa-nav__close">
+                <img src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/images/usa-icons/close.svg" role="img" alt="Close"/>
+            </button>
+
+            [# Public primary navigation only. This fragment is served from the app-owned /menu endpoint and cached independently by nginx (SSI), so it must stay context-independent: no document-view Download submenu, no editor Admin submenu, no login/language. See OP#1284. #]
+            <ul class="usa-nav__primary usa-accordion">
+                [% for $item in $menu?items?* %]
+                [% if $item?url or $item?url = '' %]
+                [% let $url = if (starts-with($item?url, 'http')) then $item?url else $context-path || '/' ||
+                $item?url %]
+                <li class="usa-nav__primary-item">
+                    <a href="[[ replace($url, 'browse\.html', $context?defaults?browse) ]]">
+                        <pb-i18n key="menu.[[ $item?id ]]">[[ $item?id ]]</pb-i18n>
+                    </a>
+                </li>
+                [% endlet %]
+                [% elif exists($item?subitems) %]
+                <li class="usa-nav__primary-item">
+                    <button type="button" class="usa-accordion__button usa-nav__link" aria-expanded="false" aria-controls="submenu-[[ $item?id ]]">
+                        <pb-i18n key="menu.[[ $item?id ]]">[[ $item?id ]]</pb-i18n>
+                    </button>
+                    <ul class="usa-nav__submenu" id="submenu-[[ $item?id ]]">
+                        [% for $subitem in $item?subitems?* %]
+                        <li class="usa-nav__submenu-item">
+                            <a href="[[ $context-path ]]/[[ replace($subitem?url, 'browse\.html', $context?defaults?browse) ]]"><pb-i18n key="menu.[[ $subitem?id ]]">[[ $subitem?id ]]</pb-i18n></a>
+                        </li>
+                        [% endfor %]
+                    </ul>
+                </li>
+                [% endif %]
+                [% endfor %]
+            </ul>
+            <div class="usa-nav__secondary">
+                [% if $menu?search %]
+                <section aria-label="Search">
+                    <form action="[[ $context-path ]]/search" class="usa-search usa-search--small" role="search">
+                        <label class="usa-sr-only" for="query"><pb-i18n key="search.search">Search</pb-i18n></label>
+                        <input if="search" type="search" value="" name="q" placeholder="" data-i18n="[placeholder]search.placeholder" class="usa-input"/>
+                        <button class="usa-button" type="submit">
+                            <img src="[[ $context-path ]]/resources/images/usa-icons-bg/search--white.svg" class="usa-search__submit-icon" alt="" data-18n="[alt]search.search"/>
+                        </button>
+                    </form>
+                </section>
+                [% endif %]
+            </div>
+        </div>
+    </nav>
