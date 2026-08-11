@@ -68,22 +68,13 @@
             <header class="page-header">
                 <div>
                     [% if $features?menubar %]
-                    [# When proxy caching is on (production nginx), pull the nav from the app-owned /menu fragment via an SSI include so page bodies cache aggressively while the menu is refreshed independently by purging only /menu. Off (dev, no nginx): render inline. The include directive is built as a comment node because interpolation is not evaluated inside a literal HTML comment. See OP#1284 and doc/nginx-ssi-menu.conf. #]
-                    [% if $config:enable-proxy-caching %]
-                    [[ comment { '#include virtual="' || $context-path || '/menu" ' } ]]
-                    [% else %]
                     [% include "templates/menu.html" %]
-                    [% endif %]
                     [% endif %]
 
                     [% block header %][% endblock %]
                 </div>
                 [% if $features?menubar %]
-                    [% if $config:enable-proxy-caching %]
-                    [[ comment { '#include virtual="' || $context-path || '/menu-mobile" ' } ]]
-                    [% else %]
                     [% include "templates/menu-mobile.html" %]
-                    [% endif %]
                 [% endif %]
             </header>
 

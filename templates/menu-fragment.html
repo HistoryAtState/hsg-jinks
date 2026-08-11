@@ -1,5 +1,5 @@
-<div class="usa-header usa-header--extended usa-header--megamenu">
-    <div class="usa-navbar">
+[# Menu innards only: the stable "usa-header" wrapper stays in every (cached) page body, rendered by templates/menu.html, which SSI-includes this fragment inside it when proxy caching is on. Keep this fragment's markup in sync with menu.html's inline else-branch. See OP#1284. #]
+<div class="usa-navbar">
         [% if $theme?logo?image %]
         <div class="usa-logo">
             <a class="usa-logo__text" href="[[ head(($context?defaults?site-root, $context-path)) ]]"><img class="usa-logo__img" src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/css/[[ $theme?logo?image ]]" alt="[[ $context?description ]]"/></a>
@@ -61,4 +61,3 @@
             </div>
         </div>
     </nav>
-</div>

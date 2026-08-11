@@ -145,9 +145,12 @@ describe("cacheable menu fragments (nginx SSI)", () => {
         // would double-prefix and fall through to the /{docid} 404 route.
         cy.request("menu").then((res) => {
             expect(res.status).to.eq(200);
-            expect(res.headers["content-type"]).to.contain("xhtml+xml");
-            expect(res.body).to.contain("usa-header--megamenu");
+            expect(res.headers["content-type"]).to.contain("application/xml");
+            // Innards only: the stable usa-header wrapper stays in the page
+            // body (templates/menu.html); the fragment starts at the navbar.
+            expect(res.body).to.contain("usa-nav__primary");
             expect(res.body).to.contain('id="submenu-historicaldocuments"');
+            expect(res.body).to.not.contain("usa-header--megamenu");
             expect(res.body).to.not.contain("submenu-admin");
             expect(res.body).to.not.contain("submenu-download");
             expect(res.body.trimStart()).to.match(/^<div/); // bare fragment, no DOCTYPE
@@ -157,8 +160,11 @@ describe("cacheable menu fragments (nginx SSI)", () => {
     it("GET /menu-mobile returns the mobile nav fragment", () => {
         cy.request("menu-mobile").then((res) => {
             expect(res.status).to.eq(200);
-            expect(res.body).to.contain("mobile menubar");
+            // Innards only; the "mobile menubar" wrapper div stays in the
+            // page body (templates/menu-mobile.html).
+            expect(res.body).to.contain('details class="dropdown"');
             expect(res.body).to.contain("historicaldocuments");
+            expect(res.body).to.not.contain("mobile menubar");
         });
     });
 });

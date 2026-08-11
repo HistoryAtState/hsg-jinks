@@ -1,5 +1,5 @@
-<div class="mobile menubar hidden">
-    <nav>
+[# Mobile menubar innards only: the stable "mobile menubar hidden" wrapper stays in every (cached) page body, rendered by templates/menu-mobile.html, which SSI-includes this fragment inside it when proxy caching is on. Keep in sync with menu-mobile.html's inline else-branch. See OP#1284. #]
+<nav>
         <ul>
             [% if $menu?search %]
             <li>
@@ -39,4 +39,3 @@
             </ul>
         </nav>
     </aside>
-</div>
