@@ -18,15 +18,22 @@
          their data carries the same relatedItem targets. -->
     <div class="hsg-frus__interior">
         [[ hsg:navigation-title($context) ]]
-        [% if $doc?content//tei:bibl[@type='frus-division-type'] = ('chapter', 'chapter-pending', 'compilation') %]
-            [[ hsg:division-listing($context) ]]
-        [% elif starts-with(normalize-space(($doc?content//tei:bibl[@type='frus-division-type'])[1]), 'document') %]
-            [[ page:transform($doc?content, map { "mode": "document-view" }) ]]
-            [[ hsg:prev-next($context) ]]
-        [% else %]
-            [[ page:transform($doc?content, map { "mode": "division" }) ]]
-            [[ hsg:prev-next($context) ]]
-        [% endif %]
+        <!-- usa-prose gives the division its USWDS body typography, the same
+             wrapper every other section's TEI content sits in. The volume
+             title stays outside it: it is page chrome rather than prose, and
+             as a direct child it would pick up the "usa-prose" heading rules
+             and read as loudly as the division's own title. -->
+        <div class="hsg-frus__prose usa-prose">
+            [% if $doc?content//tei:bibl[@type='frus-division-type'] = ('chapter', 'chapter-pending', 'compilation') %]
+                [[ hsg:division-listing($context) ]]
+            [% elif starts-with(normalize-space(($doc?content//tei:bibl[@type='frus-division-type'])[1]), 'document') %]
+                [[ page:transform($doc?content, map { "mode": "document-view" }) ]]
+                [[ hsg:prev-next($context) ]]
+            [% else %]
+                [[ page:transform($doc?content, map { "mode": "division" }) ]]
+                [[ hsg:prev-next($context) ]]
+            [% endif %]
+        </div>
     </div>
 
     [% template after %]

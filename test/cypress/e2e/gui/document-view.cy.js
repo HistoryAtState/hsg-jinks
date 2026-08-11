@@ -1,11 +1,11 @@
-// Document view (#1081): overline, number + title heading with its source-note
-// marker, dateline, ruler, and the footnote apparatus.
+// Document view (#1081): number + title heading with its source-note marker,
+// dateline, ruler, and the footnote apparatus.
 //
-// Documents carry no <head> in the body (only a <?frusGen document-heading...?>
-// placeholder PI), so the number + title, the overline and the dateline are all
-// synthesized from the teiHeader via the "document-view" ODD mode
-// (resources/odd/hsg-jinks.odd), selected in
-// templates/pages/volume-interior.html for frus-division-type='document'.
+// The "document-view" ODD mode (resources/odd/hsg-jinks.odd, selected in
+// templates/pages/volume/interior.html for frus-division-type='document')
+// renders the division's own body: the heading, its opener and its prose all
+// come from there. Nothing is synthesized from the teiHeader, which is page
+// chrome (breadcrumb, title) -- doing so rendered each of them twice.
 //
 // Footnotes live in standOff/listAnnotation and point *at* the in-body anchors
 // (note/@corresp = '#' || anchor/@xml:id), the reverse of what the base ODD
@@ -18,7 +18,7 @@
 
 const VOLUME = "historicaldocuments/frus1981-88v05";
 
-const OVERLINE =
+const VOLUME_TITLE =
     "Foreign Relations of the United States, 1981–1988, Volume V, Soviet Union, March 1985–October 1986";
 
 // Text of an element with the footnote marker stripped, whitespace collapsed.
@@ -64,12 +64,20 @@ describe("document view", () => {
                 cy.get("main h1").should("have.length", 1);
             });
 
-            it("renders the volume title as an overline", () => {
-                cy.get("main .overline")
+            // The volume title belongs to the page chrome and appears once,
+            // as the navigation title above the content. It used to be
+            // rendered a second time as an overline inside the document; the
+            // two strings are identical for all 694 volumes (titleStmt and
+            // seriesStmt/title[@type='complete'] carry the same text), and the
+            // reference site has no overline at all.
+            it("shows the volume title once, above the document", () => {
+                cy.get("main .hsg-navigation-title")
                     .should("be.visible")
                     .invoke("text")
                     .then((t) => t.replace(/\s+/g, " ").trim())
-                    .should("eq", OVERLINE);
+                    .should("eq", VOLUME_TITLE);
+                cy.get("main").contains(VOLUME_TITLE).should("have.length", 1);
+                cy.get("main .overline").should("not.exist");
             });
 
             it("renders the place and date as a dateline", () => {

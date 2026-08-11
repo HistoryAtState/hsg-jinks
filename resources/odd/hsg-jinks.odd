@@ -81,7 +81,7 @@
 </ul>
 </div></pb:template>
         </model><model predicate="$parameters?mode='document-view' and normalize-space(.//bibl[@type='frus-attachment-label']) != ''" behaviour="block">
-            <desc>An attachment ("Tab I") inlined into its parent document, as the reference site renders it. Only the label is synthesized: the reference site reads it from an inline note at the top of the attachment's own body, and the v2 data moved that into the teiHeader as bibl[@type='frus-attachment-label']. Everything else comes out of the attachment's body, which already holds its title (with the source note's anchor inside it) and its opener with the dateline; rendering the body only is the same treatment the document models below get, and for the same reason: synthesizing head and dateline from the teiHeader as well showed each attachment's title and place/date twice, and put two elements carrying the same footnote-marker id on the page. The attachment has no overline and no footnote list of its own -- its notes merge into the parent's consolidated list, which is why their @n continue the parent's sequence -- and no document number either, its frus-document-number bibl being present but empty.</desc>
+            <desc>An attachment ("Tab I") inlined into its parent document, as the reference site renders it. Only the label is synthesized: the reference site reads it from an inline note at the top of the attachment's own body, and the v2 data moved that into the teiHeader as bibl[@type='frus-attachment-label']. Everything else comes out of the attachment's body, which already holds its title (with the source note's anchor inside it) and its opener with the dateline; rendering the body only is the same treatment the document models below get, and for the same reason: synthesizing head and dateline from the teiHeader as well showed each attachment's title and place/date twice, and put two elements carrying the same footnote-marker id on the page. The attachment has no footnote list of its own -- its notes merge into the parent's consolidated list, which is why their @n continue the parent's sequence -- and no document number either, its frus-document-number bibl being present but empty.</desc>
             <param name="label" value=".//bibl[@type='frus-attachment-label']"/>
             <param name="content" value="text/body"/>
             <pb:template xml:space="preserve"><div xmlns="" class="attachment">
@@ -90,13 +90,11 @@
   [[content]]
 </div></pb:template>
         </model><model predicate="$parameters?mode='document-view' and exists(.//standOff//note)" behaviour="block">
-            <desc>A document with footnotes (333 of 341). Reference parity with hsg-shell: render the body div only -- its own head (which already carries the number, e.g. "72. Telegram...", and the source-note marker as an in-body anchor) and its opener (print page number and dateline). The teiHeader title/dateline are metadata for page chrome (breadcrumb, title), not rendered inline, so head, place and date each appear once. Footnotes are consolidated from this document and any inlined attachments, ordered by @n.</desc>
-            <param name="overline" value="global:volume-series-title($parameters, .)"/>
+            <desc>A document with footnotes (333 of 341). Reference parity with hsg-shell: render the body div only -- its own head (which already carries the number, e.g. "72. Telegram...", and the source-note marker as an in-body anchor) and its opener (print page number and dateline). The teiHeader title/dateline are metadata for page chrome (breadcrumb, title), not rendered inline, so head, place and date each appear once. No volume title either: it is the same string in titleStmt and in seriesStmt/title[@type='complete'] for all 694 volumes, and hsg:navigation-title already puts it above the content of every interior page, so rendering it here as an overline showed it twice (the reference site shows it once, and has no overline at all). Footnotes are consolidated from this document and any inlined attachments, ordered by @n.</desc>
             <param name="content" value="text/body"/>
             <param name="attachments" value="text/back/xi:include"/>
             <param name="footnotes" value="let $att := (text/body//xi:include ! (id(@xpointer, doc(util:collection-name(.) || '/' || @href))/root()//standOff//note)) return (for $note in (.//standOff//note, $att) order by number($note/@n) return $note)"/>
             <pb:template xml:space="preserve"><div xmlns="">
-  <p class="overline">[[overline]]</p>
   [[content]]
   [[attachments]]
   <hr class="footnotes-divider"/>
@@ -104,10 +102,8 @@
 </div></pb:template>
         </model><model predicate="$parameters?mode='document-view'" behaviour="block">
             <desc>A document without footnotes (8 of 341: 7 editorial notes and 1 historical document). Same body-only rendering as above; no source note exists, so no ruler or footnote list is emitted.</desc>
-            <param name="overline" value="global:volume-series-title($parameters, .)"/>
             <param name="content" value="text/body"/>
             <pb:template xml:space="preserve"><div xmlns="">
-  <p class="overline">[[overline]]</p>
   [[content]]
 </div></pb:template>
         </model><model predicate="$parameters?mode='division'" behaviour="pass-through">
@@ -470,7 +466,7 @@
             </elementSpec>
             <elementSpec ident="pb" mode="change">
                 <desc>Reference parity with hsg-shell's frus.odd pb model: the visible text of a
-                    page-break facsimile link is "Page N", not the bare page number -- the base
+                    page-break facsimile link is "[Page N]", not the bare page number -- the base
                     teipublisher.odd renders just @n, which reads as stray text in the prose (a
                     lone "66" before a section heading, PR #32 review). Same model chain as the
                     base spec (print omit, then the @facs IIIF webcomponent, then the no-facsimile
@@ -483,7 +479,7 @@
                 <model output="print" behaviour="omit"/>
                 <model predicate="@facs" behaviour="webcomponent" cssClass="facs pb hsg-facs-link">
                     <param name="name" value="'pb-facs-link'"/>
-                    <param name="content" value="'Page ' || @n"/>
+                    <param name="content" value="'[Page ' || @n || ']'"/>
                     <param name="emit" value="'transcription'"/>
                     <param name="subscribe" value="'transcription'"/>
                     <param name="order" value="count($get(.)/preceding::pb) + 1"/>
@@ -493,7 +489,7 @@
                 <model behaviour="break" cssClass="pb hsg-facs-link" useSourceRendition="true">
                     <desc>Output Page label when no facsimile information is available</desc>
                     <param name="type" value="'page'"/>
-                    <param name="label" value="'Page ' || @n"/>
+                    <param name="label" value="'[Page ' || @n || ']'"/>
                 </model>
             </elementSpec></schemaSpec>
         </body>

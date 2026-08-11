@@ -26,6 +26,12 @@
     --hsg-color-link-broken: #b50909;
     --hsg-color-link-broken-visited: #8b0707;
 
+    /* Type sizes, from the USWDS sans type scale (the app's heading and body
+       face is Source Sans), named for the USWDS step they carry. */
+    --hsg-font-size-sm: 1.06rem;                /* USWDS font-sans-sm */
+    --hsg-font-size-md: 1.13rem;                /* USWDS font-sans-md */
+    --hsg-font-size-lg: 1.46rem;                /* USWDS font-sans-lg */
+
     /* Spacing, on the USWDS spacing scale: one unit is 8px, and the token
        names are USWDS' own (105 = one and a half units). */
     --hsg-space-05: 0.25rem;                    /* USWDS units(0.5) */
@@ -539,6 +545,39 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-frus__contents {
     font-size: 1.15rem;
     margin: var(--hsg-space-2) 0 var(--hsg-space-1);
+}
+
+/* Headings inside a FRUS division (the TEI head of a document, a section or
+   one of its subdivisions).
+
+   "usa-prose" styles only its direct children, and a division's head sits
+   several elements deep inside the transform's output, so none of the
+   `.usa-prose > h*` rules reach it and every head fell back to the browser's
+   own defaults -- a document title rendered at 2em, twice the size of the
+   volume title above it and half again the size the reference site gives it.
+   These map each level onto the USWDS sans type scale instead. A chapter or
+   compilation title is built in XQuery rather than by the transform
+   (hsg:division-listing), so it carries its own class and joins them here to
+   keep every division title the same size. */
+.hsg-frus__prose :is(h1, h2, h3, h4, h5, h6).tei-head,
+.hsg-frus__division-title {
+    font-family: var(--jinks-heading-font-family);
+    line-height: var(--jinks-heading-line-height);
+    font-weight: 700;
+    margin: var(--hsg-space-3) 0 var(--hsg-space-105);
+}
+
+.hsg-frus__prose h1.tei-head,
+.hsg-frus__division-title {
+    font-size: var(--hsg-font-size-lg);
+}
+
+.hsg-frus__prose h2.tei-head {
+    font-size: var(--hsg-font-size-md);
+}
+
+.hsg-frus__prose :is(h3, h4, h5, h6).tei-head {
+    font-size: var(--hsg-font-size-sm);
 }
 
 /* Label above an attachment inlined into its parent document ("Tab I"). The

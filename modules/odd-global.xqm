@@ -2,8 +2,6 @@ xquery version "3.1";
 
 module namespace config="http://e-editiones.org/tei-publisher/odd-global";
 
-declare namespace tei="http://www.tei-c.org/ns/1.0";
-declare namespace xi="http://www.w3.org/2001/XInclude";
 
 (:
     Determine the application root collection from the current module load path.
@@ -121,38 +119,3 @@ declare function config:volume-id($parameters as map(*)?, $node as node()?) as x
     )
 };
 
-(:~
- : Collection holding the FRUS volume a node belongs to, or the empty string
- : outside the FRUS collection. The volume root document is
- : {this}/{volume-id}.xml.
- :)
-declare function config:volume-collection($parameters as map(*)?, $node as node()?) as xs:string {
-    let $id := config:volume-id($parameters, $node)
-    return
-        if ($id = "") then "" else $config:data-default || "/" || $id
-};
-
-(:~
- : The complete series title of a FRUS volume ("Foreign Relations of the
- : United States, 1977-1980, Volume XXVII, Western Europe"), rendered as the
- : overline above every document.
- :
- : It lives in the volume root's seriesStmt, which is itself xincluded from
- : the volume's shared _includes.xml, so it takes two hops to reach: division
- : files carry no copy of it.
- :)
-declare function config:volume-series-title($parameters as map(*)?, $node as node()?) as node()* {
-    let $collection := config:volume-collection($parameters, $node)
-    let $path := $collection || "/" || config:volume-id($parameters, $node) || ".xml"
-    let $include :=
-        if ($collection != "" and doc-available($path)) then
-            doc($path)//tei:teiHeader/tei:fileDesc/xi:include[@xpointer = "seriesStmt"]
-        else
-            ()
-    let $target := head($include ! (util:collection-name(.) || "/" || @href))
-    return
-        if (empty($target) or not(doc-available($target))) then
-            ()
-        else
-            id("seriesStmt", doc($target))/tei:title[@type = "complete"]
-};

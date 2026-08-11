@@ -711,7 +711,7 @@ declare function hsg:division-listing($context as map(*)) {
         let $type := normalize-space(($doc//tei:bibl[@type='frus-division-type'])[1])
         return
             <div class="hsg-frus__division">
-                <h1>{$title}</h1>
+                <h1 class="hsg-frus__division-title">{$title}</h1>
                 {hsg:prev-next($context)}
                 {(: A compilation lists its chapters under a "Contents" heading,
                     reference parity with hsg-shell's document-list. :)
