@@ -109,6 +109,25 @@ describe("primary navigation menu", () => {
         cy.get("#submenu-download").should("not.exist");
     });
 
+    it("accordion buttons stay inside their item (About Us not painted over)", () => {
+        // Regression: layout.css keeps the header chrome at content-box and
+        // USWDS's inherit reset spread that into the nav, where the width:100%
+        // + padding accordion buttons then painted 2rem past their own list
+        // item, hiding the start of the next one ("About Us" showed as
+        // "out Us" under the More Resources caret). hsg-theme.css re-anchors
+        // border-box on .usa-header.
+        cy.get(".usa-nav__primary > .usa-nav__primary-item > button").each(($btn) => {
+            expect(getComputedStyle($btn[0]).boxSizing, "accordion button box-sizing").to.eq("border-box");
+        });
+        cy.contains(".usa-nav__primary-item > button", "More Resources").then(($btn) => {
+            cy.contains(".usa-nav__primary-item > a", "About Us").then(($a) => {
+                const btnRight = $btn[0].getBoundingClientRect().right;
+                const aboutLeft = $a[0].getBoundingClientRect().left;
+                expect(btnRight, "More Resources button must not overlap About Us").to.be.at.most(aboutLeft + 0.5);
+            });
+        });
+    });
+
     it("renders no Admin or Download submenu on a content page either", () => {
         // The Admin submenu used to leak into every inline-rendered page, so
         // assert on a content page too, not just the home page. (The Download

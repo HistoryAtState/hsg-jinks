@@ -696,6 +696,20 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin: var(--hsg-space-1) 0;
 }
 
+/* Re-anchor USWDS's border-box inside the header chrome. layout.css keeps
+   header.page-header at box-sizing: content-box on purpose (page-width math),
+   and USWDS's reset ("*, ::before, ::after { box-sizing: inherit }") then
+   carries content-box down into every USWDS element inside the header. USWDS
+   is designed for border-box: each nav accordion button is width: 100% plus
+   1rem padding per side, so under content-box every button painted 2rem past
+   its own list item, over the start of the next one. The visible symptom was
+   the last item, "About Us", losing its first characters under the More
+   Resources button and its caret. Setting the USWDS root back to border-box
+   lets the same inherit reset restore it for the whole subtree. */
+.usa-header {
+    box-sizing: border-box;
+}
+
 /* Active primary-nav item (set by resources/scripts/nav-active.js; OP#1283).
    USWDS marks the current item with a colored bottom border on desktop; make
    it follow the navy theme and read as bold. On the mobile accordion the
