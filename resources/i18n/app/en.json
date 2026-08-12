@@ -17,6 +17,10 @@
     "letters": "Letters",
     "doc": "Documentation"
   },
+  "stub": {
+    "title": "To be implemented",
+    "text": "This page has not yet been implemented in this application."
+  },
   "menu": {
         "home": "Home",
         "historicaldocuments": "Historical Documents",

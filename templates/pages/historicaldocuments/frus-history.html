@@ -1,0 +1,54 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                <li>
+                    <a href="[[ $context?context-path ]]/">
+                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments">
+                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
+                    </a>
+                </li>
+                <li aria-current="page">
+                    <pb-i18n key="menu.frus-history">History of the Foreign Relations Series</pb-i18n>
+                </li>
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <div class="section-landing usa-prose">
+        <h1>
+            <pb-i18n key="menu.frus-history">History of the Foreign Relations Series</pb-i18n>
+        </h1>
+        <div class="usa-alert usa-alert--info">
+            <div class="usa-alert__body">
+                <h2 class="usa-alert__heading">
+                    <pb-i18n key="stub.title">To be implemented</pb-i18n>
+                </h2>
+                <p class="usa-alert__text">
+                    <pb-i18n key="stub.text">This page has not yet been implemented in this application.</pb-i18n>
+                    <a href="https://history.state.gov/historicaldocuments/frus-history">View this page on the current history.state.gov site</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</template>
