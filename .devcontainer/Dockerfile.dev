@@ -7,8 +7,6 @@ ARG ROUTER_VERSION=1.12.2
 ARG EDITOR_VERSION=1.0.1
 ARG CRYPTO_VERSION=6.0.1
 ARG JWT_VERSION=2.0.1
-ARG WWDAI_VERSION=0.6.5
-ARG RDCR_VERSION=0.8.7
 ARG CAROUSEL_VERSION=0.11.10
 
 
@@ -95,26 +93,26 @@ RUN curl -L -o /usr/local/exist/autodeploy/atom-editor-${EDITOR_VERSION}.xar htt
 RUN curl -L -o /usr/local/exist/autodeploy/expath-crypto-module-${CRYPTO_VERSION}.xar https://exist-db.org/exist/apps/public-repo/public/expath-crypto-module-${CRYPTO_VERSION}.xar
 RUN curl -L -o /usr/local/exist/autodeploy/jwt-${JWT_VERSION}.xar https://exist-db.org/exist/apps/public-repo/public/jwt-${JWT_VERSION}.xar
 
-# Countries-section data (OP#1095, modules/countries-api.xql): rdcr and wwdai
-# are HistoryAtState/{rdcr,wwdai} on GitHub, released via semantic-release
-# with the xar attached as a GitHub Release asset -- same pinned-fetch
-# pattern as roaster/jwt/crypto above, just a different host. carousel
-# (modules/templates/hsg-landing.xqm) is released the same way.
-RUN curl -fL -o /usr/local/exist/autodeploy/wwdai-${WWDAI_VERSION}.xar https://github.com/HistoryAtState/wwdai/releases/download/v${WWDAI_VERSION}/wwdai.xar
-RUN curl -fL -o /usr/local/exist/autodeploy/rdcr-${RDCR_VERSION}.xar https://github.com/HistoryAtState/rdcr/releases/download/v${RDCR_VERSION}/rdcr.xar
+# carousel (modules/templates/hsg-landing.xqm) is a software component
+# released via semantic-release with the xar attached as a GitHub Release
+# asset -- same pinned-fetch pattern as roaster/jwt/crypto above, just a
+# different host.
 RUN curl -fL -o /usr/local/exist/autodeploy/carousel-${CAROUSEL_VERSION}.xar https://github.com/HistoryAtState/carousel/releases/download/v${CAROUSEL_VERSION}/carousel.xar
 
-# departmenthistory (OP#1096: gsh, other-publications, pocom, travels, visits),
-# milestones (OP#1098) and about's HAC documents (OP#1097, hac): unlike
-# wwdai/rdcr/carousel above these are NOT version-pinned -- they're
-# append-only content packages (see CLAUDE.md "Cypress assertions on
-# data-package counts"), so the devcontainer should always track each repo's
-# latest release rather than freeze to whatever was current when this line
-# was added. GitHub's /releases/latest/download/ redirect resolves that
-# without needing a version number or an API call. Docker layer caching means
-# a plain rebuild won't refetch once cached -- use `docker compose build
-# --no-cache` (or bump something above this line) to actually pick up a new
-# release.
+# All 11 external HistoryAtState data packages -- countries (rdcr, wwdai,
+# OP#1095), departmenthistory (gsh, other-publications, pocom, travels,
+# visits, OP#1096), milestones (OP#1098), about's HAC documents (hac,
+# OP#1097), conferences (OP#1099) and tags (OP#1101) -- always track each repo's LATEST
+# GitHub release (decision 2026-08-07, after the milestones/conferences/
+# education epics merged: no data package stays pinned; the full Cypress
+# suite is expected green against current releases). GitHub's
+# /releases/latest/download/ redirect resolves that without needing a
+# version number or an API call. Docker layer caching means a plain rebuild
+# won't refetch once cached -- use `docker compose build --no-cache` (or
+# bump something above this line) to actually pick up a new release.
+RUN curl -fL -o /usr/local/exist/autodeploy/wwdai.xar https://github.com/HistoryAtState/wwdai/releases/latest/download/wwdai.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/rdcr.xar https://github.com/HistoryAtState/rdcr/releases/latest/download/rdcr.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/conferences.xar https://github.com/HistoryAtState/conferences/releases/latest/download/conferences.xar
 RUN curl -fL -o /usr/local/exist/autodeploy/gsh.xar https://github.com/HistoryAtState/gsh/releases/latest/download/gsh.xar
 RUN curl -fL -o /usr/local/exist/autodeploy/milestones.xar https://github.com/HistoryAtState/milestones/releases/latest/download/milestones.xar
 RUN curl -fL -o /usr/local/exist/autodeploy/other-publications.xar https://github.com/HistoryAtState/other-publications/releases/latest/download/other-publications.xar
@@ -122,6 +120,7 @@ RUN curl -fL -o /usr/local/exist/autodeploy/pocom.xar https://github.com/History
 RUN curl -fL -o /usr/local/exist/autodeploy/travels.xar https://github.com/HistoryAtState/travels/releases/latest/download/travels.xar
 RUN curl -fL -o /usr/local/exist/autodeploy/visits.xar https://github.com/HistoryAtState/visits/releases/latest/download/visits.xar
 RUN curl -fL -o /usr/local/exist/autodeploy/hac.xar https://github.com/HistoryAtState/hac/releases/latest/download/hac.xar
+RUN curl -fL -o /usr/local/exist/autodeploy/tags.xar https://github.com/HistoryAtState/tags/releases/latest/download/tags.xar
 
 # The jinks generator and the USWDS theme profile are both built from main:
 # we track jinks main, and profile-theme-uswds has no release at all.

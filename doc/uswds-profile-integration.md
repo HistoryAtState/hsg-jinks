@@ -329,17 +329,24 @@ Visually confirmed in the browser on the host port.
 
 ## Data
 
-The app's `defaults.data` points at `/db/apps/frus-data-jinks/data` (default
-collection `Publications`). That is supplied by the sibling repo
+The path splits into two configuration values (PR #32 review), never one
+hardcoded string: the **data directory** (`config.json` `"data"` →
+`$config:data-root`, `/db/apps/frus-data-jinks/data`) and the **FRUS
+volumes collection inside it** (`config.json` `"data-default"` →
+`$config:frus-volumes`, `frus-v2-data`; mirrored for compiled ODD
+transforms as `$global:frus-volumes` in `modules/odd-global.xqm`).
+`$config:data-default` is their join. The data is supplied by the sibling repo
 **`../../hsg-jinks-data`** (git `HistoryAtState/hsg-jinks-data`), an eXist data
 package deploying to `/db/apps/frus-data-jinks`.
 
 It is a slimmed data-model sample, not production data: the most recent commit
 ("remove-old-samples") trimmed it to a single FRUS publication —
 `frus1981-88v05` ("Foreign Relations of the United States, 1981–1988, Volume V,
-Soviet Union, March 1985–October 1986"), 361 TEI XML docs — plus a `Resources`
-apparatus (`frus.odd`, `frus.rnc`, encoding desc, placeholders, Author authority
-project).
+Soviet Union, March 1985–October 1986"), 361 TEI XML docs — plus a
+`frus-tei-guidelines-resources` apparatus (`frus.odd`, `frus.rnc`, encoding
+desc, placeholders, Author authority project). (Volumes now live under
+`data/frus-v2-data/`; both collections were renamed from the earlier
+`Publications` / `Resources` when the full legacy corpus landed.)
 
 The devcontainer does **not** install data automatically (it only deploys the
 app + jinks + theme profile). Load it manually:

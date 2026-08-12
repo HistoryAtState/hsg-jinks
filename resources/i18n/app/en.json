@@ -104,7 +104,9 @@
     "waysToExplore": "Ways to Explore",
     "searchInsideVolume": "Search inside this volume",
     "download": "Download:",
-    "browseGpoPrefix": "Browse the"
+    "browseGpoPrefix": "Browse the",
+    "persons": "Persons",
+    "terms": "Abbreviations & Terms"
   },
   "countries": {
     "title": "Countries"

@@ -43,7 +43,10 @@ describe("breadcrumb", () => {
         cy.get(".usa-logo").then(($logo) => {
             const logoLeft = $logo[0].getBoundingClientRect().left;
             cy.get('nav[aria-label="breadcrumb"]').should(($nav) => {
-                expect($nav[0].getBoundingClientRect().left).to.be.closeTo(logoLeft, 1);
+                // Tolerance is half a classic scrollbar (8px), not 1px --
+                // same vw-vs-scrollbar limitation of the header's full-bleed
+                // escape as documented in page-width-alignment.cy.js.
+                expect($nav[0].getBoundingClientRect().left).to.be.closeTo(logoLeft, 8);
             });
         });
     });

@@ -81,53 +81,29 @@
 </ul>
 </div></pb:template>
         </model><model predicate="$parameters?mode='document-view' and normalize-space(.//bibl[@type='frus-attachment-label']) != ''" behaviour="block">
-            <desc>An attachment ("Tab I") inlined into its parent document, as the reference site renders it. It carries no overline and no footnote list of its own: its notes are merged into the parent's consolidated list, which is why their @n continue the parent's sequence. It has no document number either - its frus-document-number bibl is present but empty.</desc>
+            <desc>An attachment ("Tab I") inlined into its parent document, as the reference site renders it. Only the label is synthesized: the reference site reads it from an inline note at the top of the attachment's own body, and the v2 data moved that into the teiHeader as bibl[@type='frus-attachment-label']. Everything else comes out of the attachment's body, which already holds its title (with the source note's anchor inside it) and its opener with the dateline; rendering the body only is the same treatment the document models below get, and for the same reason: synthesizing head and dateline from the teiHeader as well showed each attachment's title and place/date twice, and put two elements carrying the same footnote-marker id on the page. The attachment has no footnote list of its own -- its notes merge into the parent's consolidated list, which is why their @n continue the parent's sequence -- and no document number either, its frus-document-number bibl being present but empty.</desc>
             <param name="label" value=".//bibl[@type='frus-attachment-label']"/>
-            <param name="head" value=".//fileDesc//titleStmt/title"/>
-            <param name="srcId" value="substring-after((.//standOff//note[@type='source'])[1]/@corresp, '#')"/>
-            <param name="srcRef" value="substring-after((.//standOff//note[@type='source'])[1]/@corresp, '#') || 'ref'"/>
-            <param name="srcLabel" value="(.//standOff//note[@type='source'])[1]/@n/string()"/>
-            <param name="dateline" value=".//profileDesc//setting"/>
             <param name="content" value="text/body"/>
             <pb:template xml:space="preserve"><div xmlns="" class="attachment">
   <hr class="attachment-divider"/>
-  <h2 class="attachment-label">[[label]]</h2>
-  <h3 class="attachment-title">[[head]]<sup class="footnote-ref"><a id="[[srcRef]]" href="#[[srcId]]">[[srcLabel]]</a></sup></h3>
-  [[dateline]]
+  <p class="attachment-label">[[label]]</p>
   [[content]]
 </div></pb:template>
         </model><model predicate="$parameters?mode='document-view' and exists(.//standOff//note)" behaviour="block">
-            <desc>A document with footnotes (333 of 341). The heading's marker points at the source note, which has no in-body anchor - it belongs to the heading. Its label comes from the note's @n and must not be hardcoded to 1: attachment notes continue their parent's numbering. Footnotes are consolidated from this document and any inlined attachments, ordered by @n.</desc>
-            <param name="overline" value="let $volid := root(.)//bibl[@type='frus-volume-id']/string() let $volcol := substring-before(document-uri(root(.)), '/' || $volid || '/') || '/' || $volid let $inc := doc($volcol || '/' || $volid || '.xml')//teiHeader/fileDesc/xi:include[@xpointer='seriesStmt'] return id('seriesStmt', doc(util:collection-name($inc) || '/' || $inc/@href))/title[@type='complete']"/>
-            <param name="number" value=".//bibl[@type='frus-document-number']"/>
-            <param name="head" value=".//fileDesc//titleStmt/title"/>
-            <param name="srcId" value="substring-after((.//standOff//note[@type='source'])[1]/@corresp, '#')"/>
-            <param name="srcRef" value="substring-after((.//standOff//note[@type='source'])[1]/@corresp, '#') || 'ref'"/>
-            <param name="srcLabel" value="(.//standOff//note[@type='source'])[1]/@n/string()"/>
-            <param name="dateline" value=".//profileDesc//setting"/>
+            <desc>A document with footnotes (333 of 341). Reference parity with hsg-shell: render the body div only -- its own head (which already carries the number, e.g. "72. Telegram...", and the source-note marker as an in-body anchor) and its opener (print page number and dateline). The teiHeader title/dateline are metadata for page chrome (breadcrumb, title), not rendered inline, so head, place and date each appear once. No volume title either: it is the same string in titleStmt and in seriesStmt/title[@type='complete'] for all 694 volumes, and hsg:navigation-title already puts it above the content of every interior page, so rendering it here as an overline showed it twice (the reference site shows it once, and has no overline at all). Footnotes are consolidated from this document and any inlined attachments, ordered by @n.</desc>
             <param name="content" value="text/body"/>
             <param name="attachments" value="text/back/xi:include"/>
             <param name="footnotes" value="let $att := (text/body//xi:include ! (id(@xpointer, doc(util:collection-name(.) || '/' || @href))/root()//standOff//note)) return (for $note in (.//standOff//note, $att) order by number($note/@n) return $note)"/>
             <pb:template xml:space="preserve"><div xmlns="">
-  <p class="overline">[[overline]]</p>
-  <h1>[[number]]. [[head]]<sup class="footnote-ref"><a id="[[srcRef]]" href="#[[srcId]]">[[srcLabel]]</a></sup></h1>
-  [[dateline]]
   [[content]]
   [[attachments]]
   <hr class="footnotes-divider"/>
   <ol class="footnotes">[[footnotes]]</ol>
 </div></pb:template>
         </model><model predicate="$parameters?mode='document-view'" behaviour="block">
-            <desc>A document without footnotes (8 of 341: 7 editorial notes and 1 historical document). No source note exists, so the heading carries no marker and no ruler or footnote list is emitted. None of these documents have attachments.</desc>
-            <param name="overline" value="let $volid := root(.)//bibl[@type='frus-volume-id']/string() let $volcol := substring-before(document-uri(root(.)), '/' || $volid || '/') || '/' || $volid let $inc := doc($volcol || '/' || $volid || '.xml')//teiHeader/fileDesc/xi:include[@xpointer='seriesStmt'] return id('seriesStmt', doc(util:collection-name($inc) || '/' || $inc/@href))/title[@type='complete']"/>
-            <param name="number" value=".//bibl[@type='frus-document-number']"/>
-            <param name="head" value=".//fileDesc//titleStmt/title"/>
-            <param name="dateline" value=".//profileDesc//setting"/>
+            <desc>A document without footnotes (8 of 341: 7 editorial notes and 1 historical document). Same body-only rendering as above; no source note exists, so no ruler or footnote list is emitted.</desc>
             <param name="content" value="text/body"/>
             <pb:template xml:space="preserve"><div xmlns="">
-  <p class="overline">[[overline]]</p>
-  <h1>[[number]]. [[head]]</h1>
-  [[dateline]]
   [[content]]
 </div></pb:template>
         </model><model predicate="$parameters?mode='division'" behaviour="pass-through">
@@ -172,9 +148,11 @@
             <desc>No dateline (10 documents, e.g. d304 and the appendices). The setting element is always present but is empty for these, so render nothing rather than an empty line.</desc>
         </model></elementSpec>
             <elementSpec ident="anchor" mode="change"><model predicate="$parameters?mode='document-view' and @xml:id" behaviour="pass-through">
-            <desc>FRUS footnote marker. The note points at the anchor (note/@corresp = '#' || anchor/@xml:id), the reverse of the base models below, which expect the anchor to point at the note - so those never match FRUS data and the marker fell through to the bare anchor model, rendering an empty span. Every in-body anchor in the corpus resolves to a note, so no fallback is needed.</desc>
-            <param name="noteId" value="@xml:id/string()"/>
-            <param name="refId" value="@xml:id || 'ref'"/>
+            <desc>FRUS footnote marker. The note points at the anchor (note/@corresp = '#' || anchor/@xml:id), the reverse of the base models below, which expect the anchor to point at the note - so those never match FRUS data and the marker fell through to the bare anchor model, rendering an empty span. Every in-body anchor in the corpus resolves to a note, so no fallback is needed.
+                The rendered id is qualified with the division the page is showing (global:division-id, i.e. {page division}-f{note @n}), NOT the anchor's raw @xml:id: each attachment file restarts its anchor ids at {parent}-f1 (d96-a1.xml and d96-a2.xml both carry d96-f1..f3), so a consolidated page built from @xml:id verbatim repeated the same DOM id three times and every marker resolved to the parent's note. @n continues the parent's sequence across the attachments, so one prefix for the whole page plus @n is unique. For a stand-alone document ({div}.xml with anchors {div}-f{seq} and @n = seq, the corpus norm) this yields exactly the same ids as before.
+                Expression-shape caveat, learned the hard way: wrapping the note lookup as a parenthesized-then-[1] step ("(root(.)//...)[1]/@n") comes back empty when compiled into a model param, while the plain path with a trailing /@n/string() works; keep these params in the plain shape (@corresp is unique within a file, so no [1] is needed).</desc>
+            <param name="noteId" value="let $target := '#' || @xml:id return global:division-id($parameters, .) || '-f' || root(.)//standOff//note[@corresp = $target]/@n/string()"/>
+            <param name="refId" value="let $target := '#' || @xml:id return global:division-id($parameters, .) || '-f' || root(.)//standOff//note[@corresp = $target]/@n/string() || 'ref'"/>
             <param name="label" value="let $target := '#' || @xml:id return root(.)//standOff//note[@corresp = $target]/@n/string()"/>
             <pb:template xml:space="preserve"><sup xmlns="" class="footnote-ref"><a id="[[refId]]" href="#[[noteId]]">[[label]]</a></sup></pb:template>
         </model><model predicate="$parameters?mode=('toc', 'breadcrumb')" behaviour="omit"/><model predicate="@corresp" behaviour="note">
@@ -191,10 +169,10 @@
             <param name="id" value="@xml:id"/>
         </model></elementSpec>
             <elementSpec ident="note" mode="change"><model predicate="$parameters?mode='document-view' and ancestor::listAnnotation" behaviour="pass-through">
-            <desc>FRUS footnote, rendered as an item of the document's consolidated list. @value carries the encoded number rather than relying on the ol's own counter, because an inlined attachment's notes continue the parent's sequence and so do not start at 1. The source note has no in-body anchor, so its backlink targets the marker on the heading.</desc>
+            <desc>FRUS footnote, rendered as an item of the document's consolidated list. @value carries the encoded number rather than relying on the ol's own counter, because an inlined attachment's notes continue the parent's sequence and so do not start at 1. The source note has no in-body anchor, so its backlink targets the marker on the heading. The id is qualified with the page's division ({page division}-f{@n}) for the same reason as the anchor marker above; @corresp taken verbatim collided across a parent and its attachments.</desc>
             <param name="n" value="@n/string()"/>
-            <param name="noteId" value="substring-after(@corresp, '#')"/>
-            <param name="refId" value="substring-after(@corresp, '#') || 'ref'"/>
+            <param name="noteId" value="global:division-id($parameters, .) || '-f' || @n"/>
+            <param name="refId" value="global:division-id($parameters, .) || '-f' || @n || 'ref'"/>
             <param name="content" value="node()"/>
             <pb:template xml:space="preserve"><li xmlns="" id="[[noteId]]" value="[[n]]">[[content]] <a class="footnote-backlink" href="#[[refId]]" aria-label="Back to content">↩</a></li></pb:template>
         </model><model predicate="$parameters?mode='register-overview' and $parameters?show-notes and text()" behaviour="block">
@@ -216,6 +194,8 @@
                 relying on source data that was never encoded with it.</desc>
             <param name="place" value="'foot'"/>
             <param name="label" value="@n"/>
+        </model><model predicate="@rend='inline'" behaviour="paragraph">
+            <desc>An inline prose note that is not a footnote (e.g. the prefatory "[This list of persons ...]" note on the persons and terms front-matter pages). Render as a plain paragraph with no footnote marker or number, reference parity with hsg-shell's frus.odd note[@rend='inline']. Without this it fell through to the note behaviour below and was numbered "1" as a footnote.</desc>
         </model><model behaviour="note">
             <param name="place" value="@place"/>
             <param name="label" value="@n"/>
@@ -249,7 +229,7 @@
                     ODD, so they would render as broken relative srcs. The reference site
                     resolves each against its own static.history.state.gov/{collection}/ prefix
                     (confirmed live per collection); reproduced here as per-collection models,
-                    matched by the source document's collection path via base-uri(/), tried in
+                    matched by the source document's collection path via global:source-uri, tried in
                     order with the original countries model kept last as the fallback for any
                     other bare-filename graphic. Some short-history graphics carry a "../"-
                     relative filename (e.g. "../secretaries/hull-cordell.jpg", for secretaries
@@ -260,35 +240,51 @@
                     to only the "bare filename" shape (no scheme, no leading slash) so it doesn't
                     touch any graphic that already carries a full path/URL elsewhere in the
                     app.</desc>
-                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/other-publications/short-history/')" behaviour="graphic">
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and global:volume-id($parameters, .) != ''" behaviour="graphic">
+                    <desc>FRUS document graphics (PR #32 review audit): the v2 corpus encodes
+                        graphic/@url as a bare, extension-less basename (e.g. "d312p1" in
+                        frus1981-88v05 appC). Reference parity with hsg-shell's frus.odd graphic
+                        model: resolve against static.history.state.gov/frus/{volume-id}/ and
+                        append ".png" unless the name already carries an image extension. Without
+                        this model such graphics fell through to the countries fallback below and
+                        rendered a broken countries/ URL. global:volume-id reads the volume from
+                        the collection path of the document being rendered, and is empty outside
+                        the FRUS collection, which is what makes it the predicate here too.</desc>
+                    <param name="url" value="'https://static.history.state.gov/frus/' || global:volume-id($parameters, .) || '/' || @url || (if (matches(@url, '\.(jpg|jpeg|png|gif|svg)$')) then '' else '.png')"/>
+                    <param name="width" value="@width"/>
+                    <param name="height" value="@height"/>
+                    <param name="scale" value="@scale"/>
+                    <param name="title" value="(../desc, ../figDesc) => head() => normalize-space()"/>
+                </model>
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(global:source-uri($parameters, .), '/other-publications/short-history/')" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/short-history/' || @url"/>
                     <param name="width" value="@width"/>
                     <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
-                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/other-publications/buildings/')" behaviour="graphic">
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(global:source-uri($parameters, .), '/other-publications/buildings/')" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/buildings/' || @url"/>
                     <param name="width" value="@width"/>
                     <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
-                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/other-publications/secretary-bios/')" behaviour="graphic">
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(global:source-uri($parameters, .), '/other-publications/secretary-bios/')" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/secretaries/' || @url"/>
                     <param name="width" value="@width"/>
                     <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
-                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/milestones/chapters/')" behaviour="graphic">
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(global:source-uri($parameters, .), '/milestones/chapters/')" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/milestones/' || @url"/>
                     <param name="width" value="@width"/>
                     <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
-                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(base-uri(/), '/conferences/data/')" behaviour="graphic">
+                <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(global:source-uri($parameters, .), '/conferences/data/')" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/conferences/' || @url"/>
                     <param name="width" value="@width"/>
                     <param name="height" value="@height"/>
@@ -340,6 +336,160 @@
                     <param name="player" value="(.//xhtml:video/@data-player)[1]/string()"/>
                     <param name="videoId" value="(.//xhtml:video/@data-video-id)[1]/string()"/>
                     <pb:template xml:space="preserve"><div xmlns="" class="conf-video-embed" style="position: relative; padding-top: 56.25%;"><iframe src="https://players.brightcove.net/[[account]]/[[player]]_default/index.html?videoId=[[videoId]]" allowfullscreen="allowfullscreen" allow="encrypted-media" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe></div></pb:template>
+                </model>
+            </elementSpec>
+            <elementSpec ident="dateline" mode="change">
+                <desc>A FRUS opener dateline carries rendition="#float-right" so it sits on the same line as the print page number (a #float-left seg, e.g. "434."). The base teipublisher.odd model is a plain block that drops the source rendition, so the dateline stacked below the page number instead of floating opposite it; keep the source rendition here.</desc>
+                <model behaviour="block" useSourceRendition="true"/>
+            </elementSpec>
+            <elementSpec ident="list" mode="change">
+                <desc>FRUS document lists, reference parity with hsg-shell's frus.odd list model. The base teipublisher.odd model renders every list with disc bullets and, worse, passes child::node() so a label is emitted twice -- once as raw text and once as the definition-list term (the "SUBJECT SUBJECT" / "1. 1." duplication). Each model below passes only the items, so pmf:list pairs each item with its preceding label into a dt/dd with no duplication:
+                    - persons/terms front-matter name lists: no bullets, hanging indent (list-person).
+                    - a list opened by a head (e.g. "Ref:"): the head as a bold heading, items as a no-bullet indented list.
+                    - a description list (label + item, e.g. "SUBJECT"): a definition list whose term is bold and sits above its indented value.
+                    - a label/item list (the numbered paragraphs "1.", "2." and lettered "(A)"..): a definition list whose label sits inline, on the same line as the item text, with no bullets and no auto-numbering.
+                    The first model keys on an xml:id, which is only sound if that id means one thing (PR #32 review). Checked over the whole 694-volume corpus, not just the volumes deployed here: "persons" and "terms" occur on 596 elements in total, every one of them a body/div and at most one per file, and they appear in no file other than a register's own persons.xml / terms.xml. The predicate spells out that body/div position so a future nested div reusing the id could not silently pick up the register styling.</desc>
+                <model predicate="ancestor-or-self::div[parent::body][@xml:id = ('persons', 'terms')]" behaviour="list" cssClass="list-person" useSourceRendition="true">
+                    <param name="content" value="item"/>
+                </model>
+                <modelSequence predicate="tei:head">
+                    <model behaviour="heading" cssClass="frus-list-head">
+                        <param name="content" value="tei:head/node()"/>
+                        <param name="level" value="4"/>
+                    </model>
+                    <model behaviour="list" cssClass="frus-list">
+                        <param name="content" value="tei:item"/>
+                    </model>
+                </modelSequence>
+                <model predicate="@type = 'description' and tei:label" behaviour="list" cssClass="frus-labeled-list frus-description-list">
+                    <param name="content" value="tei:item"/>
+                </model>
+                <model predicate="tei:label" behaviour="list" cssClass="frus-labeled-list">
+                    <param name="content" value="tei:item"/>
+                </model>
+                <model behaviour="list" useSourceRendition="true">
+                    <param name="content" value="child::node()"/>
+                </model>
+            </elementSpec>
+            <elementSpec ident="ref" mode="change">
+                <desc>FRUS cross-reference resolution (PR #32 review: "BL-5 / BL-15 anchors do
+                    not resolve"). Reference parity with hsg-shell's pmf:ref (ext-html.xql). The
+                    corpus encodes three link conventions that the base teipublisher.odd ref model
+                    renders as dead hrefs, because it emits @target verbatim:
+                    "#bl_d5" (27,826 refs) points at another division of the same volume, not an
+                    anchor on the current page (zero same-file targets exist corpus-wide; in the
+                    per-division v2 data the target is a different file, so a bare fragment goes
+                    nowhere); "frus1977-80v26#d271" (175, mostly footnotes) points into another
+                    volume; "frus1958-60v10p2" (80) at another volume's landing page. Each becomes
+                    an app URL under /historicaldocuments/. The volume id for same-volume refs
+                    comes from global:volume-id, which reads it off the collection path (see the
+                    graphic elementSpec on why not the teiHeader); it is empty outside the FRUS
+                    collection, which is what scopes these three models to it.
+                    Other collections keep the base
+                    behaviour via the copied fallback models below (including the base
+                    correspondence models, which deployed data still matches). http/mailto targets
+                    do not match the predicates and fall through verbatim.</desc>
+                <model predicate="@subtype='placeholder'" behaviour="pass-through">
+                    <desc>placeholder for unavailable next/prev links</desc>
+                    <param name="type" value="if (@type='prev') then 'previous' else @type"/>
+                    <param name="svg" value="$parameters?context-path || '/resources/css/correspondence-icons.svg'"/>
+                    <pb:template xmlns="" xml:space="preserve"><li class="unavailable">
+                                <pb-i18n key="odd.nav-[[type]].before"/>
+                                <svg class="icon">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="[[svg]]#[[type]]"/>
+                                </svg>
+                                <pb-i18n key="odd.nav-[[type]].after"/>
+                            </li></pb:template>
+                </model>
+                <model predicate="parent::correspContext and @type" behaviour="pass-through">
+                    <desc>refs inside the correspContext are interpreted as links for next/previous elements in the corpus (copied from the base spec unchanged)</desc>
+                    <param name="type" value="if (@type='prev') then 'previous' else @type"/>
+                    <param name="target" value="@target"/>
+                    <param name="svg" value="$parameters?context-path || '/resources/css/correspondence-icons.svg'"/>
+                    <pb:template xmlns="" xml:space="preserve"><li><pb-popover>
+                            <a href="[[target]]" emit="transcription" subscribe="transcription" slot="default">
+                                <pb-i18n key="odd.nav-[[type]].before"/>
+                                <svg class="icon">
+                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="[[svg]]#[[type]]"/>
+                                </svg>
+                                <pb-i18n key="odd.nav-[[type]].after"/>
+                            </a>
+                            <template slot="alternate"><pb-i18n key="odd.[[type]]"/>:  [[ content ]]</template>
+            </pb-popover></li></pb:template>
+                </model>
+                <model predicate="global:volume-id($parameters, .) != '' and starts-with(@target, 'frus') and contains(@target, '#')" behaviour="link">
+                    <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || substring-before(@target, '#') || '/' || substring-after(@target, '#')"/>
+                </model>
+                <model predicate="global:volume-id($parameters, .) != '' and starts-with(@target, 'frus')" behaviour="link">
+                    <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || @target"/>
+                </model>
+                <model predicate="global:volume-id($parameters, .) != '' and starts-with(@target, '#')" behaviour="link">
+                    <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || global:volume-id($parameters, .) || '/' || substring-after(@target, '#')"/>
+                </model>
+                <model predicate="@target" behaviour="link">
+                    <param name="uri" value="@target"/>
+                </model>
+                <model behaviour="inline"/>
+            </elementSpec>
+            <elementSpec ident="table" mode="change">
+                <desc>PR #32 review audit: the base teipublisher.odd table/row/cell models drop
+                    @rendition, so FRUS table renditions (cell-border-*, #middle, cell-num etc.,
+                    from frus-encodingDesc.xml) rendered unstyled -- e.g. frus1861 d180's
+                    attachment tables lost their vertical-align and border cells. Reference parity
+                    with hsg-shell's frus.odd, whose whole table family carries
+                    useSourceRendition. Like shell, a table containing renditions renders plain
+                    (the renditions carry the styling); one without gets the design system's
+                    default table dress (usa-table here, bootstrap there).</desc>
+                <model predicate=".//row/@rendition or .//cell/@rendition" behaviour="table" useSourceRendition="true"/>
+                <model behaviour="table" useSourceRendition="true" cssClass="usa-table"/>
+            </elementSpec>
+            <elementSpec ident="row" mode="change">
+                <desc>See the table elementSpec above: keep source renditions.</desc>
+                <model predicate="@role='label'" behaviour="row" cssClass="row-label" useSourceRendition="true"/>
+                <model behaviour="row" useSourceRendition="true"/>
+            </elementSpec>
+            <elementSpec ident="cell" mode="change">
+                <desc>See the table elementSpec above: keep source renditions.</desc>
+                <model behaviour="cell" useSourceRendition="true"/>
+            </elementSpec>
+            <elementSpec ident="gap" mode="change">
+                <desc>Reference parity with hsg-shell's frus.odd: a gap is rendered (as an
+                    ellipsis with extent) only when it is quantifiable (@unit plus an integer
+                    @quantity); anything else -- the corpus has e.g. a bare gap
+                    reason="deleted" -- is omitted, where the base ODD's fallback rendered an
+                    empty inline span.</desc>
+                <model predicate="exists(@unit) and @quantity castable as xs:integer" behaviour="gap">
+                    <param name="unit" value="@unit"/>
+                    <param name="quantity" value="@quantity cast as xs:integer"/>
+                </model>
+                <model behaviour="omit"/>
+            </elementSpec>
+            <elementSpec ident="pb" mode="change">
+                <desc>Reference parity with hsg-shell's frus.odd pb model: the visible text of a
+                    page-break facsimile link is "[Page N]", not the bare page number -- the base
+                    teipublisher.odd renders just @n, which reads as stray text in the prose (a
+                    lone "66" before a section heading, PR #32 review). Same model chain as the
+                    base spec (print omit, then the @facs IIIF webcomponent, then the no-facsimile
+                    fallback), with only the visible content changed and an hsg-facs-link class
+                    added for the grey right-floated margin styling (resources/css/hsg-theme.css;
+                    shell equivalent: hsg-facsilime-link). The base spec's title-mode,
+                    pb-facsimile-viewer and static-site variants are dropped: this app renders pb
+                    only through page:transform document/division views, which pass none of those
+                    parameters.</desc>
+                <model output="print" behaviour="omit"/>
+                <model predicate="@facs" behaviour="webcomponent" cssClass="facs pb hsg-facs-link">
+                    <param name="name" value="'pb-facs-link'"/>
+                    <param name="content" value="'[Page ' || @n || ']'"/>
+                    <param name="emit" value="'transcription'"/>
+                    <param name="subscribe" value="'transcription'"/>
+                    <param name="order" value="count($get(.)/preceding::pb) + 1"/>
+                    <param name="emit-on-load" value="'emit-on-load'"/>
+                    <param name="facs" value="let $ref := if ($global:address-by-id)                          then                              root($parameters?root)/descendant-or-self::TEI/@xml:id                          else                              substring-after(document-uri(root($parameters?root)), $global:data-root || '/')                         return 'api/iiif/' || $ref"/>
+                </model>
+                <model behaviour="break" cssClass="pb hsg-facs-link" useSourceRendition="true">
+                    <desc>Output Page label when no facsimile information is available</desc>
+                    <param name="type" value="'page'"/>
+                    <param name="label" value="'[Page ' || @n || ']'"/>
                 </model>
             </elementSpec></schemaSpec>
         </body>

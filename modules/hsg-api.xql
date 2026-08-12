@@ -47,7 +47,7 @@ declare function hsgapi:view($request as map(*)) {
                 "parameters": map:merge((
                     $request?parameters,
                     map {
-                        "docid": "Publications/" || $publicationId || "/" || $publicationId || ".xml"
+                        "docid": $config:frus-volumes || "/" || $publicationId || "/" || $publicationId || ".xml"
                     }
                 ))
             }

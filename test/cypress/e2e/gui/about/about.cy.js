@@ -75,7 +75,15 @@ describe("HAC: TOC, nested meeting-notes subchapters, video embed, exact-divisio
     });
 
     it("opens a meeting-notes subchapter and shows its Brightcove video embed", () => {
-        cy.request("about/hac/September-2024").its("body").should("match", /<video[^>]*class="video-js"[^>]*data-video-id="6365048608112"/);
+        // The raw video-js markup pasted into the TEI (with its third-party
+        // inline script) is replaced by the ODD's CSP-safe iframe embed --
+        // the conferences xhtml:div model (OP#1099/#1114), which also covers
+        // HAC's videos since they share the same encoding shape. This spec
+        // predates that model (OP#1158) and originally asserted the raw
+        // <video> tag.
+        cy.request("about/hac/September-2024").its("body")
+            .should("match", /<iframe src="https:\/\/players\.brightcove\.net\/[^"]*videoId=6365048608112"/)
+            .and("not.match", /<script[^>]*players\.brightcove\.net/);
     });
 
     it("mixed-case and lowercase meeting subchapter ids both resolve (no casing normalization)", () => {

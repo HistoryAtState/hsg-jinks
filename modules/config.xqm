@@ -284,6 +284,14 @@ declare variable $config:data-root := $gen:data-root;
 declare variable $config:data-default := $gen:data-default;
 
 (:~
+ : The name of the FRUS volumes collection inside $config:data-root
+ : ("frus-v2-data"), as a global any XQuery can use instead of spelling the
+ : literal out (PR #32 review). $config:data-default above is
+ : $config:data-root || "/" || this.
+ :)
+declare variable $config:frus-volumes := $gen:frus-volumes;
+
+(:~
  : A sequence of root elements which should be excluded from the list of
  : documents displayed in the browsing view.
  :)

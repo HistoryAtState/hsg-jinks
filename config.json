@@ -130,7 +130,7 @@
   },
   "defaults" : {
     "data" : "/db/apps/frus-data-jinks/data",
-    "data-default" : "Publications",
+    "data-default" : "frus-v2-data",
     "odd" : "hsg-jinks.odd",
     "template" : "volume-landing.html",
     "$replace" : [
@@ -195,7 +195,8 @@
   },
   "$schema" : "../jinks/schema/jinks.json",
   "styles" : [
-    "resources/css/hsg-theme.css"
+    "resources/css/hsg-theme.css",
+    "resources/css/frus-renditions.css"
   ],
   "script" : {
     "custom" : [

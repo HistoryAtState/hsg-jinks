@@ -36,7 +36,11 @@ describe("the section landing", () => {
 describe("navigate from volume landing to a document", () => {
     it("clicks through section -> landing -> compilation -> chapter -> document", () => {
         cy.visit(SECTION);
-        cy.contains("a", "Foreign Relations of the United States").click();
+        // By href, not by title text: several volumes share the "Foreign
+        // Relations of the United States" prefix and the list is sorted by
+        // title, so the first text match depends on which volumes are
+        // deployed (the 1958-60 microfiche supplement sorts before v05).
+        cy.get(`main ul.volume-list a[href$='${VOLUME}']`).click();
         cy.location("pathname").should("match", new RegExp(`${VOLUME}$`));
 
         cy.contains("a", "Soviet Union, March 1985").click();

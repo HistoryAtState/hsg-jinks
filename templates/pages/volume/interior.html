@@ -2,15 +2,41 @@
     ---json
     {
         "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
+            },
             "extends": "templates/layouts/hsg-content.html"
         }
     }
     ---
-    [% if $doc?content//tei:bibl[@type='frus-division-type'] = ('chapter', 'compilation') %]
-        [[ page:transform($doc?content, map { "mode": "volume-interior" }) ]]
-    [% elif $doc?content//tei:bibl[@type='frus-division-type'] = 'document' %]
-        [[ page:transform($doc?content, map { "mode": "document-view" }) ]]
-    [% else %]
-        [[ page:transform($doc?content, map { "mode": "division" }) ]]
-    [% endif %]
+    <!-- One root element: the layout's main is a flex row whose children each
+         get flex: 1 (resources/css/layout.css, .sticky-layout > main > *), so
+         siblings here would lay out as columns; the wrapper stacks the volume
+         title, content and pager instead. The h2 volume title on every
+         interior page mirrors hsg-shell's navigation title. Sections (front
+         and back matter essays) get the same prev/next pager as documents;
+         their data carries the same relatedItem targets. -->
+    <div class="hsg-frus__interior">
+        [[ hsg:navigation-title($context) ]]
+        <!-- usa-prose gives the division its USWDS body typography, the same
+             wrapper every other section's TEI content sits in. The volume
+             title stays outside it: it is page chrome rather than prose, and
+             as a direct child it would pick up the "usa-prose" heading rules
+             and read as loudly as the division's own title. -->
+        <div class="hsg-frus__prose usa-prose">
+            [% if $doc?content//tei:bibl[@type='frus-division-type'] = ('chapter', 'chapter-pending', 'compilation') %]
+                [[ hsg:division-listing($context) ]]
+            [% elif starts-with(normalize-space(($doc?content//tei:bibl[@type='frus-division-type'])[1]), 'document') %]
+                [[ page:transform($doc?content, map { "mode": "document-view" }) ]]
+                [[ hsg:prev-next($context) ]]
+            [% else %]
+                [[ page:transform($doc?content, map { "mode": "division" }) ]]
+                [[ hsg:prev-next($context) ]]
+            [% endif %]
+        </div>
+    </div>
+
+    [% template after %]
+    [[ hsg:division-asides($context) ]]
+    [% endtemplate %]
 </template>

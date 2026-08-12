@@ -69,3 +69,59 @@ describe("volume landing page", () => {
         });
     });
 });
+
+// Regression: a microfiche supplement's notesStmt carries one relatedItem per
+// associated file (frus1958-60v05mSupp has 562 type="pdf" entries, one per
+// document) alongside the volume's own downloads. Selecting ebook links by
+// @type alone matched all 562 and the page died with an XPTY0004 cardinality
+// error; the volume's own items are identified by @corresp = "#<volume-id>",
+// the same gate hsg-shell's fh:exists-pdf and friends use.
+// Unpublished ("pending") chapters, which the reference site marks with
+// li.pending on this page. The muted colour is the point here: on the landing
+// page the surrounding links are blue, so it is what sets a pending entry
+// apart. Asserted as a computed value because the rule has to survive the
+// theme's own link colours (resources/css/hsg-theme.css explains where it
+// deliberately does not fight them).
+describe("volume landing page, unpublished chapters", () => {
+    const PARTIAL = "historicaldocuments/frus1977-80v27";
+
+    beforeEach(() => cy.visit(PARTIAL));
+
+    it("marks chapters with no published documents as pending", () => {
+        cy.get(".hsg-frus__toc li.pending").should("have.length.at.least", 1);
+        cy.get(".hsg-frus__toc li.pending > a")
+            .first()
+            .should("have.css", "color", "rgb(86, 92, 101)") // --hsg-color-muted
+            .and("have.css", "font-style", "italic");
+    });
+
+    it("leaves chapters that do have published documents unmarked", () => {
+        cy.contains(".hsg-frus__toc li", "Canada").should("not.have.class", "pending");
+    });
+});
+
+describe("volume landing page for a microfiche supplement", () => {
+    const SUPPLEMENT = "historicaldocuments/frus1958-60v05mSupp";
+
+    beforeEach(() => cy.visit(SUPPLEMENT));
+
+    it("renders instead of erroring on the per-document relatedItems", () => {
+        cy.get("main h1").should("contain.text", "Microfiche Supplement");
+        cy.get(".hsg-frus__ways-to-explore").should("exist");
+    });
+
+    it("links only the volume-level ebook downloads, not the per-document PDFs", () => {
+        cy.get(".hsg-frus__ways-to-explore").within(() => {
+            cy.get("a.hsg-link-button").should("have.length", 3);
+            cy.get("a.hsg-link-button[href$='frus1958-60v05mSupp.epub']").should("exist");
+            cy.get("a.hsg-link-button[href$='frus1958-60v05mSupp.mobi']").should("exist");
+            // The volume PDF, not one of the 562 per-document ones.
+            cy.get("a.hsg-link-button[href$='frus1958-60v05mSupp.pdf']").should("exist");
+        });
+    });
+
+    it("still shows the cover image", () => {
+        cy.get("img.hsg-frus__cover")
+            .should("have.attr", "src", "https://static.history.state.gov/frus/frus1958-60v05mSupp/covers/frus1958-60v05mSupp.jpg");
+    });
+});

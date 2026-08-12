@@ -1,11 +1,11 @@
-// Document view (#1081): overline, number + title heading with its source-note
-// marker, dateline, ruler, and the footnote apparatus.
+// Document view (#1081): number + title heading with its source-note marker,
+// dateline, ruler, and the footnote apparatus.
 //
-// Documents carry no <head> in the body (only a <?frusGen document-heading...?>
-// placeholder PI), so the number + title, the overline and the dateline are all
-// synthesized from the teiHeader via the "document-view" ODD mode
-// (resources/odd/hsg-jinks.odd), selected in
-// templates/pages/volume-interior.html for frus-division-type='document'.
+// The "document-view" ODD mode (resources/odd/hsg-jinks.odd, selected in
+// templates/pages/volume/interior.html for frus-division-type='document')
+// renders the division's own body: the heading, its opener and its prose all
+// come from there. Nothing is synthesized from the teiHeader, which is page
+// chrome (breadcrumb, title) -- doing so rendered each of them twice.
 //
 // Footnotes live in standOff/listAnnotation and point *at* the in-body anchors
 // (note/@corresp = '#' || anchor/@xml:id), the reverse of what the base ODD
@@ -18,7 +18,7 @@
 
 const VOLUME = "historicaldocuments/frus1981-88v05";
 
-const OVERLINE =
+const VOLUME_TITLE =
     "Foreign Relations of the United States, 1981–1988, Volume V, Soviet Union, March 1985–October 1986";
 
 // Text of an element with the footnote marker stripped, whitespace collapsed.
@@ -34,17 +34,18 @@ const DOCS = [
         heading:
             "1. Letter From President Reagan to Soviet General Secretary Gorbachev",
         dateline: "Washington, March 11, 1985",
-        // note @n, in document order; ids are TEI-derived (decision: #d1fn2,
-        // not the legacy #fn:1.7.4.4.8.8.8.5 scheme, which was a node path into
-        // the old monolithic volume file and is not derivable from split TEI).
-        footnotes: ["d1fn1", "d1fn2"],
+        // note @n, in document order; ids are division-qualified TEI-derived
+        // ids ({file stem}-f{n}, e.g. #d1-f2) -- not the legacy
+        // #fn:1.7.4.4.8.8.8.5 scheme, which was a node path into the old
+        // monolithic volume file and is not derivable from split TEI.
+        footnotes: ["d1-f1", "d1-f2"],
     },
     {
         id: "d3",
         heading:
             "3. Memorandum From John Lenczowski of the National Security Council Staff to the President’s Assistant for National Security Affairs (McFarlane)",
         dateline: "Washington, March 12, 1985",
-        footnotes: ["d3fn1", "d3fn2", "d3fn3", "d3fn4", "d3fn5"],
+        footnotes: ["d3-f1", "d3-f2", "d3-f3", "d3-f4", "d3-f5"],
     },
 ];
 
@@ -63,16 +64,27 @@ describe("document view", () => {
                 cy.get("main h1").should("have.length", 1);
             });
 
-            it("renders the volume title as an overline", () => {
-                cy.get("main .overline")
+            // The volume title belongs to the page chrome and appears once,
+            // as the navigation title above the content. It used to be
+            // rendered a second time as an overline inside the document; the
+            // two strings are identical for all 694 volumes (titleStmt and
+            // seriesStmt/title[@type='complete'] carry the same text), and the
+            // reference site has no overline at all.
+            it("shows the volume title once, above the document", () => {
+                cy.get("main .hsg-navigation-title")
                     .should("be.visible")
                     .invoke("text")
                     .then((t) => t.replace(/\s+/g, " ").trim())
-                    .should("eq", OVERLINE);
+                    .should("eq", VOLUME_TITLE);
+                cy.get("main").contains(VOLUME_TITLE).should("have.length", 1);
+                cy.get("main .overline").should("not.exist");
             });
 
             it("renders the place and date as a dateline", () => {
-                cy.get("main .dateline")
+                // The opener's own tei:dateline, reference parity with
+                // hsg-shell -- not the setting-derived .dateline block, which
+                // only attachments use (they have no opener of their own).
+                cy.get("main .tei-dateline")
                     .should("be.visible")
                     .invoke("text")
                     .then((t) => t.replace(/\s+/g, " ").trim())
@@ -136,18 +148,32 @@ describe("document view", () => {
             });
         });
 
-        it("gives each attachment its own title and dateline", () => {
+        // Title and dateline come out of the attachment's own body, exactly
+        // once each: the body already carries them (the head holds the source
+        // note's anchor too), so the ODD renders the body rather than
+        // synthesizing a second copy from the teiHeader.
+        it("gives each attachment its own title and dateline, once", () => {
             cy.get("main .attachment").each(($att) => {
                 cy.wrap($att)
-                    .find(".attachment-title")
+                    .find(".tei-head")
+                    .should("have.length", 1)
                     .invoke("text")
                     .then((t) => t.replace(/\s+/g, " ").trim())
                     .should("contain", "Paper Prepared by an Interagency Working Group");
                 cy.wrap($att)
-                    .find(".dateline")
+                    .find(".tei-dateline")
+                    .should("have.length", 1)
                     .invoke("text")
                     .then((t) => t.replace(/\s+/g, " ").trim())
                     .should("eq", "Washington, undated");
+            });
+        });
+
+        it("carries no duplicate element ids", () => {
+            cy.get("main [id]").then(($els) => {
+                const ids = [...$els].map((el) => el.id);
+                const duplicates = ids.filter((id, i) => ids.indexOf(id) !== i);
+                expect(duplicates, "duplicate ids in main").to.deep.eq([]);
             });
         });
 
@@ -156,20 +182,16 @@ describe("document view", () => {
             cy.get("main ol.footnotes > li")
                 .should("have.length", 11)
                 .then(($lis) => {
+                    // Every id is qualified with the division the page shows,
+                    // not with the file each note happens to live in: the
+                    // attachments' own anchor xml:ids restart at d96-f1, and
+                    // @n is what keeps them apart (PR #32 review, which moved
+                    // the ODD off base-uri(/) onto the root the view pipeline
+                    // carries in $parameters?root).
                     const ids = [...$lis].map((li) => li.id);
-                    expect(ids).to.deep.eq([
-                        "d96fn1",
-                        "d96fn2",
-                        "d96fn3",
-                        "d96fn4",
-                        "d96fn5",
-                        "d96-a1fn6",
-                        "d96-a1fn7",
-                        "d96-a1fn8",
-                        "d96-a2fn9",
-                        "d96-a2fn10",
-                        "d96-a2fn11",
-                    ]);
+                    expect(ids).to.deep.eq(
+                        Array.from({ length: 11 }, (_, i) => `d96-f${i + 1}`),
+                    );
                     // numbering runs 1..11 across the parent and both attachments
                     const values = [...$lis].map((li) => li.getAttribute("value"));
                     expect(values).to.deep.eq(
@@ -253,6 +275,7 @@ describe("document view", () => {
 
         it("d304: renders no dateline, since its setting is empty", () => {
             cy.visit(`${VOLUME}/d304`);
+            cy.get("main .tei-dateline").should("not.exist");
             cy.get("main .dateline").should("not.exist");
         });
     });
@@ -260,7 +283,7 @@ describe("document view", () => {
     it("d299: renders a date-only dateline without a leading comma", () => {
         // 4 documents have a date but no placeName.
         cy.visit(`${VOLUME}/d299`);
-        cy.get("main .dateline")
+        cy.get("main .tei-dateline")
             .invoke("text")
             .then((t) => t.replace(/\s+/g, " ").trim())
             .should("eq", "October 9, 1986");

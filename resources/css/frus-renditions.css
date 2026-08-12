@@ -1,0 +1,85 @@
+/*
+ * FRUS rendition styles -- GENERATED, do not edit by hand.
+ *
+ * Regenerate with tools/generate-frus-renditions.xq (see its header for why
+ * this is generated ahead of time rather than resolved at render time, and
+ * for how to run it).
+ *
+ * Source vocabulary: the 42 tei:rendition definitions in
+ * hsg-jinks-data's frus-tei-guidelines-resources/frus-encodingDesc.xml, one
+ * ".document_<id>" rule each -- the class name TEI Publisher's
+ * useSourceRendition emits for @rendition="#<id>" (css:get-rendition in
+ * tei-publisher-lib).
+ */
+
+/* inline (typographic) */
+.document_bold { font-weight: bold; }
+.document_italic { font-style: italic; }
+.document_roman { font-style: normal; }
+.document_small-caps { font-variant: small-caps; }
+.document_all-caps { text-transform: uppercase; }
+.document_strikethrough { text-decoration: line-through; }
+.document_underline { text-decoration: underline; }
+.document_superscript { position: relative; top: -0.52em; font-size: 0.69em; line-height: 0; }
+.document_subscript { position: relative; top: 0.36em; font-size: 0.69em; line-height: 0; }
+.document_letter-spaced { letter-spacing: 0.125em; }
+
+/* block (paragraph-level; ids name visual intent — element context in
+   consumer CSS refines the implementation, e.g. #center on a table or
+   figure is margin-left/right auto; #tab-level-1 on a cell is 1em) */
+.document_center { text-align: center; text-indent: 0; }
+.document_flush { text-indent: 0; }
+.document_right { text-indent: 0; text-align: right; }
+.document_section-heading { padding-top: 1em; text-indent: 0; }
+.document_tab-level-0 { margin-left: 0; text-indent: 0; }
+.document_tab-level-1 { margin-left: 3em; text-indent: 0; }
+.document_tab-level-2 { margin-left: 6em; text-indent: 0; }
+.document_tab-level-3 { margin-left: 9em; text-indent: 0; }
+.document_hanging-indent { padding-left: 1.5em; text-indent: -1.5em; }
+.document_set-solid { line-height: 1.1; }
+.document_columns-2 { columns: 2; column-gap: 2em; }
+
+/* position (same-line layout) */
+.document_float-left { display: inline; float: left; }
+.document_float-right { display: inline; float: right; }
+
+/* table / cell (unmarked cells are left-aligned; renditions mark the
+   exceptions and may sit on row for whole-row application) */
+.document_cell-tab-level-1 { padding-left: 1em; }
+.document_cell-tab-level-2 { padding-left: 2em; }
+.document_cell-num { text-align: right; }
+.document_cell-center { text-align: center; }
+.document_cell-left { text-align: left; }
+.document_cell-border-top { border-top: 1px solid black; }
+.document_cell-border-bottom { border-bottom: 1px solid black; }
+.document_cell-border-left { border-left: 1px solid black; }
+.document_cell-border-right { border-right: 1px solid black; }
+.document_border-top { border-top: 1px solid black; }
+.document_border-bottom { border-bottom: 1px solid black; }
+.document_border-left { border-left: 1px solid black; }
+.document_border-right { border-right: 1px solid black; }
+.document_nowrap { white-space: nowrap; }
+.document_top { vertical-align: top; }
+.document_middle { vertical-align: middle; }
+.document_bottom { vertical-align: bottom; }
+.document_nopad { padding-right: 0.5em; }
+
+/* experimental (d998 3e): a labelled list rendered as run-in dashed
+   paragraphs */
+.document_run-in { display: run-in; }
+
+/*
+ * seg[rendition~="#center"] needs display:block: text-align cannot center an
+ * inline <seg> (rendered as <span class="tei-seg">). 68,393 of 68,395 legacy
+ * #center uses are opener segs. Flagged in hsg-jinks-data PR #8.
+ */
+.tei-seg.document_center { display: block; }
+
+/*
+ * The encodingDesc's own block comment prescribes element-context refinements:
+ * "#center on a table or figure is margin-left/right auto" (text-align cannot
+ * center the box itself).
+ */
+table.document_center,
+.tei-figure.document_center { margin-left: auto; margin-right: auto; }
+

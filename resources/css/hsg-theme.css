@@ -1,7 +1,53 @@
+/* Design tokens for this app's own components (PR #32 review).
+
+   USWDS 3 publishes its design tokens as Sass only. The compiled bundle this
+   app vendors (resources/css/palette-navy.css) therefore exposes utility
+   classes, not custom properties, so there is no USWDS variable to var() into
+   from here. These are HSG-level tokens carrying USWDS token values verbatim
+   and named for the role they play; the USWDS token each one holds is named
+   in the comment beside it, so a value can be checked against the design
+   system without leaving this file.
+
+   Rules below take their colours and spacings from these, or from the
+   --jinks-* variables the USWDS theme profile exports; neither literals nor
+   jinks' own every-layout spacing scale (--s-1, --s0, ...) belong here, the
+   latter being a base10-theme construct rather than a USWDS one. */
+:root {
+    /* Colours */
+    --hsg-color-muted: #565c65;                 /* USWDS gray-cool-60, theme-color-base */
+    --hsg-color-link-hover: #1a4480;            /* USWDS blue-warm-70v, theme-color-primary-dark */
+    --hsg-color-rule: #dfe1e2;                  /* USWDS gray-cool-10, theme-color-base-lighter */
+    --hsg-color-accent: #005ea2;                /* USWDS blue-60v, theme-color-primary */
+
+    /* External reference link confirmed dead (404/redirected-away, #1095).
+       Flags it visually rather than silently dropping or swapping it; a
+       bracketed alternative link follows in the markup where one was found.
+       No USWDS token covers this, so the pair is HSG's own. */
+    --hsg-color-link-broken: #b50909;
+    --hsg-color-link-broken-visited: #8b0707;
+
+    /* Type sizes, from the USWDS sans type scale (the app's heading and body
+       face is Source Sans), named for the USWDS step they carry. */
+    --hsg-font-size-sm: 1.06rem;                /* USWDS font-sans-sm */
+    --hsg-font-size-md: 1.13rem;                /* USWDS font-sans-md */
+    --hsg-font-size-lg: 1.46rem;                /* USWDS font-sans-lg */
+
+    /* Spacing, on the USWDS spacing scale: one unit is 8px, and the token
+       names are USWDS' own (105 = one and a half units). */
+    --hsg-space-05: 0.25rem;                    /* USWDS units(0.5) */
+    --hsg-space-1: 0.5rem;                      /* USWDS units(1) */
+    --hsg-space-105: 0.75rem;                   /* USWDS units(1.5) */
+    --hsg-space-2: 1rem;                        /* USWDS units(2) */
+    --hsg-space-205: 1.25rem;                   /* USWDS units(2.5) */
+    --hsg-space-3: 1.5rem;                      /* USWDS units(3) */
+    --hsg-space-4: 2rem;                        /* USWDS units(4) */
+    --hsg-space-5: 2.5rem;                      /* USWDS units(5) */
+}
+
 .fixed-layout > main {
     max-width: var(--jinks-content-max-width);
     display: block;
-    margin: var(--s1) auto;
+    margin: var(--hsg-space-3) auto;
 }
 
 .fixed-layout > main:has(pb-odd-editor) {
@@ -26,7 +72,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .footnotes .footnote-backlink {
-    margin-left: 0.25em;
+    margin-left: var(--hsg-space-05);
     text-decoration: none;
 }
 
@@ -44,9 +90,10 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     --hsg-footer-background: #173a57;
     --hsg-footer-heading: var(--jinks-colors-200, #a1d3ff);
     --hsg-footer-text: #dbe9f7;
+    --hsg-footer-social-background: #0e517f;
     background-color: var(--hsg-footer-background);
     color: var(--hsg-footer-text);
-    padding-top: 2rem;
+    padding-top: var(--hsg-space-4);
 }
 
 .hsg-footer .usa-footer__primary-section,
@@ -57,7 +104,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-footer .usa-footer__primary-link {
     color: var(--hsg-footer-heading);
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--hsg-space-3);
 }
 
 .hsg-footer a {
@@ -70,7 +117,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-footer .usa-footer__secondary-link {
-    margin-bottom: 0.75rem;
+    margin-bottom: var(--hsg-space-105);
     padding-top: 0;
 }
 
@@ -89,15 +136,15 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-footer .usa-footer__address {
-    margin-top: 0.75rem;
+    margin-top: var(--hsg-space-105);
 }
 
 .hsg-footer .usa-footer__contact-info {
     align-items: center;
     display: flex;
-    gap: 0.5rem;
+    gap: var(--hsg-space-1);
     justify-content: flex-start;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--hsg-space-1);
 }
 
 .hsg-footer .usa-footer__social-links {
@@ -111,12 +158,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-footer .usa-footer__social-links {
-    margin-top: 1.5rem;
+    margin-top: var(--hsg-space-3);
 }
 
 .hsg-footer .usa-social-link {
     align-items: center;
-    background-color: #0e517f;
+    background-color: var(--hsg-footer-social-background);
     border-radius: 50%;
     display: flex;
     height: 3rem;
@@ -132,7 +179,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 /* Closing band: the office wordmark left, its place in the department right. */
 .hsg-footer .usa-footer__secondary-section {
-    margin-top: 2rem;
+    margin-top: var(--hsg-space-4);
 }
 
 /* The only logo asset is the navy one the header uses, which disappears against
@@ -168,7 +215,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 @media (max-width: 640px) {
     .hsg-footer .usa-footer__agency {
-        margin-top: 1.5rem;
+        margin-top: var(--hsg-space-3);
         text-align: left;
     }
 }
@@ -189,17 +236,6 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     .usa-nav__secondary {
         bottom: 5.15rem;
     }
-}
-
-/* External reference link confirmed dead (404/redirected-away, #1095). Flags
-   it visually rather than silently dropping or swapping it; a bracketed
-   alternative link follows in the markup where one was found.
-   No USWDS color custom properties are vendored in this app (only the
-   compiled JS bundle), so this is a locally-defined semantic token rather
-   than a USWDS one. */
-:root {
-    --hsg-color-link-broken: #b50909;
-    --hsg-color-link-broken-visited: #8b0707;
 }
 
 .hsg-link-broken {
@@ -247,15 +283,15 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    and dl/dt/dd laid out as a compact number + text row instead of the
    browser's default definition-list indentation. */
 .usa-prose .footnotes {
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid #ccc;
+    margin-top: var(--hsg-space-4);
+    padding-top: var(--hsg-space-2);
+    border-top: 1px solid var(--hsg-color-rule);
 }
 
 .usa-prose .footnotes dl.footnote {
     display: flex;
-    gap: 0.5em;
-    margin: 0 0 0.75em;
+    gap: var(--hsg-space-1);
+    margin: 0 0 var(--hsg-space-105);
 }
 
 .usa-prose .footnotes dl.footnote dt {
@@ -282,26 +318,37 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     display: block;
     max-width: 220px;
     height: auto;
-    margin: var(--s-1) 0;
+    margin: var(--hsg-space-105) 0;
+}
+
+/* On wider screens the cover floats left and the editor/publisher metadata
+   flows to its right, reference parity with hsg-shell (_frus.scss: cover
+   float:left, following block to the right, TOC clears). */
+@media (min-width: 30em) {
+    .hsg-frus__cover {
+        float: left;
+        margin: var(--hsg-space-105) var(--hsg-space-4) var(--hsg-space-105) 0;
+    }
 }
 
 .hsg-frus__meta {
-    margin-bottom: var(--s-1);
+    margin-bottom: var(--hsg-space-105);
+    overflow: hidden;
 }
 
 .hsg-frus__editor-label {
     font-weight: 700;
-    margin-top: var(--s-2);
+    margin-top: var(--hsg-space-1);
 }
 
 .hsg-list-editors {
-    margin: 0 0 var(--s-2);
-    padding-left: 1.25em;
+    margin: 0 0 var(--hsg-space-1);
+    padding-left: var(--hsg-space-205);
 }
 
 .hsg-frus__published {
-    margin-top: var(--s-1);
-    color: var(--jinks-colors-600, #555);
+    margin-top: var(--hsg-space-105);
+    color: var(--hsg-color-muted);
 }
 
 .hsg-frus__published > span {
@@ -311,28 +358,331 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 /* The divider itself: a top border on the TOC that follows the cover/editor
    block, same treatment as .usa-prose .footnotes above. */
 .hsg-frus__toc {
-    margin-top: var(--s-1);
-    padding-top: var(--s-1);
+    clear: both;
+    margin-top: var(--hsg-space-105);
+    padding-top: var(--hsg-space-105);
     border-top: 1px solid var(--jinks-color-border);
     list-style: none;
     padding-left: 0;
 }
 
+/* Unpublished (pending) divisions in the table of contents render muted and
+   italic, in a non-link colour -- reference parity with hsg-shell's li.pending
+   (which the reference site marks on the volume landing page only; the sidebar
+   here carries it too, so the state is visible on interior pages as well).
+
+   Only the landing page takes the colour. Its neighbouring links are blue, so
+   the muted grey is what sets a pending entry apart -- whereas every link in
+   the sidebar already IS this grey: the theme's own
+   `.usa-sidenav :not(.usa-button):not(.uswds-button):not(.usa-current)`
+   (palette-navy.css) colours them #5c5c5c, and out-specifies anything that
+   does not repeat its four classes. Rather than win that with a longer
+   selector to arrive at an indistinguishable grey, the sidebar leaves the
+   colour alone and lets the italic carry the distinction. */
+.hsg-frus__toc li.pending > a {
+    color: var(--hsg-color-muted);
+}
+
+.hsg-frus__toc li.pending > a:hover {
+    color: var(--hsg-color-link-hover);
+}
+
+.hsg-frus__toc li.pending > a,
+.usa-sidenav__item.pending > a {
+    font-style: italic;
+}
+
+/* Sidebar TOC: indent nested chapters under their compilation, and show the
+   document-count range in a muted colour, reference parity with hsg-shell. */
+.toc .usa-sidenav__sublist {
+    margin-left: 0;
+    padding-left: var(--hsg-space-2);
+    border-left: 1px solid var(--jinks-color-border);
+}
+
+.toc-range {
+    color: var(--hsg-color-muted);
+    font-size: 0.85em;
+    margin-left: var(--hsg-space-05);
+}
+
+/* Persons / terms front-matter lists: no bullets, hanging indent per entry
+   (class list-person), reference parity with hsg-shell. */
+.list-person {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+
+.list-person li {
+    list-style: none;
+    padding-left: var(--hsg-space-3);
+    text-indent: calc(-1 * var(--hsg-space-3));
+}
+
+.list-person .list-person {
+    margin-left: 0;
+}
+
+/* Chapter listing page (#PR-review): each document as a titled entry with its
+   dateline, summary and source note, reference parity with hsg-shell's
+   toc:document-list -- replacing the old bulleted list of bare title links. */
+.hsg-frus__doclist {
+    margin-top: var(--hsg-space-2);
+}
+
+.hsg-frus__doc-entry {
+    padding: var(--hsg-space-105) 0;
+    border-top: 1px solid var(--jinks-color-border);
+}
+
+.hsg-frus__doc-title {
+    margin: 0 0 var(--hsg-space-1);
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.hsg-frus__doc-entry .dateline {
+    color: var(--hsg-color-muted);
+    font-style: italic;
+    margin: 0 0 var(--hsg-space-1);
+}
+
+.hsg-frus__doc-entry .summary {
+    margin: 0 0 var(--hsg-space-1);
+}
+
+.hsg-frus__doc-entry .sourcenote {
+    color: var(--hsg-color-muted);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.hsg-frus__doc-entry.pending .hsg-frus__doc-title {
+    color: var(--hsg-color-muted);
+    font-style: italic;
+    font-weight: 400;
+}
+
+/* Both sidebars are populated on interior division pages now (left TOC +
+   right division asides). The layout grid's middle track is 1fr, but a grid
+   item's automatic minimum is its min-content, so wide content in main
+   (tables, long headings) pushed the three columns past the page box
+   (hsg-jinks#1217 alignment: band wider than the header) once the second
+   sidebar landed. min-width: 0 restores the 1fr track's ability to shrink;
+   wide content wraps or scrolls inside main instead of widening the band. */
+.sticky-layout > main {
+    min-width: 0;
+}
+
+/* "Page N" page-break facsimile markers in document and section prose
+   (pb elementSpec in resources/odd/hsg-jinks.odd): a grey right-floated
+   margin marker, reference parity with hsg-shell's facsimile-link rule
+   (display block, 4pt left margin, grey, float right). */
+.hsg-facs-link {
+    display: block;
+    margin-left: var(--hsg-space-05);
+    color: var(--hsg-color-muted);
+    float: right;
+    font-size: 0.9rem;
+}
+
+/* Volume-title heading above the content of every interior division page
+   (chapter, document, section); hsg:navigation-title, reference parity with
+   hsg-shell's navigation title. Rendered as quiet chrome, not the page's own
+   h1: the division heading below it stays the visually dominant title. */
+.hsg-navigation-title {
+    margin: 0 0 var(--hsg-space-2);
+    padding-bottom: var(--hsg-space-1);
+    border-bottom: 1px solid var(--hsg-color-rule);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--hsg-color-muted);
+}
+
+/* Previous / next pager on chapter and document pages. */
+.hsg-frus__pager {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--hsg-space-105);
+    margin: var(--hsg-space-2) 0;
+}
+
+.hsg-frus__pager-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--hsg-space-1);
+    max-width: 46%;
+    text-decoration: none;
+}
+
+.hsg-frus__pager-link:hover .hsg-frus__pager-label {
+    text-decoration: underline;
+}
+
+.hsg-frus__pager-next {
+    margin-left: auto;
+    text-align: right;
+}
+
+.hsg-frus__pager-empty {
+    visibility: hidden;
+}
+
+.hsg-frus__pager-arrow {
+    font-weight: 700;
+}
+
+.hsg-frus__pager-label {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hsg-frus__contents {
+    font-size: 1.15rem;
+    margin: var(--hsg-space-2) 0 var(--hsg-space-1);
+}
+
+/* Headings inside a FRUS division (the TEI head of a document, a section or
+   one of its subdivisions).
+
+   "usa-prose" styles only its direct children, and a division's head sits
+   several elements deep inside the transform's output, so none of the
+   `.usa-prose > h*` rules reach it and every head fell back to the browser's
+   own defaults -- a document title rendered at 2em, twice the size of the
+   volume title above it and half again the size the reference site gives it.
+   These map each level onto the USWDS sans type scale instead. A chapter or
+   compilation title is built in XQuery rather than by the transform
+   (hsg:division-listing), so it carries its own class and joins them here to
+   keep every division title the same size. */
+.hsg-frus__prose :is(h1, h2, h3, h4, h5, h6).tei-head,
+.hsg-frus__division-title {
+    font-family: var(--jinks-heading-font-family);
+    line-height: var(--jinks-heading-line-height);
+    font-weight: 700;
+    margin: var(--hsg-space-3) 0 var(--hsg-space-105);
+}
+
+.hsg-frus__prose h1.tei-head,
+.hsg-frus__division-title {
+    font-size: var(--hsg-font-size-lg);
+}
+
+.hsg-frus__prose h2.tei-head {
+    font-size: var(--hsg-font-size-md);
+}
+
+.hsg-frus__prose :is(h3, h4, h5, h6).tei-head {
+    font-size: var(--hsg-font-size-sm);
+}
+
+/* Label above an attachment inlined into its parent document ("Tab I"). The
+   reference site renders it as a bold inline note rather than a heading, the
+   attachment's own title below it being the heading. */
+.attachment-label {
+    margin: var(--hsg-space-2) 0 0;
+    font-weight: 700;
+}
+
+/* Opener: the print page number (#float-left) and the dateline (#float-right)
+   share one line; clear the floats so the document body starts below them. */
+.tei-opener::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* FRUS document lists, reference parity with hsg-shell. Head-introduced lists
+   (Ref:, SUBJECT) get a bold heading with no-bullet indented items; label/item
+   lists (numbered "1." / lettered "(A)") render as a definition list with the
+   label inline, on the same line as the item text. */
+.frus-list-head {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: var(--hsg-space-1) 0 var(--hsg-space-05);
+}
+
+.frus-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 var(--hsg-space-1);
+}
+
+.frus-list-head + .frus-list li {
+    margin-left: var(--hsg-space-4);
+}
+
+.frus-labeled-list {
+    margin: var(--hsg-space-1) 0;
+}
+
+.frus-labeled-list dt {
+    float: left;
+    clear: left;
+    font-weight: 400;
+}
+
+.frus-labeled-list dd {
+    margin-left: var(--hsg-space-5);
+    margin-bottom: var(--hsg-space-05);
+}
+
+/* A description pair ("SUBJECT" + value): term bold, on its own line, value
+   indented beneath -- not inline. */
+.frus-description-list dt {
+    float: none;
+    font-weight: 700;
+}
+
+.frus-description-list dd {
+    margin-left: var(--hsg-space-4);
+    margin-bottom: var(--hsg-space-05);
+}
+
 .hsg-frus__toc ul {
     list-style: none;
-    padding-left: 1.25em;
+    padding-left: var(--hsg-space-205);
 }
 
 .hsg-frus__toc > li {
-    margin-bottom: var(--s-2);
+    margin-bottom: var(--hsg-space-1);
 }
 
 .hsg-frus__ways-to-explore .hsg-sidebar-title {
     margin-top: 0;
 }
 
+/* Interior-page right sidebar (hsg:division-asides): the Persons and
+   Abbreviations and Terms register panels plus the Historical Documents
+   section navigation. Same quiet chrome as the landing sidebar's
+   ways-to-explore panel; consecutive panels get breathing room. */
+.hsg-frus__register .hsg-sidebar-title,
+.hsg-frus__section-nav .hsg-sidebar-title {
+    margin-top: 0;
+}
+
+.hsg-panel + .hsg-panel {
+    margin-top: var(--hsg-space-4);
+}
+
+.hsg-frus__register .hsg-list-group,
+.hsg-frus__section-nav .hsg-list-group {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.hsg-frus__register .hsg-list-group li,
+.hsg-frus__section-nav .hsg-list-group li {
+    margin-bottom: var(--hsg-space-1);
+}
+
 .hsg-frus__ways-to-explore .usa-search {
-    margin-bottom: var(--s-1);
+    margin-bottom: var(--hsg-space-105);
 }
 
 .hsg-ebook-list,
@@ -343,7 +693,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-link-button {
     display: inline-block;
-    margin: var(--s-2) 0;
+    margin: var(--hsg-space-1) 0;
 }
 
 /* Active primary-nav item (set by resources/scripts/nav-active.js; OP#1283).
@@ -358,7 +708,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 @media (min-width: 64em) {
     .usa-nav__primary-item > .usa-current::after,
     .usa-nav__primary-item > a.usa-current::after {
-        background-color: var(--theme-color-primary, #005ea2);
+        background-color: var(--hsg-color-accent);
     }
 }
 
@@ -379,7 +729,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .conf-conference-list > li.usa-collection__item {
     position: relative;
-    padding-left: 2rem;
+    padding-left: var(--hsg-space-4);
 }
 
 .conf-conference-list > li.usa-collection__item::before {

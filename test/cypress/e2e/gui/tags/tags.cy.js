@@ -92,8 +92,12 @@ describe("tag browse page: direct hits, dig-deeper, and empty states", () => {
     });
 
     it("an entry with nothing tagged anywhere beneath it renders a non-blank empty state", () => {
-        cy.visit("tags/lincoln-abraham");
-        cy.get("main h1").should("contain.text", "Lincoln, Abraham");
+        // washington-george, not lincoln-abraham: FRUS coverage starts in
+        // 1861, so a Washington entry can never gain a tagged volume, while
+        // Lincoln legitimately picked one up as soon as frus1861 joined the
+        // deployed data (the spec was written against a two-volume sample).
+        cy.visit("tags/washington-george");
+        cy.get("main h1").should("contain.text", "Washington, George");
         cy.contains("main p", "No resources have been tagged");
     });
 

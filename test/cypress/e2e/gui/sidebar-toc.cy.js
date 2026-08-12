@@ -192,4 +192,31 @@ describe("sidebar table of contents", () => {
                 .should("have.css", "font-weight", "700");
         });
     });
+
+    // Unpublished chapters, marked li.pending like the reference site marks
+    // them on the volume landing page. Here the distinction is the italic
+    // alone: every sidebar link already carries the theme's muted grey (see
+    // resources/css/hsg-theme.css), so a second grey would not read.
+    describe("unpublished chapters", () => {
+        const PARTIAL = "historicaldocuments/frus1977-80v27/ch2";
+
+        beforeEach(() => cy.visit(PARTIAL));
+
+        it("marks chapters with no published documents as pending", () => {
+            cy.get("nav.toc .usa-sidenav__item.pending").should(
+                "have.length.at.least",
+                1,
+            );
+            cy.get("nav.toc .usa-sidenav__item.pending > a")
+                .first()
+                .should("have.css", "font-style", "italic");
+        });
+
+        it("leaves chapters that do have published documents unmarked", () => {
+            cy.contains("nav.toc .usa-sidenav__item", "Canada").should(
+                "not.have.class",
+                "pending",
+            );
+        });
+    });
 });

@@ -73,8 +73,8 @@ USWDS ships ~2600). Remove when Jinks fixes it.
 
 ### Pinned baseline
 
-Software dependencies (and `wwdai`/`rdcr`/`carousel`, all released via
-semantic-release) are pinned to a release, in
+Software dependencies (and `carousel`, released via semantic-release) are
+pinned to a release, in
 `.devcontainer/docker-compose.yml` → `build.args` (the `Dockerfile.dev` `ARG`
 defaults mirror them):
 
@@ -250,15 +250,23 @@ use the same **frozen baseline**:
 
 ## Data
 
-`hsg-jinks-data` (one sample volume, `frus1981-88v05`, deployed as
-`/db/apps/frus-data-jinks`) has no GitHub release either, so it follows the
-exact same **frozen baseline** pattern as the USWDS profile above — baked
-into the image's `autodeploy/` at `.devcontainer/Dockerfile.dev` build time,
-not built or installed per-container. That matters because eXist's database
+`hsg-jinks-data` (the legacy FRUS corpus, deployed as `/db/apps/frus-data-jinks`
+with volumes under `data/frus-v2-data/` and guidelines apparatus under
+`data/frus-tei-guidelines-resources/`) has no GitHub release either, so it
+follows the exact same **frozen baseline** pattern as the USWDS profile above —
+baked into the image's `autodeploy/` at `.devcontainer/Dockerfile.dev` build
+time, not built or installed per-container. That matters because eXist's database
 lives entirely inside the container (no volume): anything installed only at
 *runtime* (the old approach: `ant` + `xst package install` against the
 running instance) is gone the moment the container is recreated, with no
 warning that it's missing until a page 404s.
+
+> Note: the `data/Publications` and `data/Resources` collections were renamed to
+> `data/frus-v2-data` and `data/frus-tei-guidelines-resources` when the full
+> legacy corpus (694 volumes) landed. The app's `data-default` points at
+> `frus-v2-data`. The frozen baseline xar is a single-volume sample; the full
+> corpus (~1.2 GB / 390k files) is impractical to bake into the image and is a
+> separate infra decision.
 
 - The baseline is stored as `~/.config/hsg/xars/frus-data-jinks-baseline.xar`
   (`frus-data-jinks-BASELINE.txt` beside it records commit + date). Refresh
@@ -286,14 +294,15 @@ the ones backing `/departmenthistory`, `/countries`, `/conferences`,
 `/about`, `/tags`, and `/milestones` — each maintained in its own repo under
 `github.com/HistoryAtState` and, unlike `frus-data-jinks`, already published
 as a versioned `.xar` GitHub release. That means none of them need the
-frozen-baseline treatment. 10 of the 11 are `curl`'d straight into
-`autodeploy/` in `Dockerfile.dev` — every fresh container build already has
-them installed, no manual step required. `wwdai` and `rdcr` are
-version-pinned (see "Pinned baseline"); the other 8 of those 10 always fetch
-each repo's `/releases/latest/` asset instead, since they're append-only
-content that should stay current rather than freeze to a version.
-`conferences` isn't wired into `Dockerfile.dev` yet, so it still needs the
-manual `xst package install` step below on every fresh container.
+frozen-baseline treatment. All 11 are `curl`'d straight into `autodeploy/`
+in `Dockerfile.dev` — every fresh container build already has them
+installed, no manual step required — and every one of them always fetches
+its repo's `/releases/latest/` asset (decision 2026-08-07, after the
+milestones/conferences/education epics merged: no data package stays
+pinned, and the full Cypress suite is expected to run green against the
+current releases; when a count-style test breaks on a refresh, fix the
+test per "Cypress assertions on data-package counts" in `CLAUDE.md`, don't
+pin the data).
 
 | Repo | Latest release |
 |---|---|
@@ -309,10 +318,8 @@ manual `xst package install` step below on every fresh container.
 | `wwdai` | https://github.com/HistoryAtState/wwdai/releases/latest |
 | `hac` | https://github.com/HistoryAtState/hac/releases/latest |
 
-To pick up a newer release without a full image rebuild — e.g. to try a
-just-published fix before bumping the pinned version, or to install
-`conferences` at all since it isn't in `Dockerfile.dev`'s autodeploy yet —
-refresh one or all of them directly into *this worktree's own* devcontainer
+To pick up a newer release without a full image rebuild, refresh one or
+all of them directly into *this worktree's own* devcontainer
 (never port 8080, see "Parallel worktrees & the read-only mirror" in
 `CLAUDE.md`):
 
@@ -325,10 +332,9 @@ done
 ```
 
 That's a runtime-only change (eXist's database isn't persisted, see "Data"
-above) — it won't survive the next container recreation. For `wwdai`/`rdcr`,
-also bump the pinned version in `Dockerfile.dev`/`docker-compose.yml` if the
-newer release should stick around after a rebuild; the other 8 already
-refetch `/releases/latest/` on every `docker compose build --no-cache`.
+above) — it won't survive the next container recreation, but the container
+already refetches every package's `/releases/latest/` on the next
+`docker compose build --no-cache`, so nothing needs pinning or bumping.
 
 These packages are append-only upstream — see `CLAUDE.md` ("Cypress
 assertions on data-package counts") before writing a test that counts
@@ -363,6 +369,12 @@ by hand.
 
 - `tools/inspect-page.xq` — fetch a deployed page server-side, assert on rendered
   markup by CSS class (excluded from the app build; run with `xst`, see header).
+- `tools/generate-frus-renditions.xq` — regenerate `resources/css/frus-renditions.css`
+  from the FRUS rendition vocabulary (the `tei:rendition` definitions in
+  hsg-jinks-data's `frus-tei-guidelines-resources/frus-encodingDesc.xml`). That
+  stylesheet is generated, not hand-maintained: re-run the script and commit the
+  result whenever the vocabulary changes.
+  `xst --config .xstrc run -f tools/generate-frus-renditions.xq > resources/css/frus-renditions.css`
 - `test/cypress/e2e/gui/breadcrumb.cy.js` — run against the worktree's own
   container: `dotenv -e .env -- npx cypress run --spec …` (Cypress reads
   `CYPRESS_BASE_URL` from the environment, not from `.env` itself).
