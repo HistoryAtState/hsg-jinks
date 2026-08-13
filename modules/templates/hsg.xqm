@@ -902,11 +902,12 @@ declare %private function hsg:register-description($name as element()) as xs:str
 (:~
  : The static Historical Documents section navigation, reference parity with
  : hsg-shell's site.xml "sections" aside (7 links, plus the section landing).
- : Context-path-relative even where the target route has not been ported
- : yet, the same transitional policy the Department History sidebar settled
- : in #1132 and templates/pages/historicaldocuments/sidebar.html follows:
- : unported targets 404 here until their pages land, rather than pointing at
- : the production site.
+ : Same link list as templates/pages/historicaldocuments/sidebar.html, which
+ : the section's own pages mount in their left aside; this one is the right
+ : aside of volume interior pages, where the left is taken by the volume TOC.
+ : Context-path-relative even for the three targets that have neither content
+ : nor a stub yet, the same transitional policy the Department History
+ : sidebar settled in #1132.
  :)
 declare %private function hsg:section-nav($context as map(*)) {
     let $cp := $context?context-path
