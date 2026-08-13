@@ -323,13 +323,148 @@ declare function hsg:administration-heading($context as map(*)) as xs:string {
 };
 
 (:~
- : The volumes of one administration, grouped by sub-series, reference parity
- : with hsg-shell's frus:volumes-by-administration: an h2 per sub-series
- : ("Foreign Relations of the United States, 1981-1988") holding a list of
- : its volumes with availability notices. pre-truman instead gets the
- : reference's flat chronological list of complete titles
- : (frus:volumes-pre-truman); its volumes predate administration-based
- : sub-series, so sub-series grouping would just repeat each title.
+ : The administrations whose volumes predate administration-organized
+ : sub-series (the series was organized by year for 1861-1951 and
+ : triennially for 1952-1963), reference parity with the closed list in
+ : hsg-shell's fh:administration-listing-note. Their pages carry an
+ : explanatory note; administration-organized pages carry none (hsg-shell
+ : has that branch commented out, and the reference site renders nothing).
+ :)
+declare %private variable $hsg:pre-administration-subseries-admins := (
+    "lincoln", "johnson-a", "grant", "hayes", "garfield", "arthur",
+    "cleveland-22", "harrison", "cleveland-24", "mckinley", "roosevelt-t",
+    "taft", "wilson", "harding", "coolidge", "hoover", "roosevelt-fd",
+    "truman", "kennedy"
+);
+
+(:~
+ : The FRUS production tracks, reference parity with the
+ : frus-production-tracks taxonomy in hsg-shell's code table
+ : (frus repo, shared/frus-production.xml). frus-data-jinks carries no code
+ : table, and the vocabulary is closed and stable (three fixed categories),
+ : so the ids and display labels live here. Order is the taxonomy's, which
+ : fixes the order of the per-track headings on administration pages.
+ :)
+declare %private variable $hsg:production-tracks := (
+    map { "id": "regular", "label": "Regular" },
+    map { "id": "accelerated", "label": "Accelerated" },
+    map { "id": "retrospective", "label": "Retrospective" }
+);
+
+(:~
+ : The production track under which a volume covers the given
+ : administration. The volume's #frus-administration-coverage terms carry
+ : xml:ids, and its #frus-production-priority terms point back at them, so a
+ : retrospective volume spanning several administrations can be Regular for
+ : one and Retrospective for another. Most volumes point via @corresp; a few
+ : v2 headers use @ana for the same relation (e.g. frus1977-80v27), so both
+ : are accepted.
+ :)
+declare %private function hsg:production-track($root as element(tei:TEI), $admin-id as xs:string) as xs:string? {
+    let $admin-terms := $root/tei:teiHeader//tei:keywords[@scheme = '#frus-administration-coverage']
+        /tei:term[. = $admin-id]
+    let $refs := $admin-terms/@xml:id ! ("#" || .)
+    let $tracks := $root/tei:teiHeader//tei:keywords[@scheme = '#frus-production-priority']
+        /tei:term[(@corresp, @ana) = $refs]
+    return ($tracks ! string(.))[1]
+};
+
+(:~
+ : The production tracks in use among an administration's volumes, in order
+ : of first appearance with the volumes sorted by id. That matches what the
+ : reference site's group-info sentence shows (hsg-shell's order-by there
+ : compares against an attribute that does not exist on categories, so its
+ : groups keep first-appearance order), while the per-track headings below
+ : use the taxonomy order instead, same as the reference.
+ :)
+declare %private function hsg:tracks-in-use($roots as element(tei:TEI)*, $admin-id as xs:string) as xs:string* {
+    let $per-volume :=
+        for $root in $roots
+        order by $root/@xml:id
+        return hsg:production-track($root, $admin-id)
+    return distinct-values($per-volume)
+};
+
+(:~
+ : The explanatory note on pages of administrations that predate
+ : administration-organized sub-series, reference parity with hsg-shell's
+ : fh:administration-listing-note and the pre-administration-based-subseries
+ : paragraph in its administrations.xml.
+ :)
+declare function hsg:administration-listing-note($context as map(*)) as element(p)? {
+    if ($context?administration-id = $hsg:pre-administration-subseries-admins) then
+        <p id="pre-administration-based-subseries-note">
+            <strong>Note:</strong> The volumes listed
+            below contain at least one document from the period of this presidential
+            administration; {hsg:administration-search-link($context)}. The <em>Foreign
+            Relations</em> series was organized by year for the volumes covering
+            1861–1951, triennially for 1952–1963, and by presidential administration
+            for 1964 onward—with some exceptions.</p>
+    else
+        ()
+};
+
+(:~
+ : "view and search within the available documents", a search scoped to the
+ : president's term of office, reference parity with hsg-shell's
+ : fh:admin-search-href. Term dates come from the travels data package's
+ : presidents register; the taxonomy position + 14 maps an administration to
+ : its president's ordinal, which is sound for every administration that
+ : gets the note (one category per president up to kennedy; the combined
+ : nixon-ford category sits after them and never renders it).
+ :)
+declare %private function hsg:administration-search-link($context as map(*)) as element(a) {
+    let $ordinal := index-of(
+            hsg:administrations()/tei:category/@xml:id/string(),
+            $context?administration-id
+        ) + 14
+    let $president := doc("/db/apps/travels/presidents/presidents.xml")//president[@n = $ordinal]
+    return
+        <a href="{$context?context-path}/search?within=documents&amp;start-date={$president/took-office-date}&amp;end-date={$president/left-office-date}&amp;sort=date-asc"
+            >view and search within the available documents</a>
+};
+
+(:~
+ : "Volumes are grouped into X and Y categories." with in-page links, shown
+ : only when more than one production track is in use, reference parity with
+ : hsg-shell's fh:group-info including its list punctuation (Oxford comma
+ : from three items up).
+ :)
+declare function hsg:administration-group-info($context as map(*)) as element(p)? {
+    let $admin-id := $context?administration-id
+    let $tracks := hsg:tracks-in-use(hsg:volumes-in-administration($admin-id), $admin-id)
+    return
+        if ($admin-id != 'pre-truman' and count($tracks) gt 1) then
+            <p>Volumes are grouped into {
+                for $track at $n in $tracks
+                return (
+                    <a href="#{$track}-volumes">{
+                        $hsg:production-tracks[?id = $track]?label
+                    }</a>,
+                    if ($n lt count($tracks)) then
+                        concat(
+                            if (count($tracks) gt 2) then ', ' else (),
+                            if ($n = count($tracks) - 1) then ' and ' else ()
+                        )
+                    else ()
+                )
+            } categories.</p>
+        else
+            ()
+};
+
+(:~
+ : The volumes of one administration, reference parity with hsg-shell's
+ : administrations.xml rendering chain: when several production tracks are
+ : in use (nixon-ford, kennedy, ...), an h2 per track ("Regular volumes",
+ : anchor {track}-volumes) in taxonomy order, each holding the track's
+ : volumes grouped by sub-series; otherwise the sub-series groups alone. A
+ : sub-series group is an h3 ("Foreign Relations of the United States,
+ : 1981-1988") over a list of volumes with availability notices, ordered by
+ : the sub-series' @n. pre-truman instead gets the reference's flat
+ : chronological list of complete titles (frus:volumes-pre-truman); its
+ : volumes predate administration-based sub-series, so sub-series grouping
+ : would just repeat each title.
  :)
 declare function hsg:administration-volumes($context as map(*)) {
     let $admin-id := $context?administration-id
@@ -347,37 +482,52 @@ declare function hsg:administration-volumes($context as map(*)) {
                     return hsg:admin-volume-item($context, $root, $title)
                 }
             </ol>
-        else
-            for $root in $roots
-            let $seriesStmt := hsg:resolve-include($root/tei:teiHeader, 'seriesStmt')
-            let $group := normalize-space(string-join((
-                    $seriesStmt/tei:title[@type = 'series'],
-                    $seriesStmt/tei:title[@type = 'sub-series']
-                ), ", "))
-            group by $group
-            order by $group
+        else if (count(hsg:tracks-in-use($roots, $admin-id)) gt 1) then
+            for $track in $hsg:production-tracks
+            let $track-roots := $roots[hsg:production-track(., $admin-id) = $track?id]
+            where exists($track-roots)
             return (
-                if ($group != '') then
-                    <h2 class="hsg-admin__sub-series">{$group}</h2>
-                else
-                    (),
-                <ul class="hsg-admin__volumes">
-                    {
-                        for $vol-root in $root
-                        let $volStmt := hsg:resolve-include($vol-root/tei:teiHeader, 'seriesStmt')
-                        let $label := normalize-space(string-join((
-                                $volStmt/tei:title[@type = 'volume-number'],
-                                $volStmt/tei:title[@type = 'volume']
-                            ), ", "))
-                        let $label := if ($label != '') then
-                                $label
-                            else
-                                normalize-space((hsg:resolve-include($vol-root/tei:teiHeader, 'titleStmt')/tei:title)[1])
-                        order by $vol-root/@xml:id
-                        return hsg:admin-volume-item($context, $vol-root, $label)
-                    }
-                </ul>
+                <h2 id="{$track?id}-volumes" class="hsg-admin__track">{$track?label} volumes</h2>,
+                hsg:sub-series-groups($context, $track-roots)
             )
+        else
+            hsg:sub-series-groups($context, $roots)
+};
+
+(:~
+ : Sub-series groups over a set of volume roots: an h3 per sub-series in
+ : sub-series order (@n), each over its volumes ordered by id, reference
+ : parity with hsg-shell's fh:volumes-by-group / fh:volumes-by-administration
+ : (including the "Other" fallback label for a volume without series titles).
+ :)
+declare %private function hsg:sub-series-groups($context as map(*), $roots as element(tei:TEI)*) {
+    for $root in $roots
+    let $seriesStmt := hsg:resolve-include($root/tei:teiHeader, 'seriesStmt')
+    let $group := normalize-space(string-join((
+            $seriesStmt/tei:title[@type = 'series'],
+            $seriesStmt/tei:title[@type = 'sub-series']
+        )[. != ''], ", "))
+    group by $group
+    order by ($seriesStmt/tei:title[@type = 'sub-series']/@n/string())[1]
+    return (
+        <h3 class="hsg-admin__sub-series">{($group[. != ''], 'Other')[1]}</h3>,
+        <ul class="hsg-admin__volumes">
+            {
+                for $vol-root in $root
+                let $volStmt := hsg:resolve-include($vol-root/tei:teiHeader, 'seriesStmt')
+                let $label := normalize-space(string-join((
+                        $volStmt/tei:title[@type = 'volume-number'],
+                        $volStmt/tei:title[@type = 'volume']
+                    )[. != ''], ", "))
+                let $label := if ($label != '') then
+                        $label
+                    else
+                        normalize-space(($volStmt/tei:title[@type = 'sub-series'])[1])
+                order by $vol-root/@xml:id
+                return hsg:admin-volume-item($context, $vol-root, $label)
+            }
+        </ul>
+    )
 };
 
 declare %private function hsg:admin-volume-item($context as map(*), $root as element(tei:TEI), $label as xs:string) {
