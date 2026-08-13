@@ -3,6 +3,7 @@ xquery version "3.1";
 module namespace opds="https://history.state.gov/ns/templates/opds-catalog";
 
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "../config.xqm";
+import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace atom="http://www.w3.org/2005/Atom";
@@ -32,26 +33,12 @@ declare function opds:ebook-volumes() as element(tei:TEI)* {
     collection($config:data-root)//tei:relatedItem[@type eq "epub"]/root(.)/tei:TEI
 };
 
-(:~
- : Build an absolute, externally-resolvable URL for a path relative to this
- : app's own root -- OPDS feed/entry ids and links must be absolute since an
- : e-reader client resolves them outside of any browser/page context. Same
- : technique as modules/lib/api/iiif.xql's iiif:link (scheme + server-name +
- : non-default port + $config:context-path).
- :)
-declare function opds:absolute-url($relpath as xs:string) as xs:string {
-    let $host := request:get-scheme() || "://" || request:get-server-name()
-    let $port :=
-        if (request:get-server-port() = (80, 443)) then
-            ()
-        else
-            ":" || request:get-server-port()
-    return
-        string-join(($host, $port, replace($config:context-path || "/" || $relpath, "//", "/")))
-};
-
+(:~ OPDS feed/entry ids and links must be absolute, since an e-reader client
+ : resolves them outside of any browser/page context -- hence hsg:absolute-url
+ : (the app's central builder, see modules/templates/hsg.xqm) rather than
+ : root-relative paths. :)
 declare function opds:base-url() as xs:string {
-    opds:absolute-url("api/v1/catalog")
+    hsg:absolute-url("api/v1/catalog")
 };
 
 (:~ Generic Atom &lt;link&gt;, explicitly namespaced (see opds:entry for why). :)
@@ -104,7 +91,7 @@ declare function opds:feed($id as xs:string, $title as xs:string, $links as elem
         element { QName('http://www.w3.org/2005/Atom', 'updated') } { current-dateTime() },
         element { QName('http://www.w3.org/2005/Atom', 'author') } {
             element { QName('http://www.w3.org/2005/Atom', 'name') } { $opds:FEED_AUTHOR_NAME },
-            element { QName('http://www.w3.org/2005/Atom', 'uri') } { opds:absolute-url("") }
+            element { QName('http://www.w3.org/2005/Atom', 'uri') } { hsg:absolute-url("") }
         },
         $links,
         $entries
