@@ -54,8 +54,12 @@ describe("section page (sec6)", () => {
     it("shows the Historical Documents section navigation", () => {
         cy.get(".hsg-frus__section-nav").within(() => {
             cy.get(".hsg-sidebar-title").should("contain.text", "Historical Documents");
-            cy.get("li a").should("have.length", 7);
-            cy.get("li a").first().should("have.attr", "href").and("contain", "about-frus");
+            // 7 reference-parity links plus the section landing (OP#1214),
+            // all context-path-relative now.
+            cy.get("li a").should("have.length", 8);
+            cy.get("li a").first().should("have.attr", "href")
+                .and("match", /\/historicaldocuments$/);
+            cy.get("li a").eq(1).should("have.attr", "href").and("contain", "about-frus");
         });
     });
 });
