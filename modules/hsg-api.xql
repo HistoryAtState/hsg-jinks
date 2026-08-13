@@ -46,12 +46,10 @@ declare function hsgapi:view-section($request as map(*)) {
 };
 
 (:~
- : Stub landing pages for the five Historical Documents menu entries whose
- : hsg-shell content has not been ported yet: each renders a "To be
- : implemented" notice so no primary-nav link 404s (parity with the reference
- : menu in hsg-shell templates/site.xml). Their literal routes beat the
- : parameterized /historicaldocuments/{publicationId} volume route by Roaster
- : path specificity; see the note on devapi:not-found in developer-api.xql.
+ : Section pages under /historicaldocuments (OP#1291-#1295). Their literal
+ : routes beat the parameterized /historicaldocuments/{publicationId} volume
+ : route by Roaster path specificity; see the note on devapi:not-found in
+ : developer-api.xql.
  :)
 declare function hsgapi:about-frus($request as map(*)) {
     hsgapi:render($request, "pages/historicaldocuments/about-frus")
@@ -71,6 +69,28 @@ declare function hsgapi:ebooks($request as map(*)) {
 
 declare function hsgapi:quarterly-releases($request as map(*)) {
     hsgapi:render($request, "pages/historicaldocuments/quarterly-releases")
+};
+
+(:~
+ : The ten quarterly-release announcement pages (OP#1295). Content is frozen
+ : upstream (the digitization partnership's last release was 2018-q4), so each
+ : announcement is a verbatim-ported static template and the id vocabulary is
+ : a closed list; anything else is a real 404, not hsg-shell's error-page
+ : fallthrough (precedent: #1130/#1166). The announcements deliberately do not
+ : appear in the section sidebar, matching the reference's section-nav
+ : exclusion (hsg-shell urls.xml).
+ :)
+declare variable $hsgapi:quarterly-release-ids :=
+    ("2016-q3", "2016-q4", "2017-q1", "2017-q2", "2017-q3", "2017-q4",
+     "2018-q1", "2018-q2", "2018-q3", "2018-q4");
+
+declare function hsgapi:quarterly-release($request as map(*)) {
+    let $releaseId := $request?parameters?releaseId
+    return
+        if ($releaseId = $hsgapi:quarterly-release-ids) then
+            hsgapi:render($request, "pages/historicaldocuments/quarterly-releases/" || $releaseId)
+        else
+            error($errors:NOT_FOUND, "no quarterly release announcement " || $releaseId)
 };
 
 (:~

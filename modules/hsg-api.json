@@ -150,6 +150,50 @@
                 }
             }
         },
+        "/historicaldocuments/quarterly-releases/{releaseId}": {
+            "get": {
+                "summary": "Quarterly Releases: one release announcement page",
+                "operationId": "hsgapi:quarterly-release",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "releaseId",
+                        "in": "path",
+                        "description": "ID of the release announcement, e.g. 2016-q3",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The release announcement was not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/historicaldocuments/{publicationId}": {
             "get": {
                 "summary": "Retrieve landing page for a volume",

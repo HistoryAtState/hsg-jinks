@@ -1,0 +1,160 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                <li>
+                    <a href="[[ $context?context-path ]]/">
+                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments">
+                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments/quarterly-releases">
+                        <pb-i18n key="menu.quarterly-releases">Quarterly Releases</pb-i18n>
+                    </a>
+                </li>
+                <li aria-current="page">2016 Quarter 3</li>
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [# Frozen announcement ported verbatim from hsg-shell
+       pages/historicaldocuments/quarterly-releases/announcements/2016-q3.xml (OP#1295) #]
+    <div class="section-landing usa-prose">
+        <h1>Quarterly Release of Newly Digitized <em>Foreign Relations</em> Volumes</h1>
+        <p>August 26, 2016</p>
+        <p>The Department of State today announces the release
+            of newly digitized versions of twenty volumes from
+                the <em>Foreign Relations of the United States</em>series, the official
+            documentary record of U.S. foreign relations. These volumes cover events
+            that took place between 1936 and 1939 and were originally published in print
+            between 1953 and 1957:</p>
+        <p>
+            <em>Foreign Relations of the United States Diplomatic Papers,</em> 1936</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1936v01">General, British
+                    Commonwealth, Volume I</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1936v02">Europe, Volume II</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1936v03">The Near East and Africa,
+                    Volume III</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1936v04">The Far East, Volume
+                    IV</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1936v05">The American Republics,
+                    Volume V</a>
+            </li>
+        </ol>
+        <p>
+            <em>Foreign Relations of the United States Diplomatic Papers, </em> 1937</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1937v01">General, Volume I</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1937v02">The British Commonwealth,
+                    Europe, Near East and Africa, Volume II</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1937v03">The Far East, Volume
+                    III</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1937v04">The Far East, Volume
+                    IV</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1937v05">The American Republics,
+                    Volume V</a>
+            </li>
+        </ol>
+        <p>
+            <em>Foreign Relations of the United States Diplomatic Papers,</em> 1938</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1938v01">General, Volume I</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1938v02">The British Commonwealth,
+                    Europe, Near East, and Africa, Volume II</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1938v03">The Far East, Volume
+                    III</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1938v04">The Far East, Volume
+                    IV</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1938v05">The American Republics,
+                    Volume V</a>
+            </li>
+        </ol>
+        <p>
+            <em>Foreign Relations of the United States, Diplomatic Papers,</em> 1939</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1939v01">General, Volume I</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1939v02">General, The British
+                    Commonwealth and Europe, Volume II</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1939v03">The Far East, Volume
+                    III</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1939v04">The Far East; The Near
+                    East and Africa, Volume IV</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1939v05">The American Republics,
+                    Volume V</a>
+            </li>
+        </ol>
+        <p>Today’s release is part of the Office of the Historian’s ongoing project, in
+            partnership with the University of Wisconsin Digital Collections Center, to
+            digitize the entire <em>Foreign Relations</em> series. The University
+            graciously provided high quality scanned images of each printed book, which
+            the Office further digitized to create a full text searchable edition. These
+            volumes are available online and as free ebooks at the Office of the
+            Historian’s website (<a href="[[ $context?context-path ]]/historicaldocuments"
+                >https://history.state.gov/historicaldocuments</a>). This is the latest
+            in a series of <a href="[[ $context?context-path ]]/historicaldocuments/quarterly-releases"
+                >quarterly releases</a>, which will continue until the 
+            <em>FRUS</em> digital archive is complete.</p>
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/historicaldocuments/sidebar.html" %]
+    [% endtemplate %]
+</template>
