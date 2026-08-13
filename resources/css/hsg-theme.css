@@ -664,12 +664,14 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-top: 0;
 }
 
-/* Interior-page right sidebar (hsg:division-asides): the Persons and
-   Abbreviations and Terms register panels plus the Historical Documents
-   section navigation. Same quiet chrome as the landing sidebar's
-   ways-to-explore panel; consecutive panels get breathing room. */
+/* Interior-page right sidebar: the Persons and Abbreviations and Terms
+   register panels (hsg:division-asides) plus the shared section-navigation
+   partial (historicaldocuments/sidebar.html) in a panel wrapper. Same quiet
+   chrome as the landing sidebar's ways-to-explore panel; consecutive panels
+   get breathing room. The partial brings its own usa-sidenav markup, so the
+   panel only needs to align its plain h2 with the register titles. */
 .hsg-frus__register .hsg-sidebar-title,
-.hsg-frus__section-nav .hsg-sidebar-title {
+.hsg-frus__section-nav h2 {
     margin-top: 0;
 }
 
@@ -677,15 +679,13 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-top: var(--hsg-space-4);
 }
 
-.hsg-frus__register .hsg-list-group,
-.hsg-frus__section-nav .hsg-list-group {
+.hsg-frus__register .hsg-list-group {
     list-style: none;
     padding-left: 0;
     margin: 0;
 }
 
-.hsg-frus__register .hsg-list-group li,
-.hsg-frus__section-nav .hsg-list-group li {
+.hsg-frus__register .hsg-list-group li {
     margin-bottom: var(--hsg-space-1);
 }
 

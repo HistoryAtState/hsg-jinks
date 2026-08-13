@@ -796,10 +796,12 @@ declare %private function hsg:bytes-to-readable($bytes as xs:integer?) as xs:str
 (:~
  : Right-hand sidebar panels for interior division pages (PR #32 review):
  : Persons and Abbreviations &amp; Terms panels listing the registered
- : entities the current division references, then the static Historical
- : Documents section navigation. Rendered into the layout's `after` block by
- : templates/pages/volume/interior.html, mirroring how the volume landing
- : mounts hsg:volume-ways-to-explore.
+ : entities the current division references. Data-driven panels only; the
+ : static Historical Documents section navigation is not built here but
+ : included as a template partial by templates/pages/volume/interior.html's
+ : `after` block, the same sidebar.html every other page in the section
+ : mounts. Rendered into the layout's `after` block by that template,
+ : mirroring how the volume landing mounts hsg:volume-ways-to-explore.
  :
  : Reference parity with hsg-shell's fh:facets/fh:view-persons/fh:view-gloss
  : plus the site.xml "sections" aside, with one structural difference: shell
@@ -833,8 +835,7 @@ declare function hsg:division-asides($context as map(*)) {
                     'historicaldocuments.terms', 'Abbreviations &amp; Terms', 'terms',
                     $doc//tei:gloss/@target,
                     doc($config:data-default || "/" || $publication || "/front/terms.xml")//tei:term[@sameAs])
-            ) else (),
-            hsg:section-nav($context)
+            ) else ()
         )
 };
 
@@ -897,36 +898,6 @@ declare %private function hsg:register-description($name as element()) as xs:str
         else
             $name/following-sibling::node()
     return normalize-space(replace(string-join($following, ''), '^\s*,\s*', ''))
-};
-
-(:~
- : The static Historical Documents section navigation, reference parity with
- : hsg-shell's site.xml "sections" aside (7 links, plus the section landing).
- : Same link list as templates/pages/historicaldocuments/sidebar.html, which
- : the section's own pages mount in their left aside; this one is the right
- : aside of volume interior pages, where the left is taken by the volume TOC.
- : Context-path-relative even for the three targets that have neither content
- : nor a stub yet, the same transitional policy the Department History
- : sidebar settled in #1132.
- :)
-declare %private function hsg:section-nav($context as map(*)) {
-    let $cp := $context?context-path
-    return
-        <div class="hsg-panel hsg-frus__section-nav">
-            <h2 class="hsg-sidebar-title">
-                <pb-i18n key="historicaldocuments.title">Historical Documents</pb-i18n>
-            </h2>
-            <ul class="hsg-list-group">
-                <li><a href="{$cp}/historicaldocuments">Foreign Relations of the United States</a></li>
-                <li><a href="{$cp}/historicaldocuments/about-frus">About the <em>Foreign Relations</em> Series</a></li>
-                <li><a href="{$cp}/historicaldocuments/status-of-the-series">Status of the <em>Foreign Relations</em> Series</a></li>
-                <li><a href="{$cp}/historicaldocuments/frus-history">History of the <em>Foreign Relations</em> Series</a></li>
-                <li><a href="{$cp}/historicaldocuments/ebooks"><em>Foreign Relations</em> Ebooks</a></li>
-                <li><a href="{$cp}/historicaldocuments/other-electronic-resources">Other Electronic Resources</a></li>
-                <li><a href="{$cp}/historicaldocuments/guide-to-sources-on-vietnam-1969-1975">Guide to Sources on Vietnam, 1969-1975</a></li>
-                <li><a href="{$cp}/historicaldocuments/citing-frus">Citing the <em>Foreign Relations</em> series</a></li>
-            </ul>
-        </div>
 };
 
 (:~
