@@ -42,7 +42,7 @@
         },
         "/historicaldocuments/about-frus": {
             "get": {
-                "summary": "Stub landing page: About the Foreign Relations Series",
+                "summary": "About the Foreign Relations Series: static article on the series and its statutory basis",
                 "operationId": "hsgapi:about-frus",
                 "x-error-handler": "hsgapi:handle-error",
                 "tags": [
