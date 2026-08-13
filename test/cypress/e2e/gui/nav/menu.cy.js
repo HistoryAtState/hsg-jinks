@@ -86,16 +86,58 @@ describe("primary navigation menu", () => {
         cy.get("pb-page").should("have.attr", "supported-languages", "en");
     });
 
-    it("has the six hsg-shell top-level items in order", () => {
+    it("has exactly the six hsg-shell top-level items, in order", () => {
         // Read each primary item's *direct* control label (the submenu <ul> is a
-        // sibling of the button, so its text must not be folded in).
+        // sibling of the button, so its text must not be folded in). Exact
+        // equality: parity with hsg-shell means nothing extra either.
         cy.get(".usa-nav__primary > .usa-nav__primary-item > a, .usa-nav__primary > .usa-nav__primary-item > button")
             .then(($controls) => {
                 const labels = [...$controls].map((el) => el.textContent.replace(/\s+/g, " ").trim());
-                expect(labels[0]).to.eq("Home");
-                ["Historical Documents", "Department History", "Guide to Countries", "More Resources", "About Us"]
-                    .forEach((l) => expect(labels).to.include(l));
+                expect(labels).to.deep.eq([
+                    "Home",
+                    "Historical Documents",
+                    "Department History",
+                    "Guide to Countries",
+                    "More Resources",
+                    "About Us",
+                ]);
             });
+    });
+
+    it("renders no Admin or Download submenu (absent from hsg-shell's nav)", () => {
+        cy.get("#submenu-admin").should("not.exist");
+        cy.get("#submenu-download").should("not.exist");
+    });
+
+    it("accordion buttons stay inside their item (About Us not painted over)", () => {
+        // Regression: layout.css keeps the header chrome at content-box and
+        // USWDS's inherit reset spread that into the nav, where the width:100%
+        // + padding accordion buttons then painted 2rem past their own list
+        // item, hiding the start of the next one ("About Us" showed as
+        // "out Us" under the More Resources caret). hsg-theme.css re-anchors
+        // border-box on .usa-header.
+        cy.get(".usa-nav__primary > .usa-nav__primary-item > button").each(($btn) => {
+            expect(getComputedStyle($btn[0]).boxSizing, "accordion button box-sizing").to.eq("border-box");
+        });
+        cy.contains(".usa-nav__primary-item > button", "More Resources").then(($btn) => {
+            cy.contains(".usa-nav__primary-item > a", "About Us").then(($a) => {
+                const btnRight = $btn[0].getBoundingClientRect().right;
+                const aboutLeft = $a[0].getBoundingClientRect().left;
+                expect(btnRight, "More Resources button must not overlap About Us").to.be.at.most(aboutLeft + 0.5);
+            });
+        });
+    });
+
+    it("renders no Admin or Download submenu on a content page either", () => {
+        // The Admin submenu used to leak into every inline-rendered page, so
+        // assert on a content page too, not just the home page. (The Download
+        // submenu was only injected on document-context pages; FRUS volume
+        // pages currently 404 in the dev containers, so its absence is covered
+        // by the /menu fragment test and the template removal itself.)
+        cy.visit("milestones/1750-1775");
+        cy.contains(".usa-nav__primary-item", "Historical Documents", { timeout: 15000 });
+        cy.get("#submenu-admin").should("not.exist");
+        cy.get("#submenu-download").should("not.exist");
     });
 
     TOP_LINKS.forEach(({ label, url }) => {
@@ -132,9 +174,14 @@ describe("primary navigation menu", () => {
     });
 
     it("highlights the active category with usa-current", () => {
-        cy.visit("historicaldocuments");
+        // Use /departmenthistory rather than /historicaldocuments: the latter
+        // landing page is currently broken in the dev containers (frus-v2 data
+        // layout drift dumps raw template source, so page scripts, including
+        // nav-active.js, never load there). The nav behaviour under test is
+        // identical on any section page.
+        cy.visit("departmenthistory");
         cy.get(".usa-nav__primary-item > button.usa-current")
-            .should("contain.text", "Historical Documents");
+            .should("contain.text", "Department History");
     });
 });
 

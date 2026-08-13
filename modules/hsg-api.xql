@@ -15,26 +15,60 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace router="http://e-editiones.org/roaster/router";
 
 (:~
- : Landing page for the Historical Documents section: a list of all volumes.
- :
- : Without this route the path falls through to the jinks-owned catch-all
- : /{docid}, which treats "historicaldocuments" as a document id and errors --
- : yet the breadcrumb links here from every content page.
- :
- : The page has no document of its own, so it renders through vapi:html rather
- : than vapi:view. The template name is fixed here instead of being declared as
- : a parameter, so it cannot be steered from the query string.
+ : Render a page that has no backing document of its own through vapi:html;
+ : same idiom as devapi:render / aboutapi:render. The template name is fixed
+ : by the caller instead of being declared as a parameter, so it cannot be
+ : steered from the query string.
  :)
-declare function hsgapi:view-section($request as map(*)) {
+declare %private function hsgapi:render($request as map(*), $file as xs:string) {
     vapi:html(map:merge((
         $request,
         map {
             "parameters": map:merge((
                 $request?parameters,
-                map { "file": "pages/historicaldocuments" }
+                map { "file": $file }
             ))
         }
     )))
+};
+
+(:~
+ : Landing page for the Historical Documents section: a list of all volumes.
+ :
+ : Without this route the path falls through to the jinks-owned catch-all
+ : /{docid}, which treats "historicaldocuments" as a document id and errors --
+ : yet the breadcrumb links here from every content page.
+ :)
+declare function hsgapi:view-section($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments")
+};
+
+(:~
+ : Stub landing pages for the five Historical Documents menu entries whose
+ : hsg-shell content has not been ported yet: each renders a "To be
+ : implemented" notice so no primary-nav link 404s (parity with the reference
+ : menu in hsg-shell templates/site.xml). Their literal routes beat the
+ : parameterized /historicaldocuments/{publicationId} volume route by Roaster
+ : path specificity; see the note on devapi:not-found in developer-api.xql.
+ :)
+declare function hsgapi:about-frus($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/about-frus")
+};
+
+declare function hsgapi:status-of-the-series($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/status-of-the-series")
+};
+
+declare function hsgapi:frus-history($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/frus-history")
+};
+
+declare function hsgapi:ebooks($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/ebooks")
+};
+
+declare function hsgapi:quarterly-releases($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/quarterly-releases")
 };
 
 declare function hsgapi:view($request as map(*)) {

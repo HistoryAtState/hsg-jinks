@@ -40,6 +40,116 @@
                 }
             }
         },
+        "/historicaldocuments/about-frus": {
+            "get": {
+                "summary": "Stub landing page: About the Foreign Relations Series",
+                "operationId": "hsgapi:about-frus",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/status-of-the-series": {
+            "get": {
+                "summary": "Stub landing page: Status of the Foreign Relations Series",
+                "operationId": "hsgapi:status-of-the-series",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/frus-history": {
+            "get": {
+                "summary": "Stub landing page: History of the Foreign Relations Series",
+                "operationId": "hsgapi:frus-history",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/ebooks": {
+            "get": {
+                "summary": "Stub landing page: Ebooks Initiative",
+                "operationId": "hsgapi:ebooks",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/quarterly-releases": {
+            "get": {
+                "summary": "Stub landing page: Quarterly Releases",
+                "operationId": "hsgapi:quarterly-releases",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/historicaldocuments/{publicationId}": {
             "get": {
                 "summary": "Retrieve landing page for a volume",
