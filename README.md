@@ -291,12 +291,13 @@ warning that it's missing until a page 404s.
 
 ### External data packages (GitHub releases)
 
-Beyond `frus-data-jinks` above, running the app also needs 11 data packages —
+Beyond `frus-data-jinks` above, running the app also needs 12 data packages —
 the ones backing `/departmenthistory`, `/countries`, `/conferences`,
-`/about`, `/tags`, `/milestones`, and `/api/v1/catalog` — each maintained in
-its own repo under `github.com/HistoryAtState` and, unlike `frus-data-jinks`,
-already published as a versioned `.xar` GitHub release. That means none of
-them need the frozen-baseline treatment. All 11 are `curl`'d into `autodeploy/`
+`/about`, `/tags`, `/milestones`, `/api/v1/catalog`, and
+`/historicaldocuments/frus-history` — each maintained in its own repo under
+`github.com/HistoryAtState` and, unlike `frus-data-jinks`, already published
+as a versioned `.xar` GitHub release. That means none of them need the
+frozen-baseline treatment. All 12 are `curl`'d into `autodeploy/`
 in `Dockerfile.dev` — every fresh container build already has them
 installed, no manual step required — and every one of them always fetches
 its repo's `/releases/latest/` asset (decision 2026-08-07, after the
@@ -309,6 +310,7 @@ pin the data).
 | Repo | Latest release |
 |---|---|
 | `conferences` | https://github.com/HistoryAtState/conferences/releases/latest |
+| `frus-history` | https://github.com/HistoryAtState/frus-history/releases/latest |
 | `gsh` | https://github.com/HistoryAtState/gsh/releases/latest |
 | `milestones` | https://github.com/HistoryAtState/milestones/releases/latest |
 | `other-publications` | https://github.com/HistoryAtState/other-publications/releases/latest |
@@ -330,7 +332,7 @@ all of them directly into *this worktree's own* devcontainer
 `CLAUDE.md`):
 
 ```sh
-for repo in conferences gsh milestones other-publications pocom rdcr tags travels visits wwdai hac; do
+for repo in conferences frus-history gsh milestones other-publications pocom rdcr tags travels visits wwdai hac; do
   url=$(gh release view --repo HistoryAtState/$repo --json assets -q '.assets[0].url')
   curl -sL -o "/tmp/${repo}.xar" "$url"
   xst --config .xstrc package install "/tmp/${repo}.xar"

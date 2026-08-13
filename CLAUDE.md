@@ -85,7 +85,7 @@ doesn't involve XML/the database at all (e.g. validating plain JSON syntax).
 
 ## Cypress assertions on data-package counts
 
-9 of the 11 external `HistoryAtState/*` data packages this app depends on
+9 of the 12 external `HistoryAtState/*` data packages this app depends on
 (`gsh`, `other-publications`, `pocom`, `rdcr`, `tags`, `travels`, `visits`,
 `wwdai`, `hac` — see README "External data packages") are append-only
 upstream: new records get added over time (e.g. a new Secretary of State),
@@ -95,7 +95,7 @@ spuriously fail the next time someone refreshes to a newer release, even
 though nothing actually broke — this has already happened once, in
 `test/cypress/e2e/gui/departmenthistory/people.cy.js`.
 
-The other 2 packages are exceptions, both frozen rather than append-only:
+Two of the other 3 are exceptions, frozen rather than append-only:
 
 - `milestones` backs a **retired** publication whose content has been frozen
   since 2018 — new `.xar` releases only ever touch build/packaging metadata,
@@ -104,6 +104,15 @@ The other 2 packages are exceptions, both frozen rather than append-only:
 - `conferences` backs 5 frozen conference-proceedings documents (last
   addition 2012) that are not expected to grow, so exact counts against it
   (e.g. the 5-conference landing-page listing) are fine too.
+
+`frus-history` (behind `/historicaldocuments/frus-history`, OP#1294) sits in
+between: its collections change rarely — the monograph has been frozen since
+its 2015 publication, and the documents/articles collections last grew years
+ago — but the package **does** keep getting `.xar` releases and nothing
+declares its content closed the way milestones'/conferences' is. Treat its
+counts (63 documents, 28 authored articles, 13 events, 29 monograph TOC
+entries at write-time) like the append-only packages':
+`.should("have.length.at.least", N)` with `N` safely below those values.
 
 When a test counts items rendered from one of these packages, use a lower
 bound instead: `.should("have.length.at.least", N)`, with `N` set a bit

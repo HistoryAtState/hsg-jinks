@@ -94,6 +94,93 @@ declare function hsgapi:quarterly-release($request as map(*)) {
 };
 
 (:~
+ : The FRUS History subsection (OP#1294), backed by the frus-history data
+ : package (/db/apps/frus-history). The monograph landing page is the
+ : frus-history route above; the fixed-segment sub-routes (documents,
+ : research, events, appendix-a) beat the {sectionId} catch-all by Roaster
+ : path specificity. Unknown ids 404 server-side, per the section's pattern.
+ :)
+declare variable $hsgapi:frus-history-root := "/db/apps/frus-history";
+
+declare function hsgapi:frus-history-documents($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/frus-history/documents")
+};
+
+declare function hsgapi:frus-history-document($request as map(*)) {
+    let $documentId := $request?parameters?documentId
+    return
+        if (doc-available($hsgapi:frus-history-root || "/documents/" || $documentId || ".xml")) then
+            vapi:html(
+                map:merge((
+                    $request,
+                    map {
+                        "parameters": map:merge((
+                            $request?parameters,
+                            map { "file": "pages/historicaldocuments/frus-history/document" }
+                        ))
+                    }
+                )),
+                map { "document-id": $documentId }
+            )
+        else
+            error($errors:NOT_FOUND, "no frus-history document " || $documentId)
+};
+
+declare function hsgapi:frus-history-research($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/frus-history/research")
+};
+
+declare function hsgapi:frus-history-article($request as map(*)) {
+    let $articleId := $request?parameters?articleId
+    return
+        if (doc-available($hsgapi:frus-history-root || "/articles/" || $articleId || ".xml")) then
+            vapi:html(
+                map:merge((
+                    $request,
+                    map {
+                        "parameters": map:merge((
+                            $request?parameters,
+                            map { "file": "pages/historicaldocuments/frus-history/article" }
+                        ))
+                    }
+                )),
+                map { "article-id": $articleId }
+            )
+        else
+            error($errors:NOT_FOUND, "no frus-history article " || $articleId)
+};
+
+declare function hsgapi:frus-history-events($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/frus-history/events")
+};
+
+declare function hsgapi:frus-history-appendix-a($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/frus-history/appendix-a")
+};
+
+declare function hsgapi:frus-history-section($request as map(*)) {
+    let $sectionId := $request?parameters?sectionId
+    let $division := doc($hsgapi:frus-history-root || "/monograph/frus-history.xml")/id($sectionId)
+    return
+        if (count($division) eq 1 and $division instance of element(tei:div)
+                and $division/@xml:id = $sectionId) then
+            vapi:html(
+                map:merge((
+                    $request,
+                    map {
+                        "parameters": map:merge((
+                            $request?parameters,
+                            map { "file": "pages/historicaldocuments/frus-history/section" }
+                        ))
+                    }
+                )),
+                map { "section-id": $sectionId }
+            )
+        else
+            error($errors:NOT_FOUND, "no monograph division " || $sectionId || " in frus-history")
+};
+
+(:~
  : /historicaldocuments/{publicationId} serves two kinds of page from one
  : path, the same split hsg-shell's controller made: an administration
  : landing page when the id is a slug in the administrations taxonomy
