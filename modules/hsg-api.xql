@@ -5,6 +5,7 @@ module namespace hsgapi="http://teipublisher.com/api/hsg";
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace errors="http://e-editiones.org/roaster/errors";
+import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "templates/hsg.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -33,14 +34,15 @@ declare %private function hsgapi:render($request as map(*), $file as xs:string) 
 };
 
 (:~
- : Landing page for the Historical Documents section: a list of all volumes.
+ : Landing page for the Historical Documents section: the presidential
+ : administrations grid.
  :
  : Without this route the path falls through to the jinks-owned catch-all
  : /{docid}, which treats "historicaldocuments" as a document id and errors --
  : yet the breadcrumb links here from every content page.
  :)
 declare function hsgapi:view-section($request as map(*)) {
-    hsgapi:render($request, "pages/historicaldocuments")
+    hsgapi:render($request, "pages/historicaldocuments/index")
 };
 
 (:~
@@ -71,21 +73,47 @@ declare function hsgapi:quarterly-releases($request as map(*)) {
     hsgapi:render($request, "pages/historicaldocuments/quarterly-releases")
 };
 
+(:~
+ : /historicaldocuments/{publicationId} serves two kinds of page from one
+ : path, the same split hsg-shell's controller made: an administration
+ : landing page when the id is a slug in the administrations taxonomy
+ : (lincoln, nixon-ford, cleveland-22, ...), otherwise a volume. Volumes all
+ : start with "frus" and no administration slug does, so the vocabularies
+ : cannot collide; unknown ids fall through to the volume branch and 404
+ : there.
+ :
+ : The stub routes above are literal paths and beat this parameterized one by
+ : Roaster path specificity, so their slugs never reach this dispatch.
+ :)
 declare function hsgapi:view($request as map(*)) {
     let $publicationId := $request?parameters?publicationId
     let $_ := util:log("INFO", "publicationId: " || $publicationId)
     return
-        vapi:view(map:merge((
-            $request,
-            map {
-                "parameters": map:merge((
-                    $request?parameters,
+        if (exists(hsg:administration($publicationId))) then
+            vapi:html(
+                map:merge((
+                    $request,
                     map {
-                        "docid": $config:frus-volumes || "/" || $publicationId || "/" || $publicationId || ".xml"
+                        "parameters": map:merge((
+                            $request?parameters,
+                            map { "file": "pages/historicaldocuments/administration" }
+                        ))
                     }
-                ))
-            }
-        )))
+                )),
+                map { "administration-id": $publicationId }
+            )
+        else
+            vapi:view(map:merge((
+                $request,
+                map {
+                    "parameters": map:merge((
+                        $request?parameters,
+                        map {
+                            "docid": $config:frus-volumes || "/" || $publicationId || "/" || $publicationId || ".xml"
+                        }
+                    ))
+                }
+            )))
 };
 
 declare function hsgapi:view-interior($request as map(*)) {

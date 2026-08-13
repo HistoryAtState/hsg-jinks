@@ -1,0 +1,51 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ hsg:section-breadcrumb($context, ()) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <!-- Section landing (OP#1214): the reference site's by-administration
+         grid replaces the flat volume list of #1084. Intro text ported from
+         hsg-shell pages/historicaldocuments/index.xml; the cards come from
+         the administrations taxonomy in frus-data-jinks. One root element:
+         the layout's main lays its children out as columns. -->
+    <div class="section-landing usa-prose">
+        <h1>
+            <pb-i18n key="historicaldocuments.title">Historical Documents</pb-i18n>
+        </h1>
+        <p>The <em>Foreign Relations of the United States</em> (FRUS) series presents the
+            official documentary historical record of major U.S. foreign policy decisions
+            and significant diplomatic activity.</p>
+        <p>Search <a href="[[ $context?context-path ]]/search">within the volumes</a> or
+            browse volume titles by administration:</p>
+        <ul class="usa-card-group hsg-admin-cards">
+            [[ hsg:administration-cards($context) ]]
+        </ul>
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/historicaldocuments/sidebar.html" %]
+    [% endtemplate %]
+</template>

@@ -243,6 +243,216 @@ declare function hsg:volume-list($context as map(*)) {
 };
 
 (:~
+ : The administrations taxonomy (frus-data-jinks, OP#1214): one category per
+ : administration slug, one catDesc per presidency. Its xml:id is the target
+ : the volume headers' keywords scheme "#frus-administration-coverage" point
+ : at, so the slugs here and the terms in the volumes are one vocabulary.
+ :)
+declare %private function hsg:administrations() as element(tei:taxonomy)? {
+    doc($config:data-root || "/administrations/administrations.xml")
+        //tei:taxonomy[@xml:id = 'frus-administration-coverage']
+};
+
+declare function hsg:administration($admin-id as xs:string) as element(tei:category)? {
+    hsg:administrations()/tei:category[@xml:id = $admin-id]
+};
+
+(:~
+ : Every volume root TEI classified under the given administration.
+ :
+ : Membership lives in each volume's own header (keywords scheme
+ : "#frus-administration-coverage"), so this walks the volume collections the
+ : same way hsg:volume-list does rather than querying a registry; there is no
+ : bibliography collection in the v2 data.
+ :)
+declare %private function hsg:volumes-in-administration($admin-id as xs:string) as element(tei:TEI)* {
+    for $volume in xmldb:get-child-collections($config:data-default)
+    let $path := $config:data-default || "/" || $volume || "/" || $volume || ".xml"
+    where doc-available($path)
+    let $root := doc($path)/tei:TEI
+    where $root/tei:teiHeader//tei:keywords[@scheme = '#frus-administration-coverage']/tei:term = $admin-id
+    return $root
+};
+
+(:~
+ : The section landing's administration grid: one card per presidency, in the
+ : taxonomy's chronological order, reference parity with hsg-shell's
+ : pages/historicaldocuments/index.xml thumbnails. A catDesc without a
+ : portrait ptr (pre-truman, the nixon-ford combined heading entry) is not a
+ : card. Both Nixon and Ford link to the shared nixon-ford page, and the two
+ : Cleveland terms stay separate, matching the slugs the volume headers use.
+ :)
+declare function hsg:administration-cards($context as map(*)) {
+    for $category in hsg:administrations()/tei:category
+    for $presidency in $category/tei:catDesc[tei:ptr[@type = 'portrait']]
+    let $name := normalize-space($presidency/tei:term)
+    let $dates := normalize-space($presidency/tei:date[@type = 'coverage'])
+    return
+        <li class="usa-card hsg-admin-card">
+            <div class="usa-card__container">
+                <div class="usa-card__media">
+                    <div class="usa-card__img">
+                        <img src="{$presidency/tei:ptr[@type = 'portrait']/@target}"
+                            alt="{replace($name, ' Administration$', '')}" loading="lazy"/>
+                    </div>
+                </div>
+                <div class="usa-card__header">
+                    <h2 class="usa-card__heading">
+                        <a href="{$context?context-path}/historicaldocuments/{$category/@xml:id}">{$name}</a>
+                    </h2>
+                </div>
+                <div class="usa-card__body">
+                    <p>{$dates}</p>
+                </div>
+            </div>
+        </li>
+};
+
+(:~
+ : Administration page heading, reference parity with hsg-shell's
+ : frus:administration-name: "Ronald Reagan Administration (1981-1989)" with
+ : the term-of-office dates, not the coverage dates the landing cards show.
+ : nixon-ford uses its combined catDesc; a category without a term date
+ : (pre-truman) falls back to its coverage date.
+ :)
+declare function hsg:administration-heading($context as map(*)) as xs:string {
+    let $category := hsg:administration($context?administration-id)
+    let $head := ($category/tei:catDesc[@n = 'combined'], $category/tei:catDesc)[1]
+    let $date := ($head/tei:date[@type = 'term'], $head/tei:date[@type = 'coverage'])[1]
+    return normalize-space($head/tei:term) || " (" || normalize-space($date) || ")"
+};
+
+(:~
+ : The volumes of one administration, grouped by sub-series, reference parity
+ : with hsg-shell's frus:volumes-by-administration: an h2 per sub-series
+ : ("Foreign Relations of the United States, 1981-1988") holding a list of
+ : its volumes with availability notices. pre-truman instead gets the
+ : reference's flat chronological list of complete titles
+ : (frus:volumes-pre-truman); its volumes predate administration-based
+ : sub-series, so sub-series grouping would just repeat each title.
+ :)
+declare function hsg:administration-volumes($context as map(*)) {
+    let $admin-id := $context?administration-id
+    let $roots := hsg:volumes-in-administration($admin-id)
+    return
+        if (empty($roots)) then
+            <p class="hsg-admin__empty">No volumes for this administration are available in this
+                instance's data set.</p>
+        else if ($admin-id = 'pre-truman') then
+            <ol class="hsg-admin__volumes">
+                {
+                    for $root in $roots
+                    let $title := normalize-space((hsg:resolve-include($root/tei:teiHeader, 'titleStmt')/tei:title)[1])
+                    order by $root/@xml:id
+                    return hsg:admin-volume-item($context, $root, $title)
+                }
+            </ol>
+        else
+            for $root in $roots
+            let $seriesStmt := hsg:resolve-include($root/tei:teiHeader, 'seriesStmt')
+            let $group := normalize-space(string-join((
+                    $seriesStmt/tei:title[@type = 'series'],
+                    $seriesStmt/tei:title[@type = 'sub-series']
+                ), ", "))
+            group by $group
+            order by $group
+            return (
+                if ($group != '') then
+                    <h2 class="hsg-admin__sub-series">{$group}</h2>
+                else
+                    (),
+                <ul class="hsg-admin__volumes">
+                    {
+                        for $vol-root in $root
+                        let $volStmt := hsg:resolve-include($vol-root/tei:teiHeader, 'seriesStmt')
+                        let $label := normalize-space(string-join((
+                                $volStmt/tei:title[@type = 'volume-number'],
+                                $volStmt/tei:title[@type = 'volume']
+                            ), ", "))
+                        let $label := if ($label != '') then
+                                $label
+                            else
+                                normalize-space((hsg:resolve-include($vol-root/tei:teiHeader, 'titleStmt')/tei:title)[1])
+                        order by $vol-root/@xml:id
+                        return hsg:admin-volume-item($context, $vol-root, $label)
+                    }
+                </ul>
+            )
+};
+
+declare %private function hsg:admin-volume-item($context as map(*), $root as element(tei:TEI), $label as xs:string) {
+    <li>
+        <a href="{$context?context-path}/historicaldocuments/{$root/@xml:id}">{$label}</a>
+        {" "}
+        <span class="hsg-status-notice">{hsg:volume-availability($root)}</span>
+    </li>
+};
+
+(:~
+ : Availability notice per volume, reference parity with hsg-shell's
+ : fh:volume-availability-summary: published volumes list their formats, any
+ : other revisionDesc status is shown humanized ("(Being Cleared)"). Full
+ : text means the volume has a body collection; the v2 corpus also carries
+ : root-only volumes without one.
+ :)
+declare %private function hsg:volume-availability($root as element(tei:TEI)) as xs:string {
+    let $status := $root/tei:teiHeader//tei:revisionDesc/@status/string()
+    return
+        if ($status = 'published') then
+            let $formats := (
+                "Full Text"[xmldb:collection-available(util:collection-name($root) || "/body")],
+                "Ebook"[$root/tei:teiHeader//tei:relatedItem[@type = 'epub']],
+                "PDF"[$root/tei:teiHeader//tei:relatedItem[@type = 'pdf']]
+            )
+            return
+                if (exists($formats)) then
+                    "(Published and available in " || string-join($formats, ", ") || ")"
+                else
+                    "(Published)"
+        else
+            "(" ||
+            string-join(
+                for $word in tokenize(translate($status, '-', ' '), '\s+')
+                return upper-case(substring($word, 1, 1)) || substring($word, 2),
+                " ")
+            || ")"
+};
+
+(:~
+ : Breadcrumb for section pages that render without a document of their own
+ : (the landing and the administration pages), where the layout's
+ : hsg:collection-breadcrumbs is gated on $context?doc. Same trail contract
+ : as dh:breadcrumb: Home > Historical Documents [> $trail].
+ :)
+declare function hsg:section-breadcrumb($context as map(*), $trail as map(*)*) as element(li)+ {
+    (
+        <li>
+            <a href="{$context?context-path}/">
+                <pb-i18n key="breadcrumb.home">Home</pb-i18n>
+            </a>
+        </li>,
+        if (empty($trail)) then
+            <li aria-current="page">
+                <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
+            </li>
+        else
+            <li>
+                <a href="{$context?context-path}/historicaldocuments">
+                    <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
+                </a>
+            </li>,
+        for $crumb at $pos in $trail
+        return
+            if ($pos = count($trail)) then
+                <li aria-current="page">{$crumb?label}</li>
+            else
+                <li>
+                    <a href="{$context?context-path}{$crumb?href}">{$crumb?label}</a>
+                </li>
+    )
+};
+
+(:~
  : Generate the breadcrumb trail: Home > Historical Documents > volume title.
  : The volume title is the current (non-link) crumb only on the volume
  : landing page; on any interior page it links back there.
@@ -624,7 +834,7 @@ declare function hsg:division-asides($context as map(*)) {
                     $doc//tei:gloss/@target,
                     doc($config:data-default || "/" || $publication || "/front/terms.xml")//tei:term[@sameAs])
             ) else (),
-            hsg:section-nav()
+            hsg:section-nav($context)
         )
 };
 
@@ -691,26 +901,31 @@ declare %private function hsg:register-description($name as element()) as xs:str
 
 (:~
  : The static Historical Documents section navigation, reference parity with
- : hsg-shell's site.xml "sections" aside (7 links). None of these routes
- : exist in this app yet, so the links point at the production site -- the
- : same policy as templates/footer.html's links into unported sections; make
- : them context-path-relative as each page lands.
+ : hsg-shell's site.xml "sections" aside (7 links, plus the section landing).
+ : Context-path-relative even where the target route has not been ported
+ : yet, the same transitional policy the Department History sidebar settled
+ : in #1132 and templates/pages/historicaldocuments/sidebar.html follows:
+ : unported targets 404 here until their pages land, rather than pointing at
+ : the production site.
  :)
-declare %private function hsg:section-nav() {
-    <div class="hsg-panel hsg-frus__section-nav">
-        <h2 class="hsg-sidebar-title">
-            <pb-i18n key="historicaldocuments.title">Historical Documents</pb-i18n>
-        </h2>
-        <ul class="hsg-list-group">
-            <li><a href="https://history.state.gov/historicaldocuments/about-frus">About the <em>Foreign Relations</em> Series</a></li>
-            <li><a href="https://history.state.gov/historicaldocuments/status-of-the-series">Status of the <em>Foreign Relations</em> Series</a></li>
-            <li><a href="https://history.state.gov/historicaldocuments/frus-history">History of the <em>Foreign Relations</em> Series</a></li>
-            <li><a href="https://history.state.gov/historicaldocuments/ebooks"><em>Foreign Relations</em> Ebooks</a></li>
-            <li><a href="https://history.state.gov/historicaldocuments/other-electronic-resources">Other Electronic Resources</a></li>
-            <li><a href="https://history.state.gov/historicaldocuments/guide-to-sources-on-vietnam-1969-1975">Guide to Sources on Vietnam, 1969-1975</a></li>
-            <li><a href="https://history.state.gov/historicaldocuments/citing-frus">Citing the <em>Foreign Relations</em> series</a></li>
-        </ul>
-    </div>
+declare %private function hsg:section-nav($context as map(*)) {
+    let $cp := $context?context-path
+    return
+        <div class="hsg-panel hsg-frus__section-nav">
+            <h2 class="hsg-sidebar-title">
+                <pb-i18n key="historicaldocuments.title">Historical Documents</pb-i18n>
+            </h2>
+            <ul class="hsg-list-group">
+                <li><a href="{$cp}/historicaldocuments">Foreign Relations of the United States</a></li>
+                <li><a href="{$cp}/historicaldocuments/about-frus">About the <em>Foreign Relations</em> Series</a></li>
+                <li><a href="{$cp}/historicaldocuments/status-of-the-series">Status of the <em>Foreign Relations</em> Series</a></li>
+                <li><a href="{$cp}/historicaldocuments/frus-history">History of the <em>Foreign Relations</em> Series</a></li>
+                <li><a href="{$cp}/historicaldocuments/ebooks"><em>Foreign Relations</em> Ebooks</a></li>
+                <li><a href="{$cp}/historicaldocuments/other-electronic-resources">Other Electronic Resources</a></li>
+                <li><a href="{$cp}/historicaldocuments/guide-to-sources-on-vietnam-1969-1975">Guide to Sources on Vietnam, 1969-1975</a></li>
+                <li><a href="{$cp}/historicaldocuments/citing-frus">Citing the <em>Foreign Relations</em> series</a></li>
+            </ul>
+        </div>
 };
 
 (:~

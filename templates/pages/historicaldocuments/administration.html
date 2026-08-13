@@ -1,0 +1,42 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ hsg:section-breadcrumb($context, (map { "label": hsg:administration-heading($context) })) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <!-- Administration landing page (OP#1214), reference parity with
+         hsg-shell pages/historicaldocuments/administrations.xml: the
+         administration's volumes grouped by sub-series. administration-id is
+         threaded into the context by hsgapi:view. One root element: the
+         layout's main lays its children out as columns. -->
+    <div class="hsg-admin usa-prose">
+        <h1>[[ hsg:administration-heading($context) ]]</h1>
+        [[ hsg:administration-volumes($context) ]]
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/historicaldocuments/sidebar.html" %]
+    [% endtemplate %]
+</template>

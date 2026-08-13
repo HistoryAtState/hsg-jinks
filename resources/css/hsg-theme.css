@@ -761,3 +761,64 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     left: 0;
     font-weight: 700;
 }
+/* Historical Documents section landing: administration cards (OP#1214).
+   The reference site's thumbnail grid rebuilt as USWDS cards. The compiled
+   CSS carries no responsive grid-col utilities, so the card group is sized
+   with its own auto-fill grid instead of per-card grid classes. Portraits
+   are small legacy assets (89x76) served from static.history.state.gov;
+   render them at natural size, centered, rather than stretched to the card
+   width. */
+.hsg-admin-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: var(--hsg-space-2, 1rem);
+    padding-left: 0;
+    list-style: none;
+}
+
+.hsg-admin-cards .usa-card {
+    margin-bottom: 0;
+    max-width: none;
+    width: auto;
+}
+
+.hsg-admin-cards .usa-card__container {
+    height: 100%;
+    margin: 0;
+}
+
+.hsg-admin-cards .usa-card__media {
+    text-align: center;
+    padding-top: 1rem;
+}
+
+.hsg-admin-cards .usa-card__img {
+    display: inline-block;
+    background: none;
+}
+
+.hsg-admin-cards .usa-card__img img {
+    width: 89px;
+    height: 76px;
+    object-fit: cover;
+}
+
+.hsg-admin-cards .usa-card__heading {
+    font-size: 1.05rem;
+    text-align: center;
+}
+
+.hsg-admin-cards .usa-card__body {
+    text-align: center;
+}
+
+/* Administration page volume listing (OP#1214). */
+.hsg-admin__sub-series {
+    margin-top: var(--hsg-space-4, 2rem);
+}
+
+.hsg-status-notice {
+    color: var(--hsg-color-base-dark, #565c65);
+    font-size: 0.9em;
+    white-space: nowrap;
+}
