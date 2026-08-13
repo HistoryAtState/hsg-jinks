@@ -130,7 +130,7 @@
         },
         "/historicaldocuments/quarterly-releases": {
             "get": {
-                "summary": "Stub landing page: Quarterly Releases",
+                "summary": "Quarterly Releases: index of the 2016-2018 digitization releases",
                 "operationId": "hsgapi:quarterly-releases",
                 "x-error-handler": "hsgapi:handle-error",
                 "tags": [
