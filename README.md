@@ -349,6 +349,47 @@ taxonomy.xql` (OP#1177) re-encodes it as native TEI
 commit the refreshed `data/tags/taxonomy.xml` whenever the `tags` package is
 refreshed to a newer release.
 
+## Production Docker image
+
+The root `Dockerfile` builds a self-contained image: the app xar built from
+this checkout plus everything it needs at runtime — the EXPATH libraries
+(roaster, jinks-templates, tei-publisher-lib, pinned to the same versions as
+the devcontainer baseline), `carousel`, all 11 external data packages (each
+fetched from its repo's `/releases/latest/`, same policy as `Dockerfile.dev`),
+and `frus-data-jinks`. The USWDS theme is **not** needed at runtime — it's a
+generation-time profile whose output is already committed here and packed
+into the app xar.
+
+`frus-data-jinks` comes from the private, release-less `hsg-jinks-data` repo,
+so it must be staged at the repo root before building (the `COPY` fails
+loudly if it's missing; the xar is gitignored and excluded from the app xar
+by `build.xml`):
+
+```sh
+cp ~/.config/hsg/xars/frus-data-jinks-baseline.xar ./frus-data-jinks-0.2.xar
+docker build -t hsg-jinks .
+```
+
+The container listens on **8081 (HTTP)** and **8444 (HTTPS)** directly
+(`jetty.port`/`jetty.ssl.port` are set via `JDK_JAVA_OPTIONS`), so these
+ports don't collide with the reference mirror on 8080 or the devcontainers
+on 8090+:
+
+```sh
+docker run -d --name hsg-jinks -p 8081:8081 -p 8444:8444 hsg-jinks
+# → http://localhost:8081/exist/apps/hsg-jinks/index.html
+```
+
+To run the Cypress suite against it, point both the base URL and the API
+server at 8081 (see CLAUDE.md and the memory notes on suite invocation):
+
+```sh
+set -a; source .env; set +a
+EXISTDB_SERVER=http://localhost:8081 \
+CYPRESS_BASE_URL=http://localhost:8081/exist/apps/hsg-jinks \
+npx cypress run > /tmp/cypress-docker.log 2>&1
+```
+
 ## Sync-down: files to exclude
 
 `xst get` the app, then **copy, never mirror** (a mirror deletes `.existdb.json`,
