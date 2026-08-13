@@ -10,7 +10,9 @@
         <div id="custom"></div>
         
         <div id="hsgapi"></div>
-        
+
+        <div id="opdsapi"></div>
+
         <script>
             window.onload = function() {
                 SwaggerUIBundle({
@@ -31,7 +33,16 @@
                     showExtensions: true,
                     withCredentials: true
                 });
-                
+
+                SwaggerUIBundle({
+                    url: "modules/opds-catalog-api.json",
+                    dom_id: '#opdsapi',
+                    displayOperationId: true,
+                    displayRequestDuration: true,
+                    showExtensions: true,
+                    withCredentials: true
+                });
+
             }
         </script>
     </body>

@@ -291,10 +291,10 @@ warning that it's missing until a page 404s.
 
 Beyond `frus-data-jinks` above, running the app also needs 11 data packages —
 the ones backing `/departmenthistory`, `/countries`, `/conferences`,
-`/about`, `/tags`, and `/milestones` — each maintained in its own repo under
-`github.com/HistoryAtState` and, unlike `frus-data-jinks`, already published
-as a versioned `.xar` GitHub release. That means none of them need the
-frozen-baseline treatment. All 11 are `curl`'d straight into `autodeploy/`
+`/about`, `/tags`, `/milestones`, and `/api/v1/catalog` — each maintained in
+its own repo under `github.com/HistoryAtState` and, unlike `frus-data-jinks`,
+already published as a versioned `.xar` GitHub release. That means none of
+them need the frozen-baseline treatment. All 11 are `curl`'d into `autodeploy/`
 in `Dockerfile.dev` — every fresh container build already has them
 installed, no manual step required — and every one of them always fetches
 its repo's `/releases/latest/` asset (decision 2026-08-07, after the
@@ -317,6 +317,10 @@ pin the data).
 | `visits` | https://github.com/HistoryAtState/visits/releases/latest |
 | `wwdai` | https://github.com/HistoryAtState/wwdai/releases/latest |
 | `hac` | https://github.com/HistoryAtState/hac/releases/latest |
+
+`tags` (deployed as `/db/apps/tags`, taxonomy data at `tags/taxonomy`) also
+backs the OPDS catalog's browse/search-by-subject routes (OP#1105), on top of
+the `/tags` section itself.
 
 To pick up a newer release without a full image rebuild, refresh one or
 all of them directly into *this worktree's own* devcontainer

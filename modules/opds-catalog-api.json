@@ -1,0 +1,230 @@
+{
+    "info": {
+        "title": "HSG Jinks OPDS Catalog API",
+        "description": "Full route definition for /api/v1/catalog (#1105): an OPDS 1.2 (Atom) ebook catalog exposing FRUS volumes with an ebook (EPUB/Mobi/PDF, hosted on static.history.state.gov) for e-reader applications, plus keyword browse/search over a subject taxonomy (People/Places/Topics). Unlike every other section, this is a pure machine API -- no HTML anywhere, no path parameters (all/recent/browse/search are literal sibling segments, not one parameterized operation segment). Deliberately unauthenticated (no security requirement): OPDS e-reader clients cannot perform this app's cookie/basic-auth handshake, and hsg-shell serves this section without login today.",
+        "version": "1.0.0"
+    },
+    "openapi": "3.0.3",
+    "servers": [
+        {
+            "description": "Endpoint for testing on localhost",
+            "url": "/exist/apps/hsg-jinks"
+        }
+    ],
+    "security": [],
+    "paths": {
+        "/api/v1/catalog": {
+            "get": {
+                "summary": "OPDS catalog root: navigation feed linking to All, Recent and Browse",
+                "operationId": "opdsapi:catalog",
+                "x-error-handler": "opdsapi:handle-error",
+                "tags": [
+                    "opds-catalog"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OPDS navigation feed",
+                        "content": {
+                            "application/atom+xml;profile=opds-catalog;kind=navigation": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/catalog/all": {
+            "get": {
+                "summary": "Complete acquisition feed of every FRUS volume that has an ebook",
+                "operationId": "opdsapi:all",
+                "x-error-handler": "opdsapi:handle-error",
+                "tags": [
+                    "opds-catalog"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OPDS acquisition feed, one entry per ebook volume",
+                        "content": {
+                            "application/atom+xml;profile=opds-catalog;kind=acquisition": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/catalog/recent": {
+            "get": {
+                "summary": "Acquisition feed of the n most recently changed FRUS ebook volumes",
+                "operationId": "opdsapi:recent",
+                "x-error-handler": "opdsapi:handle-error",
+                "tags": [
+                    "opds-catalog"
+                ],
+                "parameters": [
+                    {
+                        "name": "n",
+                        "in": "query",
+                        "description": "Number of volumes to return. hsg-shell casts this straight to xs:integer with no validation (an unhandled 500 on a non-numeric value); this rewrite validates and returns 400 instead.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OPDS acquisition feed, at most n entries",
+                        "content": {
+                            "application/atom+xml;profile=opds-catalog;kind=acquisition": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "n is present but not a positive integer",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "code",
+                                        "description"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/catalog/browse": {
+            "get": {
+                "summary": "Browse the subject taxonomy: navigation feed of categories/tags, optionally mixed with acquisition entries for tagged volumes",
+                "operationId": "opdsapi:browse",
+                "x-error-handler": "opdsapi:handle-error",
+                "tags": [
+                    "opds-catalog"
+                ],
+                "parameters": [
+                    {
+                        "name": "tag",
+                        "in": "query",
+                        "description": "Taxonomy id to browse into (e.g. 'vietnam', 'people'). Without it, the 3 top-level categories (People/Places/Topics) are returned.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "vietnam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OPDS feed: navigation entries for sub-categories/tags, plus acquisition entries for any volumes tagged directly with tag",
+                        "content": {
+                            "application/atom+xml;profile=opds-catalog": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "tag was given but does not exist in the taxonomy. hsg-shell returns an ad hoc HTML page for this case; this rewrite replaces it with the uniform JSON error body.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "code",
+                                        "description"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/catalog/search": {
+            "get": {
+                "summary": "Search the subject taxonomy by keyword: navigation feed of matching categories/tags",
+                "operationId": "opdsapi:search",
+                "x-error-handler": "opdsapi:handle-error",
+                "tags": [
+                    "opds-catalog"
+                ],
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Free-text Lucene query matched against taxonomy labels only (not ebook/document content). hsg-shell silently returns an empty feed on malformed Lucene syntax; this rewrite returns 400 instead. Omitting q returns an empty feed (200).",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "vietnam"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OPDS navigation feed of matching taxonomy tags (possibly empty)",
+                        "content": {
+                            "application/atom+xml;profile=opds-catalog;kind=navigation": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "q is present but is not syntactically valid Lucene query syntax",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code": {
+                                            "type": "string"
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "code",
+                                        "description"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
