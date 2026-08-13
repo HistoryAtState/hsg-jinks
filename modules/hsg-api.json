@@ -64,7 +64,7 @@
         },
         "/historicaldocuments/status-of-the-series": {
             "get": {
-                "summary": "Stub landing page: Status of the Foreign Relations Series",
+                "summary": "Status of the Foreign Relations Series: report computed from the volumes' revision metadata",
                 "operationId": "hsgapi:status-of-the-series",
                 "x-error-handler": "hsgapi:handle-error",
                 "tags": [

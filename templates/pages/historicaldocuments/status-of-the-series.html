@@ -2,6 +2,9 @@
     ---json
     {
         "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/frus-status": { "at": "modules/templates/frus-status.xqm", "prefix": "status" }
+            },
             "extends": "templates/layouts/hsg-content.html"
         },
         "theme": {
@@ -35,22 +38,28 @@
     </li>
     [% endtemplate %]
 
+    [# Status of the Series report (OP#1292), reference parity with
+       hsg-shell pages/historicaldocuments/status-of-the-series.xml: fixed
+       h1 and intro paragraph here, all data-derived sections computed and
+       conditionally rendered by status:report (modules/templates/
+       frus-status.xqm). One root element: the layout's main lays its
+       children out as columns. #]
     <div class="section-landing usa-prose">
-        <h1>
-            <pb-i18n key="menu.status-of-the-series">Status of the Foreign Relations Series</pb-i18n>
-        </h1>
-        <div class="usa-alert usa-alert--info">
-            <div class="usa-alert__body">
-                <h2 class="usa-alert__heading">
-                    <pb-i18n key="stub.title">To be implemented</pb-i18n>
-                </h2>
-                <p class="usa-alert__text">
-                    <pb-i18n key="stub.text">This page has not yet been implemented in this application.</pb-i18n>
-                    <a href="https://history.state.gov/historicaldocuments/status-of-the-series">View this page on the current history.state.gov site</a>.
-                </p>
-            </div>
-        </div>
+        <h1>Status of the <em>Foreign Relations of the United States</em> Series</h1>
+        <p><em>Foreign Relations</em> volumes proceed through four main stages of
+            production: Planning (when a volume is assigned to a sub-series plan), Research
+            (which includes archival research, selection, annotation, and review), Clearance
+            (when the manuscript undergoes declassification coordination and is edited and
+            prepared for publication), and Publication (when the volume is released to the
+            public). This page lists publications released in the current and previous
+            calendar year, those planned for release later in the current year, and those at
+            various stages of production. A growing number of volumes are published
+            incrementally as individual chapters are cleared; volumes with outstanding
+            chapters are listed in the table below. Published volumes being digitized are
+            also listed.</p>
+        [[ status:report($context) ]]
     </div>
+
     [% template before %]
     [% include "templates/pages/historicaldocuments/sidebar.html" %]
     [% endtemplate %]
