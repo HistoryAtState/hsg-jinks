@@ -275,6 +275,12 @@
       "prefix" : "menuapi",
       "id" : "https://history.state.gov/api/menu",
       "path" : "menu-api.xql"
+    },
+    {
+      "spec" : "opds-catalog-api.json",
+      "prefix" : "opdsapi",
+      "id" : "http://teipublisher.com/api/opds",
+      "path" : "opds-catalog-api.xql"
     }
   ],
   "extends" : [

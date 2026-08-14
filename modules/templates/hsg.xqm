@@ -8,6 +8,27 @@ declare namespace xi="http://www.w3.org/2001/XInclude";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "../config.xqm";
 
 (:~
+ : Build an absolute, externally-resolvable URL for a path relative to this
+ : app's own root -- for content consumed outside any browser/page context
+ : (OPDS feed ids and links, and anything else that must not emit a
+ : root-relative href). Central home per PR #26 review: use this instead of
+ : re-deriving scheme/host/port at the call site. Mirrors the technique of
+ : modules/lib/api/iiif.xql's iiif:link (scheme + server-name + non-default
+ : port + $config:context-path); that file is jinks-managed and so keeps its
+ : own private copy rather than importing from here.
+ :)
+declare function hsg:absolute-url($relpath as xs:string) as xs:string {
+    let $host := request:get-scheme() || "://" || request:get-server-name()
+    let $port :=
+        if (request:get-server-port() = (80, 443)) then
+            ()
+        else
+            ":" || request:get-server-port()
+    return
+        string-join(($host, $port, replace($config:context-path || "/" || $relpath, "//", "/")))
+};
+
+(:~
  : Resolve one fragment of a header by name (titleStmt, publicationStmt,
  : seriesStmt): inline at the volume root's chapter/compilation level, but
  : xincluded from the volume's shared *_includes.xml at the volume-root

@@ -85,14 +85,14 @@ doesn't involve XML/the database at all (e.g. validating plain JSON syntax).
 
 ## Cypress assertions on data-package counts
 
-8 of the 10 external `HistoryAtState/*` data packages this app depends on
-(`gsh`, `other-publications`, `pocom`, `rdcr`, `travels`, `visits`, `wwdai`,
-`hac` — see README "External data packages") are append-only upstream: new
-records get added over time (e.g. a new Secretary of State), existing ones
-are never removed. A Cypress assertion that pins an *exact* count of
-data-derived content (e.g. `have.length(71)` officeholders) will spuriously
-fail the next time someone refreshes to a newer release, even though nothing
-actually broke — this has already happened once, in
+9 of the 11 external `HistoryAtState/*` data packages this app depends on
+(`gsh`, `other-publications`, `pocom`, `rdcr`, `tags`, `travels`, `visits`,
+`wwdai`, `hac` — see README "External data packages") are append-only
+upstream: new records get added over time (e.g. a new Secretary of State),
+existing ones are never removed. A Cypress assertion that pins an *exact*
+count of data-derived content (e.g. `have.length(71)` officeholders) will
+spuriously fail the next time someone refreshes to a newer release, even
+though nothing actually broke — this has already happened once, in
 `test/cypress/e2e/gui/departmenthistory/people.cy.js`.
 
 The other 2 packages are exceptions, both frozen rather than append-only:
