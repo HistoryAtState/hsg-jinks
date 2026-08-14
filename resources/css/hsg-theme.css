@@ -1,12 +1,16 @@
 /* Design tokens for this app's own components (PR #32 review).
 
-   USWDS 3 publishes its design tokens as Sass only. The compiled bundle this
-   app vendors (resources/css/palette-navy.css) therefore exposes utility
-   classes, not custom properties, so there is no USWDS variable to var() into
-   from here. These are HSG-level tokens carrying USWDS token values verbatim
-   and named for the role they play; the USWDS token each one holds is named
-   in the comment beside it, so a value can be checked against the design
-   system without leaving this file.
+   USWDS 3 publishes most of its design tokens as Sass only. The compiled
+   bundle this app vendors (resources/css/palette-navy.css) therefore exposes
+   utility classes, not custom properties, so there is no USWDS variable to
+   var() into for colours or fonts below - those are HSG-level tokens
+   carrying USWDS token values verbatim and named for the role they play, the
+   USWDS token each one holds named in the comment beside it, so a value can
+   be checked against the design system without leaving this file. Spacing is
+   the exception: the USWDS theme profile exports its spacing scale as
+   --uswds-space-* custom properties, so those var() into a live value with
+   the last-known literal kept as fallback for apps pinned to an older
+   profile version that doesn't emit it yet.
 
    Rules below take their colours and spacings from these, or from the
    --jinks-* variables the USWDS theme profile exports; neither literals nor
@@ -33,15 +37,19 @@
     --hsg-font-size-lg: 1.46rem;                /* USWDS font-sans-lg */
 
     /* Spacing, on the USWDS spacing scale: one unit is 8px, and the token
-       names are USWDS' own (105 = one and a half units). */
-    --hsg-space-05: 0.25rem;                    /* USWDS units(0.5) */
-    --hsg-space-1: 0.5rem;                      /* USWDS units(1) */
-    --hsg-space-105: 0.75rem;                   /* USWDS units(1.5) */
-    --hsg-space-2: 1rem;                        /* USWDS units(2) */
-    --hsg-space-205: 1.25rem;                   /* USWDS units(2.5) */
-    --hsg-space-3: 1.5rem;                      /* USWDS units(3) */
-    --hsg-space-4: 2rem;                        /* USWDS units(4) */
-    --hsg-space-5: 2.5rem;                      /* USWDS units(5) */
+       names are USWDS' own (105 = one and a half units). Sourced from the
+       USWDS theme profile's --uswds-space-* export where available, falling
+       back to the last-known value for apps pinned to an older profile
+       version that doesn't emit it yet. */
+    --hsg-space-05: var(--uswds-space-05, 0.25rem);    /* USWDS units(0.5) */
+    --hsg-space-1: var(--uswds-space-1, 0.5rem);       /* USWDS units(1) */
+    --hsg-space-105: var(--uswds-space-105, 0.75rem);  /* USWDS units(1.5) */
+    --hsg-space-2: var(--uswds-space-2, 1rem);         /* USWDS units(2) */
+    --hsg-space-205: var(--uswds-space-205, 1.25rem);  /* USWDS units(2.5) */
+    --hsg-space-3: var(--uswds-space-3, 1.5rem);       /* USWDS units(3) */
+    --hsg-space-4: var(--uswds-space-4, 2rem);         /* USWDS units(4) */
+    --hsg-space-5: var(--uswds-space-5, 2.5rem);       /* USWDS units(5) */
+    --hsg-space-6: var(--uswds-space-6, 3rem);         /* USWDS units(6) */
 }
 
 .fixed-layout > main {
@@ -166,9 +174,9 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     background-color: var(--hsg-footer-social-background);
     border-radius: 50%;
     display: flex;
-    height: 3rem;
+    height: var(--hsg-space-6);
     justify-content: center;
-    width: 3rem;
+    width: var(--hsg-space-6);
 }
 
 .hsg-footer .usa-social-link__icon {
