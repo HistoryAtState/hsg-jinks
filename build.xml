@@ -50,6 +50,9 @@
                 <exclude name=".vscode/**"/>
                 <exclude name="*.tmpl"/>
                 <exclude name="*.properties"/>
+                <!-- data-package xars staged at the repo root for the Docker
+                     image build (see Dockerfile); not part of the app -->
+                <exclude name="*.xar"/>
                 <exclude name="build.xml"/>
                 <exclude name="README.md"/>
                 <exclude name="node_modules/**"/>
