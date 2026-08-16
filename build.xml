@@ -54,10 +54,12 @@
                      image build (see Dockerfile); not part of the app -->
                 <exclude name="*.xar"/>
                 <exclude name="build.xml"/>
+                <exclude name="build.cjs"/>
                 <exclude name="README.md"/>
                 <exclude name="node_modules/**"/>
                 <exclude name="package*.json"/>
                 <exclude name=".existdb.json"/>
+                <exclude name=".gitignore"/>
                 <exclude name="gulpfile.js"/>
                 <exclude name=".devcontainer"/>
                 <exclude name="test/cypress/screenshots/**"/>
