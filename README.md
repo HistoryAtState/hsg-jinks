@@ -264,9 +264,11 @@ warning that it's missing until a page 404s.
 > Note: the `data/Publications` and `data/Resources` collections were renamed to
 > `data/frus-v2-data` and `data/frus-tei-guidelines-resources` when the full
 > legacy corpus (694 volumes) landed. The app's `data-default` points at
-> `frus-v2-data`. The frozen baseline xar is a single-volume sample; the full
-> corpus (~1.2 GB / 390k files) is impractical to bake into the image and is a
-> separate infra decision.
+> `frus-v2-data`. The frozen baseline xar is a curated multi-volume subset:
+> every volume the landing page links (so those links resolve) plus
+> representative era/structure samples — the authoritative list lives in
+> `hsg-jinks-data`'s `build.xml`. The full corpus (694 volumes, ~4.6 GB) is
+> impractical to bake into the image and is a separate infra decision.
 
 - The baseline is stored as `~/.config/hsg/xars/frus-data-jinks-baseline.xar`
   (`frus-data-jinks-BASELINE.txt` beside it records commit + date). Refresh
