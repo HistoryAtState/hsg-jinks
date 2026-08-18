@@ -1,0 +1,59 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/serial-set": { "at": "modules/templates/serial-set.xqm", "prefix": "sset" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                <li>
+                    <a href="[[ $context?context-path ]]/">
+                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments">
+                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments/pre-1861">
+                        <pb-i18n key="menu.pre-1861">Pre-1861 U.S. foreign relations materials</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments/pre-1861/serial-set">
+                        <pb-i18n key="menu.serial-set">U.S. Congressional Serial Set</pb-i18n>
+                    </a>
+                </li>
+                [[ sset:browse-breadcrumbs($context) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [# Filtered record table ported from hsg-shell
+       pages/historicaldocuments/pre-1861/serial-set/browse.xml (OP#1305), driven by the
+       region/subject query parameters. Full-width like the reference (no aside), hence no
+       sidebar include. #]
+    <div class="section-landing usa-prose">
+        <h1>U.S. Congressional Serial Set: Documents on
+            [[ sset:region-and-or-subject-name($context) ]] before 1861</h1>
+        <p>[[ sset:filtered-count($context) ]] sources, in chronological order.</p>
+        [[ sset:filtered-table($context) ]]
+    </div>
+</template>

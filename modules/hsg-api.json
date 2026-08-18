@@ -106,6 +106,88 @@
                 }
             }
         },
+        "/historicaldocuments/pre-1861/serial-set": {
+            "get": {
+                "summary": "Serial Set landing: introduction and region/subject browse list",
+                "operationId": "hsgapi:serial-set",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/pre-1861/serial-set/all": {
+            "get": {
+                "summary": "Serial Set full bibliography: every record in chronological order",
+                "operationId": "hsgapi:serial-set-all",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/pre-1861/serial-set/browse": {
+            "get": {
+                "summary": "Serial Set browse: record table filtered by region and subject",
+                "operationId": "hsgapi:serial-set-browse",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "region",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "subject",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/historicaldocuments/citing-frus": {
             "get": {
                 "summary": "Citing the Foreign Relations series: static article with citation recommendations",

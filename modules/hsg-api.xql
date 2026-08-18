@@ -67,6 +67,24 @@ declare function hsgapi:other-electronic-resources($request as map(*)) {
     hsgapi:render($request, "pages/historicaldocuments/other-electronic-resources")
 };
 
+(:~
+ : The pre-1861 Serial Set subsection (OP#1303-#1305), backed by the
+ : other-publications data package's serial-set document; rendering helpers
+ : in modules/templates/serial-set.xqm. The browse route's region/subject
+ : query parameters reach the template through the request map.
+ :)
+declare function hsgapi:serial-set($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/pre-1861/serial-set")
+};
+
+declare function hsgapi:serial-set-all($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/pre-1861/serial-set/all")
+};
+
+declare function hsgapi:serial-set-browse($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/pre-1861/serial-set/browse")
+};
+
 declare function hsgapi:status-of-the-series($request as map(*)) {
     hsgapi:render($request, "pages/historicaldocuments/status-of-the-series")
 };
