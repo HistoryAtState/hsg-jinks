@@ -106,6 +106,28 @@
                 }
             }
         },
+        "/historicaldocuments/guide-to-sources-on-vietnam-1969-1975": {
+            "get": {
+                "summary": "Guide to Sources on Vietnam, 1969-1975: TEI monograph rendered as a single page",
+                "operationId": "hsgapi:vietnam-guide",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/historicaldocuments/pre-1861/serial-set": {
             "get": {
                 "summary": "Serial Set landing: introduction and region/subject browse list",

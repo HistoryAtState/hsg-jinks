@@ -6,6 +6,7 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace xi="http://www.w3.org/2001/XInclude";
 
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "../config.xqm";
+import module namespace page="http://teipublisher.com/ns/templates/page" at "page.xqm";
 
 (:~
  : Build an absolute, externally-resolvable URL for a path relative to this
@@ -1291,4 +1292,19 @@ declare function hsg:latest-publications($context as map(*), $n as xs:integer) a
     } catch * {
         ()
     }
+};
+
+(:~
+ : The "Guide to Sources on Vietnam, 1969-1975" TEI monograph (OP#1301),
+ : from the other-publications data package, rendered as a single page.
+ : hsg-shell transformed it with the frus ODD; the guide's element inventory
+ : (div/head/hi/p/lb/ref) is plain TEI the default ODD covers. Its ref
+ : targets are absolute production URLs and stay untouched, exactly as the
+ : reference's app:fix-links (which only rewrote $app-prefixed hrefs) left
+ : them.
+ :)
+declare function hsg:vietnam-guide($context as map(*)) {
+    page:transform(
+        doc("/db/apps/other-publications/vietnam-guide/guide-to-sources-on-vietnam-1969-1975.xml")
+            //tei:body/*)
 };
