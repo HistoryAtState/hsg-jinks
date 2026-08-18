@@ -953,17 +953,19 @@ declare function fh:events($context as map(*)) as element(div) {
             }
             <h1>Recent Events</h1>
             {
-                let $ordered := (
-                    for $event in $recent
-                    order by xs:date($event/event-date) descending
-                    return $event
-                )
-                return fh:event-blocks($ordered)
+                if ($recent) then
+                    let $ordered := (
+                        for $event in $recent
+                        order by xs:date($event/event-date) descending
+                        return $event
+                    )
+                    return fh:event-blocks($ordered)
+                else ()
             }
         </div>
 };
 
-declare %private function fh:event-blocks($events as element(event)*) as element()* {
+declare %private function fh:event-blocks($events as element(event)+) as element()+ {
     for $event at $pos in $events
     return (
         <div class="frus-history-event">{$event/full-description/node()}</div>,

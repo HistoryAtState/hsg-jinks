@@ -123,27 +123,29 @@ declare %private function status:list-published-volumes($context as map(*),
             else $published-chapters
         order by $vol-published/@when, $vol-id
         return
-            if (empty($chapters)) then
-                <li>
-                    <a href="{$context?context-path}/historicaldocuments/{$vol-id}">{$vol-title}</a>
-                    {if (exists($vol-published-date)) then " (" || $vol-published-date || ")" else ()}
-                </li>
-            else
-                <li>
-                    <a href="{$context?context-path}/historicaldocuments/{$vol-id}">{$vol-title}</a>
-                    <ul>{
-                        for $chapter in $chapters-to-list
-                        let $div-id := substring-after($chapter/@corresp, "#")
-                        let $division := status:division($vol-id, $div-id)
-                        let $published-date := status:published-date-to-english($chapter/@when/string())
-                        where exists($division)
-                        return
-                            <li>
-                                <a href="{$context?context-path}/historicaldocuments/{$vol-id}/{$div-id}">{status:division-title($division)}</a>
-                                {if (exists($year) and exists($published-date)) then " (" || $published-date || ")" else ()}
-                            </li>
-                    }</ul>
-                </li>
+            <li>
+                <a href="{$context?context-path}/historicaldocuments/{$vol-id}">{$vol-title}</a>
+                {
+                    (: Only the suffix varies: a volume published in one go
+                       shows its publication date, an incrementally published
+                       one the chapter sub-list instead. :)
+                    if (empty($chapters)) then
+                        if (exists($vol-published-date)) then " (" || $vol-published-date || ")" else ()
+                    else
+                        <ul>{
+                            for $chapter in $chapters-to-list
+                            let $div-id := substring-after($chapter/@corresp, "#")
+                            let $division := status:division($vol-id, $div-id)
+                            let $published-date := status:published-date-to-english($chapter/@when/string())
+                            where exists($division)
+                            return
+                                <li>
+                                    <a href="{$context?context-path}/historicaldocuments/{$vol-id}/{$div-id}">{status:division-title($division)}</a>
+                                    {if (exists($year) and exists($published-date)) then " (" || $published-date || ")" else ()}
+                                </li>
+                        }</ul>
+                }
+            </li>
     }</ol>
 };
 
@@ -164,15 +166,17 @@ declare %private function status:list-anticipated-volumes($context as map(*),
         let $chapters-anticipated := $chapters[@status eq "being-cleared"][@to ne ""]
         order by $vol-id
         return
-            if (empty($chapters)) then
-                <li>
-                    <a href="{$context?context-path}/historicaldocuments/{$vol-id}">{$vol-title}</a>
-                </li>
-            else
-                <li>
-                    <a href="{$context?context-path}/historicaldocuments/{$vol-id}">{$vol-title}</a>
-                    {status:chapter-sublist($context, $vol-id, $chapters-anticipated, exists($some-published))}
-                </li>
+            <li>
+                <a href="{$context?context-path}/historicaldocuments/{$vol-id}">{$vol-title}</a>
+                {
+                    (: Only the chapter sub-list is conditional: it appears
+                       just for incrementally published volumes (those with
+                       chapter-level change entries). :)
+                    if (exists($chapters)) then
+                        status:chapter-sublist($context, $vol-id, $chapters-anticipated, exists($some-published))
+                    else ()
+                }
+            </li>
     }</ol>
 };
 
@@ -193,15 +197,17 @@ declare %private function status:list-in-production-volumes($context as map(*),
         let $chapters-anticipated := $chapters[@status eq "being-cleared"]
         order by $vol-id
         return
-            if (empty($chapters)) then
-                <li>
-                    <a href="{$context?context-path}/historicaldocuments/{$vol-id}">{$vol-title}</a>
-                </li>
-            else
-                <li>
-                    <a href="{$context?context-path}/historicaldocuments/{$vol-id}">{$vol-title}</a>
-                    {status:chapter-sublist($context, $vol-id, $chapters-anticipated, exists($some-published))}
-                </li>
+            <li>
+                <a href="{$context?context-path}/historicaldocuments/{$vol-id}">{$vol-title}</a>
+                {
+                    (: Only the chapter sub-list is conditional: it appears
+                       just for incrementally published volumes (those with
+                       chapter-level change entries). :)
+                    if (exists($chapters)) then
+                        status:chapter-sublist($context, $vol-id, $chapters-anticipated, exists($some-published))
+                    else ()
+                }
+            </li>
     }</ol>
 };
 
