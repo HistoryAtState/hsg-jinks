@@ -22,15 +22,15 @@ declare namespace router="http://e-editiones.org/roaster/router";
  : dhapi:index/dhapi:people.
  :)
 declare %private function eduapi:render($request as map(*), $file as xs:string) {
-    vapi:html(map:merge((
-        $request,
-        map {
-            "parameters": map:merge((
-                $request?parameters,
-                map { "file": $file }
-            ))
-        }
-    )))
+    (: map:put, not an outer map:merge((`$request`, map{"parameters": ...})): both
+       operands would carry a "parameters" key, and map:merge's default
+       "use-first" duplicate policy silently keeps $request's original
+       (unmerged) "parameters" map, discarding this function's own. map:put
+       has no such ambiguity -- it always overwrites the single named key. :)
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
+        map { "file": $file }
+    ))))
 };
 
 declare function eduapi:index($request as map(*)) {

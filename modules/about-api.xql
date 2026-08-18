@@ -21,15 +21,15 @@ declare namespace router="http://e-editiones.org/roaster/router";
  : dhapi:render.
  :)
 declare %private function aboutapi:render($request as map(*), $file as xs:string) {
-    vapi:html(map:merge((
-        $request,
-        map {
-            "parameters": map:merge((
-                $request?parameters,
-                map { "file": $file }
-            ))
-        }
-    )))
+    (: map:put, not an outer map:merge((`$request`, map{"parameters": ...})): both
+       operands would carry a "parameters" key, and map:merge's default
+       "use-first" duplicate policy silently keeps $request's original
+       (unmerged) "parameters" map, discarding this function's own. map:put
+       has no such ambiguity -- it always overwrites the single named key. :)
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
+        map { "file": $file }
+    ))))
 };
 
 declare function aboutapi:index($request as map(*)) {
@@ -73,18 +73,13 @@ declare function aboutapi:recent-publications($request as map(*)) {
  : single-file-monograph shape).
  :)
 declare %private function aboutapi:monograph-toc($request as map(*), $publication as xs:string) {
-    vapi:html(map:merge((
-        $request,
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
         map {
-            "parameters": map:merge((
-                $request?parameters,
-                map {
-                    "file": "pages/about/monograph-toc",
-                    "publication": $publication
-                }
-            ))
+            "file": "pages/about/monograph-toc",
+            "publication": $publication
         }
-    )))
+    ))))
 };
 
 declare function aboutapi:view-faq($request as map(*)) {
@@ -112,18 +107,13 @@ declare %private function aboutapi:monograph-section($request as map(*), $public
         if (count($division) ne 1) then
             error($errors:NOT_FOUND, "no section " || $sectionId || " in " || $publication)
         else
-            vapi:html(map:merge((
-                $request,
+            vapi:html(map:put($request, "parameters", map:merge((
+                $request?parameters,
                 map {
-                    "parameters": map:merge((
-                        $request?parameters,
-                        map {
-                            "file": "pages/about/monograph-section",
-                            "publication": $publication
-                        }
-                    ))
+                    "file": "pages/about/monograph-section",
+                    "publication": $publication
                 }
-            )))
+            ))))
 };
 
 declare function aboutapi:view-faq-section($request as map(*)) {

@@ -16,15 +16,15 @@ declare variable $countryapi:RDCR_ARTICLES := "/db/apps/rdcr/articles";
 declare variable $countryapi:WWDAI_ARTICLES := "/db/apps/wwdai/articles";
 
 declare %private function countryapi:render($request as map(*), $file as xs:string) {
-    vapi:html(map:merge((
-        $request,
-        map {
-            "parameters": map:merge((
-                $request?parameters,
-                map { "file": $file }
-            ))
-        }
-    )))
+    (: map:put, not an outer map:merge((`$request`, map{"parameters": ...})): both
+       operands would carry a "parameters" key, and map:merge's default
+       "use-first" duplicate policy silently keeps $request's original
+       (unmerged) "parameters" map, discarding this function's own. map:put
+       has no such ambiguity -- it always overwrites the single named key. :)
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
+        map { "file": $file }
+    ))))
 };
 
 declare function countryapi:index($request as map(*)) {
@@ -54,29 +54,19 @@ declare function countryapi:archives-list($request as map(*)) {
 declare function countryapi:view($request as map(*)) {
     let $countryId := $request?parameters?countryId
     return
-        vapi:view(map:merge((
-            $request,
-            map {
-                "parameters": map:merge((
-                    $request?parameters,
-                    map { "docid": $countryapi:RDCR_ARTICLES || "/" || $countryId || ".xml" }
-                ))
-            }
-        )))
+        vapi:view(map:put($request, "parameters", map:merge((
+            $request?parameters,
+            map { "docid": $countryapi:RDCR_ARTICLES || "/" || $countryId || ".xml" }
+        ))))
 };
 
 declare function countryapi:archives-view($request as map(*)) {
     let $archiveId := $request?parameters?archiveId
     return
-        vapi:view(map:merge((
-            $request,
-            map {
-                "parameters": map:merge((
-                    $request?parameters,
-                    map { "docid": $countryapi:WWDAI_ARTICLES || "/" || $archiveId || ".xml" }
-                ))
-            }
-        )))
+        vapi:view(map:put($request, "parameters", map:merge((
+            $request?parameters,
+            map { "docid": $countryapi:WWDAI_ARTICLES || "/" || $archiveId || ".xml" }
+        ))))
 };
 
 (:~

@@ -20,15 +20,15 @@ declare namespace router="http://e-editiones.org/roaster/router";
  : vapi:view -- same technique as hsgapi:view-section / dhapi:render.
  :)
 declare function confapi:index($request as map(*)) {
-    vapi:html(map:merge((
-        $request,
-        map {
-            "parameters": map:merge((
-                $request?parameters,
-                map { "file": "pages/conferences/index" }
-            ))
-        }
-    )))
+    (: map:put, not an outer map:merge((`$request`, map{"parameters": ...})): both
+       operands would carry a "parameters" key, and map:merge's default
+       "use-first" duplicate policy silently keeps $request's original
+       (unmerged) "parameters" map, discarding this function's own. map:put
+       has no such ambiguity -- it always overwrites the single named key. :)
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
+        map { "file": "pages/conferences/index" }
+    ))))
 };
 
 (:~
@@ -50,15 +50,10 @@ declare function confapi:view($request as map(*)) {
         if (empty($doc)) then
             error($errors:NOT_FOUND, "no conference " || $conferenceId)
         else
-            vapi:html(map:merge((
-                $request,
-                map {
-                    "parameters": map:merge((
-                        $request?parameters,
-                        map { "file": "pages/conferences/conference" }
-                    ))
-                }
-            )))
+            vapi:html(map:put($request, "parameters", map:merge((
+                $request?parameters,
+                map { "file": "pages/conferences/conference" }
+            ))))
 };
 
 (:~
@@ -82,15 +77,10 @@ declare function confapi:view-section($request as map(*)) {
         if (not(confapi:is-exact-division($division, $sectionId))) then
             error($errors:NOT_FOUND, "no division " || $sectionId || " in " || $conferenceId)
         else
-            vapi:html(map:merge((
-                $request,
-                map {
-                    "parameters": map:merge((
-                        $request?parameters,
-                        map { "file": "pages/conferences/section" }
-                    ))
-                }
-            )))
+            vapi:html(map:put($request, "parameters", map:merge((
+                $request?parameters,
+                map { "file": "pages/conferences/section" }
+            ))))
 };
 
 (:~
