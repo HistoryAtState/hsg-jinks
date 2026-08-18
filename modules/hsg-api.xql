@@ -46,13 +46,17 @@ declare function hsgapi:view-section($request as map(*)) {
 };
 
 (:~
- : Section pages under /historicaldocuments (OP#1291-#1295). Their literal
+ : Section pages under /historicaldocuments (OP#1291-#1295, #1299). Their literal
  : routes beat the parameterized /historicaldocuments/{publicationId} volume
  : route by Roaster path specificity; see the note on devapi:not-found in
  : developer-api.xql.
  :)
 declare function hsgapi:about-frus($request as map(*)) {
     hsgapi:render($request, "pages/historicaldocuments/about-frus")
+};
+
+declare function hsgapi:citing-frus($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/citing-frus")
 };
 
 declare function hsgapi:status-of-the-series($request as map(*)) {
