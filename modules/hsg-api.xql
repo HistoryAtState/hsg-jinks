@@ -262,6 +262,11 @@ declare function hsgapi:view-interior($request as map(*)) {
     let $divisionId := $request?parameters?divisionId
     let $_ := util:log("INFO", "publicationId: " || $publicationId || " divisionId: " || $divisionId)
     let $doc := collection($config:data-default || "/" || $publicationId)/id($divisionId)
+        [not(self::tei:divGen)]
+        (: The volume root marks where the printed TOC goes with
+           <divGen xml:id="toc"/>, so id("toc") resolves both that
+           placeholder and the real front-matter division (OP#1306);
+           only the division has a page. :)
     return
         if (not(hsgapi:is-exact-division($doc, $divisionId))) then
             (: id() tokenizes its argument on whitespace, so "d1 d3" resolves to two
