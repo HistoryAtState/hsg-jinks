@@ -1,0 +1,146 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                <li>
+                    <a href="[[ $context?context-path ]]/">
+                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments">
+                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments/quarterly-releases">
+                        <pb-i18n key="menu.quarterly-releases">Quarterly Releases</pb-i18n>
+                    </a>
+                </li>
+                <li aria-current="page">2018 Quarter 2</li>
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [# Frozen announcement ported verbatim from hsg-shell
+       pages/historicaldocuments/quarterly-releases/announcements/2018-q2.xml (OP#1295) #]
+    <div class="section-landing usa-prose">
+        <h1>Quarterly Release of Newly Digitized <em>Foreign Relations</em> Volumes</h1>
+        <p>May 31, 2018</p>
+        <p>The Department of State today announces the release of newly digitized
+            versions of fifteen volumes from the <em>Foreign Relations of the United
+                States</em> series, the official documentary record of U.S. foreign
+            relations. These volumes cover events that took place between 1874 and 1887
+            and were originally published in print between 1875 and 1889:</p>
+        <p>
+            <em>Papers Relating to the Foreign Relations of the United States,</em>
+            1874–1887</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1874">Papers Relating to the
+                    Foreign Relations of the United States, 1874 Transmitted to
+                    Congress, With the Annual Message of the President, December 7,
+                    1874</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1875v01">Papers Relating to the
+                    Foreign Relations of the United States, 1875 Transmitted to
+                    Congress, With the Annual Message of the President, December 6,
+                    1875, Volume I</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1875v02">Papers Relating to the
+                    Foreign Relations of the United States, 1875 Transmitted to
+                    Congress, With the Annual Message of the President, December 6,
+                    1875, Volume II</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1876">Papers Relating to the
+                    Foreign Relations of the United States, 1876 Transmitted to
+                    Congress, With the Annual Message of the President, December 4,
+                    1876</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1877">Papers Relating to the
+                    Foreign Relations of the United States, 1877 Transmitted to
+                    Congress, With the Annual Message of the President, December 3,
+                    1877</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1878">Papers Relating to the
+                    Foreign Relations of the United States, 1878 Transmitted to
+                    Congress, With the Annual Message of the President, December 2,
+                    1878</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1879">Papers Relating to the
+                    Foreign Relations of the United States, 1879 Transmitted to
+                    Congress, With the Annual Message of the President, December 1,
+                    1879</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1880">Papers Relating to the
+                    Foreign Relations of the United States, 1880 Transmitted to
+                    Congress, With the Annual Message of the President, December 6,
+                    1880</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1881">Papers Relating to the
+                    Foreign Relations of the United States, 1881 Transmitted to
+                    Congress, With the Annual Message of the President, December 5,
+                    1881</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1882">Papers Relating to the
+                    Foreign Relations of the United States, 1882 Transmitted to
+                    Congress, With the Annual Message of the President, December 4,
+                    1882</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1883">Papers Relating to the
+                    Foreign Relations of the United States, 1883 Transmitted to
+                    Congress, With the Annual Message of the President, December 4,
+                    1883</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1884">Papers Relating to the
+                    Foreign Relations of the United States, 1884 Transmitted to
+                    Congress, With the Annual Message of the President, December 1,
+                    1884</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1885">Papers Relating to the
+                    Foreign Relations of the United States, 1885 Transmitted to
+                    Congress, With the Annual Message of the President, December 8,
+                    1885</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1886">Papers Relating to the
+                    Foreign Relations of the United States, 1886 Transmitted to
+                    Congress, With the Annual Message of the President, December 6,
+                    1886</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1887">Papers Relating to the
+                    Foreign Relations of the United States, 1887 For the Year 1887,
+                    Transmitted to Congress, With a Message of the President, June 26,
+                    1888</a>.</li>
+        </ol>
+        <p>Today’s release is part of the Office of the Historian’s ongoing project, in
+            partnership with the University of Wisconsin Digital Collections Center, to
+            digitize the entire <em>Foreign Relations</em> series. The University
+            graciously provided high quality scanned images of each printed book, which
+            the Office further digitized to create a full text searchable edition. These
+            volumes are available online and as free ebooks at the Office of the
+            Historian’s website (<a href="[[ $context?context-path ]]/historicaldocuments"
+                >https://history.state.gov/historicaldocuments</a>). This is the latest
+            in a series of quarterly releases, which will continue until the
+                <em>FRUS</em> digital archive is complete.</p>
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/historicaldocuments/sidebar.html" %]
+    [% endtemplate %]
+</template>

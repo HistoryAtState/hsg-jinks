@@ -1,0 +1,79 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/frus-history": { "at": "modules/templates/frus-history.xqm", "prefix": "fh" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [# Appendix A: the interactive Dygraph production/timeliness chart
+       (OP#1294), reference parity with hsg-shell's frus-history/appendix-a
+       .xml. Static chart chrome (headings, graph target, the dataset
+       checkboxes) ported verbatim; the intro prose and the two JSON datasets
+       come from the frus-history package (fh:appendix-a-chart-intro /
+       fh:appendix-a-chart-data). The vendored dygraph-combined.js is loaded
+       by an in-content script tag immediately before the inline constructor
+       script, the same ordering the reference page relies on. The monograph
+       TOC sidebar highlights this appendix; prev/next walk the surrounding
+       divisions (the fixed /appendix-a route replaces the {sectionId} view
+       of this division, matching the reference). #]
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ fh:appendix-a-breadcrumb($context) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [% template before %]
+    [[ fh:appendix-a-toc-sidebar($context) ]]
+    <div class="hsg-panel hsg-frus__section-nav">
+        [% include "templates/pages/historicaldocuments/sidebar.html" %]
+    </div>
+    [% endtemplate %]
+
+    <div class="hsg-frus__interior">
+        [[ fh:navigation-title($context) ]]
+        <div class="hsg-frus__prose usa-prose">
+            <h1>Appendix A: Historical <em>Foreign Relations</em> Timeliness and Production Charts</h1>
+            <h2 class="h4">
+                <em>Foreign Relations</em> Series: Production &amp; Timeliness,
+                1861-2015</h2>
+
+            <div id="graph"></div>
+            <fieldset class="graph-checkboxes" id="graph-fieldset">
+                <label for="#graph-fieldset">Select Datasets to Display
+                    Above:</label>
+                <div>
+                    <input checked="checked" id="0" onClick="change(this)" type="checkbox"/>
+                    <label for="0"> Annual <em>FRUS</em> Production </label>
+                </div>
+                <div>
+                    <input checked="checked" id="1" onClick="change(this)" type="checkbox"/>
+                    <label for="1"> Average <em>FRUS</em> Lag </label>
+                </div>
+                <div>
+                    <input id="2" onClick="change(this)" type="checkbox"/>
+                    <label for="2"> Average Regular <em>FRUS</em> Lag </label>
+                </div>
+            </fieldset>
+
+            [[ fh:appendix-a-chart-intro($context) ]]
+            <script src="[[ $context?context-path ]]/resources/scripts/dygraph-combined.js" type="text/javascript"></script>
+            [[ fh:appendix-a-chart-data($context) ]]
+            [[ fh:appendix-a-pagination($context) ]]
+        </div>
+    </div>
+</template>

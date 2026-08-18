@@ -2,6 +2,9 @@
     ---json
     {
         "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/frus-history": { "at": "modules/templates/frus-history.xqm", "prefix": "fh" }
+            },
             "extends": "templates/layouts/hsg-content.html"
         },
         "theme": {
@@ -13,6 +16,12 @@
         }
     }
     ---
+    [# Monograph landing page for the FRUS History subsection (OP#1294),
+       reference parity with hsg-shell pages/historicaldocuments/frus-history/
+       index.xml: complete title, editors, edition info, the static blurb
+       paragraph, then the full book TOC. The sidebar carries the ebook
+       download panel (data-derived, see fh:download-panel) and the FRUS
+       History Resources panel above the shared section navigation. #]
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
@@ -36,19 +45,32 @@
     [% endtemplate %]
 
     <div class="section-landing usa-prose">
-        <h1>
-            <pb-i18n key="menu.frus-history">History of the Foreign Relations Series</pb-i18n>
-        </h1>
-        <div class="usa-alert usa-alert--info">
-            <div class="usa-alert__body">
-                <h2 class="usa-alert__heading">
-                    <pb-i18n key="stub.title">To be implemented</pb-i18n>
-                </h2>
-                <p class="usa-alert__text">
-                    <pb-i18n key="stub.text">This page has not yet been implemented in this application.</pb-i18n>
-                    <a href="https://history.state.gov/historicaldocuments/frus-history">View this page on the current history.state.gov site</a>.
-                </p>
-            </div>
+        <h1>[[ fh:monograph-title($context) ]]</h1>
+        [[ fh:monograph-editors($context) ]]
+        [[ fh:monograph-edition-info($context) ]]
+        <p>
+            <em>Toward &#8220;Thorough, Accurate, and Reliable&#8221;</em> explores the
+            evolution of the <em>Foreign Relations of the United States</em>
+            documentary history series from its antecedents in the early republic
+            through the early 21st century implementation of its current mandate,
+            the 1991 <em>Foreign Relations</em> statute. This book traces how
+            policymakers and an expanding array of stakeholders translated values
+            like &#8220;security,&#8221; &#8220;legitimacy,&#8221; and &#8220;transparency&#8221; into practice as they
+            debated how to balance the government&#8217;s obligation to protect sensitive
+            information with its commitment to openness. Determining the &#8220;people&#8217;s
+            right to know&#8221; has fueled lively discussion for over two centuries, and
+            this work provides important, historically informed perspectives
+            valuable to policymakers and engaged citizens as that conversation
+            continues.</p>
+        <hr/>
+        <div class="toc-inner">
+            [[ fh:monograph-toc($context) ]]
         </div>
     </div>
+
+    [% template before %]
+    [% include "templates/pages/historicaldocuments/sidebar.html" %]
+    [[ fh:download-panel($context) ]]
+    [[ fh:resources-panel($context, "documents research events") ]]
+    [% endtemplate %]
 </template>

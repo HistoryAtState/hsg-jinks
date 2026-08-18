@@ -1,0 +1,139 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                <li>
+                    <a href="[[ $context?context-path ]]/">
+                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments">
+                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments/quarterly-releases">
+                        <pb-i18n key="menu.quarterly-releases">Quarterly Releases</pb-i18n>
+                    </a>
+                </li>
+                <li aria-current="page">2017 Quarter 1</li>
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [# Frozen announcement ported verbatim from hsg-shell
+       pages/historicaldocuments/quarterly-releases/announcements/2017-q1.xml (OP#1295) #]
+    <div class="section-landing usa-prose">
+        <h1>Quarterly Release of Newly Digitized <em>Foreign Relations</em> Volumes</h1>
+        <p>April 6, 2017</p>
+        <p>The Department of State today announces the release of newly digitized
+            versions of sixteen volumes from the <em>Foreign Relations of the United
+                States</em> series, the official documentary record of U.S. foreign
+            relations. These volumes cover events that took place between 1912 and 1918
+            and were originally published in print between 1919 and 1933.</p>
+        <p>The Office of the Historian is releasing this material documenting World War
+            I on the centennial of the U.S. entry into the war to commemorate that event
+            and to honor those who served in that conflict. The Office plans to release
+            the related material on the Versailles peace negotiations in the next
+            quarterly release, scheduled for June 2017. In addition, the Office of the
+            Historian is publishing a narrative account of the response by U.S.
+            diplomats in Europe to the humanitarian catastrophe that accompanied the
+            beginning of the war. This narrative will be published sequentially at <a
+                href="[[ $context?context-path ]]/departmenthistory/wwi"
+                >https://history.state.gov/departmenthistory/wwi</a>.</p>
+        <p>
+            <em>Papers Relating to the Foreign Relations of the United States,</em>
+            1912–1917</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1912">With the Annual Message of
+                    the President Transmitted to Congress December 3, 1912</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1913">With the Address of the
+                    President to Congress December 2, 1913</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1914">With the Address of the
+                    President to Congress December 8, 1914</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1915">With the Address of the
+                    President to Congress December 7, 1915</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1916">With the Address of the
+                    President to Congress December 5, 1916</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1917">With the Address of the
+                    President to Congress December 4, 1917</a>.</li>
+        </ol>
+        <p>
+            <em>Papers Relating to the Foreign Relations of the United States,</em>
+            1917</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1917Supp01v01">Supplement 1, The
+                    World War</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1917Supp02v01">Supplement 2, The
+                    World War, Volume I</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1917Supp02v02">Supplement 2, The
+                    World War, Volume II</a>.</li>
+        </ol>
+        <p>
+            <em>Papers Relating to the Foreign Relations of the United States,</em>
+            1918</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1918">1918</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1918Russiav01">1918, Russia,
+                    Volume I</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1918Russiav02">1918, Russia,
+                    Volume II</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1918Russiav03">1918, Russia,
+                    Volume III</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1918Supp01v01">Supplement 1, The
+                    World War, Volume I</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1918Supp01v02">Supplement 1, The
+                    World War, Volume II</a>.</li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1918Supp02">Supplement 2, The
+                    World War</a>.</li>
+        </ol>
+        <p>Today’s release is part of the Office of the Historian’s ongoing project, in
+            partnership with the University of Wisconsin Digital Collections Center, to
+            digitize the entire <em>Foreign Relations</em> series. The University
+            graciously provided high quality scanned images of each printed book, which
+            the Office further digitized to create a full text searchable edition. These
+            volumes are available online and as free ebooks at the Office of the
+            Historian’s website (<a href="[[ $context?context-path ]]/historicaldocuments"
+                >https://history.state.gov/historicaldocuments</a>). This is the latest
+            in a series of <a href="[[ $context?context-path ]]/historicaldocuments/quarterly-releases"
+                >quarterly releases</a>, which will continue until the 
+            <em>FRUS</em> digital archive is complete.</p>
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/historicaldocuments/sidebar.html" %]
+    [% endtemplate %]
+</template>

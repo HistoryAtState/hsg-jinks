@@ -1,0 +1,45 @@
+<!--
+    Section side navigation for Historical Documents, the single source for
+    every page in the section (OP#1214): the landing, administration and stub
+    pages include it in their left aside, and volume interior pages include
+    it in their right aside (wrapped in panel chrome; their left holds the
+    volume TOC). Link list is reference parity with hsg-shell's generated
+    aside#sections for /historicaldocuments (urls.xml section nav), plus an
+    entry for the section landing itself.
+
+    Five targets are the stub pages added by the menu-parity work; three
+    (other-electronic-resources, the Vietnam sources guide, citing-frus) have
+    neither content nor a stub yet and 404 until they land. Links stay
+    context-path-relative either way, the same transitional policy the
+    Department History sidebar settled in #1132, rather than pointing at the
+    production site.
+-->
+<h2>
+    <pb-i18n key="historicaldocuments.title">Historical Documents</pb-i18n>
+</h2>
+<ul class="usa-sidenav">
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/historicaldocuments">Foreign Relations of the United States</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/historicaldocuments/about-frus">About the <em>Foreign Relations</em> Series</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/historicaldocuments/status-of-the-series">Status of the <em>Foreign Relations</em> Series</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/historicaldocuments/frus-history">History of the <em>Foreign Relations</em> Series</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/historicaldocuments/ebooks"><em>Foreign Relations</em> Ebooks</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/historicaldocuments/other-electronic-resources">Other Electronic Resources</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/historicaldocuments/guide-to-sources-on-vietnam-1969-1975">Guide to Sources on Vietnam, 1969-1975</a>
+    </li>
+    <li class="usa-sidenav__item">
+        <a href="[[ $context?context-path ]]/historicaldocuments/citing-frus">Citing the <em>Foreign Relations</em> series</a>
+    </li>
+</ul>

@@ -664,12 +664,14 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-top: 0;
 }
 
-/* Interior-page right sidebar (hsg:division-asides): the Persons and
-   Abbreviations and Terms register panels plus the Historical Documents
-   section navigation. Same quiet chrome as the landing sidebar's
-   ways-to-explore panel; consecutive panels get breathing room. */
+/* Interior-page right sidebar: the Persons and Abbreviations and Terms
+   register panels (hsg:division-asides) plus the shared section-navigation
+   partial (historicaldocuments/sidebar.html) in a panel wrapper. Same quiet
+   chrome as the landing sidebar's ways-to-explore panel; consecutive panels
+   get breathing room. The partial brings its own usa-sidenav markup, so the
+   panel only needs to align its plain h2 with the register titles. */
 .hsg-frus__register .hsg-sidebar-title,
-.hsg-frus__section-nav .hsg-sidebar-title {
+.hsg-frus__section-nav h2 {
     margin-top: 0;
 }
 
@@ -677,15 +679,13 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-top: var(--hsg-space-4);
 }
 
-.hsg-frus__register .hsg-list-group,
-.hsg-frus__section-nav .hsg-list-group {
+.hsg-frus__register .hsg-list-group {
     list-style: none;
     padding-left: 0;
     margin: 0;
 }
 
-.hsg-frus__register .hsg-list-group li,
-.hsg-frus__section-nav .hsg-list-group li {
+.hsg-frus__register .hsg-list-group li {
     margin-bottom: var(--hsg-space-1);
 }
 
@@ -760,4 +760,65 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     position: absolute;
     left: 0;
     font-weight: 700;
+}
+/* Historical Documents section landing: administration cards (OP#1214).
+   The reference site's thumbnail grid rebuilt as USWDS cards. The compiled
+   CSS carries no responsive grid-col utilities, so the card group is sized
+   with its own auto-fill grid instead of per-card grid classes. Portraits
+   are small legacy assets (89x76) served from static.history.state.gov;
+   render them at natural size, centered, rather than stretched to the card
+   width. */
+.hsg-admin-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: var(--hsg-space-2, 1rem);
+    padding-left: 0;
+    list-style: none;
+}
+
+.hsg-admin-cards .usa-card {
+    margin-bottom: 0;
+    max-width: none;
+    width: auto;
+}
+
+.hsg-admin-cards .usa-card__container {
+    height: 100%;
+    margin: 0;
+}
+
+.hsg-admin-cards .usa-card__media {
+    text-align: center;
+    padding-top: 1rem;
+}
+
+.hsg-admin-cards .usa-card__img {
+    display: inline-block;
+    background: none;
+}
+
+.hsg-admin-cards .usa-card__img img {
+    width: 89px;
+    height: 76px;
+    object-fit: cover;
+}
+
+.hsg-admin-cards .usa-card__heading {
+    font-size: 1.05rem;
+    text-align: center;
+}
+
+.hsg-admin-cards .usa-card__body {
+    text-align: center;
+}
+
+/* Administration page volume listing (OP#1214). */
+.hsg-admin__sub-series {
+    margin-top: var(--hsg-space-4, 2rem);
+}
+
+.hsg-status-notice {
+    color: var(--hsg-color-base-dark, #565c65);
+    font-size: 0.9em;
+    white-space: nowrap;
 }

@@ -1,0 +1,165 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                <li>
+                    <a href="[[ $context?context-path ]]/">
+                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments">
+                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments/quarterly-releases">
+                        <pb-i18n key="menu.quarterly-releases">Quarterly Releases</pb-i18n>
+                    </a>
+                </li>
+                <li aria-current="page">2018 Quarter 4</li>
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [# Frozen announcement ported verbatim from hsg-shell
+       pages/historicaldocuments/quarterly-releases/announcements/2018-q4.xml (OP#1295) #]
+    <div class="section-landing usa-prose">
+        <h1>Quarterly Release of Newly Digitized <em>Foreign Relations</em> Volumes</h1>
+        <p>December 6, 2018</p>
+        <p>The Department of State today announces the release of newly digitized
+            versions of fourteen volumes from the <em>Foreign Relations of the United
+                States</em> series, the official documentary record of U.S. foreign
+            relations. These volumes cover events that took place between 1861 and 1866
+            and were originally published in print between 1861 and 1867:</p>
+        <p>
+            <em>Papers Relating to Foreign Affairs</em>, 1861</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1861">Message of the President of
+                    the United States to the Two Houses of Congress, at the Commencement
+                    of the Second Session of the Thirty-seventh Congress</a>
+            </li>
+        </ol>
+        <p>
+            <em>Papers Relating to Foreign Affairs</em>, 1862</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1862">Accompanying the Annual
+                    Message of the President to the Third Session Thirty-seventh
+                    Congress</a>
+            </li>
+        </ol>
+        <p>
+            <em>Papers Relating to Foreign Affairs</em>, 1863</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1863p1">Accompanying the Annual
+                    Message of the President to the First Session Thirty-eighth
+                    Congress, Part I</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1863p2">Accompanying the Annual
+                    Message of the President to the First Session Thirty-eighth
+                    Congress, Part II</a>
+            </li>
+        </ol>
+        <p>
+            <em>Papers Relating to Foreign Affairs</em>, 1864</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1864p1">Accompanying the Annual
+                    Message of the President to the Second Session Thirty-eighth
+                    Congress, Part I</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1864p2">Accompanying the Annual
+                    Message of the President to the Second Session Thirty-eighth
+                    Congress, Part II</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1864p3">Accompanying the Annual
+                    Message of the President to the Second Session Thirty-eighth
+                    Congress, Part III</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1864p4">Accompanying the Annual
+                    Message of the President to the Second Session Thirty-eighth
+                    Congress, Part IV</a>
+            </li>
+        </ol>
+        <p>
+            <em>Papers Relating to the Foreign Relations of the United States</em>,
+            1865</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1865p1">Accompanying the Annual
+                    Message of the President to the First Session Thirty-ninth Congress,
+                    Part I</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1865p2">Accompanying the Annual
+                    Message of the President to the First Session Thirty-ninth Congress,
+                    Part II</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1865p3">Accompanying the Annual
+                    Message of the President to the First Session Thirty-ninth Congress,
+                    Part III</a>
+            </li>
+        </ol>
+        <p>
+            <em>Papers Relating to the Foreign Relations of the United States</em>,
+            1866</p>
+        <ol>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1866p1">Accompanying the Annual
+                    Message of the President to the Second Session Thirty-ninth
+                    Congress, Part I</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1866p2">Accompanying the Annual
+                    Message of the President to the Second Session Thirty-ninth
+                    Congress, Part II</a>
+            </li>
+            <li>
+                <a href="[[ $context?context-path ]]/historicaldocuments/frus1866p3">Accompanying the Annual
+                    Message of the President to the Second Session Thirty-ninth
+                    Congress, Part III</a>
+            </li>
+        </ol>
+        <p>Today’s release is part of the Office of the Historian’s ongoing project, in
+            partnership with the University of Wisconsin Digital Collections Center, to
+            digitize the entire <em>Foreign Relations</em> series. The University
+            graciously provided high quality scanned images of each printed book, which
+            the Office further digitized to create a full text searchable edition. These
+            volumes are available online and as free ebooks at the Office of the
+            Historian’s website (<a href="[[ $context?context-path ]]/historicaldocuments"
+                >https://history.state.gov/historicaldocuments</a>). With this release,
+            the FRUS digital archive now contains a complete set of all 511 printed
+            volumes from the series to date. Two indexes to the 1861–1918 volumes and
+            thirteen microfiche supplements covering 1955–1963 are being digitized, but
+            due to the size and condition of these materials, these will be released
+            more slowly and as resources allow.</p>
+    </div>
+
+    [% template before %]
+    [% include "templates/pages/historicaldocuments/sidebar.html" %]
+    [% endtemplate %]
+</template>

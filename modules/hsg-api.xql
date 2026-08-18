@@ -5,6 +5,7 @@ module namespace hsgapi="http://teipublisher.com/api/hsg";
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace errors="http://e-editiones.org/roaster/errors";
+import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "templates/hsg.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -33,23 +34,22 @@ declare %private function hsgapi:render($request as map(*), $file as xs:string) 
 };
 
 (:~
- : Landing page for the Historical Documents section: a list of all volumes.
+ : Landing page for the Historical Documents section: the presidential
+ : administrations grid.
  :
  : Without this route the path falls through to the jinks-owned catch-all
  : /{docid}, which treats "historicaldocuments" as a document id and errors --
  : yet the breadcrumb links here from every content page.
  :)
 declare function hsgapi:view-section($request as map(*)) {
-    hsgapi:render($request, "pages/historicaldocuments")
+    hsgapi:render($request, "pages/historicaldocuments/index")
 };
 
 (:~
- : Stub landing pages for the five Historical Documents menu entries whose
- : hsg-shell content has not been ported yet: each renders a "To be
- : implemented" notice so no primary-nav link 404s (parity with the reference
- : menu in hsg-shell templates/site.xml). Their literal routes beat the
- : parameterized /historicaldocuments/{publicationId} volume route by Roaster
- : path specificity; see the note on devapi:not-found in developer-api.xql.
+ : Section pages under /historicaldocuments (OP#1291-#1295). Their literal
+ : routes beat the parameterized /historicaldocuments/{publicationId} volume
+ : route by Roaster path specificity; see the note on devapi:not-found in
+ : developer-api.xql.
  :)
 declare function hsgapi:about-frus($request as map(*)) {
     hsgapi:render($request, "pages/historicaldocuments/about-frus")
@@ -71,21 +71,156 @@ declare function hsgapi:quarterly-releases($request as map(*)) {
     hsgapi:render($request, "pages/historicaldocuments/quarterly-releases")
 };
 
+(:~
+ : The ten quarterly-release announcement pages (OP#1295). Content is frozen
+ : upstream (the digitization partnership's last release was 2018-q4), so each
+ : announcement is a verbatim-ported static template and the id vocabulary is
+ : a closed list; anything else is a real 404, not hsg-shell's error-page
+ : fallthrough (precedent: #1130/#1166). The announcements deliberately do not
+ : appear in the section sidebar, matching the reference's section-nav
+ : exclusion (hsg-shell urls.xml).
+ :)
+declare variable $hsgapi:quarterly-release-ids :=
+    ("2016-q3", "2016-q4", "2017-q1", "2017-q2", "2017-q3", "2017-q4",
+     "2018-q1", "2018-q2", "2018-q3", "2018-q4");
+
+declare function hsgapi:quarterly-release($request as map(*)) {
+    let $releaseId := $request?parameters?releaseId
+    return
+        if ($releaseId = $hsgapi:quarterly-release-ids) then
+            hsgapi:render($request, "pages/historicaldocuments/quarterly-releases/" || $releaseId)
+        else
+            error($errors:NOT_FOUND, "no quarterly release announcement " || $releaseId)
+};
+
+(:~
+ : The FRUS History subsection (OP#1294), backed by the frus-history data
+ : package (/db/apps/frus-history). The monograph landing page is the
+ : frus-history route above; the fixed-segment sub-routes (documents,
+ : research, events, appendix-a) beat the {sectionId} catch-all by Roaster
+ : path specificity. Unknown ids 404 server-side, per the section's pattern.
+ :)
+declare variable $hsgapi:frus-history-root := "/db/apps/frus-history";
+
+declare function hsgapi:frus-history-documents($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/frus-history/documents")
+};
+
+declare function hsgapi:frus-history-document($request as map(*)) {
+    let $documentId := $request?parameters?documentId
+    return
+        if (doc-available($hsgapi:frus-history-root || "/documents/" || $documentId || ".xml")) then
+            vapi:html(
+                map:merge((
+                    $request,
+                    map {
+                        "parameters": map:merge((
+                            $request?parameters,
+                            map { "file": "pages/historicaldocuments/frus-history/document" }
+                        ))
+                    }
+                )),
+                map { "document-id": $documentId }
+            )
+        else
+            error($errors:NOT_FOUND, "no frus-history document " || $documentId)
+};
+
+declare function hsgapi:frus-history-research($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/frus-history/research")
+};
+
+declare function hsgapi:frus-history-article($request as map(*)) {
+    let $articleId := $request?parameters?articleId
+    return
+        if (doc-available($hsgapi:frus-history-root || "/articles/" || $articleId || ".xml")) then
+            vapi:html(
+                map:merge((
+                    $request,
+                    map {
+                        "parameters": map:merge((
+                            $request?parameters,
+                            map { "file": "pages/historicaldocuments/frus-history/article" }
+                        ))
+                    }
+                )),
+                map { "article-id": $articleId }
+            )
+        else
+            error($errors:NOT_FOUND, "no frus-history article " || $articleId)
+};
+
+declare function hsgapi:frus-history-events($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/frus-history/events")
+};
+
+declare function hsgapi:frus-history-appendix-a($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/frus-history/appendix-a")
+};
+
+declare function hsgapi:frus-history-section($request as map(*)) {
+    let $sectionId := $request?parameters?sectionId
+    let $division := doc($hsgapi:frus-history-root || "/monograph/frus-history.xml")/id($sectionId)
+    return
+        if (count($division) eq 1 and $division instance of element(tei:div)
+                and $division/@xml:id = $sectionId) then
+            vapi:html(
+                map:merge((
+                    $request,
+                    map {
+                        "parameters": map:merge((
+                            $request?parameters,
+                            map { "file": "pages/historicaldocuments/frus-history/section" }
+                        ))
+                    }
+                )),
+                map { "section-id": $sectionId }
+            )
+        else
+            error($errors:NOT_FOUND, "no monograph division " || $sectionId || " in frus-history")
+};
+
+(:~
+ : /historicaldocuments/{publicationId} serves two kinds of page from one
+ : path, the same split hsg-shell's controller made: an administration
+ : landing page when the id is a slug in the administrations taxonomy
+ : (lincoln, nixon-ford, cleveland-22, ...), otherwise a volume. Volumes all
+ : start with "frus" and no administration slug does, so the vocabularies
+ : cannot collide; unknown ids fall through to the volume branch and 404
+ : there.
+ :
+ : The stub routes above are literal paths and beat this parameterized one by
+ : Roaster path specificity, so their slugs never reach this dispatch.
+ :)
 declare function hsgapi:view($request as map(*)) {
     let $publicationId := $request?parameters?publicationId
     let $_ := util:log("INFO", "publicationId: " || $publicationId)
     return
-        vapi:view(map:merge((
-            $request,
-            map {
-                "parameters": map:merge((
-                    $request?parameters,
+        if (exists(hsg:administration($publicationId))) then
+            vapi:html(
+                map:merge((
+                    $request,
                     map {
-                        "docid": $config:frus-volumes || "/" || $publicationId || "/" || $publicationId || ".xml"
+                        "parameters": map:merge((
+                            $request?parameters,
+                            map { "file": "pages/historicaldocuments/administration" }
+                        ))
                     }
-                ))
-            }
-        )))
+                )),
+                map { "administration-id": $publicationId }
+            )
+        else
+            vapi:view(map:merge((
+                $request,
+                map {
+                    "parameters": map:merge((
+                        $request?parameters,
+                        map {
+                            "docid": $config:frus-volumes || "/" || $publicationId || "/" || $publicationId || ".xml"
+                        }
+                    ))
+                }
+            )))
 };
 
 declare function hsgapi:view-interior($request as map(*)) {

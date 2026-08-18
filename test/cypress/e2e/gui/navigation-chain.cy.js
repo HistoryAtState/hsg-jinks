@@ -1,26 +1,27 @@
 // Covers the user story "As a User I want to be able to navigate from the
 // volume landing page to a document detail view" -- click-through from the
-// volume landing page down to a document, entirely via rendered links.
+// section landing down to a document, entirely via rendered links.
 //
-// The section landing at /historicaldocuments extends that chain one level up.
-// It is scaffolding: a bare list of volumes, enough to navigate through and
-// to give the breadcrumb's "Historical Documents" crumb -- which every
-// content page links to -- somewhere to land.
+// The section landing at /historicaldocuments groups volumes by presidential
+// administration (OP#1214): one card per presidency linking to an
+// administration page, which lists that administration's volumes -- so the
+// chain gained one level: section -> administration -> volume -> ... -> document.
 //
 // frus-data-jinks is append-only upstream like the external data packages
 // (see CLAUDE.md "Cypress assertions on data-package counts"): new volumes
-// get added over time (frus1981-88v41 alongside frus1981-88v05), so assert a
-// lower bound on the volume count, not an exact one.
+// get added over time, so assert lower bounds on data-derived counts, not
+// exact ones.
 
 const SECTION = "historicaldocuments";
+const ADMIN = "historicaldocuments/reagan";
 const VOLUME = "historicaldocuments/frus1981-88v05";
 
 describe("the section landing", () => {
-    it("lists every volume as a link", () => {
+    it("lists administrations as cards", () => {
         cy.visit(SECTION);
         cy.get("main h1").should("contain.text", "Historical Documents");
-        cy.get("main ul.volume-list > li").should("have.length.at.least", 1);
-        cy.get("main ul.volume-list a[href$='historicaldocuments/frus1981-88v05']").should("exist");
+        cy.get("main .hsg-admin-cards > li.usa-card").should("have.length.at.least", 25);
+        cy.get(`main .hsg-admin-cards a[href$='${ADMIN}']`).should("exist");
     });
 
     it("is what the breadcrumb's Historical Documents crumb points at", () => {
@@ -29,18 +30,19 @@ describe("the section landing", () => {
             .contains("a", "Historical Documents")
             .click();
         cy.location("pathname").should("match", new RegExp(`${SECTION}$`));
-        cy.get("main ul.volume-list > li").should("have.length.at.least", 1);
+        cy.get("main .hsg-admin-cards > li.usa-card").should("have.length.at.least", 25);
     });
 });
 
-describe("navigate from volume landing to a document", () => {
-    it("clicks through section -> landing -> compilation -> chapter -> document", () => {
+describe("navigate from the section landing to a document", () => {
+    it("clicks through section -> administration -> landing -> compilation -> chapter -> document", () => {
         cy.visit(SECTION);
-        // By href, not by title text: several volumes share the "Foreign
-        // Relations of the United States" prefix and the list is sorted by
-        // title, so the first text match depends on which volumes are
-        // deployed (the 1958-60 microfiche supplement sorts before v05).
-        cy.get(`main ul.volume-list a[href$='${VOLUME}']`).click();
+        cy.get(`main .hsg-admin-cards a[href$='${ADMIN}']`).click();
+        cy.location("pathname").should("match", new RegExp(`${ADMIN}$`));
+
+        // By href, not by title text: several volumes share the "Soviet
+        // Union" prefix within the administration's listing.
+        cy.get(`main a[href$='${VOLUME}']`).click();
         cy.location("pathname").should("match", new RegExp(`${VOLUME}$`));
 
         cy.contains("a", "Soviet Union, March 1985").click();

@@ -42,7 +42,7 @@
         },
         "/historicaldocuments/about-frus": {
             "get": {
-                "summary": "Stub landing page: About the Foreign Relations Series",
+                "summary": "About the Foreign Relations Series: static article on the series and its statutory basis",
                 "operationId": "hsgapi:about-frus",
                 "x-error-handler": "hsgapi:handle-error",
                 "tags": [
@@ -64,7 +64,7 @@
         },
         "/historicaldocuments/status-of-the-series": {
             "get": {
-                "summary": "Stub landing page: Status of the Foreign Relations Series",
+                "summary": "Status of the Foreign Relations Series: report computed from the volumes' revision metadata",
                 "operationId": "hsgapi:status-of-the-series",
                 "x-error-handler": "hsgapi:handle-error",
                 "tags": [
@@ -86,7 +86,7 @@
         },
         "/historicaldocuments/frus-history": {
             "get": {
-                "summary": "Stub landing page: History of the Foreign Relations Series",
+                "summary": "History of the Foreign Relations Series: monograph landing page with table of contents",
                 "operationId": "hsgapi:frus-history",
                 "x-error-handler": "hsgapi:handle-error",
                 "tags": [
@@ -106,9 +106,243 @@
                 }
             }
         },
+        "/historicaldocuments/frus-history/documents": {
+            "get": {
+                "summary": "FRUS History: list of documents on the history of the series",
+                "operationId": "hsgapi:frus-history-documents",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "sort-by",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "default": "posted",
+                            "enum": [
+                                "posted",
+                                "created"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/frus-history/documents/{documentId}": {
+            "get": {
+                "summary": "FRUS History: single document view",
+                "operationId": "hsgapi:frus-history-document",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "documentId",
+                        "in": "path",
+                        "description": "ID of the document",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The document was not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/frus-history/research": {
+            "get": {
+                "summary": "FRUS History: list of research articles",
+                "operationId": "hsgapi:frus-history-research",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/frus-history/research/{articleId}": {
+            "get": {
+                "summary": "FRUS History: single research article view",
+                "operationId": "hsgapi:frus-history-article",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "articleId",
+                        "in": "path",
+                        "description": "ID of the article",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The article was not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/frus-history/events": {
+            "get": {
+                "summary": "FRUS History: upcoming and past events",
+                "operationId": "hsgapi:frus-history-events",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/frus-history/appendix-a": {
+            "get": {
+                "summary": "FRUS History: Appendix A, the interactive volume-production chart",
+                "operationId": "hsgapi:frus-history-appendix-a",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/frus-history/{sectionId}": {
+            "get": {
+                "summary": "FRUS History: monograph division view",
+                "operationId": "hsgapi:frus-history-section",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "sectionId",
+                        "in": "path",
+                        "description": "ID of the monograph division",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The division was not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/historicaldocuments/ebooks": {
             "get": {
-                "summary": "Stub landing page: Ebooks Initiative",
+                "summary": "Ebooks Initiative: FAQ and catalog of ebook editions of FRUS volumes",
                 "operationId": "hsgapi:ebooks",
                 "x-error-handler": "hsgapi:handle-error",
                 "tags": [
@@ -130,7 +364,7 @@
         },
         "/historicaldocuments/quarterly-releases": {
             "get": {
-                "summary": "Stub landing page: Quarterly Releases",
+                "summary": "Quarterly Releases: index of the 2016-2018 digitization releases",
                 "operationId": "hsgapi:quarterly-releases",
                 "x-error-handler": "hsgapi:handle-error",
                 "tags": [
@@ -139,6 +373,50 @@
                 "responses": {
                     "200": {
                         "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/quarterly-releases/{releaseId}": {
+            "get": {
+                "summary": "Quarterly Releases: one release announcement page",
+                "operationId": "hsgapi:quarterly-release",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "releaseId",
+                        "in": "path",
+                        "description": "ID of the release announcement, e.g. 2016-q3",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The release announcement was not found",
                         "content": {
                             "text/html": {
                                 "schema": {
