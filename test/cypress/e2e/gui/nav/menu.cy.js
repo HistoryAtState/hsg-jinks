@@ -115,7 +115,8 @@ describe("primary navigation menu", () => {
         // + padding accordion buttons then painted 2rem past their own list
         // item, hiding the start of the next one ("About Us" showed as
         // "out Us" under the More Resources caret). hsg-theme.css re-anchors
-        // border-box on .usa-header.
+        // border-box on .usa-nav__primary (not .usa-header: the page-box
+        // containers must stay content-box, see page-width-alignment.cy.js).
         cy.get(".usa-nav__primary > .usa-nav__primary-item > button").each(($btn) => {
             expect(getComputedStyle($btn[0]).boxSizing, "accordion button box-sizing").to.eq("border-box");
         });
