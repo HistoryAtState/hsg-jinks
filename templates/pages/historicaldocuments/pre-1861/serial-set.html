@@ -1,0 +1,62 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/serial-set": { "at": "modules/templates/serial-set.xqm", "prefix": "sset" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                <li>
+                    <a href="[[ $context?context-path ]]/">
+                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments">
+                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments/pre-1861">
+                        <pb-i18n key="menu.pre-1861">Pre-1861 U.S. foreign relations materials</pb-i18n>
+                    </a>
+                </li>
+                <li aria-current="page">
+                    <pb-i18n key="menu.serial-set">U.S. Congressional Serial Set</pb-i18n>
+                </li>
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [# Serial Set landing ported from hsg-shell pages/historicaldocuments/pre-1861/serial-set/index.xml
+       (OP#1303): TEI introduction from the other-publications serial-set document, then the
+       region/subject browse list. #]
+    <div class="section-landing usa-prose">
+        <h1>U.S. foreign relations materials in the pre-1861 U.S. Congressional Serial
+            Set</h1>
+        [[ sset:introduction($context) ]]
+        <p>Browse sources by [[ sset:regions-count($context) ]] regions and
+            [[ sset:subjects-count($context) ]] subjects, or <a
+                href="[[ $context?context-path ]]/historicaldocuments/pre-1861/serial-set/all">View all
+                [[ sset:bibls-count($context) ]] sources</a>.</p>
+        [[ sset:region-subject-list($context) ]]
+    </div>
+    [% template before %]
+    [% include "templates/pages/historicaldocuments/sidebar.html" %]
+    [% endtemplate %]
+</template>

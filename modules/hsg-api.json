@@ -62,6 +62,176 @@
                 }
             }
         },
+        "/historicaldocuments/other-electronic-resources": {
+            "get": {
+                "summary": "Other Electronic Resources: static list of external U.S. foreign-relations resources",
+                "operationId": "hsgapi:other-electronic-resources",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/pre-1861": {
+            "get": {
+                "summary": "Pre-1861 U.S. foreign relations materials: static index linking into the Serial Set subsection",
+                "operationId": "hsgapi:pre-1861",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/guide-to-sources-on-vietnam-1969-1975": {
+            "get": {
+                "summary": "Guide to Sources on Vietnam, 1969-1975: TEI monograph rendered as a single page",
+                "operationId": "hsgapi:vietnam-guide",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/pre-1861/serial-set": {
+            "get": {
+                "summary": "Serial Set landing: introduction and region/subject browse list",
+                "operationId": "hsgapi:serial-set",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/pre-1861/serial-set/all": {
+            "get": {
+                "summary": "Serial Set full bibliography: every record in chronological order",
+                "operationId": "hsgapi:serial-set-all",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/pre-1861/serial-set/browse": {
+            "get": {
+                "summary": "Serial Set browse: record table filtered by region and subject",
+                "operationId": "hsgapi:serial-set-browse",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "region",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "subject",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/historicaldocuments/citing-frus": {
+            "get": {
+                "summary": "Citing the Foreign Relations series: static article with citation recommendations",
+                "operationId": "hsgapi:citing-frus",
+                "x-error-handler": "hsgapi:handle-error",
+                "tags": [
+                    "hsg"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/historicaldocuments/status-of-the-series": {
             "get": {
                 "summary": "Status of the Foreign Relations Series: report computed from the volumes' revision metadata",

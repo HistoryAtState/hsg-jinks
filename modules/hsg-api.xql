@@ -46,13 +46,47 @@ declare function hsgapi:view-section($request as map(*)) {
 };
 
 (:~
- : Section pages under /historicaldocuments (OP#1291-#1295). Their literal
+ : Section pages under /historicaldocuments (OP#1291-#1295, #1299-#1305). Their literal
  : routes beat the parameterized /historicaldocuments/{publicationId} volume
  : route by Roaster path specificity; see the note on devapi:not-found in
  : developer-api.xql.
  :)
 declare function hsgapi:about-frus($request as map(*)) {
     hsgapi:render($request, "pages/historicaldocuments/about-frus")
+};
+
+declare function hsgapi:citing-frus($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/citing-frus")
+};
+
+declare function hsgapi:pre-1861($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/pre-1861")
+};
+
+declare function hsgapi:other-electronic-resources($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/other-electronic-resources")
+};
+
+declare function hsgapi:vietnam-guide($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/vietnam-guide")
+};
+
+(:~
+ : The pre-1861 Serial Set subsection (OP#1303-#1305), backed by the
+ : other-publications data package's serial-set document; rendering helpers
+ : in modules/templates/serial-set.xqm. The browse route's region/subject
+ : query parameters reach the template through the request map.
+ :)
+declare function hsgapi:serial-set($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/pre-1861/serial-set")
+};
+
+declare function hsgapi:serial-set-all($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/pre-1861/serial-set/all")
+};
+
+declare function hsgapi:serial-set-browse($request as map(*)) {
+    hsgapi:render($request, "pages/historicaldocuments/pre-1861/serial-set/browse")
 };
 
 declare function hsgapi:status-of-the-series($request as map(*)) {
@@ -218,6 +252,11 @@ declare function hsgapi:view-interior($request as map(*)) {
     let $divisionId := $request?parameters?divisionId
     let $_ := util:log("INFO", "publicationId: " || $publicationId || " divisionId: " || $divisionId)
     let $doc := collection($config:data-default || "/" || $publicationId)/id($divisionId)
+        [not(self::tei:divGen)]
+        (: The volume root marks where the printed TOC goes with
+           <divGen xml:id="toc"/>, so id("toc") resolves both that
+           placeholder and the real front-matter division (OP#1306);
+           only the division has a page. :)
     return
         if (not(hsgapi:is-exact-division($doc, $divisionId))) then
             (: id() tokenizes its argument on whitespace, so "d1 d3" resolves to two

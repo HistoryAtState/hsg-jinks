@@ -1,0 +1,50 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                <li>
+                    <a href="[[ $context?context-path ]]/">
+                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments">
+                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
+                    </a>
+                </li>
+                <li aria-current="page">
+                    <pb-i18n key="menu.vietnam-guide">Guide to Sources on Vietnam, 1969-1975</pb-i18n>
+                </li>
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [# The TEI "Guide to Sources on Vietnam, 1969-1975" monograph rendered as a single page
+       (OP#1301), port of hsg-shell pages/historicaldocuments/vietnam-guide.xml; the content
+       comes from the other-publications data package via hsg:vietnam-guide. #]
+    <div class="section-landing usa-prose">
+        [[ hsg:vietnam-guide($context) ]]
+    </div>
+    [% template before %]
+    [% include "templates/pages/historicaldocuments/sidebar.html" %]
+    [% endtemplate %]
+</template>
