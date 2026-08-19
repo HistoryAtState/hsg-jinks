@@ -169,6 +169,30 @@ declare %private function hsg:toc-divisions($publication as xs:string) as map(*)
  : with subchapters need no special casing -- though the loaded fixture has
  : exactly one compilation and cannot exercise those variants.
  :)
+(:~
+ : A division title for display (OP#1085): frus-unbound-alpha splits a
+ : chapter/compilation title into a date-range title plus a descriptive
+ : subtitle, which read as a run-on when merely concatenated. The reference
+ : renders a line break between them (its tei-lb br) everywhere the title
+ : appears as a block -- heading, TOCs, document list -- so this returns
+ : (title, <br/>, subtitle) for the split case and the plain title otherwise.
+ : Breadcrumbs, which cannot break lines, join with a space instead.
+ :
+ : normalize-space is load-bearing, not noise (PR #47 review): 1431 of the
+ : 2714 titleStmt titles in the loaded corpus carry line wraps from TEI
+ : source indentation, which would otherwise pass through into the emitted
+ : markup and into exact-text assertions as raw newline-plus-indent runs.
+ :)
+declare %private function hsg:split-title($titles as element(tei:title)*) {
+    if (count($titles) gt 1) then (
+        head($titles) => normalize-space(),
+        <br/>,
+        tail($titles) => string-join(' ') => normalize-space()
+    ) else (
+        $titles => normalize-space()
+    )
+};
+
 declare %private function hsg:toc-entries($division as element(tei:TEI)?, $divisions as map(*),
         $publication as xs:string, $current as xs:string?, $current-is-document as xs:boolean,
         $context as map(*)) {
@@ -177,9 +201,9 @@ declare %private function hsg:toc-entries($division as element(tei:TEI)?, $divis
     where map:contains($divisions, $id)
     let $included := $divisions($id)
     (: A chapter/compilation title may be split across two title elements (a
-       date range plus a descriptive subtitle, frus-unbound-alpha); join both
-       rather than showing only the date range. :)
-    let $title := normalize-space(string-join($included//tei:fileDesc//tei:titleStmt/tei:title, ''))
+       date range plus a descriptive subtitle, frus-unbound-alpha); show both
+       with the reference's line break between them (OP#1085). :)
+    let $title := hsg:split-title($included//tei:fileDesc//tei:titleStmt/tei:title)
     (: current when it is the page being viewed, or -- on a document page, where
        the document itself is not listed -- when it is the division including it :)
     let $is-current :=
@@ -638,9 +662,12 @@ declare function hsg:collection-breadcrumbs($context as map(*)) {
                     <a href="{$context?context-path}/historicaldocuments/{$publication}">{$volume-title}</a>
                 </li>,
             if (not($is-landing) and $division-type = ('chapter', 'compilation')) then
-                (: See hsg:toc-entries: the title may be split into a date
-                   range and a subtitle; join both. :)
-                let $own-title := normalize-space(string-join($context?doc?content//tei:titleStmt/tei:title, ''))
+                (: See hsg:split-title: the title may be split into a date
+                   range and a subtitle. A breadcrumb cannot break lines, so
+                   join with a space, as the reference breadcrumb does;
+                   normalize-space for the same reason as there. :)
+                let $own-title := $context?doc?content//tei:titleStmt/tei:title
+                    => string-join(' ') => normalize-space()
                 return <li class="breadcrumb-current" aria-current="page">{$own-title}</li>
             else if (not($is-landing) and $division-type = 'document') then
                 let $number := ($context?doc?content//tei:bibl[@type='frus-document-number'])[1]/string()
@@ -781,17 +808,9 @@ declare %private function hsg:landing-toc-entries($division as element(tei:TEI)?
     let $id := $include/@xpointer/string()
     where map:contains($divisions, $id)
     let $included := $divisions($id)
-    let $title-parts := $included//tei:fileDesc//tei:titleStmt/tei:title
-    (: A date-range title plus a descriptive subtitle (frus-unbound-alpha)
-       reads as a run-on without a break between them -- hsg-shell inserts
-       a <br/> here too. :)
-    let $title :=
-        if (count($title-parts) gt 1) then (
-            normalize-space($title-parts[1]),
-            <br/>,
-            normalize-space(string-join($title-parts[position() gt 1], ' '))
-        ) else
-            normalize-space($title-parts)
+    (: hsg-shell inserts a <br/> between date-range title and subtitle here
+       too; shared logic in hsg:split-title (OP#1085). :)
+    let $title := hsg:split-title($included//tei:fileDesc//tei:titleStmt/tei:title)
     let $range-label := hsg:document-range-label(hsg:document-range($included))
     (: Unpublished division: muted, reference parity with hsg-shell's
        li.pending. See hsg:toc-entries. :)
@@ -1066,7 +1085,9 @@ declare function hsg:division-listing($context as map(*)) {
     if (not(exists($doc))) then ()
     else
         let $publication := ($doc//tei:bibl[@type='frus-volume-id'])[1]/string()
-        let $title := normalize-space(string-join($doc//tei:teiHeader//tei:titleStmt/tei:title, ' '))
+        (: Line break between date-range title and subtitle, reference parity
+           (OP#1085). :)
+        let $title := hsg:split-title($doc//tei:teiHeader//tei:titleStmt/tei:title)
         let $type := normalize-space(($doc//tei:bibl[@type='frus-division-type'])[1])
         return
             <div class="hsg-frus__division">
@@ -1131,7 +1152,9 @@ declare %private function hsg:doclist-document($target as element(tei:TEI), $pub
 declare %private function hsg:doclist-division($target as element(tei:TEI), $publication as xs:string,
         $type as xs:string, $context as map(*)) {
     let $id := normalize-space(($target//tei:bibl[@type='frus-division-id'])[1])
-    let $title := normalize-space(string-join($target//tei:teiHeader//tei:titleStmt/tei:title, ' '))
+    (: Line break between date-range title and subtitle, reference parity
+       (OP#1085). :)
+    let $title := hsg:split-title($target//tei:teiHeader//tei:titleStmt/tei:title)
     let $range := hsg:document-range-label(hsg:document-range($target))
     let $pending := ends-with($type, '-pending')
     return
