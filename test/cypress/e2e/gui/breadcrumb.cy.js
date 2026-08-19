@@ -68,7 +68,10 @@ describe("breadcrumb", () => {
             "Home",
             "Historical Documents",
             VOLUME_TITLE,
-            "March 1985–July 1985“Now we have to begin everything anew”: Gorbachev’s Debut",
+            // Space between date-range title and subtitle (OP#1085); the
+            // block contexts (heading, TOCs) line-break instead, covered by
+            // chapter-title-split.cy.js.
+            "March 1985–July 1985 “Now we have to begin everything anew”: Gorbachev’s Debut",
         ]);
         lastCrumb().should("have.attr", "aria-current", "page").and("have.css", "display", "block");
     });
