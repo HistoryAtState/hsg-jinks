@@ -145,15 +145,10 @@ declare function hsgapi:frus-history-document($request as map(*)) {
     return
         if (doc-available($hsgapi:frus-history-root || "/documents/" || $documentId || ".xml")) then
             vapi:html(
-                map:merge((
-                    $request,
-                    map {
-                        "parameters": map:merge((
-                            $request?parameters,
-                            map { "file": "pages/historicaldocuments/frus-history/document" }
-                        ))
-                    }
-                )),
+                map:put($request, "parameters", map:merge((
+                    $request?parameters,
+                    map { "file": "pages/historicaldocuments/frus-history/document" }
+                ))),
                 map { "document-id": $documentId }
             )
         else
@@ -169,15 +164,10 @@ declare function hsgapi:frus-history-article($request as map(*)) {
     return
         if (doc-available($hsgapi:frus-history-root || "/articles/" || $articleId || ".xml")) then
             vapi:html(
-                map:merge((
-                    $request,
-                    map {
-                        "parameters": map:merge((
-                            $request?parameters,
-                            map { "file": "pages/historicaldocuments/frus-history/article" }
-                        ))
-                    }
-                )),
+                map:put($request, "parameters", map:merge((
+                    $request?parameters,
+                    map { "file": "pages/historicaldocuments/frus-history/article" }
+                ))),
                 map { "article-id": $articleId }
             )
         else
@@ -199,15 +189,10 @@ declare function hsgapi:frus-history-section($request as map(*)) {
         if (count($division) eq 1 and $division instance of element(tei:div)
                 and $division/@xml:id = $sectionId) then
             vapi:html(
-                map:merge((
-                    $request,
-                    map {
-                        "parameters": map:merge((
-                            $request?parameters,
-                            map { "file": "pages/historicaldocuments/frus-history/section" }
-                        ))
-                    }
-                )),
+                map:put($request, "parameters", map:merge((
+                    $request?parameters,
+                    map { "file": "pages/historicaldocuments/frus-history/section" }
+                ))),
                 map { "section-id": $sectionId }
             )
         else

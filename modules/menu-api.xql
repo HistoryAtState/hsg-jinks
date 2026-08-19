@@ -53,15 +53,10 @@ declare function menuapi:menu($request as map(*)) {
  : roaster re-escaping the markup.
  :)
 declare %private function menuapi:render($request as map(*), $file as xs:string) {
-    vapi:html(map:merge((
-        $request,
-        map {
-            "parameters": map:merge((
-                $request?parameters,
-                map { "file": $file }
-            ))
-        }
-    )))
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
+        map { "file": $file }
+    ))))
 };
 
 (:~

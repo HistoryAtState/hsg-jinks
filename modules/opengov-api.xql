@@ -20,15 +20,10 @@ declare namespace router="http://e-editiones.org/roaster/router";
  : backing document -- same technique as hsgapi:view-section / devapi:render.
  :)
 declare %private function ogapi:render($request as map(*), $file as xs:string) {
-    vapi:html(map:merge((
-        $request,
-        map {
-            "parameters": map:merge((
-                $request?parameters,
-                map { "file": $file }
-            ))
-        }
-    )))
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
+        map { "file": $file }
+    ))))
 };
 
 declare function ogapi:index($request as map(*)) {
