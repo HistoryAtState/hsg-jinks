@@ -177,14 +177,20 @@ declare %private function hsg:toc-divisions($publication as xs:string) as map(*)
  : appears as a block -- heading, TOCs, document list -- so this returns
  : (title, <br/>, subtitle) for the split case and the plain title otherwise.
  : Breadcrumbs, which cannot break lines, join with a space instead.
+ :
+ : normalize-space is load-bearing, not noise (PR #47 review): 1431 of the
+ : 2714 titleStmt titles in the loaded corpus carry line wraps from TEI
+ : source indentation, which would otherwise pass through into the emitted
+ : markup and into exact-text assertions as raw newline-plus-indent runs.
  :)
 declare %private function hsg:split-title($titles as element(tei:title)*) {
     if (count($titles) gt 1) then (
-        normalize-space($titles[1]),
+        head($titles) => normalize-space(),
         <br/>,
-        normalize-space(string-join($titles[position() gt 1], ' '))
-    ) else
-        normalize-space($titles)
+        tail($titles) => string-join(' ') => normalize-space()
+    ) else (
+        $titles => normalize-space()
+    )
 };
 
 declare %private function hsg:toc-entries($division as element(tei:TEI)?, $divisions as map(*),
@@ -658,8 +664,10 @@ declare function hsg:collection-breadcrumbs($context as map(*)) {
             if (not($is-landing) and $division-type = ('chapter', 'compilation')) then
                 (: See hsg:split-title: the title may be split into a date
                    range and a subtitle. A breadcrumb cannot break lines, so
-                   join with a space, as the reference breadcrumb does. :)
-                let $own-title := normalize-space(string-join($context?doc?content//tei:titleStmt/tei:title, ' '))
+                   join with a space, as the reference breadcrumb does;
+                   normalize-space for the same reason as there. :)
+                let $own-title := $context?doc?content//tei:titleStmt/tei:title
+                    => string-join(' ') => normalize-space()
                 return <li class="breadcrumb-current" aria-current="page">{$own-title}</li>
             else if (not($is-landing) and $division-type = 'document') then
                 let $number := ($context?doc?content//tei:bibl[@type='frus-document-number'])[1]/string()
