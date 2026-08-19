@@ -24,15 +24,10 @@ declare namespace router="http://e-editiones.org/roaster/router";
  : template, same technique as hsgapi:view-section / dhapi:render.
  :)
 declare %private function tagapi:render($request as map(*), $file as xs:string) {
-    vapi:html(map:merge((
-        $request,
-        map {
-            "parameters": map:merge((
-                $request?parameters,
-                map { "file": $file }
-            ))
-        }
-    )))
+    vapi:html(map:put($request, "parameters", map:merge((
+        $request?parameters,
+        map { "file": $file }
+    ))))
 };
 
 declare function tagapi:index($request as map(*)) {
