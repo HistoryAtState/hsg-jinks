@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Electronic Resources for U.S. Foreign Relations</title>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian, Foreign Service Institute, United States Department of State</publisher>
+            </publicationStmt>
+            <sourceDesc>
+                <p>born digital, ported from hsg-shell</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <div>
+                <head>Electronic Resources for U.S. Foreign Relations</head>
+                <p>A growing number of primary source materials relating to U.S. foreign relations
+            are available online. The Office of the Historian maintains this list as a
+            resource for the public and will continue to update it as more resources are
+            made available.</p>
+                <div>
+                    <head>Declassified Document Collections</head>
+                    <list>
+                        <item>
+                            <ref target="https://www.foia.cia.gov">Central Intelligence Agency, Freedom of
+                    Information Electronic Reading Room</ref>
+                        </item>
+                        <item>
+                            <ref target="http://www.dod.mil/pubs/foi/rdroom.html">Department of Defense,
+                    Freedom of Information Electronic Reading Room</ref>
+                        </item>
+                        <item>
+                            <ref target="https://foia.state.gov/">Department of State, Freedom of
+                    Information Electronic Reading Room</ref>
+                        </item>
+                        <item>
+                            <ref target="https://nsarchive.gwu.edu/postings/briefing-books">National
+                    Security Archive, Electronic Briefing Books</ref>
+                        </item>
+                    </list>
+                </div>
+                <div>
+                    <head>Department of State Telegrams</head>
+                    <list>
+                        <item>
+                            <ref target="https://aad.archives.gov/aad/series-list.jsp?cat=WR43">National
+                    Archives and Records Administration, Access to Archival Databases</ref>
+                        </item>
+                    </list>
+                </div>
+                <div>
+                    <head>Public Papers of the Presidents of the United States</head>
+                    <list>
+                        <item>
+                            <ref target="http://www.presidency.ucsb.edu/">University of California at Santa
+                    Barbara American Presidency Project</ref>
+                        </item>
+                    </list>
+                </div>
+                <div>
+                    <head>Association of Southeast Asian Nations</head>
+                    <list>
+                        <item>
+                            <ref target="http://asean.org/documents-archive-copy/">Documents and Archive</ref>
+                        </item>
+                    </list>
+                </div>
+                <div>
+                    <head>Ford Presidency Materials</head>
+                    <list>
+                        <item>
+                            <ref target="http://www.fordlibrarymuseum.gov/collections-digital.aspx">Ford
+                    Library Electronic Resources</ref>
+                        </item>
+                    </list>
+                </div>
+                <div>
+                    <head>Nixon Presidency Materials</head>
+                    <list>
+                        <item>
+                            <ref target="https://www.nixonlibrary.gov/virtuallibrary">Nixon Library
+                    Electronic Resources</ref>
+                        </item>
+                    </list>
+                </div>
+                <div>
+                    <head>United Nations Materials</head>
+                    <list>
+                        <item>
+                            <ref target="https://unyearbook.un.org/">Yearbook of the United Nations</ref>
+                        </item>
+                    </list>
+                </div>
+                <div>
+                    <head>Pre-1861 Resources</head>
+                    <list>
+                        <item>
+                            <ref target="historicaldocuments/pre-1861">Our list of resources for
+                    research on pre-1861 topics in U.S. foreign relations.</ref>
+                        </item>
+                    </list>
+                </div>
+            </div>
+        </body>
+    </text>
+</TEI>

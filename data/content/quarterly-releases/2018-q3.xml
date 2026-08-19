@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Quarterly Release of Newly Digitized Foreign Relations Volumes</title>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian, Foreign Service Institute, United States Department of State</publisher>
+            </publicationStmt>
+            <sourceDesc>
+                <p>born digital, ported from hsg-shell</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <div>
+                <head>Quarterly Release of Newly Digitized <hi rend="italic">Foreign Relations</hi> Volumes</head>
+                <p>August 23, 2018</p>
+                <p>The Department of State today announces the release of newly digitized
+            versions of fifteen volumes from the <hi rend="italic">Foreign Relations of the United
+                States</hi> series, the official documentary record of U.S. foreign
+            relations. These volumes cover events that took place between 1866 and 1873
+            and were originally published in print between 1868 and 1874:</p>
+                <p>
+                    <hi rend="italic">Papers Relating to the Foreign Relations of the United States,</hi>
+            1867-1874</p>
+                <list type="ordered">
+                    <item>
+                        <ref target="historicaldocuments/frus1867p1">Papers Relating to the
+                    Foreign Affairs, 1867 Accompanying the Annual Message of the
+                    President to the Second Session of the Fortieth Congress, Part
+                I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1867p2">Papers Relating to the
+                    Foreign Affairs, 1867 Accompanying the Annual Message of the
+                    President to the Second Session of the Fortieth Congress, Part
+                    II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1868p1">Papers Relating to the
+                    Foreign Affairs, 1868 Accompanying the Annual Message of the
+                    President to the Third Session of the Fortieth Congress, Part
+                I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1868p2">Papers Relating to the
+                    Foreign Affairs, 1868 Accompanying the Annual Message of the
+                    President to the Third Session of the Fortieth Congress, Part
+                II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1870">Papers Relating to the
+                    Foreign Relations of the United States, 1870 Transmitted to
+                    Congress, With the Annual Message of the President, December 5,
+                    1870</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1871">Papers Relating to the
+                    Foreign Relations of the United States, 1871 Transmitted to
+                    Congress, With the Annual Message of the President, December 4,
+                    1871</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1872p1">Papers Relating to the
+                    Foreign Relations of the United States, 1872 Transmitted to
+                    Congress, With the Annual Message of the President, December 2,
+                    1872, Part I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1872p2v1">Papers Relating to the
+                    Foreign Relations of the United States, 1872 Papers Relating to the
+                    Treaty of Washington, Part II, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1872p2v2">Papers Relating to the
+                    Foreign Relations of the United States, 1872 Papers Relating to the
+                    Treaty of Washington, Part II, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1872p2v3">Papers Relating to the
+                    Foreign Relations of the United States, 1872 Papers Relating to the
+                    Treaty of Washington, Part II, Volume III</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1872p2v4">Papers Relating to the
+                    Foreign Relations of the United States, 1872 Papers Relating to the
+                    Treaty of Washington, Part II, Volume IV</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1872p2v5">Papers Relating to the
+                    Foreign Relations of the United States, 1872 Papers Relating to the
+                    Treaty of Washington, Part II, Volume V</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1873p1v1">Papers Relating to the
+                    Foreign Relations of the United States, 1873 General Correspondence;
+                    and Papers Relating to Naturalization and Expatriation, Part I,
+                    Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1873p1v2">Papers Relating to the
+                    Foreign Relations of the United States, 1873 General Correspondence;
+                    and Papers Relating to Naturalization and Expatriation, Part I,
+                    Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1873p2v3">Papers Relating to the
+                    American and British Joint Claims Commission, Part II, Volume
+                    III</ref>.</item>
+                </list>
+                <p>Today’s release is part of the Office of the Historian’s ongoing project, in
+            partnership with the University of Wisconsin Digital Collections Center, to
+            digitize the entire <hi rend="italic">Foreign Relations</hi> series. The University
+            graciously provided high quality scanned images of each printed book, which
+            the Office further digitized to create a full text searchable edition. These
+            volumes are available online and as free ebooks at the Office of the
+            Historian’s website (<ref target="historicaldocuments">https://history.state.gov/historicaldocuments</ref>). This is the latest
+            in a series of quarterly releases, which will continue until the
+                <hi rend="italic">FRUS</hi> digital archive is complete.</p>
+            </div>
+        </body>
+    </text>
+</TEI>

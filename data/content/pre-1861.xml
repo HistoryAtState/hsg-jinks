@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Pre-1861 U.S. foreign relations materials</title>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian, Foreign Service Institute, United States Department of State</publisher>
+            </publicationStmt>
+            <sourceDesc>
+                <p>born digital, ported from hsg-shell</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <div>
+                <head>Pre-1861 U.S. foreign relations materials</head>
+                <p>The <hi rend="italic">Foreign Relations of the United States</hi>
+                    <ref target="historicaldocuments/frus-history">began publication in 1861</ref>.
+            Prior to that time, the U.S. government released documents through a variety of
+            means.</p>
+                <p>One of those means was the U.S. Congressional Serial Set, which began publication
+            in 1817. Your local library may hold the Serial Set or subscribe to an
+            electronic database which contains these documents. Two indexes of foreign
+            affairs-related documents in the Serial Set are available:</p>
+                <list>
+                    <item>Between 1914 and 1921, Adelaide Rosalia Hasse compiled a three-volume <ref target="https://catalog.hathitrust.org/api/volumes/oclc/1100023.html">
+                            <hi rend="italic">Index to United States Documents Relating to Foreign Affairs,
+                        1828-1861</hi>
+                        </ref>, available online in full text via the Hathi Trust.</item>
+                    <item>
+                        <ref target="historicaldocuments/pre-1861/serial-set">U.S. foreign
+                    relations materials in the pre-1861 U.S. Congressional Serial Set</ref>: A
+                much shorter index of the foreign affairs material in the Serial Set,
+                compiled by the Office of the Historian.</item>
+                </list>
+                <p>Other sources for early U.S. foreign affairs documentation are also available
+            online. These include:</p>
+                <list>
+                    <item>
+                        <ref target="http://memory.loc.gov/ammem/amlaw/lwsp.html">
+                            <hi rend="italic">American State Papers</hi>
+                        </ref>, which covers 1789 to 1838 and is available online via the Library of
+                Congress.</item>
+                    <item>
+                        <ref target="https://founders.archives.gov/">
+                            <hi rend="italic">Founders Online</hi>
+                        </ref>, which includes documents from the papers of Secretaries of State
+                Thomas Jefferson, James Madison, and James Monroe, among others.</item>
+                </list>
+            </div>
+        </body>
+    </text>
+</TEI>

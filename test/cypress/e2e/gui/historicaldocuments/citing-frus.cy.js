@@ -18,7 +18,10 @@ describe("the citing-frus page", () => {
     });
 
     it("links the canonic-URL example to the document page", () => {
-        cy.get("main blockquote a[href$='/historicaldocuments/frus1969-76v19p1/d75']", { timeout: 15000 })
+        // .block-quote, not the blockquote element: since OP#1313 the content
+        // comes from data/content/citing-frus.xml through the ODD, which
+        // renders tei:quote as div.block-quote.
+        cy.get("main .block-quote a[href$='/historicaldocuments/frus1969-76v19p1/d75']", { timeout: 15000 })
             .should("contain.text", "history.state.gov/historicaldocuments/frus1969-76v19p1/d75");
     });
 

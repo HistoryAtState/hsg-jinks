@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Quarterly Release of Newly Digitized Foreign Relations Volumes</title>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian, Foreign Service Institute, United States Department of State</publisher>
+            </publicationStmt>
+            <sourceDesc>
+                <p>born digital, ported from hsg-shell</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <div>
+                <head>Quarterly Release of Newly Digitized <hi rend="italic">Foreign Relations</hi> Volumes</head>
+                <p>December 7, 2017</p>
+                <p>The Department of State today announces the release of newly digitized
+            versions of seventeen volumes from the <hi rend="italic">Foreign Relations of the United
+                States</hi> series, the official documentary record of U.S. foreign
+            relations. These volumes cover events that took place between 1900 and 1911
+            and were originally published in print between 1902 and 1918:</p>
+                <p>
+                    <hi rend="italic">Papers Relating to the Foreign Relations of the United States,</hi>
+            1900–1911</p>
+                <list type="ordered">
+                    <item>
+                        <ref target="historicaldocuments/frus1900">Papers Relating to the
+                    Foreign Relations of the United States, 1900</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1901">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 3, 1901</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1901China">Foreign Relations of
+                    the United States, 1901, Appendix, Affairs in China, Report of
+                    William W. Rockhill, Late Commissioner to China, with Accompanying
+                    Documents</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1902">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 2, 1902</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1902app1">Foreign Relations of the
+                    United States, 1902, Whaling and Sealing Claims Against Russia, On
+                    Account of Arrest and Seizure of the American Vessels “Cape Horn
+                    Pigeon,” “James Hamilton Lewis,” “C. H. White,” and “Kate and Anna,”
+                    Appendix I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1902app2">Foreign Relations of the
+                    United States, 1902, United States vs. Mexico, In the matter of the
+                    case of the Pious Fund of the Californias, Appendix II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1903">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 7, 1903</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1904">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 6, 1904</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1905">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 5, 1905</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1906p1">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 3, 1906, (In two
+                    parts), Part I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1906p2">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 3, 1906, (In two
+                    parts), Part II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1907p1">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 3, 1907, (In two
+                    parts), Part I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1907p2">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 3, 1907, (In two
+                    parts), Part II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1908">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 8, 1908</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1909">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 7, 1909 </ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1910">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 6, 1910</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1911">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 7, 1911 </ref>.</item>
+                </list>
+                <p>Today’s release is part of the Office of the Historian’s ongoing project, in
+            partnership with the University of Wisconsin Digital Collections Center, to
+            digitize the entire <hi rend="italic">Foreign Relations</hi> series. The University
+            graciously provided high quality scanned images of each printed book, which
+            the Office further digitized to create a full text searchable edition. These
+            volumes are available online and as free ebooks at the Office of the
+            Historian’s website (<ref target="historicaldocuments">https://history.state.gov/historicaldocuments</ref>). This is the latest
+            in a series of quarterly releases, which will continue until the
+                <hi rend="italic">FRUS</hi> digital archive is complete.</p>
+            </div>
+        </body>
+    </text>
+</TEI>

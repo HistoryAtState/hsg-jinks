@@ -1,0 +1,54 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "toggle": false
+                }
+            }
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                <li>
+                    <a href="[[ $context?context-path ]]/">
+                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments">
+                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
+                    </a>
+                </li>
+                <li>
+                    <a href="[[ $context?context-path ]]/historicaldocuments/quarterly-releases">
+                        <pb-i18n key="menu.quarterly-releases">Quarterly Releases</pb-i18n>
+                    </a>
+                </li>
+                <li aria-current="page">[[ replace($context?release-id, "^(\d+)-q(\d)$", "$1 Quarter $2") ]]</li>
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    [# One template for all ten frozen announcement pages (OP#1313): the content
+       lives in data/content/quarterly-releases/{release-id}.xml, the TEI ports
+       of the statics originally transcribed into ten sibling templates
+       (OP#1295); release-id arrives from hsgapi:quarterly-release. #]
+    <div class="section-landing usa-prose">
+        [[ hsg:content-page($context, "quarterly-releases/" || $context?release-id) ]]
+    </div>
+    [% template before %]
+    [% include "templates/pages/historicaldocuments/sidebar.html" %]
+    [% endtemplate %]
+</template>

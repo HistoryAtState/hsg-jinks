@@ -1308,3 +1308,15 @@ declare function hsg:vietnam-guide($context as map(*)) {
         doc("/db/apps/other-publications/vietnam-guide/guide-to-sources-on-vietnam-1969-1975.xml")
             //tei:body/*)
 };
+
+(:~
+ : A static content page from the app-owned data/content collection (OP#1313,
+ : PR #46 review follow-up): the page's TEI document rendered through the
+ : default ODD, replacing content transcribed into the HTML templates. Same
+ : pattern as hsg:vietnam-guide above, but for app-owned documents; internal
+ : links are encoded as app-root-relative ref targets, resolved against the
+ : context path by the content-collection ref model in hsg-jinks.odd.
+ :)
+declare function hsg:content-page($context as map(*), $page as xs:string) {
+    page:transform(doc($config:app-root || "/data/content/" || $page || ".xml")//tei:body/*)
+};

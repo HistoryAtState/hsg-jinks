@@ -426,6 +426,14 @@
                 <model predicate="global:volume-id($parameters, .) != '' and starts-with(@target, '#')" behaviour="link">
                     <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || global:volume-id($parameters, .) || '/' || substring-after(@target, '#')"/>
                 </model>
+                <model predicate="contains(base-uri(root(.)), '/data/content/') and not(matches(@target, '^([a-z][a-z0-9+.-]*:|#|/)'))" behaviour="link">
+                    <desc>App-internal links in the app-owned content pages
+                        (data/content, OP#1313): targets are app-root-relative
+                        (no scheme, no leading slash, no fragment), resolved
+                        against the context path. Absolute http/mailto targets
+                        fall through to the verbatim model below.</desc>
+                    <param name="uri" value="$parameters?context-path || '/' || @target"/>
+                </model>
                 <model predicate="@target" behaviour="link">
                     <param name="uri" value="@target"/>
                 </model>

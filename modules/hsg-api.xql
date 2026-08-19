@@ -122,7 +122,15 @@ declare function hsgapi:quarterly-release($request as map(*)) {
     let $releaseId := $request?parameters?releaseId
     return
         if ($releaseId = $hsgapi:quarterly-release-ids) then
-            hsgapi:render($request, "pages/historicaldocuments/quarterly-releases/" || $releaseId)
+            (: One template for all announcements since OP#1313; the content
+               documents live in data/content/quarterly-releases/. :)
+            vapi:html(
+                map:put($request, "parameters", map:merge((
+                    $request?parameters,
+                    map { "file": "pages/historicaldocuments/quarterly-release" }
+                ))),
+                map { "release-id": $releaseId }
+            )
         else
             error($errors:NOT_FOUND, "no quarterly release announcement " || $releaseId)
 };

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Quarterly Release of Newly Digitized Foreign Relations Volumes</title>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian, Foreign Service Institute, United States Department of State</publisher>
+            </publicationStmt>
+            <sourceDesc>
+                <p>born digital, ported from hsg-shell</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <div>
+                <head>Quarterly Release of Newly Digitized <hi rend="italic">Foreign Relations</hi> Volumes</head>
+                <p>June 15, 2017</p>
+                <p>The Department of State today announces the release of seventeen volumes from
+            the <hi rend="italic">Foreign Relations of the United States</hi> series, the official
+            documentary record of U.S. foreign relations. Sixteen of these volumes are
+            newly digitized. These volumes cover events that took place in 1919 and were
+            originally published in print between 1934 and 1947.</p>
+                <p>These sixteen volumes represent the Office of the Historian’s second
+            quarterly release focusing on the United States and the First World War. On
+            April 6, the Office released volumes dating from 1913‒1918, documenting the
+            advent of war in Europe and the role of the United States in the conflict,
+            first as a neutral power and then as combatant. Today’s release continues
+            that story with the search for peace and stability in the aftermath of the
+            war.</p>
+                <p>
+                    <hi rend="italic">Papers Relating to the Foreign Relations of the United States,</hi>
+            1919</p>
+                <list type="ordered">
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv01">The Paris Peace
+                    Conference, 1919, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv02">The Paris Peace
+                    Conference, 1919, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv03">The Paris Peace
+                    Conference, 1919, Volume III</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv04">The Paris Peace
+                    Conference, 1919, Volume IV</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv05">The Paris Peace
+                    Conference, 1919, Volume V</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv06">The Paris Peace
+                    Conference, 1919, Volume VI</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv07">The Paris Peace
+                    Conference, 1919, Volume VII</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv08">The Paris Peace
+                    Conference, 1919, Volume VIII</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv09">The Paris Peace
+                    Conference, 1919, Volume IX</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv10">The Paris Peace
+                    Conference, 1919, Volume X</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv11">The Paris Peace
+                    Conference, 1919, Volume XI</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv12">The Paris Peace
+                    Conference, 1919, Volume XII</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Parisv13">The Paris Peace
+                    Conference, 1919, Volume XIII</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919Russia">Russia, 1919</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919v01">Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1919v02">Volume II</ref>.</item>
+                </list>
+                <p>Today’s release is part of the Office of the Historian’s ongoing project, in
+            partnership with the University of Wisconsin Digital Collections Center, to
+            digitize the entire <hi rend="italic">Foreign Relations</hi> series. The University
+            graciously provided high quality scanned images of each printed book, which
+            the Office further digitized to create a full text searchable edition. These
+            volumes are available online and as free ebooks at the Office of the
+            Historian’s website (<ref target="historicaldocuments">https://history.state.gov/historicaldocuments</ref>).</p>
+                <p>This quarterly release also includes the new publication <hi rend="italic">Foreign
+                Relations of the United States</hi>, Iran, 1951–1954. This volume
+            complements <ref target="historicaldocuments/frus1952-54v10">
+                        <hi rend="italic">Foreign Relations of the United States</hi>, 1952–1954, Volume X,
+                Iran, 1951–1954</ref>, published in 1989, by providing documentation on
+            the use of covert operations by the Truman and Eisenhower administrations. </p>
+                <p>
+                    <hi rend="italic">Foreign Relations of the United States</hi>
+                </p>
+                <list type="ordered">
+                    <item>
+                        <ref target="historicaldocuments/frus1951-54Iran">Iran, 1951–1954</ref>
+                    </item>
+                </list>
+            </div>
+        </body>
+    </text>
+</TEI>
