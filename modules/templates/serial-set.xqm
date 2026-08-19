@@ -19,9 +19,62 @@ declare variable $sset:doc := doc("/db/apps/other-publications/serial-set/pre-18
 
 declare variable $sset:bibls := $sset:doc//tei:listBibl/tei:bibl;
 
-declare variable $sset:regions := distinct-values($sset:bibls/tei:term[@type = 'region']);
+(: The path every region/subject link on these pages points at; prefixed
+   with the request's context path by sset:browse-href. :)
+declare variable $sset:browse-path := "/historicaldocuments/pre-1861/serial-set/browse";
 
-declare variable $sset:subjects := distinct-values($sset:bibls/tei:term[@type = 'subject']);
+(:~
+ : Pre-built controlled vocabularies (PR #46 review): distinct-values over
+ : the 2805 records on every request is wasted work for a finite set of five
+ : continents and a slow-moving subject list, so both are frozen here. The
+ : trade-off is deliberate: a value added upstream is silently absent until
+ : the lists are refreshed. Regenerate against the data with, e.g.:
+ :   for $r in distinct-values(doc("/db/apps/other-publications/serial-set/pre-1861.xml")
+ :       //tei:listBibl/tei:bibl/tei:term[@type = 'region']) order by $r return $r
+ : (and the same with @type = 'subject').
+ :)
+declare variable $sset:regions := (
+    "Africa",
+    "Asia and the Pacific",
+    "Europe",
+    "Middle East",
+    "The Americas"
+);
+
+(: Only the count of this list is consumed (the landing page's intro
+   sentence and the region-subject browse list derive their subjects per
+   region from the records), so the one source value that carries a line
+   wrap, the Sweden/Norway treaty, is listed in normalized form. :)
+declare variable $sset:subjects := (
+    "Algeria", "Argentina", "Australia", "Austria-Hungary", "Bahamas",
+    "Barbary", "Belgium", "Belize", "Bermuda", "Bolivia",
+    "Brazil", "British West Indies", "Burma", "Canada", "Chile",
+    "China", "Colombia", "Denmark", "East Asia", "East Indies",
+    "Ecuador", "Egypt", "Ethiopia", "Fiji", "France",
+    "German Customs Union", "Germany", "Great Britain", "Greece", "Hanseatic Republics",
+    "Hungary", "India", "Indonesia", "Iran", "Ireland",
+    "Italy (Kingdom of Two Sicilies)", "Japan", "Korea", "Lebanon", "Liberia",
+    "Libya", "Macau", "Mexico", "Monroe Doctrine", "Morocco",
+    "Mozambique", "Nicaragua", "Norway", "Nova Scotia", "Ottoman Empire",
+    "Panama", "Papal States", "Paraguay", "Peru", "Phillippines",
+    "Poland", "Polynesia", "Portugal", "Puerto Rico", "Regional Issues",
+    "Republic of New Grenada", "Russia", "Scotland", "Senegal", "Spain",
+    "Spain/France: Treaty of San Illdefonso (1800)", "Sri Lanka", "Sweden",
+    "Sweden/Norway: Treaty of Commerce and Navigation (1827)",
+    "Switzerland", "Syria", "Tahiti", "Tasmania", "Texas",
+    "Thailand", "The Netherlands", "Tunisia", "Turkey", "Uruguay",
+    "Venezuela", "Yucatan"
+);
+
+(:~
+ : The one place the browse-page URLs are assembled (PR #46 review): region
+ : link when $subject is absent, region+subject link otherwise.
+ :)
+declare %private function sset:browse-href($context as map(*), $region as xs:string,
+        $subject as xs:string?) as xs:string {
+    $context?context-path || $sset:browse-path || "?region=" || encode-for-uri($region)
+    || (if (exists($subject)) then "&amp;subject=" || encode-for-uri($subject) else ())
+};
 
 declare function sset:regions-count($context as map(*)) as xs:integer {
     count($sset:regions)
@@ -57,7 +110,7 @@ declare function sset:region-subject-list($context as map(*)) as element(ul) {
         order by $region
         return
             <li>
-                <a href="{$context?context-path}/historicaldocuments/pre-1861/serial-set/browse?region={encode-for-uri($region)}">{$region}</a>
+                <a href="{sset:browse-href($context, $region, ())}">{$region}</a>
                 {" (" || count($regional-subject-entries) || ")"}
                 <ul>{
                     for $subject in distinct-values($regional-subject-entries)
@@ -65,7 +118,7 @@ declare function sset:region-subject-list($context as map(*)) as element(ul) {
                     order by $subject
                     return
                         <li>
-                            <a href="{$context?context-path}/historicaldocuments/pre-1861/serial-set/browse?region={encode-for-uri($region)}&amp;subject={encode-for-uri($subject)}">{$subject}</a>
+                            <a href="{sset:browse-href($context, $region, $subject)}">{$subject}</a>
                             {" (" || count($subject-entries) || ")"}
                         </li>
                 }</ul>
@@ -114,11 +167,10 @@ declare function sset:region-and-or-subject-name($context as map(*)) as xs:strin
 declare function sset:browse-breadcrumbs($context as map(*)) as element(li)* {
     let $region := $context?request?parameters?region
     let $subject := $context?request?parameters?subject
-    let $region-url := $context?context-path || "/historicaldocuments/pre-1861/serial-set/browse?region=" || encode-for-uri(($region, "")[1])
     return (
         if (exists($region)) then
             <li>
-                <a href="{$region-url}">{$region}</a>
+                <a href="{sset:browse-href($context, $region, ())}">{$region}</a>
             </li>
         else
             (),
@@ -167,11 +219,11 @@ declare function sset:filtered-table($context as map(*)) as element(table) {
                         {
                         if ($cols-to-exclude = 'Region') then () else
                             <td>
-                                <a href="{$context?context-path}/historicaldocuments/pre-1861/serial-set/browse?region={encode-for-uri($bibl-region)}">{$bibl-region}</a>
+                                <a href="{sset:browse-href($context, $bibl-region, ())}">{$bibl-region}</a>
                             </td>,
                         if ($cols-to-exclude = 'Subject') then () else
                             <td>
-                                <a href="{$context?context-path}/historicaldocuments/pre-1861/serial-set/browse?region={encode-for-uri($bibl-region)}&amp;subject={encode-for-uri($bibl-subject)}">{$bibl-subject}</a>
+                                <a href="{sset:browse-href($context, $bibl-region, $bibl-subject)}">{$bibl-subject}</a>
                             </td>
                         }
                         <td>{$bibl/tei:title/string()}</td>
