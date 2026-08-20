@@ -62,18 +62,3 @@ declare function eduapi:view-module($request as map(*)) {
         else
             eduapi:render($request, "pages/education/module")
 };
-
-(:~
- : Wraps vapi:handle-error to correct its hardcoded 200 to 404 for
- : errors:NOT_FOUND -- vapi:handle-error itself always returns 200.
- : Identical pattern to hsgapi:handle-error / countryapi:handle-error /
- : dhapi:handle-error.
- :)
-declare function eduapi:handle-error($error as map(*)) {
-    let $response := vapi:handle-error($error)
-    return
-        if ($error?code eq $errors:NOT_FOUND) then
-            map:put($response, xs:QName("router:RESPONSE_CODE"), 404)
-        else
-            $response
-};

@@ -403,18 +403,3 @@ declare function dhapi:visits-listing($request as map(*)) {
         else
             error($errors:NOT_FOUND, "no visits for " || $key)
 };
-
-(:~
- : Wrap the jinks-owned vapi:handle-error, which renders the error page but
- : hardcodes HTTP 200, so a missing page still reports success to crawlers and
- : link checkers. Keep its markup, correct the status. Same as
- : hsgapi:handle-error / countryapi:handle-error.
- :)
-declare function dhapi:handle-error($error as map(*)) {
-    let $response := vapi:handle-error($error)
-    return
-        if ($error?code eq $errors:NOT_FOUND) then
-            map:put($response, xs:QName("router:RESPONSE_CODE"), 404)
-        else
-            $response
-};

@@ -315,17 +315,3 @@ declare function hsgapi:is-attachment($doc as node()?) as xs:boolean {
 declare function hsgapi:attachment-parent($doc as node()?) as xs:string {
     (root($doc)//tei:relatedItem[@type='attachment-source']/@target/string(), "its parent")[1]
 };
-
-(:~
- : Wrap the jinks-owned vapi:handle-error, which renders the error page but
- : hardcodes HTTP 200, so a missing page still reports success to crawlers and
- : link checkers. Keep its markup, correct the status.
- :)
-declare function hsgapi:handle-error($error as map(*)) {
-    let $response := vapi:handle-error($error)
-    return
-        if ($error?code eq $errors:NOT_FOUND) then
-            map:put($response, xs:QName("router:RESPONSE_CODE"), 404)
-        else
-            $response
-};

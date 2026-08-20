@@ -197,31 +197,3 @@ declare function ogapi:frus-metadata-feed($request as map(*)) {
 declare function ogapi:not-found($request as map(*)) {
     error($errors:NOT_FOUND, "no page " || $request?parameters?page || " under /open")
 };
-
-(:~
- : Wrap the jinks-owned vapi:handle-error, which renders the error page but
- : hardcodes HTTP 200, so a missing page still reports success to crawlers
- : and link checkers. Keep its markup, correct the status. Same pattern as
- : hsgapi:handle-error / devapi:handle-error / dhapi:handle-error /
- : countryapi:handle-error.
- :
- : Also maps err:FORG0001 to 400: roaster's own parameters:cast-value casts
- : query parameters with an unguarded xs:integer($value) when the OpenAPI
- : schema declares type "integer" -- verified by testing frus-latest.xml
- : with a non-integer "n": the cast throws err:FORG0001 (Roaster's own
- : try/catch in router:route rethrows it with the same code), which is the
- : exact same unguarded-cast bug OP#1191 flagged in the old app, just moved
- : into the library. Declaring the schema type alone does not give a clean
- : 4xx for free, so this handler has to do it, same trick as the NOT_FOUND
- : mapping below.
- :)
-declare function ogapi:handle-error($error as map(*)) {
-    let $response := vapi:handle-error($error)
-    return
-        if ($error?code eq $errors:NOT_FOUND) then
-            map:put($response, xs:QName("router:RESPONSE_CODE"), 404)
-        else if ($error?code eq QName("http://www.w3.org/2005/xqt-errors", "err:FORG0001")) then
-            map:put($response, xs:QName("router:RESPONSE_CODE"), 400)
-        else
-            $response
-};

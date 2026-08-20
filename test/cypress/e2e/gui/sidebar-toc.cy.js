@@ -128,7 +128,12 @@ describe("sidebar table of contents", () => {
         // the TOC links into #519's retained URL space
         cy.visit(`${VOLUME}/ch1`);
         cy.get("nav.toc ul.usa-sidenav a").each(($a) => {
-            cy.request($a.attr("href")).its("status").should("eq", 200);
+            // resolve the root-relative href against the server origin: passing it
+            // to cy.request raw prefixes the full baseUrl (which already carries
+            // the context path), doubling it -- masked while error pages served
+            // HTTP 200, exposed by the OP#1309 status fix
+            cy.request(new URL($a.attr("href"), Cypress.config("baseUrl")).href)
+                .its("status").should("eq", 200);
         });
     });
 

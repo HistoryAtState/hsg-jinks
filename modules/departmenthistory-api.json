@@ -22,7 +22,7 @@
             "get": {
                 "summary": "Department History section landing page",
                 "operationId": "dhapi:index",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -36,7 +36,7 @@
             "get": {
                 "summary": "People hub page",
                 "operationId": "dhapi:people",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -50,7 +50,7 @@
             "get": {
                 "summary": "Chiefs of Mission hub page",
                 "operationId": "dhapi:chiefs",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -64,7 +64,7 @@
             "get": {
                 "summary": "Principal Officers and Chiefs of Mission introduction (static article)",
                 "operationId": "dhapi:principals-chiefs",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -78,7 +78,7 @@
             "get": {
                 "summary": "Travels hub page",
                 "operationId": "dhapi:travels",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -92,7 +92,7 @@
             "get": {
                 "summary": "Diplomatic Couriers hub page",
                 "operationId": "dhapi:couriers",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -106,7 +106,7 @@
             "get": {
                 "summary": "U.S. Marine Corps and the Department (static article)",
                 "operationId": "dhapi:marine-corps",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -120,7 +120,7 @@
             "get": {
                 "summary": "World War I and the Department (static article)",
                 "operationId": "dhapi:wwi",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -134,7 +134,7 @@
             "get": {
                 "summary": "Diplomatic courier film page",
                 "operationId": "dhapi:courier-film",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "parameters": [
                     {
@@ -162,7 +162,7 @@
             "get": {
                 "summary": "Short History table of contents",
                 "operationId": "dhapi:short-history",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -176,7 +176,7 @@
             "get": {
                 "summary": "Short History chapter or subchapter",
                 "operationId": "dhapi:short-history-section",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "parameters": [
                     {
@@ -204,7 +204,7 @@
             "get": {
                 "summary": "Buildings of the Department of State table of contents",
                 "operationId": "dhapi:buildings",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -218,7 +218,7 @@
             "get": {
                 "summary": "Buildings chapter or subchapter",
                 "operationId": "dhapi:buildings-section",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "parameters": [
                     {
@@ -246,7 +246,7 @@
             "get": {
                 "summary": "Secretaries of State, ordered list (record-derived, POCOM)",
                 "operationId": "dhapi:secretaries",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -260,7 +260,7 @@
             "get": {
                 "summary": "Person page: POCOM service record, with a TEI biography for Secretaries who have one",
                 "operationId": "dhapi:person",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "parameters": [
                     {
@@ -292,7 +292,7 @@
             "get": {
                 "summary": "People by name: A-Z letter index",
                 "operationId": "dhapi:people-by-name",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -306,7 +306,7 @@
             "get": {
                 "summary": "People by name: all people whose surname starts with the given letter",
                 "operationId": "dhapi:people-by-name-letter",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "parameters": [
                     {
@@ -334,7 +334,7 @@
             "get": {
                 "summary": "People by year: decade-grouped year index",
                 "operationId": "dhapi:people-by-year",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -348,7 +348,7 @@
             "get": {
                 "summary": "People holding a role in the given year",
                 "operationId": "dhapi:people-by-year-year",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "parameters": [
                     {
@@ -376,7 +376,7 @@
             "get": {
                 "summary": "Principal officer positions grouped by category",
                 "operationId": "dhapi:principal-officers",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -390,7 +390,7 @@
             "get": {
                 "summary": "Principal officer position: description and chronological officeholder list",
                 "operationId": "dhapi:principal-officers-role",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "parameters": [
                     {
@@ -418,7 +418,7 @@
             "get": {
                 "summary": "Chiefs of Mission, letter-grouped by country",
                 "operationId": "dhapi:chiefs-by-country",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -432,7 +432,7 @@
             "get": {
                 "summary": "Chiefs of Mission to international organizations, listed",
                 "operationId": "dhapi:chiefs-by-organization",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -446,7 +446,7 @@
             "get": {
                 "summary": "Chiefs of Mission for a country or international organization (polymorphic id)",
                 "operationId": "dhapi:chiefs-listing",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "parameters": [
                     {
@@ -478,7 +478,7 @@
             "get": {
                 "summary": "Travels of the President: by-president and by-destination indexes",
                 "operationId": "dhapi:travels-president",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -492,7 +492,7 @@
             "get": {
                 "summary": "Travels of the Secretary of State: by-secretary and by-destination indexes",
                 "operationId": "dhapi:travels-secretary",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -506,7 +506,7 @@
             "get": {
                 "summary": "Trips for a president, or trips to a destination country",
                 "operationId": "dhapi:travels-president-listing",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "parameters": [
                     {
@@ -534,7 +534,7 @@
             "get": {
                 "summary": "Trips for a secretary, or trips to a destination country",
                 "operationId": "dhapi:travels-secretary-listing",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "parameters": [
                     {
@@ -566,7 +566,7 @@
             "get": {
                 "summary": "Visits by Foreign Leaders: by-year and by-country indexes",
                 "operationId": "dhapi:visits",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "responses": {
                     "200": {
@@ -580,7 +580,7 @@
             "get": {
                 "summary": "Visits for a given year or country of origin",
                 "operationId": "dhapi:visits-listing",
-                "x-error-handler": "dhapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "departmenthistory" ],
                 "parameters": [
                     {

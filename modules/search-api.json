@@ -40,7 +40,7 @@
                 "summary": "Search landing form, or search results when a query is present",
                 "description": "Single route with a parameter-driven template dispatch: the handler folds over the three parameters `q`, `start-date` and `end-date`; if at least one of them is present and non-empty after normalize-space, the results template is rendered (a whitespace-only `q` does NOT count), otherwise the landing form. `within`, `volume-id`, `sort-by` etc. alone never trigger the results view. Before that dispatch the query guard checks the raw `q` value(s): a SQL-injection-shaped value or a total `q` length over 1000 characters is answered with HTTP 400 (HTML error page) without running any query. The results view executes one Lucene query string (hsg-fulltext clause AND optional frus-search-date-min/max range clauses) with facet filters (hsg-category from `within`, hsg-publication from the section-to-publication map, frus-volume-id from `volume-id`) across the collections of the eleven indexed data apps, sorts by relevance or the binary hsg-date-min field, caches the full hit sequence in an in-memory cache for ~5 minutes (key: sha1 of the normalized parameter set), and pages through it with `start`/`per-page`. Date filtering applies only when the scope is exactly the `documents` section; date strings are interpreted in US Eastern time (a hard-coded UTC-05:00 offset, not adjusted for daylight saving). Lucene query-parser errors from malformed user syntax are currently swallowed and rendered as zero results, for URL-preservation reasons; whether that should remain the permanent behavior or become a deliberate 400 is tracked as OP#1273, not yet decided. Sitewide header search boxes on all other pages submit to this route with `q` only.",
                 "operationId": "searchapi:search",
-                "x-error-handler": "searchapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": ["search"],
                 "parameters": [
                     {
@@ -205,7 +205,7 @@
                 "summary": "Search Tips page",
                 "description": "Static hand-authored help page documenting defaults (AND between terms, case-insensitivity), scope checkboxes, keyword operators (phrases, booleans, wildcards, proximity), date/time filtering and volume filtering, with many pre-filled example links back into /search. No document behind it: renders through vapi:html with a fixed template, like the conferences landing page. Any other child path of /search (e.g. /search/foo) is a 404, declared explicitly below.",
                 "operationId": "searchapi:tips",
-                "x-error-handler": "searchapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": ["search"],
                 "responses": {
                     "200": {
@@ -226,7 +226,7 @@
                 "summary": "Unknown child of /search -- always 404",
                 "description": "Declared explicitly rather than relying on Roaster's own unmatched-route handling: this app's generic /{docid} catch-all route (jinks' own modules/lib/api.json, docid parameter has allowReserved: true) matches ANY otherwise-unrouted path including multi-segment ones, and its own error handler (vapi:handle-error, unwrapped) hardcodes HTTP 200 -- so without this route, /search/foo would silently 200 through that catch-all instead of 404ing (confirmed live; the same gap exists today for e.g. /departmenthistory/foo, out of this epic's scope to fix elsewhere). This route is more specific (single literal path segment) than that generic one, so Roaster prefers it, and its handler unconditionally errors NOT_FOUND.",
                 "operationId": "searchapi:not-found",
-                "x-error-handler": "searchapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": ["search"],
                 "parameters": [
                     {

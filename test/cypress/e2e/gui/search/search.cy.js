@@ -78,10 +78,11 @@ describe("keyword search and refinement (OP#1184)", () => {
         cy.request("search?q=cuba&within=not-a-real-section").its("status").should("eq", 200);
     });
 
-    it("malformed Lucene query syntax (a genuine Lucene parse error, not just zero matches -- confirmed directly against ft:query) is swallowed to a 200 zero-results page rather than erroring; see OP#1273 for whether this should stay the permanent behavior", () => {
-        cy.request("search?q=" + encodeURIComponent("cuba AND")).its("status").should("eq", 200);
-        cy.visit("search?q=" + encodeURIComponent("cuba AND"));
-        cy.contains("No results were found");
+    it("malformed Lucene query syntax is rejected with the 400 invalid-search page (OP#1273 decision; previously swallowed to a 200 zero-results page)", () => {
+        cy.request({ url: "search?q=" + encodeURIComponent("cuba AND"), failOnStatusCode: false })
+            .its("status").should("eq", 400);
+        cy.visit({ url: "search?q=" + encodeURIComponent("cuba AND"), failOnStatusCode: false });
+        cy.contains("Invalid search query");
     });
 });
 

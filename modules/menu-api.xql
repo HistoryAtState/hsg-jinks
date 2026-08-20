@@ -68,7 +68,3 @@ declare function menuapi:menu-mobile($request as map(*)) {
     response:set-header("Cache-Control", "public, max-age=" || $menuapi:max-age),
     menuapi:render($request, "menu-mobile-fragment")
 };
-
-declare function menuapi:handle-error($error) {
-    vapi:handle-error($error)
-};

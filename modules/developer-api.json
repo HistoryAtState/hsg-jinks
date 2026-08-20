@@ -15,7 +15,7 @@
             "get": {
                 "summary": "Developer Resources landing page",
                 "operationId": "devapi:index",
-                "x-error-handler": "devapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "developer"
                 ],
@@ -37,7 +37,7 @@
             "get": {
                 "summary": "Ebook Catalog API documentation",
                 "operationId": "devapi:catalog",
-                "x-error-handler": "devapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "developer"
                 ],
@@ -59,7 +59,7 @@
             "get": {
                 "summary": "Catch-all for any other path segment under /developer",
                 "operationId": "devapi:not-found",
-                "x-error-handler": "devapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "developer"
                 ],
