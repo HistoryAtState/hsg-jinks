@@ -31,18 +31,20 @@
                     </a>
                 </li>
                 <li aria-current="page">
-                    <pb-i18n key="menu.other-electronic-resources">Other Electronic Resources</pb-i18n>
+                    <pb-i18n key="menu.[[ $context?page-id ]]">[[ hsg:content-title($context, $context?page-id) ]]</pb-i18n>
                 </li>
             </ul>
         </nav>
     </li>
     [% endtemplate %]
 
-    [# Content lives in data/content/other-electronic-resources.xml (OP#1313), the TEI port of the
-       static originally transcribed into this template (OP#1300); rendered
-       through the default ODD via hsg:content-page. #]
+    [# One template for every data-driven static of the section (OP#1313, PR #50
+       review): the content lives in data/content/{page-id}.xml, rendered
+       through the default ODD; page-id arrives from hsgapi:content-page, and
+       the breadcrumb falls back to the content document's own title when the
+       menu.{page-id} i18n key is absent. #]
     <div class="section-landing usa-prose">
-        [[ hsg:content-page($context, "other-electronic-resources") ]]
+        [[ hsg:content-page($context, $context?page-id) ]]
     </div>
     [% template before %]
     [% include "templates/pages/historicaldocuments/sidebar.html" %]

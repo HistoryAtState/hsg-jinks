@@ -1320,3 +1320,13 @@ declare function hsg:vietnam-guide($context as map(*)) {
 declare function hsg:content-page($context as map(*), $page as xs:string) {
     page:transform(doc($config:app-root || "/data/content/" || $page || ".xml")//tei:body/*)
 };
+
+(:~
+ : A content page's display title, from its TEI header; the single static
+ : template's breadcrumb uses it as the pb-i18n fallback (OP#1313, PR #50
+ : review).
+ :)
+declare function hsg:content-title($context as map(*), $page as xs:string) as xs:string? {
+    doc($config:app-root || "/data/content/" || $page || ".xml")
+        //tei:titleStmt/tei:title[1] => normalize-space()
+};
