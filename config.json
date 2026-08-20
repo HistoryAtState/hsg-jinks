@@ -308,11 +308,17 @@
     "^resources/images/gplv3-rounded-grey-180x60\\.jpg",
     "^resources/images/(tei-with-text|e-editiones-logo-color|jinntec|tei-publisher-logo-color|arrow-right)\\.svg",
     "^resources/scripts/header\\.js",
-    "^resources/i18n/app/en\\.json",
+    "^resources/i18n/app/(de|en|pl)\\.json",
     "^templates/menu\\.html",
     "^templates/menu-mobile\\.html",
     "^test/cypress/e2e/gui/landing-page\\.cy\\.js",
-    "^test/cypress/e2e/landing\\.cy\\.js"
+    "^test/cypress/e2e/landing\\.cy\\.js",
+    "^templates/footer\\.html",
+    "^modules/lib/api\\.json",
+    "^data/content/"
+  ],
+  "ignore" : [
+    "^modules/lib/api\\.xql"
   ],
   "templating" : {
     "use" : [
