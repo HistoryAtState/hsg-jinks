@@ -5,7 +5,6 @@ module namespace opdsapi="http://teipublisher.com/api/opds";
 import module namespace roaster="http://e-editiones.org/roaster";
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace opds="https://history.state.gov/ns/templates/opds-catalog" at "templates/opds-catalog.xqm";
-import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 (:~
  : The key roaster reads the status code from. Rebuilt here rather than
@@ -95,7 +94,34 @@ declare function opdsapi:search($request as map(*)) {
  : this section's OpenAPI spec. "code" is the error QName's own local name
  : (e.g. "NOT_FOUND", "BAD_REQUEST"), not the HTTP status number.
  :)
-declare function opdsapi:handle-error($error as map(*)) {
-    (: Central status mapping + themed 404/400 pages: OP#1309. :)
-    hsg-errors:handle($error)
+declare function opdsapi:handle-error($error as map(*)) as map(*) {
+    (: FORG0001 is not one of roaster's own $errors:* QNames: it's the plain
+     : XPath cast error Roaster's own OpenAPI-schema-driven parameter
+     : coercion raises when a query param declared "type": "integer" (n,
+     : here) can't be cast, BEFORE opdsapi:recent's own body ever runs --
+     : confirmed live (?n=abc). Without this, that case would fall to the
+     : 500 branch below despite being exactly the "malformed input" case
+     : #1202 asks to turn into a 400. :)
+    let $localName := local-name-from-QName($error?code)
+    let $status :=
+        if ($error?code eq $errors:NOT_FOUND) then 404
+        else if ($error?code eq $errors:BAD_REQUEST or $localName eq "FORG0001") then 400
+        else 500
+    let $body := map {
+        "code": $localName,
+        "description": $error?description
+    }
+    return
+        map {
+            xs:QName("router:RESPONSE_CODE"): $status,
+            xs:QName("router:RESPONSE_TYPE"): "application/json",
+            xs:QName("router:RESPONSE_HEADERS"): map {},
+            (: NOT pre-serialized: router:write-response does its own
+             : method=json serialization of RESPONSE_BODY based on
+             : RESPONSE_TYPE -- handing it an already-serialized JSON
+             : string double-encodes it (confirmed live: the response body
+             : came back as a JSON string literal containing escaped JSON
+             : text, not a bare JSON object). :)
+            xs:QName("router:RESPONSE_BODY"): $body
+        }
 };

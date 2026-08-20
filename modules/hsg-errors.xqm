@@ -28,12 +28,19 @@ import module namespace roaster="http://e-editiones.org/roaster";
 declare namespace router="http://e-editiones.org/roaster/router";
 
 declare function hsg-errors:handle($error as map(*)) {
+    (: FORG0001 is roaster's own parameters:cast-value failing on a query
+       parameter whose OpenAPI schema declares a numeric type (e.g. a
+       non-integer n) -- a client error, but not one of roaster's $errors:*
+       QNames. It gets the 400 status with the diagnostics body (the friendly
+       400 page's invalid-search copy would be wrong for it), the same
+       mapping the per-section handlers carried before delegating here. :)
     let $status :=
         if ($error?code eq $errors:NOT_FOUND) then 404
         else if ($error?code eq $errors:BAD_REQUEST) then 400
+        else if (local-name-from-QName($error?code) eq "FORG0001") then 400
         else 500
     return
-        if ($status = (404, 400)) then
+        if ($error?code = ($errors:NOT_FOUND, $errors:BAD_REQUEST)) then
             hsg-errors:render($error, "error-" || $status || ".html", $status)
         else
             (: the jinks-owned generic page renders the diagnostics; only the
