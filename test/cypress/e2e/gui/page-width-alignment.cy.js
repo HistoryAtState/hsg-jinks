@@ -16,6 +16,9 @@
 //   4. the footer sits at the bottom of the viewport on a short page, and
 //      below all content (not clipped) on a long one
 //
+// Plus a fifth, from a later regression: main's flex child must stay inside
+// main's column, so the prose never paints over the sidebars.
+//
 // baseUrl: see the note in document-view.cy.js.
 
 const VOLUME = "historicaldocuments/frus1981-88v05";
@@ -122,6 +125,26 @@ describe("page-width alignment", () => {
             cy.get("footer.usa-footer")
                 .then(($footer) => $footer[0].getBoundingClientRect().bottom)
                 .should("be.closeTo", win.innerHeight, 1);
+        });
+    });
+
+    // layout.css makes main a CENTERED flex container whose child is "flex: 1".
+    // A flex item defaults to min-width: auto, so it refuses to shrink below its
+    // content's min-content width, and because main centers it the excess spills
+    // BOTH ways -- the prose lands on top of the sidebars on either side, not
+    // just off one edge. One unbreakable run is enough to trigger it: the
+    // prev/next pager label is white-space: nowrap, and d80's previous chapter
+    // title measures ~700px against a 632px column. hsg-theme.css answers with
+    // min-width: 0 on ".sticky-layout > main > *", the same remedy #1217 applied
+    // to main itself one level up.
+    it("main's content stays inside its column and off the sidebars", () => {
+        cy.viewport(1440, 900);
+        cy.visit(`${VOLUME}/d80`); // longest prev-pager chapter title in the volume
+        cy.get("main").then(($main) => {
+            const main = $main[0].getBoundingClientRect();
+            const child = $main[0].firstElementChild.getBoundingClientRect();
+            expect(child.left, "content left edge").to.be.gte(main.left - 1);
+            expect(child.right, "content right edge").to.be.lte(main.right + 1);
         });
     });
 
