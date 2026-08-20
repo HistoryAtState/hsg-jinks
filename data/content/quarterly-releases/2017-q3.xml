@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Quarterly Release of Newly Digitized Foreign Relations Volumes</title>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian, Foreign Service Institute, United States Department of State</publisher>
+            </publicationStmt>
+            <sourceDesc>
+                <p>born digital, ported from hsg-shell</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <div>
+                <head>Quarterly Release of Newly Digitized <hi rend="italic">Foreign Relations</hi> Volumes</head>
+                <p>September 6, 2017</p>
+                <p>The Department of State today announces the release of thirty-two volumes
+            from the <hi rend="italic">Foreign Relations of the United States</hi> series, the
+            official documentary record of U.S. foreign relations. These thirty-two
+            volumes cover events that took place between 1920 and 1941 and were
+            originally published in print between 1935 and 1943.</p>
+                <p>
+                    <hi rend="italic">Papers Relating to the Foreign Relations of the United States,</hi>
+            1920–1941</p>
+                <list type="ordered">
+                    <item>
+                        <ref target="historicaldocuments/frus1920v01">Papers Relating to the
+                    Foreign Relations of the United States, 1920, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1920v02">Papers Relating to the
+                    Foreign Relations of the United States, 1920, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1920v03">Papers Relating to the
+                    Foreign Relations of the United States, 1920, Volume III</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1921v01">Papers Relating to the
+                    Foreign Relations of the United States, 1921, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1921v02">Papers Relating to the
+                    Foreign Relations of the United States, 1921, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1922v01">Papers Relating to the
+                    Foreign Relations of the United States, 1922, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1922v02">Papers Relating to the
+                    Foreign Relations of the United States, 1922, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1923v01">Papers Relating to the
+                    Foreign Relations of the United States, 1923, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1923v02">Papers Relating to the
+                    Foreign Relations of the United States, 1923, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1924v01">Papers Relating to the
+                    Foreign Relations of the United States, 1924, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1924v02">Papers Relating to the
+                    Foreign Relations of the United States, 1924, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1925v01">Papers Relating to the
+                    Foreign Relations of the United States, 1925, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1925v02">Papers Relating to the
+                    Foreign Relations of the United States, 1925, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1926v01">Papers Relating to the
+                    Foreign Relations of the United States, 1926, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1926v02">Papers Relating to the
+                    Foreign Relations of the United States, 1926, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1927v01">Papers Relating to the
+                    Foreign Relations of the United States, 1927, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1927v02">Papers Relating to the
+                    Foreign Relations of the United States, 1927, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1927v03">Papers Relating to the
+                    Foreign Relations of the United States, 1927, Volume III</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1928v01">Papers Relating to the
+                    Foreign Relations of the United States, 1928, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1928v02">Papers Relating to the
+                    Foreign Relations of the United States, 1928, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1928v03">Papers Relating to the
+                    Foreign Relations of the United States, 1928, Volume III</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1929v01">Papers Relating to the
+                    Foreign Relations of the United States, 1929, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1929v02">Papers Relating to the
+                    Foreign Relations of the United States, 1929, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1929v03">Papers Relating to the
+                    Foreign Relations of the United States, 1929, Volume III</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1930v01">Papers Relating to the
+                    Foreign Relations of the United States, 1930, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1930v02">Papers Relating to the
+                    Foreign Relations of the United States, 1930, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1930v03">Papers Relating to the
+                    Foreign Relations of the United States, 1930, Volume III</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1931v01">Papers Relating to the
+                    Foreign Relations of the United States, 1931, Volume I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1931v02">Papers Relating to the
+                    Foreign Relations of the United States, 1930, Volume II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1931v03">Papers Relating to the
+                    Foreign Relations of the United States, 1931, The Far East, Volume
+                    III</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1931-41v01">Papers Relating to the
+                    Foreign Relations of the United States, Japan, 1931–1941, Volume
+                    I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1931-41v02">Papers Relating to the
+                    Foreign Relations of the United States, Japan, 1931–1941, Volume
+                    II</ref>.</item>
+                </list>
+                <p>Today’s release is part of the Office of the Historian’s ongoing project, in
+            partnership with the University of Wisconsin Digital Collections Center, to
+            digitize the entire <hi rend="italic">Foreign Relations</hi> series. The University
+            graciously provided high quality scanned images of each printed book, which
+            the Office further digitized to create a full text searchable edition. These
+            volumes are available online and as free ebooks at the Office of the
+            Historian’s website (<ref target="historicaldocuments">https://history.state.gov/historicaldocuments</ref>).</p>
+            </div>
+        </body>
+    </text>
+</TEI>

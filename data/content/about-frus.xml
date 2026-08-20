@@ -1,45 +1,24 @@
-<template>
-    ---json
-    {
-        "templating": {
-            "extends": "templates/layouts/hsg-content.html"
-        },
-        "theme": {
-            "layout": {
-                "before": {
-                    "toggle": false
-                }
-            }
-        }
-    }
-    ---
-    [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul>
-                <li>
-                    <a href="[[ $context?context-path ]]/">
-                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-                    </a>
-                </li>
-                <li>
-                    <a href="[[ $context?context-path ]]/historicaldocuments">
-                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
-                    </a>
-                </li>
-                <li aria-current="page">
-                    <pb-i18n key="menu.about-frus">About the Foreign Relations Series</pb-i18n>
-                </li>
-            </ul>
-        </nav>
-    </li>
-    [% endtemplate %]
-
-    [# Static article ported verbatim from hsg-shell pages/historicaldocuments/about-frus.xml (OP#1291) #]
-    <div class="section-landing usa-prose">
-        <h1>About the <em>Foreign Relations of the United States</em> Series</h1>
-        <p>The Department of State has published the <a href="[[ $context?context-path ]]/historicaldocuments"
-                ><em>Foreign Relations of the United States</em> (FRUS) series</a>, the
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>About the Foreign Relations of the United States Series</title>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian, Foreign Service Institute, United States Department of State</publisher>
+            </publicationStmt>
+            <sourceDesc>
+                <p>born digital, ported from hsg-shell</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <div>
+                <head>About the <hi rend="italic">Foreign Relations of the United States</hi> Series</head>
+                <p>The Department of State has published the <ref target="historicaldocuments">
+                        <hi rend="italic">Foreign Relations of the United States</hi> (FRUS) series</ref>, the
             official documentary record of U.S. foreign policy, since 1861. The Office of
             the Historian (OH) prepares the series under the requirements established by
             Public Law 102-138 (105 Stat. 647, codified in relevant part at 22 U.S.C. § 4351
@@ -53,7 +32,7 @@
             historians full and complete access to pertinent records at 20 years. The
             statute also mandates publication of volumes 30 years after the events they
             document.</p>
-        <p>Under the direction of the General Editor of the FRUS series, OH historians plan
+                <p>Under the direction of the General Editor of the FRUS series, OH historians plan
             the overall scope and content of the series, and research, compile, and edit
             individual volumes according to guidelines established in 1925 by Secretary of
             State Frank Kellogg and codified in the FRUS statute. These include: that the
@@ -63,7 +42,7 @@
             deletion has been made; that the published record should omit no facts that were
             of major importance in reaching a decision; and that nothing should be omitted
             for the purposes of concealing a defect in policy.</p>
-        <p>FRUS documents the history of U.S. bilateral and regional relations; global
+                <p>FRUS documents the history of U.S. bilateral and regional relations; global
             issues such as terrorism, narcotics, health, and the environment; and topics
             such as national security policy, foreign economic policy, and foreign policy
             organization and management. The series is a highly visible manifestation of the
@@ -81,8 +60,7 @@
             valuable to U.S. efforts to shape global norms of historical transparency and
             offers citizens of many nations an important source for an accurate
             understanding of their own histories.</p>
-    </div>
-    [% template before %]
-    [% include "templates/pages/historicaldocuments/sidebar.html" %]
-    [% endtemplate %]
-</template>
+            </div>
+        </body>
+    </text>
+</TEI>

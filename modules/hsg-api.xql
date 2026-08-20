@@ -51,20 +51,36 @@ declare function hsgapi:view-section($request as map(*)) {
  : route by Roaster path specificity; see the note on devapi:not-found in
  : developer-api.xql.
  :)
+(:~
+ : Shared renderer for the data-driven statics (OP#1313, PR #50 review):
+ : one template, pages/historicaldocuments/content-page.html, fed the page
+ : id; the template derives breadcrumb label (menu.{page-id} i18n key with
+ : the content document's own title as fallback) and content from it.
+ :)
+declare %private function hsgapi:content-page($request as map(*), $page as xs:string) {
+    vapi:html(
+        map:put($request, "parameters", map:merge((
+            $request?parameters,
+            map { "file": "pages/historicaldocuments/content-page" }
+        ))),
+        map { "page-id": $page }
+    )
+};
+
 declare function hsgapi:about-frus($request as map(*)) {
-    hsgapi:render($request, "pages/historicaldocuments/about-frus")
+    hsgapi:content-page($request, "about-frus")
 };
 
 declare function hsgapi:citing-frus($request as map(*)) {
-    hsgapi:render($request, "pages/historicaldocuments/citing-frus")
+    hsgapi:content-page($request, "citing-frus")
 };
 
 declare function hsgapi:pre-1861($request as map(*)) {
-    hsgapi:render($request, "pages/historicaldocuments/pre-1861")
+    hsgapi:content-page($request, "pre-1861")
 };
 
 declare function hsgapi:other-electronic-resources($request as map(*)) {
-    hsgapi:render($request, "pages/historicaldocuments/other-electronic-resources")
+    hsgapi:content-page($request, "other-electronic-resources")
 };
 
 declare function hsgapi:vietnam-guide($request as map(*)) {
@@ -122,7 +138,15 @@ declare function hsgapi:quarterly-release($request as map(*)) {
     let $releaseId := $request?parameters?releaseId
     return
         if ($releaseId = $hsgapi:quarterly-release-ids) then
-            hsgapi:render($request, "pages/historicaldocuments/quarterly-releases/" || $releaseId)
+            (: One template for all announcements since OP#1313; the content
+               documents live in data/content/quarterly-releases/. :)
+            vapi:html(
+                map:put($request, "parameters", map:merge((
+                    $request?parameters,
+                    map { "file": "pages/historicaldocuments/quarterly-release" }
+                ))),
+                map { "release-id": $releaseId }
+            )
         else
             error($errors:NOT_FOUND, "no quarterly release announcement " || $releaseId)
 };

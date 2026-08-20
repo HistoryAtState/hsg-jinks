@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Quarterly Release of Newly Digitized Foreign Relations Volumes</title>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian, Foreign Service Institute, United States Department of State</publisher>
+            </publicationStmt>
+            <sourceDesc>
+                <p>born digital, ported from hsg-shell</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <div>
+                <head>Quarterly Release of Newly Digitized <hi rend="italic">Foreign Relations</hi> Volumes</head>
+                <p>March 1, 2018</p>
+                <p>The Department of State today announces the release of newly digitized
+            versions of seventeen volumes from the <hi rend="italic">Foreign Relations of the United
+                States</hi> series, the official documentary record of U.S. foreign
+            relations. These volumes cover events that took place between 1886 and 1899
+            and were originally published in print between 1889 and 1901:</p>
+                <p>
+                    <hi rend="italic">Papers Relating to the Foreign Relations of the United States,</hi>
+            1886–1899</p>
+                <list type="ordered">
+                    <item>
+                        <ref target="historicaldocuments/frus1888p1">Papers Relating to the
+                    Foreign Relations of the United States, Transmitted to Congress,
+                    With the Annual Message of the President, December 3, 1888, Part
+                    I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1888p2">Papers Relating to the
+                    Foreign Relations of the United States, Transmitted to Congress,
+                    With the Annual Message of the President, December 3, 1888, Part
+                    II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1889">Papers Relating to the
+                    Foreign Relations of the United States, Transmitted to Congress,
+                    With the Annual Message of the President, December 3, 1889</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1890">Papers Relating to the
+                    Foreign Relations of the United States, Transmitted to Congress,
+                    With the Annual Message of the President, December 1, 1890</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1891">Papers Relating to the
+                    Foreign Relations of the United States, Transmitted to Congress,
+                    With the Annual Message of the President, December 9, 1891</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1892">Papers Relating to the
+                    Foreign Relations of the United States, Transmitted to Congress,
+                    With the Annual Message of the President, December 5, 1892</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1893">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President, Transmitted to Congress, December 4, 1893</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1894">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President, Transmitted to Congress, December 3, 1894</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1894Nicaragua">Foreign Relations
+                    of the United States, 1894, Nicaragua (Mosquito Territory)</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1894app1">Foreign Relations of the
+                    United States, 1894, Appendix I, Chinese-Japanese War, Enforcement
+                    of Regulation Respective to Fur Seals, Mosquito Territory, Affairs
+                    at Bluefields, Claim of Antonio Maximo Mora, Import Duties on
+                    Certain Products of Colombia, Haiti, and Venezuela, Affairs in the
+                    Samoan Islands</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1894app2">Foreign Relations of
+                    United States, 1894, Appendix II, Affairs in Hawaii</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1895p1">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President, Transmitted to Congress December 2, 1895, Part
+                I</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1895p2">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President, Transmitted to Congress December 2, 1895, Part
+                II</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1896">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 7, 1896, and the
+                    Annual Report of the Secretary of State</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1897"> Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 6, 1897</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1898">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 5, 1898</ref>.</item>
+                    <item>
+                        <ref target="historicaldocuments/frus1899">Papers Relating to the
+                    Foreign Relations of the United States, With the Annual Message of
+                    the President Transmitted to Congress December 5, 1899</ref>.</item>
+                </list>
+                <p>Today’s release is part of the Office of the Historian’s ongoing project, in
+            partnership with the University of Wisconsin Digital Collections Center, to
+            digitize the entire <hi rend="italic">Foreign Relations</hi> series. The University
+            graciously provided high quality scanned images of each printed book, which
+            the Office further digitized to create a full text searchable edition. These
+            volumes are available online and as free ebooks at the Office of the
+            Historian’s website (<ref target="historicaldocuments">https://history.state.gov/historicaldocuments</ref>). This is the latest
+            in a series of quarterly releases, which will continue until the
+                <hi rend="italic">FRUS</hi> digital archive is complete.</p>
+            </div>
+        </body>
+    </text>
+</TEI>

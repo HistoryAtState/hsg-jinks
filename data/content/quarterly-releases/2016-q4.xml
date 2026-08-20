@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Quarterly Release of Newly Digitized Foreign Relations Volumes</title>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian, Foreign Service Institute, United States Department of State</publisher>
+            </publicationStmt>
+            <sourceDesc>
+                <p>born digital, ported from hsg-shell</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <div>
+                <head>Quarterly Release of Newly Digitized <hi rend="italic">Foreign Relations </hi>Volumes</head>
+                <p>December 8, 2016</p>
+                <p>The Department of State today announces the release of newly digitized
+            versions of twenty volumes from the <hi rend="italic">Foreign Relations of the United
+                States</hi> series, the official documentary record of U.S. foreign
+            relations. These volumes cover events that took place between 1932 and 1939
+            and were originally published in print between 1947 and 1953. Collectively,
+            these volumes cover U.S. foreign policy during critical international events
+            that occurred in the years that preceded the Second World War. Documented in
+            this release are the efforts of the United States in maintaining
+            international order against the rising tide of fascism in Europe, including
+            participation in lengthy multi-lateral arms limitation discussions in
+            Geneva. Official U.S. recognition of the Soviet Union and formal bilateral
+            relations through 1939 are treated in a special <hi rend="italic">Foreign
+            Relations</hi> volume that is included in this release. Foreign policy in
+            Asia during the Far East Crisis and the militaristic expansion of Japan is
+            also covered in these volumes.</p>
+                <p>
+                    <hi rend="italic">Foreign Relations of the United States Diplomatic Papers,</hi> 1932</p>
+                <list type="ordered">
+                    <item>
+                        <ref target="historicaldocuments/frus1932v01">General, Volume I</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1932v02">The British Commonwealth,
+                    Europe, Near East and Africa, Volume II</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1932v03">The Far East, Volume
+                    III</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1932v04">The Far East, Volume
+                    IV</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1932v05">The American Republics,
+                    Volume V</ref>
+                    </item>
+                </list>
+                <p>
+                    <hi rend="italic">Foreign Relations of the United States Diplomatic Papers,</hi> 1933</p>
+                <list type="ordered">
+                    <item>
+                        <ref target="historicaldocuments/frus1933v01">General, Volume I</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1933v02">The British Commonwealth,
+                    Europe, Near East and Africa, Volume II</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1933v03">The Far East, Volume
+                    III</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1933v04">The American Republics,
+                    Volume IV</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1933v05">The American Republics,
+                    Volume V</ref>
+                    </item>
+                </list>
+                <p>
+                    <hi rend="italic">Foreign Relations of the United States</hi>
+                </p>
+                <list type="ordered">
+                    <item>
+                        <ref target="historicaldocuments/frus1933-39">The Soviet Union,
+                    1933–1939</ref>
+                    </item>
+                </list>
+                <p>
+                    <hi rend="italic">Foreign Relations of the United States Diplomatic Papers,</hi> 1934</p>
+                <list type="ordered">
+                    <item>
+                        <ref target="historicaldocuments/frus1934v01">General, the British
+                    Commonwealth, Volume I</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1934v02">Europe, Near East and
+                    Africa, Volume II</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1934v03">The Far East, Volume
+                    III</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1934v04">The American Republics,
+                    Volume IV</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1934v05">The American Republics,
+                    Volume V</ref>
+                    </item>
+                </list>
+                <p>
+                    <hi rend="italic">Foreign Relations of the United States Diplomatic Papers,</hi> 1935</p>
+                <list type="ordered">
+                    <item>
+                        <ref target="historicaldocuments/frus1935v01">The Near East and Africa,
+                    Volume I</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1935v02">The British Commonwealth;
+                    Europe, Volume II</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1935v03">The Far East, Volume
+                    III</ref>
+                    </item>
+                    <item>
+                        <ref target="historicaldocuments/frus1935v04">The American Republics,
+                    Volume IV</ref>
+                    </item>
+                </list>
+                <p>Today’s release is part of the Office of the Historian’s ongoing project, in
+            partnership with the University of Wisconsin Digital Collections Center, to
+            digitize the entire <hi rend="italic">Foreign Relations</hi> series. The University
+            graciously provided high quality scanned images of each printed book, which
+            the Office further digitized to create a full text searchable edition. These
+            volumes are available online and as free ebooks at the Office of the
+            Historian’s website (<ref target="historicaldocuments">https://history.state.gov/historicaldocuments</ref>). This is the latest
+            in a series of <ref target="historicaldocuments/quarterly-releases">quarterly releases</ref>, which will continue until the 
+            <hi rend="italic">FRUS</hi> digital archive is complete.</p>
+            </div>
+        </body>
+    </text>
+</TEI>

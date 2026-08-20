@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Citing the Foreign Relations series</title>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian, Foreign Service Institute, United States Department of State</publisher>
+            </publicationStmt>
+            <sourceDesc>
+                <p>born digital, ported from hsg-shell</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <div>
+                <head>Citing the <hi rend="italic">Foreign Relations</hi> series</head>
+                <p>The Office of the Historian offers the following general recommendations for
+            citing documents in the <hi rend="italic">Foreign Relations of the United States</hi> series.
+            Your style guide may require different formatting of a citation, so you may need
+            to adapt the elements of the sample citations below to a specific format.</p>
+                <div>
+                    <head>Cite document numbers rather than page numbers</head>
+                    <p>Every document in the <hi rend="italic">Foreign Relations</hi> series since the 1955–57
+            subseries has been assigned a sequential number unique within the volume. The
+            advantage of citing a <hi rend="italic">Foreign Relations</hi> document by its document number
+            is that, unlike page numbers, the numbers are media neutral and remain
+            consistent across different media: print, web, and ebook. An example of a
+            citation to document number is as follows:</p>
+                    <quote>
+                        <hi rend="italic">Foreign Relations of the United States</hi>, 1969–1976, Volume XIX, Part 1,
+            Korea, 1969–1972, eds. Daniel J. Lawler and Erin R. Mahan (Washington:
+            Government Printing Office, 2010), Document 75.</quote>
+                    <p>The components of this citation are as follows:</p>
+                    <list type="ordered">
+                        <item>Series title: <hi rend="italic">Foreign Relations of the United States</hi>
+                        </item>
+                        <item>Subseries title: 1969–1976</item>
+                        <item>Volume number: Volume XIX, Part 1</item>
+                        <item>Volume title: Korea, 1969–1972</item>
+                        <item>Editors (not to include the General Editor): Daniel J. Lawler and Erin R.
+                Mahan</item>
+                        <item>City: Washington, D.C.</item>
+                        <item>Publisher: Government Printing Office</item>
+                        <item>Year published: 2010</item>
+                        <item>Location within the volume: Document 75</item>
+                    </list>
+                </div>
+                <div>
+                    <head>Cite volumes by URL</head>
+                    <p>Particularly if you consulted the web or ebook edition of a <hi rend="italic">Foreign
+                Relations</hi> volume, we recommend appending the canonic URL for the volume
+            (or document) to your reference. This will allow readers to directly access the
+            source. Taking the previous citation as an example, the following URL would be
+            appended to the end of the citation, often including a date the material was
+            accessed:</p>
+                    <quote>
+                        <ref target="historicaldocuments/frus1969-76v19p1/d75">https://history.state.gov/historicaldocuments/frus1969-76v19p1/d75</ref>
+            [accessed 27 Oct 2011]</quote>
+                    <p>URLs to <hi rend="italic">Foreign Relations</hi> documents always follow this structure: the
+            Office of the Historian’s website domain (“https://history.state.gov”), section
+            (“historicaldocuments”), volume identifier (“frus1969-76v19p1”), and document
+            identifier (“d75”).</p>
+                    <p>A scanned image of the original printed page (or scanned document, in the case of
+            certain electronic-only volumes) is available for citation by URL. You can find
+            these URLs in the right sidebar of each document, labeled "View Image." For
+            example, the sidebar for document 75 contains links to the images of pages <ref target="historicaldocuments/frus1969-76v19p1/pg_190">190</ref>, <ref target="historicaldocuments/frus1969-76v19p1/pg_191">191</ref>, and <ref target="historicaldocuments/frus1969-76v19p1/pg_192">192</ref>. Notice that
+            in these page-number-based URLs, the document identifier (“d75”) is substituted
+            with the page number identifier (“pg_190”, etc.).</p>
+                    <p>Citations to ebook editions are no different for these examples.</p>
+                </div>
+                <div>
+                    <head>When citing a document number is not possible</head>
+                    <p>Since volumes before the 1955–57 subseries did not include document numbers,
+            citations must reference page numbers:</p>
+                    <quote>
+                        <hi rend="italic">Foreign Relations of the United States</hi>, 1952–1954, General: Economic
+            and Political Matters, Volume I, Part 1, eds. David M. Baehler, Herbert A. Fine,
+            Ralph R. Goodwin, N. Stephen Kane, Ronald D. Landa, Lisle A. Rose, William F.
+            Sanford, Jr., and Ilana M. Stern (Washington: Government Printing Office, 1983),
+            798–800.</quote>
+                    <p>Document numbers have been superimposed on the web and ebook edition of all these
+            earlier volumes that have been digitized, so that every document has a unique
+            URL. But take caution that readers of the print edition will not be able to
+            locate a citation in these volumes by document number (e.g., the web edition of
+            the above citation appears as “<ref target="historicaldocuments/frus1952-54v01p1/d221">Document 221</ref>”). </p>
+                </div>
+                <div>
+                    <head>Variations in the titles of early <hi rend="italic">Foreign Relations</hi> volumes</head>
+                    <p>Early editions of the <hi rend="italic">Foreign Relations</hi> series used a variety of titles.
+            For example:</p>
+                    <quote>
+                        <hi rend="italic">Papers Relating to the Foreign Relations of the United States</hi>, 1918,
+            Russia, Volume III (Washington: Government Printing Office, 1932),
+            51.</quote>
+                    <quote>
+                        <hi rend="italic">Papers Relating to the Foreign Relations of the United States</hi>, 1893
+            (Washington: Government Printing Office, 1894), 452–453.</quote>
+                    <quote>
+                        <hi rend="italic">Message of the President of the United States to the Two Houses of Congress
+                at the Commencement of the Third Session of the Thirty-Seventh Congress</hi>
+            (Washington: Government Printing Office, 1862), 356–370.</quote>
+                    <p>(For more information on the titles, see the discussion of the term “<hi rend="italic">Foreign
+                Relations</hi> series” in the <ref target="historicaldocuments/frus-history/terms">history of the
+                    <hi rend="italic">Foreign Relations</hi> series</ref>.)</p>
+                    <p>Also, earlier volumes typically do not identify the editors, in which case the
+            names of editors can not be included in a citation.</p>
+                </div>
+            </div>
+        </body>
+    </text>
+</TEI>
