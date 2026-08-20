@@ -1,0 +1,32 @@
+/* Paged-media layer for Prince, applied on top of the canonical frus.css
+   (linked from the source's xml-stylesheet PI). Page geometry and running
+   furniture only — rendition semantics stay in frus.css. */
+
+@page {
+    size: letter;
+    margin: 1in 1in 0.9in;
+    @top-center {
+        content: string(doc-title);
+        font-size: 8pt;
+        font-variant: small-caps;
+        color: #444;
+    }
+    @bottom-center {
+        content: counter(page);
+        font-size: 9pt;
+    }
+}
+
+TEI {
+    font-size: 11pt;
+    line-height: 1.35;
+}
+
+titleStmt > title {
+    string-set: doc-title content();
+}
+
+/* keep the standOff notes with their heading rule on the final page block */
+standOff {
+    margin-top: 2em;
+}

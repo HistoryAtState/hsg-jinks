@@ -71,6 +71,10 @@
                 <exclude name=".tool-versions"/>
                 <exclude name="Dockerfile"/>
                 <exclude name="CLAUDE.md"/>
+                <!-- reference-only copies of the canonical FRUS TEI artifacts
+                     (tools/sync-frus-guidelines.sh); no runtime role. The one
+                     artifact the app does compile is resources/odd/frus.odd. -->
+                <exclude name="resources/frus-tei-guidelines/**"/>
                 <exclude name="lsp-config.xq"/>
                 <exclude name=".moderne/**"/>
                 <!-- Cypress runs from the host/container filesystem, not the deployed collection -->

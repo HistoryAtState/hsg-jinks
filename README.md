@@ -21,6 +21,7 @@ the sibling names matter:
 ├── jinks                 the Jinks generator itself (Mode A) — baked into every devcontainer image
 ├── jinks-templates       companion templates library — also baked in
 ├── hsg-jinks-data        FRUS sample data, deployed as frus-data-jinks — see "Data"
+├── frus-tei-guidelines   canonical FRUS TEI customization (schema, processing model, rendition vocabulary) — see "Tools"
 ├── hsg-project           pre-v10 reference implementation (hsg-shell) — see CLAUDE.md "Reference implementation"
 └── hsg-jinks             this repo: `main` + parallel worktrees — see "Parallel worktrees"
 ```
@@ -418,6 +419,22 @@ by hand.
 
 - `tools/inspect-page.xq` — fetch a deployed page server-side, assert on rendered
   markup by CSS class (excluded from the app build; run with `xst`, see header).
+- `tools/sync-frus-guidelines.sh` — vendor the canonical FRUS TEI artifacts
+  from the `frus-tei-guidelines` sibling checkout (see "Workspace layout").
+  `resources/odd/frus.odd` is the live one: `resources/odd/hsg-jinks.odd`
+  carries `source="frus.odd"`, so TEI Publisher merges the canonical FRUS
+  processing model with this app's overrides. `frus.css`, `print.css` and
+  `frus.rnc` land in `resources/frus-tei-guidelines/` for reference only and are
+  excluded from the app build; `frus.css` in particular must never go into
+  `resources/odd/`, because TEI Publisher would inline its bare TEI element
+  selectors into the web stylesheet, where they match HTML elements.
+  The vendored copies are kept byte-identical to canonical so drift is
+  detectable. Recompile the transforms after a sync that touches `frus.odd`.
+  ```
+  tools/sync-frus-guidelines.sh          # copy + record provenance
+  tools/sync-frus-guidelines.sh --check  # report drift, write nothing
+  jinks run hsg-jinks fix-odds           # recompile transform/ after frus.odd changes
+  ```
 - `tools/generate-frus-renditions.xq` — regenerate `resources/css/frus-renditions.css`
   from the FRUS rendition vocabulary (the `tei:rendition` definitions in
   hsg-jinks-data's `frus-tei-guidelines-resources/frus-encodingDesc.xml`). That

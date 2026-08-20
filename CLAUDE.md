@@ -56,6 +56,54 @@ See `doc/` for in-progress migration/feature planning notes
   lives in `~/.config/hsg/`. For OpenProject writes:
   `source ~/.config/hsg/secrets.env` first — never inline the token.
 
+## The FRUS ODD chain and vendored guidelines artifacts
+
+`resources/odd/hsg-jinks.odd` does not derive from `teipublisher.odd` directly.
+The chain is:
+
+```
+hsg-jinks.odd  ->  frus.odd  ->  teipublisher.odd
+```
+
+`resources/odd/frus.odd` is **vendored, not authored here**: it is the canonical
+FRUS processing model from the `frus-tei-guidelines` sibling repo, copied by
+`tools/sync-frus-guidelines.sh` and kept byte-identical to upstream so
+`--check` can detect drift. Never hand-edit it; make the change upstream and
+re-sync. `frus.css`, `print.css` and `frus.rnc` land in
+`resources/frus-tei-guidelines/` for reference only and are excluded from the
+app build.
+
+Three things about this chain bite if you forget them:
+
+- **`odd:merge` replaces, it does not merge.** An `elementSpec mode="change"`
+  carrying models discards the parent's models for that element entirely. A
+  spec with *no* models is not an override at all: the parent's models survive.
+  So a guard must always carry the full model list it wants, in order.
+- **`resources/odd/hsg-jinks.odd` opens with a block of guard `elementSpec`s.**
+  They exist because upstream's models are ported from a print pipeline and are
+  internally consistent with upstream's *own* list and dateline design, which
+  this app does not share. Without them the chain emits invalid HTML: `li`
+  inside `dl` with the label text dropped, `div` as a direct child of `ul`, and
+  `div` inside `p`. Each guard says why it is there; read it before removing one.
+- **`resources/odd/configuration.xml` binds the `ext` prefix** to
+  `modules/frus-ext.xqm`, for the helper functions upstream's models call. An
+  unbound `ext` prefix is a *static* XQuery error: it does not break one
+  element, it takes down the entire compiled transform and every page with it.
+  The binding must land before, or with, anything that makes an `ext:` call
+  reachable. No `ext:` call is reachable today; the binding is kept anyway.
+
+Never put `frus.css` in `resources/odd/`. TEI Publisher's
+`css:global-css-by-rendition` inlines any file named by a `rendition/@source`
+found in the ODD collection into the generated web stylesheet, and `frus.css`
+is an oXygen/raw-TEI stylesheet whose bare `p`, `div`, `head`, `label`, `body`
+selectors would then restyle the app's own HTML. Left out, it degrades to a
+harmless "external styles not found" comment.
+
+Both `hsg-jinks.odd` and `configuration.xml` are jinks-managed
+(they appear in `.jinks.json`), so `jinks update` reports them as conflicts
+rather than overwriting them. That is expected; several files here are already
+in that state.
+
 ## Measuring rendered layout
 
 When a visual/layout question needs an actual browser (not just reading CSS),
