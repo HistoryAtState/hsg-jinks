@@ -1,0 +1,84 @@
+{
+    "components": {
+        "securitySchemes": {
+            "basicAuth": {
+                "scheme": "basic",
+                "type": "http"
+            },
+            "cookieAuth": {
+                "in": "cookie",
+                "name": "teipublisher.com.login",
+                "type": "apiKey"
+            }
+        }
+    },
+    "info": {
+        "title": "HSG Jinks volume services API",
+        "version": "1.0.0"
+    },
+    "openapi": "3.0.3",
+    "paths": {
+        "/services/volume-ids": {
+            "get": {
+                "summary": "List every FRUS volume id as XML, for the asset-publishing and QA tooling",
+                "operationId": "servicesapi:volume-ids",
+                "tags": [
+                    "services"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "results document with summary and sorted volume-id list",
+                        "content": {
+                            "application/xml": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/services/volume-images": {
+            "get": {
+                "summary": "List the S3-stored image assets of one FRUS volume as XML",
+                "operationId": "servicesapi:volume-images",
+                "tags": [
+                    "services"
+                ],
+                "parameters": [
+                    {
+                        "name": "volume",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "results document with summary and image filename list",
+                        "content": {
+                            "application/xml": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "volume parameter missing or empty"
+                    },
+                    "502": {
+                        "description": "the object-store listing endpoint refused or failed"
+                    },
+                    "503": {
+                        "description": "no object-store listing endpoint configured"
+                    }
+                }
+            }
+        }
+    },
+    "security": []
+}

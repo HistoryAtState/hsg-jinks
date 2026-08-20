@@ -276,6 +276,12 @@
       "path" : "hsg-errors.xqm"
     },
     {
+      "spec" : "services-api.json",
+      "prefix" : "servicesapi",
+      "id" : "https://history.state.gov/api/services",
+      "path" : "services-api.xql"
+    },
+    {
       "spec" : "menu-api.json",
       "prefix" : "menuapi",
       "id" : "https://history.state.gov/api/menu",

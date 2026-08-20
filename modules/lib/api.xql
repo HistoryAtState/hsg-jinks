@@ -68,6 +68,8 @@ import module namespace menuapi="https://history.state.gov/api/menu" at "../menu
 
 import module namespace opdsapi="http://teipublisher.com/api/opds" at "../opds-catalog-api.xql";
 
+import module namespace servicesapi="https://history.state.gov/api/services" at "../services-api.xql";
+
 
 
 declare option output:indent "no";
@@ -93,6 +95,7 @@ let $resp := roaster:route(
         "modules/opds-catalog-api.json",
         "modules/opengov-api.json",
         "modules/search-api.json",
+        "modules/services-api.json",
         "modules/tags-api.json",
         "modules/lib/api.json"
     ), $lookup)
