@@ -66,6 +66,11 @@ import module namespace menuapi="https://history.state.gov/api/menu" at "../menu
 
 import module namespace opdsapi="http://teipublisher.com/api/opds" at "../opds-catalog-api.xql";
 
+(: hand-added like the entries above (documented exception): resolves the
+   hsg-errors:handle x-error-handler now referenced by lib/api.json's view
+   routes (OP#1309), replacing vapi:handle-error's hardcoded HTTP 200. :)
+import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "../hsg-errors.xqm";
+
 
 
 declare option output:indent "no";

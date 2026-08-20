@@ -5,6 +5,7 @@ module namespace milapi="http://teipublisher.com/api/milestones";
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace ms="https://history.state.gov/ns/templates/milestones" at "templates/milestones.xqm";
+import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -94,6 +95,6 @@ declare function milapi:view-section($request as map(*)) {
  : bug reports 500 instead of silently succeeding.
  :)
 declare function milapi:handle-error($error as map(*)) {
-    let $response := vapi:handle-error($error)
-    return map:put($response, xs:QName("router:RESPONSE_CODE"), errors:get-status-code-from-error($error?code))
+    (: Central status mapping + themed 404/400 pages: OP#1309. :)
+    hsg-errors:handle($error)
 };

@@ -1,0 +1,37 @@
+<html>
+    <head>
+        <title>Invalid search query</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes" />
+        <link rel="shortcut icon" type="image/x-icon" href="[[ $context-path ]]/resources/images/favicon.ico" />
+
+        [% for $path in $styles?* %]
+        [% if matches($path, "(?:^https?://|^/).*$") %]
+        <link rel="stylesheet" href="[[ $path ]]" />
+        [% else %]
+        <link rel="stylesheet" href="[[ $context-path ]]/[[ $path ]]" />
+        [% endif %]
+        [% endfor %]
+
+        <style>
+            .fixed-layout > main {
+                display: block;
+                max-width: var(--jinks-content-max-width);
+                margin: 3rem auto;
+                padding: 0 1rem;
+            }
+        </style>
+    </head>
+    <body>
+    <div class="fixed-layout">
+        <main class="usa-prose">
+            <h1>Invalid search query</h1>
+            <p>Your search query contained characters that cannot be processed.
+                Please remove any special characters and
+                <a class="usa-link" href="[[ $context-path ]]/search">try your search again</a>.
+                See the <a class="usa-link" href="[[ $context-path ]]/search/tips">search tips</a>
+                for supported search syntax.</p>
+        </main>
+    </div>
+    </body>
+</html>

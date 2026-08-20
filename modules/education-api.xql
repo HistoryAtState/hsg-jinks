@@ -6,6 +6,7 @@ import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace edu="https://history.state.gov/ns/templates/education" at "templates/education.xqm";
+import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -70,10 +71,6 @@ declare function eduapi:view-module($request as map(*)) {
  : dhapi:handle-error.
  :)
 declare function eduapi:handle-error($error as map(*)) {
-    let $response := vapi:handle-error($error)
-    return
-        if ($error?code eq $errors:NOT_FOUND) then
-            map:put($response, xs:QName("router:RESPONSE_CODE"), 404)
-        else
-            $response
+    (: Central status mapping + themed 404/400 pages: OP#1309. :)
+    hsg-errors:handle($error)
 };

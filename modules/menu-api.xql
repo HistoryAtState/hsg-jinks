@@ -19,6 +19,7 @@ xquery version "3.1";
 module namespace menuapi = "https://history.state.gov/api/menu";
 
 import module namespace vapi = "http://teipublisher.com/api/view" at "lib/api/view.xql";
+import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 declare namespace response = "http://exist-db.org/xquery/response";
 
@@ -69,6 +70,7 @@ declare function menuapi:menu-mobile($request as map(*)) {
     menuapi:render($request, "menu-mobile-fragment")
 };
 
-declare function menuapi:handle-error($error) {
-    vapi:handle-error($error)
+declare function menuapi:handle-error($error as map(*)) {
+    (: Central status mapping + themed 404/400 pages: OP#1309. :)
+    hsg-errors:handle($error)
 };

@@ -4,6 +4,7 @@ module namespace countryapi="http://teipublisher.com/api/countries";
 
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors="http://e-editiones.org/roaster/errors";
+import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 (:~
  : The key roaster reads the status code from. Rebuilt here rather than
@@ -76,10 +77,6 @@ declare function countryapi:archives-view($request as map(*)) {
  : hsgapi:handle-error / dhapi:handle-error.
  :)
 declare function countryapi:handle-error($error as map(*)) {
-    let $response := vapi:handle-error($error)
-    return
-        if ($error?code eq $errors:NOT_FOUND) then
-            map:put($response, xs:QName("router:RESPONSE_CODE"), 404)
-        else
-            $response
+    (: Central status mapping + themed 404/400 pages: OP#1309. :)
+    hsg-errors:handle($error)
 };

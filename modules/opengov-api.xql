@@ -5,6 +5,7 @@ module namespace ogapi="http://teipublisher.com/api/open";
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
+import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -216,12 +217,6 @@ declare function ogapi:not-found($request as map(*)) {
  : mapping below.
  :)
 declare function ogapi:handle-error($error as map(*)) {
-    let $response := vapi:handle-error($error)
-    return
-        if ($error?code eq $errors:NOT_FOUND) then
-            map:put($response, xs:QName("router:RESPONSE_CODE"), 404)
-        else if ($error?code eq QName("http://www.w3.org/2005/xqt-errors", "err:FORG0001")) then
-            map:put($response, xs:QName("router:RESPONSE_CODE"), 400)
-        else
-            $response
+    (: Central status mapping + themed 404/400 pages: OP#1309. :)
+    hsg-errors:handle($error)
 };

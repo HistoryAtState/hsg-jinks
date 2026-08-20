@@ -92,6 +92,31 @@ declare %private function srch:escape-unsupported-characters($query as xs:string
         ()
 };
 
+(:~
+ : Whether Lucene can parse the fulltext query this module would build from
+ : the user's q (OP#1273): malformed syntax the escaping does not cover (an
+ : unbalanced quote, a dangling boolean operator) used to be swallowed by the
+ : catch around srch:query-sections into silent zero results; the route now
+ : rejects it up front as HTTP 400. The probe runs the exact query string
+ : srch:prepare-query builds against a single indexed node (the conferences
+ : package is a required install and its content is frozen), so only the
+ : parse is exercised; with the probe node absent the check passes and
+ : behavior degrades to today's empty result, never a false rejection.
+ :)
+declare function srch:query-parses($query as xs:string?) as xs:boolean {
+    if (empty($query) or normalize-space($query) = "") then
+        true()
+    else
+        let $queryString := "hsg-fulltext:(" || srch:escape-unsupported-characters($query) || ")"
+        let $probe := (collection("/db/apps/conferences")//tei:div)[1]
+        return
+            try {
+                exists($probe[ft:query(., $queryString, map {})]) or true()
+            } catch * {
+                false()
+            }
+};
+
 declare %private function srch:prepare-query($sections as xs:string*, $volumeIds as xs:string*,
         $query as xs:string?, $rangeStart as xs:dateTime?, $rangeEnd as xs:dateTime?) as map(*) {
     let $category := $sections[not(. = ("", "entire-site"))]
