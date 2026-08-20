@@ -24,12 +24,6 @@ declare namespace tei = "http://www.tei-c.org/ns/1.0";
 declare namespace s3xml = "http://s3.amazonaws.com/doc/2006-03-01/";
 
 (:~
- : The key roaster reads the status code from. Rebuilt here rather than
- : imported: roaster.xqm does not re-export $router:RESPONSE_CODE.
- :)
-declare namespace router = "http://e-editiones.org/roaster/router";
-
-(:~
  : Base URL of an S3-compatible listing endpoint for the static assets
  : bucket. The production bucket denies anonymous ListObjects (hsg-shell
  : signs its requests with its private aws/s3 library), so a deployment
@@ -41,14 +35,6 @@ declare namespace router = "http://e-editiones.org/roaster/router";
  :)
 declare variable $servicesapi:s3-endpoint as xs:string? :=
     environment-variable("HSG_S3_LIST_ENDPOINT")[. ne ''];
-
-declare %private function servicesapi:xml-response($status as xs:integer, $body as element()) {
-    (: the node itself, not serialize()d: roaster treats a string body as text
-       to escape, an element as markup to serialize :)
-    map:put(
-        roaster:response(200, "application/xml", $body),
-        xs:QName("router:RESPONSE_CODE"), $status)
-};
 
 (:~
  : GET /services/volume-ids (OP#1209): every volume id in the FRUS
@@ -68,7 +54,7 @@ declare function servicesapi:volume-ids($request as map(*)) {
     let $hitcount := count($hits)
     let $runtime := (util:system-time() - $start-time) div xs:dayTimeDuration('PT1S')
     return
-        servicesapi:xml-response(200,
+        roaster:response(200, "application/xml",
             <results>
                 <summary>
                     <volumes>{$hitcount}</volumes>
@@ -95,7 +81,7 @@ declare function servicesapi:volume-images($request as map(*)) {
         if ($volume eq '') then
             error($errors:BAD_REQUEST, "missing volume parameter")
         else if (empty($servicesapi:s3-endpoint)) then
-            servicesapi:xml-response(503,
+            roaster:response(503, "application/xml",
                 <error>no object-store listing endpoint configured (HSG_S3_LIST_ENDPOINT)</error>)
         else
             let $start-time := util:system-time()
@@ -106,7 +92,7 @@ declare function servicesapi:volume-images($request as map(*)) {
             let $status := xs:integer($response[1]/@status)
             return
                 if ($status ne 200) then
-                    servicesapi:xml-response(502,
+                    roaster:response(502, "application/xml",
                         <error>object-store listing failed with HTTP {$status}</error>)
                 else
                     let $contents := $response[2]//s3xml:Contents[s3xml:Key ne $prefix]
@@ -117,7 +103,7 @@ declare function servicesapi:volume-images($request as map(*)) {
                         return $filename
                     let $runtime := (util:system-time() - $start-time) div xs:dayTimeDuration('PT1S')
                     return
-                        servicesapi:xml-response(200,
+                        roaster:response(200, "application/xml",
                             <results>
                                 <summary>
                                     <images>{count($hits)}</images>
