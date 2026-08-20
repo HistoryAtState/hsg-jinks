@@ -4,7 +4,6 @@ module namespace devapi="http://teipublisher.com/api/developer";
 
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors="http://e-editiones.org/roaster/errors";
-import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 (:~
  : The key roaster reads the status code from. Rebuilt here rather than
@@ -53,16 +52,4 @@ declare function devapi:catalog($request as map(*)) {
  :)
 declare function devapi:not-found($request as map(*)) {
     error($errors:NOT_FOUND, "no page " || $request?parameters?page || " under /developer")
-};
-
-(:~
- : Wrap the jinks-owned vapi:handle-error, which renders the error page but
- : hardcodes HTTP 200, so a missing page still reports success to crawlers
- : and link checkers. Keep its markup, correct the status. Same pattern as
- : hsgapi:handle-error / dhapi:handle-error / countryapi:handle-error /
- : aboutapi:handle-error.
- :)
-declare function devapi:handle-error($error as map(*)) {
-    (: Central status mapping + themed 404/400 pages: OP#1309. :)
-    hsg-errors:handle($error)
 };

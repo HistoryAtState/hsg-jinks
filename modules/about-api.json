@@ -15,7 +15,7 @@
             "get": {
                 "summary": "About Us section landing page",
                 "operationId": "aboutapi:index",
-                "x-error-handler": "aboutapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "about"
                 ],
@@ -37,7 +37,7 @@
             "get": {
                 "summary": "Frequently Asked Questions table of contents",
                 "operationId": "aboutapi:view-faq",
-                "x-error-handler": "aboutapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "about"
                 ],
@@ -59,7 +59,7 @@
             "get": {
                 "summary": "FAQ section",
                 "operationId": "aboutapi:view-faq-section",
-                "x-error-handler": "aboutapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "about"
                 ],
@@ -103,7 +103,7 @@
             "get": {
                 "summary": "Historical Advisory Committee table of contents",
                 "operationId": "aboutapi:view-hac",
-                "x-error-handler": "aboutapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "about"
                 ],
@@ -125,7 +125,7 @@
             "get": {
                 "summary": "HAC section or meeting-notes subchapter",
                 "operationId": "aboutapi:view-hac-section",
-                "x-error-handler": "aboutapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "about"
                 ],
@@ -169,7 +169,7 @@
             "get": {
                 "summary": "Contact Us page",
                 "operationId": "aboutapi:contact-us",
-                "x-error-handler": "aboutapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "about"
                 ],
@@ -191,7 +191,7 @@
             "get": {
                 "summary": "The Historian page: list of past directors of the Office of the Historian",
                 "operationId": "aboutapi:the-historian",
-                "x-error-handler": "aboutapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "about"
                 ],
@@ -213,7 +213,7 @@
             "get": {
                 "summary": "FRUS volumes published in the current and prior year",
                 "operationId": "aboutapi:recent-publications",
-                "x-error-handler": "aboutapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "about"
                 ],
@@ -235,7 +235,7 @@
             "get": {
                 "summary": "Reports to Congress page",
                 "operationId": "aboutapi:reports",
-                "x-error-handler": "aboutapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "about"
                 ],
@@ -257,7 +257,7 @@
             "get": {
                 "summary": "Content Warning page",
                 "operationId": "aboutapi:content-warning",
-                "x-error-handler": "aboutapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "about"
                 ],

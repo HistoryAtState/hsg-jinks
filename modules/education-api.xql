@@ -6,7 +6,6 @@ import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace edu="https://history.state.gov/ns/templates/education" at "templates/education.xqm";
-import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -62,15 +61,4 @@ declare function eduapi:view-module($request as map(*)) {
             error($errors:NOT_FOUND, "no published education module " || $moduleId)
         else
             eduapi:render($request, "pages/education/module")
-};
-
-(:~
- : Wraps vapi:handle-error to correct its hardcoded 200 to 404 for
- : errors:NOT_FOUND -- vapi:handle-error itself always returns 200.
- : Identical pattern to hsgapi:handle-error / countryapi:handle-error /
- : dhapi:handle-error.
- :)
-declare function eduapi:handle-error($error as map(*)) {
-    (: Central status mapping + themed 404/400 pages: OP#1309. :)
-    hsg-errors:handle($error)
 };

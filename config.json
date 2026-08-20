@@ -271,6 +271,11 @@
       "path" : "opengov-api.xql"
     },
     {
+      "prefix" : "hsg-errors",
+      "id" : "https://history.state.gov/ns/site/hsg/errors",
+      "path" : "hsg-errors.xqm"
+    },
+    {
       "spec" : "menu-api.json",
       "prefix" : "menuapi",
       "id" : "https://history.state.gov/api/menu",

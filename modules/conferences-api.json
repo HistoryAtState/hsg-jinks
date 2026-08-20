@@ -22,7 +22,7 @@
             "get": {
                 "summary": "Landing page of the Conferences section: list of all conferences",
                 "operationId": "confapi:index",
-                "x-error-handler": "confapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "conferences"
                 ],
@@ -44,7 +44,7 @@
             "get": {
                 "summary": "Landing page for one conference",
                 "operationId": "confapi:view",
-                "x-error-handler": "confapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "conferences"
                 ],
@@ -89,7 +89,7 @@
             "get": {
                 "summary": "Interior page for one section (tei:div) of a conference",
                 "operationId": "confapi:view-section",
-                "x-error-handler": "confapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "conferences"
                 ],

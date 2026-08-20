@@ -62,6 +62,8 @@ import module namespace confapi="http://teipublisher.com/api/conferences" at "..
 
 import module namespace ogapi="http://teipublisher.com/api/open" at "../opengov-api.xql";
 
+import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "../hsg-errors.xqm";
+
 import module namespace menuapi="https://history.state.gov/api/menu" at "../menu-api.xql";
 
 import module namespace opdsapi="http://teipublisher.com/api/opds" at "../opds-catalog-api.xql";

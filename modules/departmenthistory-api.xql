@@ -6,7 +6,6 @@ import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace dh="https://history.state.gov/ns/templates/departmenthistory" at "templates/departmenthistory.xqm";
-import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -403,15 +402,4 @@ declare function dhapi:visits-listing($request as map(*)) {
             dhapi:render($request, "pages/departmenthistory/visits-listing")
         else
             error($errors:NOT_FOUND, "no visits for " || $key)
-};
-
-(:~
- : Wrap the jinks-owned vapi:handle-error, which renders the error page but
- : hardcodes HTTP 200, so a missing page still reports success to crawlers and
- : link checkers. Keep its markup, correct the status. Same as
- : hsgapi:handle-error / countryapi:handle-error.
- :)
-declare function dhapi:handle-error($error as map(*)) {
-    (: Central status mapping + themed 404/400 pages: OP#1309. :)
-    hsg-errors:handle($error)
 };

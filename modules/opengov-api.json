@@ -15,7 +15,7 @@
             "get": {
                 "summary": "Landing page of the Open Government Initiative section",
                 "operationId": "ogapi:index",
-                "x-error-handler": "ogapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "open"
                 ],
@@ -37,7 +37,7 @@
             "get": {
                 "summary": "Explainer page for the \"Latest Volumes\" Atom feed",
                 "operationId": "ogapi:frus-latest-page",
-                "x-error-handler": "ogapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "open"
                 ],
@@ -59,7 +59,7 @@
             "get": {
                 "summary": "Explainer page for the bibliographic-metadata dump",
                 "operationId": "ogapi:frus-metadata-page",
-                "x-error-handler": "ogapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "open"
                 ],
@@ -81,7 +81,7 @@
             "get": {
                 "summary": "Atom feed of the most recently published FRUS volumes",
                 "operationId": "ogapi:frus-latest-feed",
-                "x-error-handler": "ogapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "open"
                 ],
@@ -117,7 +117,7 @@
             "get": {
                 "summary": "Bulk XML dump of FRUS volume bibliographic metadata",
                 "operationId": "ogapi:frus-metadata-feed",
-                "x-error-handler": "ogapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "open"
                 ],
@@ -139,7 +139,7 @@
             "get": {
                 "summary": "Catch-all for any other path segment under /open",
                 "operationId": "ogapi:not-found",
-                "x-error-handler": "ogapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "open"
                 ],

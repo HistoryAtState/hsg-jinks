@@ -5,7 +5,6 @@ module namespace confapi="http://teipublisher.com/api/conferences";
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace conf="https://history.state.gov/ns/templates/conferences" at "templates/conferences.xqm";
-import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 (:~
  : The key roaster reads the status code from. Rebuilt here rather than
@@ -94,15 +93,4 @@ declare function confapi:view-section($request as map(*)) {
  :)
 declare function confapi:is-exact-division($division as node()*, $sectionId as xs:string) as xs:boolean {
     count($division) eq 1 and $division/@xml:id = $sectionId
-};
-
-(:~
- : Wrap the jinks-owned vapi:handle-error, which renders the error page but
- : hardcodes HTTP 200, so a missing page still reports success to crawlers
- : and link checkers. Keep its markup, correct the status. Same as
- : hsgapi:handle-error / countryapi:handle-error / dhapi:handle-error.
- :)
-declare function confapi:handle-error($error as map(*)) {
-    (: Central status mapping + themed 404/400 pages: OP#1309. :)
-    hsg-errors:handle($error)
 };

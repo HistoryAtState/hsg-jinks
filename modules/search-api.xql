@@ -6,7 +6,6 @@ import module namespace vapi = "http://teipublisher.com/api/view" at "lib/api/vi
 import module namespace errors = "http://e-editiones.org/roaster/errors";
 import module namespace query-guard = "http://history.state.gov/ns/site/hsg/query-guard" at "query-guard.xqm";
 import module namespace srch = "https://history.state.gov/ns/templates/search" at "templates/search.xqm";
-import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 (:~
  : The key roaster reads the status code from. Rebuilt here rather than
@@ -71,20 +70,4 @@ declare function searchapi:tips($request as map(*)) {
  :)
 declare function searchapi:not-found($request as map(*)) {
     error($errors:NOT_FOUND, "no route below /search/" || $request?parameters?other)
-};
-
-(:~
- : Wrap the jinks-owned vapi:handle-error (renders the error page but
- : hardcodes HTTP 200) to correct the status code -- same base pattern as
- : hsgapi:handle-error / dhapi:handle-error / countryapi:handle-error, but
- : those three all fall through to the unmodified (200) response for any
- : error code they don't explicitly recognize -- meaning a genuine,
- : unanticipated runtime error would silently render as a 200 "success"
- : page. Fixed here: anything that isn't a recognized NOT_FOUND/BAD_REQUEST
- : is a real server-side failure, not a client-facing 404/400, so it maps to
- : 500 instead of passing the hardcoded 200 through.
- :)
-declare function searchapi:handle-error($error as map(*)) {
-    (: Central status mapping + themed 404/400 pages: OP#1309. :)
-    hsg-errors:handle($error)
 };

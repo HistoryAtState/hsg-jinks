@@ -81,7 +81,7 @@
 				"description": "Retrieve an HTML page expanded through eXist templating. This is used to load the top-level HTML pages, e.g. `index.html`.",
 				"tags": ["view"],
 				"operationId": "vapi:html",
-				"x-error-handler": "hsgapi:handle-error",
+				"x-error-handler": "hsg-errors:handle",
 				"parameters": [
 					{
 						"name": "file",
@@ -130,7 +130,7 @@
 				"description": "Get the HTML template associated with the given document. This is called whenever the users tries to view a document. The actual content of the document will then be loaded by the template.",
 				"tags": ["view"],
 				"operationId": "vapi:view",
-				"x-error-handler": "hsgapi:handle-error",
+				"x-error-handler": "hsg-errors:handle",
 				"parameters": [
 					{
 						"name": "docid",
@@ -222,7 +222,7 @@
 				"summary": "Generate a print preview using Paged Media CSS",
 				"tags": ["view"],
 				"operationId": "vapi:view",
-				"x-error-handler": "hsgapi:handle-error",
+				"x-error-handler": "hsg-errors:handle",
 				"parameters": [
 					{
 						"name": "docid",
@@ -292,7 +292,7 @@
 				"description": "Get the HTML template associated with the given markdown document. This is called whenever the users tries to view a markdown file. The actual content of the document will then be loaded by the template.",
 				"tags": ["view"],
 				"operationId": "vapi:text",
-				"x-error-handler": "hsgapi:handle-error",
+				"x-error-handler": "hsg-errors:handle",
 				"parameters": [
 					{
 						"name": "file",
@@ -1226,7 +1226,7 @@
 				"description": "Retrieve whole document transformed via ODD and LaTeX",
 				"tags": ["documents"],
 				"operationId": "dapi:latex",
-				"x-error-handler": "hsgapi:handle-error",
+				"x-error-handler": "hsg-errors:handle",
 				"parameters": [
 					{
 						"name": "id",

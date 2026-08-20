@@ -22,7 +22,7 @@
             "get": {
                 "summary": "Landing page of the Milestones section: full retirement notice, introduction, and era selector",
                 "operationId": "milapi:index",
-                "x-error-handler": "milapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "milestones" ],
                 "responses": {
                     "200": {
@@ -36,7 +36,7 @@
             "get": {
                 "summary": "Flat listing of every milestone article across all eras",
                 "operationId": "milapi:all",
-                "x-error-handler": "milapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "milestones" ],
                 "responses": {
                     "200": {
@@ -50,7 +50,7 @@
             "get": {
                 "summary": "Landing page for one era: table of contents only",
                 "operationId": "milapi:view",
-                "x-error-handler": "milapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "milestones" ],
                 "parameters": [
                     {
@@ -82,7 +82,7 @@
             "get": {
                 "summary": "Interior page for one article (tei:div) within an era",
                 "operationId": "milapi:view-section",
-                "x-error-handler": "milapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "milestones" ],
                 "parameters": [
                     {

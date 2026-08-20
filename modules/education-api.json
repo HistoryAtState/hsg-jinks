@@ -10,7 +10,7 @@
                 "summary": "Education section landing page",
                 "description": "Retired 'Education Resources' section landing page: retirement notice plus an abbreviated prose list of published curriculum modules, generated from the module record collection.",
                 "operationId": "eduapi:index",
-                "x-error-handler": "eduapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "education" ],
                 "responses": {
                     "200": {
@@ -25,7 +25,7 @@
                 "summary": "Full list of curriculum modules",
                 "description": "Data-driven listing of all published curriculum modules (title, teaser, year, availability/download), generated from the module record collection.",
                 "operationId": "eduapi:modules",
-                "x-error-handler": "eduapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "education" ],
                 "responses": {
                     "200": {
@@ -40,7 +40,7 @@
                 "summary": "One curriculum module's introduction",
                 "description": "Renders a published module's TEI introduction document in full plus its availability/download line. moduleId is the module record's tei-document-name, not its own id field.",
                 "operationId": "eduapi:view-module",
-                "x-error-handler": "eduapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "education" ],
                 "parameters": [
                     {

@@ -6,7 +6,6 @@ import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "templates/hsg.xqm";
-import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -315,14 +314,4 @@ declare function hsgapi:is-attachment($doc as node()?) as xs:boolean {
 
 declare function hsgapi:attachment-parent($doc as node()?) as xs:string {
     (root($doc)//tei:relatedItem[@type='attachment-source']/@target/string(), "its parent")[1]
-};
-
-(:~
- : Wrap the jinks-owned vapi:handle-error, which renders the error page but
- : hardcodes HTTP 200, so a missing page still reports success to crawlers and
- : link checkers. Keep its markup, correct the status.
- :)
-declare function hsgapi:handle-error($error as map(*)) {
-    (: Central status mapping + themed 404/400 pages: OP#1309. :)
-    hsg-errors:handle($error)
 };

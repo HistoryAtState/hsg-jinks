@@ -16,7 +16,7 @@
                 "summary": "Landing page of the Tags section",
                 "description": "Narrative introduction to the subject taxonomy with live counts (number of taxonomy subjects, number of tagged biographies and tagged FRUS volumes, total tag assignments) and entry links to the three top-level categories (people, places, topics) and to the full taxonomy. Renders through vapi:html with a fixed template file.",
                 "operationId": "tagapi:index",
-                "x-error-handler": "tagapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "tags" ],
                 "responses": {
                     "200": {
@@ -31,7 +31,7 @@
                 "summary": "Full taxonomy listing",
                 "description": "Renders the complete taxonomy as one nested list: every category and tag with its label, inline definition where present, linking each entry to its /tags/{tagId} page. This is a literal path that must win over the templated sibling /tags/{tagId}.",
                 "operationId": "tagapi:all",
-                "x-error-handler": "tagapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "tags" ],
                 "responses": {
                     "200": {
@@ -46,7 +46,7 @@
                 "summary": "Browse page for one taxonomy entry (category or tag)",
                 "description": "Aggregation page for one taxonomy id: label, optional definition (may contain ptr cross-references to other taxonomy entries, rendered as links), the list of tagged Secretary of State biographies, the list of tagged FRUS volumes, and a drill-down list of child categories/tags with per-entry hit counts. If the entry itself has no directly tagged resources but descendants do, a 'dig deeper' drill-down is shown instead; with no tagged resources anywhere beneath, an empty-state message. An id not present in the taxonomy yields 404.",
                 "operationId": "tagapi:view",
-                "x-error-handler": "tagapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [ "tags" ],
                 "parameters": [
                     {

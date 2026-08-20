@@ -5,7 +5,6 @@ module namespace aboutapi="http://teipublisher.com/api/about";
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace about="https://history.state.gov/ns/templates/about" at "templates/about.xqm";
-import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 (:~
  : The key roaster reads the status code from. Rebuilt here rather than
@@ -123,15 +122,4 @@ declare function aboutapi:view-faq-section($request as map(*)) {
 
 declare function aboutapi:view-hac-section($request as map(*)) {
     aboutapi:monograph-section($request, "hac")
-};
-
-(:~
- : Wrap the jinks-owned vapi:handle-error, which renders the error page but
- : hardcodes HTTP 200, so a missing page still reports success to crawlers
- : and link checkers. Keep its markup, correct the status. Same pattern as
- : hsgapi:handle-error / dhapi:handle-error / countryapi:handle-error.
- :)
-declare function aboutapi:handle-error($error as map(*)) {
-    (: Central status mapping + themed 404/400 pages: OP#1309. :)
-    hsg-errors:handle($error)
 };

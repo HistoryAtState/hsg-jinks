@@ -23,7 +23,7 @@
             "get": {
                 "summary": "Landing page of the Countries section",
                 "operationId": "countryapi:index",
-                "x-error-handler": "countryapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "countries"
                 ],
@@ -45,7 +45,7 @@
             "get": {
                 "summary": "Alphabetical index of every country article",
                 "operationId": "countryapi:list",
-                "x-error-handler": "countryapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "countries"
                 ],
@@ -67,7 +67,7 @@
             "get": {
                 "summary": "Retrieve a country article",
                 "operationId": "countryapi:view",
-                "x-error-handler": "countryapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "countries"
                 ],
@@ -119,7 +119,7 @@
             "get": {
                 "summary": "Landing page of the World Wide Diplomatic Archives Index",
                 "operationId": "countryapi:archives-index",
-                "x-error-handler": "countryapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "countries"
                 ],
@@ -141,7 +141,7 @@
             "get": {
                 "summary": "Alphabetical index of every archive article",
                 "operationId": "countryapi:archives-list",
-                "x-error-handler": "countryapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "countries"
                 ],
@@ -163,7 +163,7 @@
             "get": {
                 "summary": "Retrieve an archive article",
                 "operationId": "countryapi:archives-view",
-                "x-error-handler": "countryapi:handle-error",
+                "x-error-handler": "hsg-errors:handle",
                 "tags": [
                     "countries"
                 ],

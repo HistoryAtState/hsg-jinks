@@ -6,7 +6,6 @@ import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace tags="https://history.state.gov/ns/templates/tags" at "templates/tags.xqm";
-import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -46,15 +45,4 @@ declare function tagapi:view($request as map(*)) {
             error($errors:NOT_FOUND, "no taxonomy entry " || $tagId)
         else
             tagapi:render($request, "pages/tags/browse")
-};
-
-(:~
- : Wrap the jinks-owned vapi:handle-error, which renders the error page but
- : hardcodes HTTP 200, so a missing page still reports success to crawlers and
- : link checkers. Keep its markup, correct the status. Same as
- : hsgapi:handle-error / dhapi:handle-error.
- :)
-declare function tagapi:handle-error($error as map(*)) {
-    (: Central status mapping + themed 404/400 pages: OP#1309. :)
-    hsg-errors:handle($error)
 };

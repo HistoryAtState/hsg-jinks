@@ -5,7 +5,6 @@ module namespace milapi="http://teipublisher.com/api/milestones";
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace ms="https://history.state.gov/ns/templates/milestones" at "templates/milestones.xqm";
-import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -84,17 +83,4 @@ declare function milapi:view-section($request as map(*)) {
                 $request?parameters,
                 map { "file": "pages/milestones/view-section" }
             ))))
-};
-
-(:~
- : Wrap the jinks-owned vapi:handle-error, which renders the error page but
- : hardcodes HTTP 200, so a missing page (or any other failure) still reports
- : success to crawlers and link checkers. Keep its markup, correct the
- : status for every error type via roaster's own
- : errors:get-status-code-from-error (not just NOT_FOUND -> 404), so a real
- : bug reports 500 instead of silently succeeding.
- :)
-declare function milapi:handle-error($error as map(*)) {
-    (: Central status mapping + themed 404/400 pages: OP#1309. :)
-    hsg-errors:handle($error)
 };
