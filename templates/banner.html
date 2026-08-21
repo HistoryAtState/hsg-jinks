@@ -1,0 +1,81 @@
+[% if $theme?banner %]
+<!-- Official U.S. government banner (hsg-jinks OP#1050), the standard USWDS
+     banner component. Opt-in (PR #13 review): a consuming app enables it with
+     theme.banner: true in its config.json. Markup per
+     designsystem.digital.gov/components/banner; the accordion toggle is wired
+     by uswds.min.js (uswds-blocks.html). Included from menu.html because the
+     base page template (base10's layouts/base.html) offers no block above the
+     header include; see the PR discussion for a possible upstream banner
+     block. -->
+<section class="usa-banner" aria-label="Official website of the United States government">
+    <div class="usa-accordion">
+        <header class="usa-banner__header">
+            <div class="usa-banner__inner">
+                <div class="grid-col-auto">
+                    <img
+                        aria-hidden="true"
+                        class="usa-banner__header-flag"
+                        src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/images/us_flag_small.png"
+                        alt=""
+                    />
+                </div>
+                <div class="grid-col-fill tablet:grid-col-auto" aria-hidden="true">
+                    <p class="usa-banner__header-text">
+                        An official website of the United States government
+                    </p>
+                    <p class="usa-banner__header-action">Here's how you know</p>
+                </div>
+                <button
+                    type="button"
+                    class="usa-accordion__button usa-banner__button"
+                    aria-expanded="false"
+                    aria-controls="gov-banner-default"
+                >
+                    <span class="usa-banner__button-text">Here's how you know</span>
+                </button>
+            </div>
+        </header>
+        <div
+            class="usa-banner__content usa-accordion__content"
+            id="gov-banner-default"
+            hidden="hidden"
+        >
+            <div class="grid-row grid-gap-lg">
+                <div class="usa-banner__guidance tablet:grid-col-6">
+                    <img
+                        class="usa-banner__icon usa-media-block__img"
+                        src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/images/icon-dot-gov.svg"
+                        role="img"
+                        alt=""
+                        aria-hidden="true"
+                    />
+                    <div class="usa-media-block__body">
+                        <p>
+                            <strong>Official websites use .gov</strong><br />A
+                            <strong>.gov</strong> website belongs to an official government
+                            organization in the United States.
+                        </p>
+                    </div>
+                </div>
+                <div class="usa-banner__guidance tablet:grid-col-6">
+                    <img
+                        class="usa-banner__icon usa-media-block__img"
+                        src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/images/icon-https.svg"
+                        role="img"
+                        alt=""
+                        aria-hidden="true"
+                    />
+                    <div class="usa-media-block__body">
+                        <p>
+                            <strong>Secure .gov websites use HTTPS</strong><br />A
+                            <strong>lock</strong> or <strong>https://</strong> means you've safely
+                            connected to the .gov website. Share sensitive information only on
+                            official, secure websites.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+[% endif %]
