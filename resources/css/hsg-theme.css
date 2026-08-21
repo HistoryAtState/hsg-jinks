@@ -414,22 +414,19 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-left: var(--hsg-space-05);
 }
 
-/* Persons / terms front-matter lists: no bullets, hanging indent per entry
-   (class list-person), reference parity with hsg-shell. */
-.list-person {
-    list-style: none;
-    padding-left: 0;
-    margin-left: 0;
-}
-
-.list-person li {
-    list-style: none;
+/* Index-division entries (persons/terms registers, back-matter index):
+   upstream frus.odd renders each entry as its own block (item cssClass
+   "list", no ul wrapper; OP#1317) -- no bullets, hanging indent per entry,
+   reference parity with hsg-shell. */
+.usa-prose div.list {
     padding-left: var(--hsg-space-3);
     text-indent: calc(-1 * var(--hsg-space-3));
+    max-width: none;
 }
 
-.list-person .list-person {
-    margin-left: 0;
+.usa-prose div.list div.list {
+    margin-left: var(--hsg-space-3);
+    text-indent: calc(-1 * var(--hsg-space-3));
 }
 
 /* Chapter listing page (#PR-review): each document as a titled entry with its
@@ -843,4 +840,59 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--hsg-color-base-dark, #565c65);
     font-size: 0.9em;
     white-space: nowrap;
+}
+
+/* ==========================================================================
+   Upstream frus.odd list/dateline design (OP#1317). The former item/label/
+   opener ODD guards are retired; FRUS description lists now render as
+   upstream designed them: a "ul.description" whose label is its own heading
+   line ("li.listLabel") and whose entries hang; subject lists sit flush
+   (per the upstream comment in frus.odd). Datelines are inline one-liners
+   placed by the generated rendition classes (frus-renditions.css).
+   ========================================================================== */
+
+.usa-prose ul.description {
+    list-style: none;
+    padding-left: 0;
+    margin: 0 0 var(--hsg-space-2);
+}
+
+.usa-prose ul.description > li {
+    margin-left: 2em;
+    margin-bottom: 0;
+    max-width: none;
+}
+
+.usa-prose ul.description.subtype-subject > li {
+    margin-left: 0;
+}
+
+.usa-prose ul.description > li.listLabel {
+    margin-left: 0;
+    font-weight: 700;
+}
+
+/* a group nested inside an entry keeps its own hang under the parent entry */
+.usa-prose ul.description ul.description {
+    margin-bottom: 0;
+}
+
+/* the optional heading line of a typed list */
+.usa-prose p.listHead {
+    margin: 0 0 var(--hsg-space-05);
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+/* opener holds the floated dateline; contain the float so the following
+   salute/body text clears it */
+.usa-prose p.opener::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* an inline dateline with a block-ish rendition needs the block back */
+.usa-prose .dateline.document_center {
+    display: block;
 }

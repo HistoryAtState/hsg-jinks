@@ -33,48 +33,13 @@
                      spec below reinstates the teipublisher.odd behaviour that
                      upstream's print-derived model would otherwise displace.
                      Upstream is not wrong; it is internally consistent with its
-                     OWN list/dateline design, which this app does not share.
-                     Remove a guard only together with the app-side change that
-                     makes upstream's version work here.
+                     OWN design. This app adopted upstream's list/dateline design
+                     (OP#1317): the former item, label and opener guards are gone,
+                     list styling lives in resources/css/hsg-theme.css, and the
+                     dateline spec below keeps upstream's opener-as-paragraph
+                     valid. Remove a remaining guard only together with the
+                     app-side change that makes upstream's version work here.
                      ============================================================ -->
-                <!-- Upstream's item models assume upstream's own list model, and
-                     this app keeps its own. Both of upstream's models emit
-                     invalid HTML under this app's list:
-                       . description lists: upstream renders them as "ul" with
-                         the label as its own "li", so its item is pass-through.
-                         Here the list is a "dl" and pmf:listItem pairs each item
-                         with its preceding label into dt + dd; mixing the halves
-                         emits "li" inside "dl" and drops the label text outright
-                         (SUBJECT, PARTICIPANTS ...).
-                       . index divisions: upstream renders each entry as a block,
-                         which lands a "div" as a direct child of this app's "ul"
-                         (264 times in one volume index alone).
-                     Restoring teipublisher.odd's single listItem model is what
-                     keeps both valid. Note this leaves upstream's
-                     ext:get-division-subtype call unreachable; the binding in
-                     resources/odd/configuration.xml stays, because it must
-                     already exist the moment a sync or a lifted guard makes any
-                     ext: helper reachable again. Adopting upstream's list,
-                     item and label together is the real fix, and needs the list
-                     styling in resources/css/hsg-theme.css rewritten with it. -->
-                <elementSpec ident="item" mode="change">
-                    <model behaviour="listItem"/>
-                </elementSpec>
-                <!-- Same mismatch seen from the label side. Upstream wraps a
-                     description list's label in "li class=listLabel" so its own
-                     "ul" stays valid; here pmf:listItem runs the model chain on
-                     the label to build the "dt", so that wrapper would land
-                     inside it. teipublisher.odd declares no label spec at all
-                     and the content renders bare, which pass-through reproduces. -->
-                <elementSpec ident="label" mode="change">
-                    <model behaviour="pass-through"/>
-                </elementSpec>
-                <!-- Upstream makes opener a paragraph. This app's dateline is a
-                     block, and a "div" inside a "p" is invalid: the browser
-                     auto-closes the paragraph and the opener styling is lost. -->
-                <elementSpec ident="opener" mode="change">
-                    <model behaviour="block"/>
-                </elementSpec>
                 <!-- Upstream's only divGen model is output="print", which would
                      leave the web pipeline with no model at all. The volume
                      root's divGen xml:id="toc" placeholder is load-bearing here
@@ -420,8 +385,8 @@
                 </model>
             </elementSpec>
             <elementSpec ident="dateline" mode="change">
-                <desc>A FRUS opener dateline carries rendition="#float-right" so it sits on the same line as the print page number (a #float-left seg, e.g. "434."). The base teipublisher.odd model is a plain block that drops the source rendition, so the dateline stacked below the page number instead of floating opposite it; keep the source rendition here.</desc>
-                <model behaviour="block" useSourceRendition="true"/>
+                <desc>Upstream's dateline design (OP#1317): a dateline reads as one line, placed by its source rendition ("#float-right" sits it opposite the print page number's "#float-left" seg; "#center" gets display:block back in hsg-theme.css). It must be INLINE: upstream's opener is a paragraph, and a block dateline inside it would be a "div" in a "p" -- invalid HTML the browser repairs by closing the paragraph early (the reason the retired opener guard existed). The float classes come from resources/css/frus-renditions.css.</desc>
+                <model behaviour="inline" cssClass="dateline" useSourceRendition="true"/>
             </elementSpec>
             <elementSpec ident="list" mode="change">
                 <desc>FRUS document lists, reference parity with hsg-shell's frus.odd list model. The base teipublisher.odd model renders every list with disc bullets and, worse, passes child::node() so a label is emitted twice -- once as raw text and once as the definition-list term (the "SUBJECT SUBJECT" / "1. 1." duplication). Each model below passes only the items, so pmf:list pairs each item with its preceding label into a dt/dd with no duplication:
@@ -430,9 +395,6 @@
                     - a description list (label + item, e.g. "SUBJECT"): a definition list whose term is bold and sits above its indented value.
                     - a label/item list (the numbered paragraphs "1.", "2." and lettered "(A)"..): a definition list whose label sits inline, on the same line as the item text, with no bullets and no auto-numbering.
                     The first model keys on an xml:id, which is only sound if that id means one thing (PR #32 review). Checked over the whole 694-volume corpus, not just the volumes deployed here: "persons" and "terms" occur on 596 elements in total, every one of them a body/div and at most one per file, and they appear in no file other than a register's own persons.xml / terms.xml. The predicate spells out that body/div position so a future nested div reusing the id could not silently pick up the register styling.</desc>
-                <model predicate="ancestor-or-self::div[parent::body][@xml:id = ('persons', 'terms')]" behaviour="list" cssClass="list-person" useSourceRendition="true">
-                    <param name="content" value="item"/>
-                </model>
                 <modelSequence predicate="tei:head">
                     <model behaviour="heading" cssClass="frus-list-head">
                         <param name="content" value="tei:head/node()"/>
@@ -442,7 +404,21 @@
                         <param name="content" value="tei:item"/>
                     </model>
                 </modelSequence>
-                <model predicate="@type = 'description' and tei:label" behaviour="list" cssClass="frus-labeled-list frus-description-list">
+                <model behaviour="pass-through" predicate="@type = 'description' or (not(@type) and parent::tei:item/parent::tei:list[@type = 'description'])">
+                    <desc>Upstream frus.odd's description-list design (OP#1317): the
+                        dt/dd-shaped FRUS list renders as a "ul.description" whose label
+                        is its own heading line and whose entries hang; nested untyped
+                        lists inside an entry are groups and take the same shape. The
+                        li / li.listLabel children come from upstream's item and label
+                        models (their guards are retired), styled in hsg-theme.css.</desc>
+                    <param name="subtype" value="if (@subtype) then @subtype else 'generic'"/>
+                    <param name="rendclass" value="replace(@rendition, '#', 'document_')"/>
+                    <param name="content" value="*"/>
+                    <pb:template xml:space="preserve"><ul xmlns="" class="description subtype-[[subtype]] [[rendclass]]">[[content]]</ul></pb:template>
+                </model>
+                <model behaviour="pass-through" predicate="ext:get-division-subtype(.) eq 'index'">
+                    <desc>Upstream's index-division lists: entries render as their own
+                        blocks (upstream's item model, cssClass "list"), not bullets.</desc>
                     <param name="content" value="tei:item"/>
                 </model>
                 <model predicate="tei:label" behaviour="list" cssClass="frus-labeled-list">
