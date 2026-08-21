@@ -48,11 +48,30 @@ describe("footer content", () => {
         );
     });
 
-    it("links Historical Documents within this app, unbuilt sections to the reference site", () => {
-        cy.get("footer.usa-footer a")
-            .contains("Historical Documents")
-            .should("have.attr", "href")
-            .and("match", /\/historicaldocuments$/);
+    it("carries the hsg-shell 'Learn more' links, including Contact Us", () => {
+        cy.get("footer.usa-footer .usa-footer__primary-content")
+            .first()
+            .find("a")
+            .then(($a) =>
+                expect(
+                    [...$a].map((el) => [el.textContent.trim(), el.getAttribute("href")])
+                ).to.deep.equal([
+                    ["Home", "/exist/apps/hsg-jinks/"],
+                    ["Search", "/exist/apps/hsg-jinks/search"],
+                    ["About Us", "/exist/apps/hsg-jinks/about"],
+                    ["Contact Us", "/exist/apps/hsg-jinks/about/contact-us"],
+                    ["FAQ", "/exist/apps/hsg-jinks/about/faq"],
+                ])
+            );
+    });
+
+    it("links every topic within this app, department policies to state.gov", () => {
+        ["Historical Documents", "Department History", "Countries"].forEach((label) => {
+            cy.get("footer.usa-footer a")
+                .contains(label)
+                .should("have.attr", "href")
+                .and("match", /^\/exist\/apps\/hsg-jinks\//);
+        });
         cy.get("footer.usa-footer a")
             .contains("Privacy Policy")
             .should("have.attr", "href", "https://www.state.gov/privacy-policy/");
