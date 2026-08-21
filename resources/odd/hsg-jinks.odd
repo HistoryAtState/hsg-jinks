@@ -25,7 +25,88 @@
             <change when="2025-11-10T19:08:27.185+01:00">Initial version</change>
         </revisionDesc></teiHeader><text>
         <body>
-            <schemaSpec start="TEI teiCorpus" source="teipublisher.odd"> <elementSpec ident="div" mode="change"><model predicate="$parameters?mode=('volume-landing', 'volume-interior')" behaviour="block"/><model predicate="$parameters?mode = 'register'" behaviour="pass-through">
+            <schemaSpec start="TEI teiCorpus" source="frus.odd">
+                <!-- ============================================================
+                     Guards against the vendored FRUS ODD (resources/odd/frus.odd).
+                     TEI Publisher's odd:merge REPLACES a parent elementSpec
+                     wholesale when this file redeclares it with models, so each
+                     spec below reinstates the teipublisher.odd behaviour that
+                     upstream's print-derived model would otherwise displace.
+                     Upstream is not wrong; it is internally consistent with its
+                     OWN list/dateline design, which this app does not share.
+                     Remove a guard only together with the app-side change that
+                     makes upstream's version work here.
+                     ============================================================ -->
+                <!-- Upstream's item models assume upstream's own list model, and
+                     this app keeps its own. Both of upstream's models emit
+                     invalid HTML under this app's list:
+                       . description lists: upstream renders them as "ul" with
+                         the label as its own "li", so its item is pass-through.
+                         Here the list is a "dl" and pmf:listItem pairs each item
+                         with its preceding label into dt + dd; mixing the halves
+                         emits "li" inside "dl" and drops the label text outright
+                         (SUBJECT, PARTICIPANTS ...).
+                       . index divisions: upstream renders each entry as a block,
+                         which lands a "div" as a direct child of this app's "ul"
+                         (264 times in one volume index alone).
+                     Restoring teipublisher.odd's single listItem model is what
+                     keeps both valid. Note this leaves upstream's
+                     ext:get-division-subtype call unreachable; the binding in
+                     resources/odd/configuration.xml stays, because it must
+                     already exist the moment a sync or a lifted guard makes any
+                     ext: helper reachable again. Adopting upstream's list,
+                     item and label together is the real fix, and needs the list
+                     styling in resources/css/hsg-theme.css rewritten with it. -->
+                <elementSpec ident="item" mode="change">
+                    <model behaviour="listItem"/>
+                </elementSpec>
+                <!-- Same mismatch seen from the label side. Upstream wraps a
+                     description list's label in "li class=listLabel" so its own
+                     "ul" stays valid; here pmf:listItem runs the model chain on
+                     the label to build the "dt", so that wrapper would land
+                     inside it. teipublisher.odd declares no label spec at all
+                     and the content renders bare, which pass-through reproduces. -->
+                <elementSpec ident="label" mode="change">
+                    <model behaviour="pass-through"/>
+                </elementSpec>
+                <!-- Upstream makes opener a paragraph. This app's dateline is a
+                     block, and a "div" inside a "p" is invalid: the browser
+                     auto-closes the paragraph and the opener styling is lost. -->
+                <elementSpec ident="opener" mode="change">
+                    <model behaviour="block"/>
+                </elementSpec>
+                <!-- Upstream's only divGen model is output="print", which would
+                     leave the web pipeline with no model at all. The volume
+                     root's divGen xml:id="toc" placeholder is load-bearing here
+                     (modules/hsg-api.xql, and it has regressed once before;
+                     see volume-front-back-matter.cy.js). -->
+                <elementSpec ident="divGen" mode="change">
+                    <model behaviour="block"/>
+                </elementSpec>
+                <!-- Upstream omits titlePage outright, which is right for its
+                     print pipeline and wrong for volume front matter on the web. -->
+                <elementSpec ident="titlePage" mode="change">
+                    <model behaviour="block" useSourceRendition="true"/>
+                </elementSpec>
+                <!-- Upstream drops the browse/toc inline model and the
+                     figure/table/lg/list cssClass hooks. This app sets
+                     display="browse" (modules/lib/api/collection.xql,
+                     modules/templates/browse.xqm) and styles .table-head
+                     (resources/css/epub.css), so both are still needed.
+                     This restores teipublisher.odd's list verbatim and adopts
+                     none of upstream's head refinements: its table head is a
+                     pass-through emitting a caption, which would need its own
+                     verification against this app's table styling. Revisit
+                     together, not piecemeal. -->
+                <elementSpec ident="head" mode="change">
+                    <model predicate="$parameters?display='browse' or $parameters?mode='toc'" behaviour="inline"/>
+                    <model predicate="parent::figure" behaviour="block" cssClass="figure-head"/>
+                    <model predicate="parent::table" behaviour="block" cssClass="table-head"/>
+                    <model predicate="parent::lg" behaviour="block" cssClass="lg-head"/>
+                    <model predicate="parent::list" behaviour="block" cssClass="list-head"/>
+                    <model predicate="parent::div" behaviour="heading"/>
+                    <model behaviour="block"/>
+                </elementSpec> <elementSpec ident="div" mode="change"><model predicate="$parameters?mode=('volume-landing', 'volume-interior')" behaviour="block"/><model predicate="$parameters?mode = 'register'" behaviour="pass-through">
             <desc>Output register data if register profile is enabled</desc>
             <param name="people" value="let $refs := (root(.)//persName[@key or @ref], root(.)//rs[@type='person'][@key or @ref]) let $keys := for $i in ($refs/@key, $refs/@ref) return $i ! tokenize(., ' ')  for $key in distinct-values($keys) return collection($global:register-root)/id($key)[self::person]"/>
             <param name="places" value="let $refs := (root(.)//placeName[@key or @ref], root(.)//rs[@type='place'][@key or @ref]) let $keys := for $i in ($refs/@key, $refs/@ref) return $i ! tokenize(., ' ')  for $key in distinct-values($keys) return collection($global:register-root)/id($key)[self::place]"/>

@@ -14,6 +14,13 @@
 --><modules>
     <!-- Import global variables and functions from modules/odd-global.xqm -->
     <module uri="http://e-editiones.org/tei-publisher/odd-global" prefix="global" at="odd-global.xqm"/>
+    <!-- Extension functions the vendored canonical FRUS ODD's models call.
+         resources/odd/frus.odd declares no xmlns:ext on purpose; binding the
+         prefix is the consuming app's job, and this is where it happens. An
+         unbound "ext" prefix is a static XQuery error that breaks the entire
+         compiled transform, so this binding and hsg-jinks.odd's
+         schemaSpec/@source="frus.odd" belong together. -->
+    <module uri="http://history.state.gov/ns/frus/odd-ext" prefix="ext" at="frus-ext.xqm"/>
     <!-- General latex extension functions -->
     <!--output mode="latex">
         <property name="class">"article"</property>

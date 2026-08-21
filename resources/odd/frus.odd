@@ -1,0 +1,787 @@
+<TEI xmlns="http://www.tei-c.org/ns/1.0"
+     xmlns:frus="http://history.state.gov/frus/ns/1.0"
+     xmlns:pb="http://teipublisher.com/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>FRUS TEI</title>
+                <author>Joseph C. Wicentowski</author>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian</publisher>
+            </publicationStmt>
+            <sourceDesc>
+                <p>Adapted from TEI Minimal.</p>
+            </sourceDesc>
+        </fileDesc>
+        <encodingDesc>
+            <appInfo>
+                <application ident="RomaJS" version="1.1.2" when="2025-01-10T19:32:42.145Z">
+                    <desc>File edited with <ref target="https://github.com/TEIC/romajs"
+                        >RomaJS</ref></desc>
+                </application>
+            </appInfo>
+            <appInfo>
+                <application ident="RomaJS" version="1.3.0" when="2025-08-28T13:58:06.630Z">
+                    <desc>File edited with <ref target="https://github.com/TEIC/romajs"
+                        >RomaJS</ref></desc>
+                </application>
+            </appInfo>
+            <!-- ============================================================
+                 The CANONICAL FRUS rendition vocabulary — the single source.
+                 Resources/generate-rendition-assets.sh derives
+                 frus-encodingDesc.xml (the published/vendored artifact), and
+                 generate-schema.sh bakes a closed @rendition valList into the
+                 generated frus.rnc — token validation is schema-level.
+                 Never edit the generated files directly.
+                 ============================================================ -->
+            <styleDefDecl scheme="css" schemeVersion="2.1"/>
+            <tagsDecl>
+                <!-- TEI Publisher loads this external stylesheet into the WEB
+                     output's global style block (css:global-css-by-rendition);
+                     print skips global CSS entirely. Carried over verbatim from
+                     release-v2 so its output is bit-identical. -->
+                <rendition source="frus.css"/>
+                <!-- inline (typographic) -->
+                <rendition xml:id="bold">font-weight: bold;</rendition>
+                <rendition xml:id="italic">font-style: italic;</rendition>
+                <rendition xml:id="roman">font-style: normal;</rendition>
+                <rendition xml:id="small-caps">font-variant: small-caps;</rendition>
+                <rendition xml:id="all-caps">text-transform: uppercase;</rendition>
+                <rendition xml:id="strikethrough">text-decoration: line-through;</rendition>
+                <rendition xml:id="underline">text-decoration: underline;</rendition>
+                <rendition xml:id="superscript">position: relative; top: -0.52em; font-size: 0.69em; line-height: 0;</rendition>
+                <rendition xml:id="subscript">position: relative; top: 0.36em; font-size: 0.69em; line-height: 0;</rendition>
+                <rendition xml:id="letter-spaced">letter-spacing: 0.125em;</rendition>
+                <!-- block (paragraph-level; ids name visual intent — element context in
+                     consumer CSS refines the implementation, e.g. #center on a table or
+                     figure is margin-left/right auto; #tab-level-1 on a cell is 1em) -->
+                <rendition xml:id="center">text-align: center; text-indent: 0;</rendition>
+                <rendition xml:id="flush">text-indent: 0;</rendition>
+                <rendition xml:id="right">text-indent: 0; text-align: right;</rendition>
+                <rendition xml:id="section-heading">padding-top: 1em; text-indent: 0;</rendition>
+                <rendition xml:id="tab-level-0">margin-left: 0; text-indent: 0;</rendition>
+                <rendition xml:id="tab-level-1">margin-left: 3em; text-indent: 0;</rendition>
+                <rendition xml:id="tab-level-2">margin-left: 6em; text-indent: 0;</rendition>
+                <rendition xml:id="tab-level-3">margin-left: 9em; text-indent: 0;</rendition>
+                <rendition xml:id="hanging-indent">padding-left: 1.5em; text-indent: -1.5em;</rendition>
+                <rendition xml:id="set-solid">line-height: 1.1;</rendition>
+                <rendition xml:id="columns-2">columns: 2; column-gap: 2em;</rendition>
+                <!-- position (same-line layout) -->
+                <rendition xml:id="float-left">display: inline; float: left;</rendition>
+                <rendition xml:id="float-right">display: inline; float: right;</rendition>
+                <!-- table / cell (unmarked cells are left-aligned; renditions mark the
+                     exceptions and may sit on row for whole-row application) -->
+                <rendition xml:id="cell-tab-level-1">padding-left: 1em;</rendition>
+                <rendition xml:id="cell-tab-level-2">padding-left: 2em;</rendition>
+                <rendition xml:id="cell-num">text-align: right;</rendition>
+                <rendition xml:id="cell-center">text-align: center;</rendition>
+                <rendition xml:id="cell-left">text-align: left;</rendition>
+                <rendition xml:id="cell-border-top">border-top: 1px solid black;</rendition>
+                <rendition xml:id="cell-border-bottom">border-bottom: 1px solid black;</rendition>
+                <rendition xml:id="cell-border-left">border-left: 1px solid black;</rendition>
+                <rendition xml:id="cell-border-right">border-right: 1px solid black;</rendition>
+                <rendition xml:id="border-top">border-top: 1px solid black;</rendition>
+                <rendition xml:id="border-bottom">border-bottom: 1px solid black;</rendition>
+                <rendition xml:id="border-left">border-left: 1px solid black;</rendition>
+                <rendition xml:id="border-right">border-right: 1px solid black;</rendition>
+                <rendition xml:id="nowrap">white-space: nowrap;</rendition>
+                <rendition xml:id="top">vertical-align: top;</rendition>
+                <rendition xml:id="middle">vertical-align: middle;</rendition>
+                <rendition xml:id="bottom">vertical-align: bottom;</rendition>
+                <rendition xml:id="nopad">padding-right: 0.5em;</rendition>
+                <!-- experimental (d998 3e): a labelled list rendered as run-in dashed
+                     paragraphs -->
+                <rendition xml:id="run-in">display: run-in;</rendition>
+            </tagsDecl>
+        </encodingDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <head>FRUS TEI</head>
+            <p>This TEI ODD defines a TEI customization for the Foreign Relations of the United
+                States (FRUS) series.</p>
+            <!-- ============================================================
+                 ONE FILE, TWO PIPELINES. This schemaSpec is read by both:
+
+                   1. TEI PUBLISHER compiles the <model> elements into the web,
+                      print and epub transforms (release-v2, hsg-jinks). It reads
+                      @source, the <model>s, and <elementSpec ident="*">; it
+                      ignores <content> and the moduleRefs.
+
+                   2. odd2odd.xsl + odd2relax.xsl generate frus.rnc from the
+                      moduleRefs, classRefs and <content>. Processing models are
+                      transparent to it — verified: adding all 87 models left the
+                      generated schema byte-identical.
+
+                 The file is authored in TEI PUBLISHER's terms, because that is
+                 the contract the renderers compile against. Three constructs mean
+                 the opposite thing to odd2odd, so generate-schema.sh adapts them
+                 in a temporary copy (see inject-rendition-vallist.xq):
+                 @source is dropped, <elementSpec ident="*"> is dropped, and
+                 mode="add" becomes mode="change" for unprefixed idents.
+
+                 That last one matters: odd2odd reads mode="add" as "declare a NEW
+                 element", and where p5subset already declares it the declaration
+                 is silently DELETED — no error. divGen and editor disappeared
+                 from frus.rnc this way before the rewrite was added.
+
+                 Model ORDER is significant: TEI Publisher tries models in
+                 document order and the first match wins. Do not reorder them.
+                 @output restricts a model to one pipeline; a model with no
+                 @output serves all three.
+                 ============================================================ -->
+            <schemaSpec source="teipublisher.odd" docLang="en" ident="frus" prefix="tei_"
+                start="TEI" targetLang="en">
+                <!-- required minimal header elements -->
+                <moduleRef
+                    include="teiHeader fileDesc titleStmt publicationStmt sourceDesc notesStmt rendition seriesStmt profileDesc styleDefDecl tagsDecl encodingDesc category extent textClass keywords revisionDesc change classDecl taxonomy idno listPrefixDef prefixDef"
+                    key="header"/>
+                <!-- required core elements -->
+                <moduleRef
+                    include="p title relatedItem editor publisher pubPlace date pb cb list item hi head label lb gap desc unclear quote bibl biblScope del graphic note ref gloss term divGen measure"
+                    key="core"/>
+                <!-- required textstructure elements (TEI, text, and body) -->
+                <moduleRef include="TEI text front body back div opener closer signed salute dateline postscript titlePage docTitle titlePart docImprint docDate byline" key="textstructure"/>
+                <!-- required module tei instantiates lots of classes used for further expansion of this odd -->
+                <moduleRef key="tei"/>
+                <moduleRef include="anchor ab standOff listAnnotation seg" key="linking"/>
+                <moduleRef include="table cell row figure figDesc" key="figures"/>
+                <moduleRef include="settingDesc setting" key="corpus"/>
+                <!-- listPerson/person: structured persons registers in standOff,
+                     derived from the printed front-matter lists (dual model) -->
+                <moduleRef include="persName placeName affiliation orgName listPerson person" key="namesdates"/>
+                <moduleRef include="fw facsimile surface surfaceGrp" key="transcr"/>
+                <classRef key="att.anchoring"/>
+                <classRef key="att.global.analytic"/>
+                <classRef key="att.global.linking"/>
+                <elementSpec ident="TEI" mode="change">
+                    <model behaviour="document"/>
+                </elementSpec>
+                <elementSpec ident="p" mode="change">
+                    <model behaviour="pass-through" predicate="parent::note">
+                        <param name="content" value="."/>
+                        <param name="br"
+                            value="if (following-sibling::p) then &lt;br xmlns=&#34;http://www.w3.org/1999/xhtml&#34;/&gt; else ()"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <span class="p-footnote">[[content]][[br]]</span>
+                        </pb:template>
+                    </model>
+                    <model behaviour="paragraph" useSourceRendition="true">
+                        <outputRendition xml:space="preserve">
+                            text-align: justify;
+                        </outputRendition>
+                    </model>
+                </elementSpec>
+                <elementSpec ident="lb" mode="change">
+                    <model behaviour="break" useSourceRendition="true">
+                        <param name="type" value="'line'"/>
+                    </model>
+                </elementSpec>
+                <elementSpec ident="anchor" mode="change">
+                    <model output="print" behaviour="inline">
+                        <desc>Print: the footnote number is the note's literal @n —
+                            attachments continue their parent document's numbering, so
+                            the CSS footnote counter (which restarts per document)
+                            cannot be used. data-n feeds ::footnote-call/-marker via
+                            attr() in print.css.</desc>
+                        <param name="content" value="ext:trim-leading(ext:get-footnote-from-anchor(.)/node())"/>
+                        <param name="n" value="ext:get-footnote-label-from-anchor(.)"/>
+                        <!-- content is left-trimmed; the number-to-text gap is CSS
+                             (::before margin) — a template space is dropped when the
+                             content starts with an element (p-footnote notes) -->
+                        <pb:template xmlns=""><span class="footnote fn-literal" data-n="[[n]]">[[content]]</span></pb:template>
+                    </model>
+                    <model behaviour="note">
+                        <param name="content" value="ext:get-footnote-from-anchor(.)"/>
+                        <param name="label" value="ext:get-footnote-label-from-anchor(.)"/>
+                        <param name="place" value="'foot'"/>
+                    </model>
+                </elementSpec>
+                <elementSpec ident="note" mode="change">
+                    <model output="print" predicate="@type eq 'source'" behaviour="inline">
+                        <desc>Print: literal @n as data-n (see anchor)</desc>
+                        <param name="content" value="ext:trim-leading(node())"/>
+                        <param name="n" value="@n"/>
+                        <pb:template xmlns=""><span class="footnote fn-literal" data-n="[[n]]">[[content]]</span></pb:template>
+                    </model>
+                    <model behaviour="note" predicate="@type eq 'source'">
+                        <param name="content" value="."/>
+                        <param name="label" value="@n"/>
+                        <param name="place" value="'foot'"/>
+                    </model>
+                    <model behaviour="pass-through">
+                        <param name="content" value="."/>
+                    </model>
+                </elementSpec>
+                <elementSpec ident="title" mode="change">
+                    <model behaviour="omit" predicate="$mode eq 'toc' and @type eq 'subtitle'"/>
+                    <model behaviour="inline" predicate="$mode eq 'toc'">
+                        <param name="content" value="."/>
+                    </model>
+                    <modelSequence predicate="@type eq 'attachment-label' and not($mode eq 'toc')">
+                        <desc>Insert attachment label</desc>
+                        <model behaviour="heading">
+                            <param name="content"
+                                value="(ext:get-document-number(.), &lt;seg&gt;{(./node())}&lt;/seg&gt;)"/>
+                            <param name="level" value="3"/>
+                        </model>
+                    </modelSequence>
+                    <modelSequence predicate="not($mode eq 'toc')">
+                        <desc>Insert document number before the title, source note inside it, and
+                            dateline after it</desc>
+                        <model behaviour="heading" predicate="parent::titleStmt/parent::fileDesc">
+                            <param name="content"
+                                value="(ext:get-document-number(.), &lt;seg&gt;{(./node(), ext:get-source-note(.))}&lt;/seg&gt;)"/>
+                            <param name="level" value="if (@type eq 'subtitle') then 4 else 3"/>
+                        </model>
+                        <model behaviour="paragraph" cssClass="dateline">
+                            <!-- the print opener line: document identifier flush left
+                                 (bibl[@type='frus-identifying-mark']) + dateline right -->
+                            <param name="content"
+                                value="(ext:get-document-identifier(.), ext:get-dateline(.))"/>
+                        </model>
+                    </modelSequence>
+                </elementSpec>
+                <elementSpec ident="seriesStmt" mode="change">
+                    <model behaviour="pass-through" predicate="$mode eq 'cover'">
+                        <param name="volume-number"
+                            value="title[@type eq 'volume-number'] =&gt; upper-case()"/>
+                        <param name="volume-title"
+                            value="title[@type eq 'volume'] =&gt; upper-case()"/>
+                        <param name="sub-series"
+                            value="title[@type eq 'sub-series'] =&gt; upper-case()"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <div class="b-border broken-headings">
+                                <h2>FOREIGN RELATIONS</h2>
+                                <h3>OF THE</h3>
+                                <h2 style="font-size:larger">UNITED STATES</h2>
+                            </div>
+                            <div class="b-border"><h2>[[sub-series]]</h2></div>
+                            <div class="b-border"><h2>[[volume-number]]</h2></div>
+                            <div class="b-border"><h2>[[volume-title]]</h2></div>
+                            <img alt="seal of the US Department of State" src="resources/images/dos-seal-bw.png"/>
+                            <div class="t-border">
+                                <h3>DEPARTMENT OF STATE</h3>
+                                <h2>Washington</h2>
+                            </div>
+                        </pb:template>
+                    </model>
+                    <modelSequence predicate="$mode eq 'titlePage'">
+                        <model behaviour="pass-through">
+                            <param name="content"
+                                value="string-join((title[@type eq 'series'], title[@type eq 'sub-series']), ', ')"/>
+                            <pb:template xml:space="preserve" xmlns="">
+                                <div class="sealHeader">
+                                    <img alt="seal of the US Department of State" src="resources/images/dos-seal-bw.png"/>
+                                    <h3>[[content]]</h3>
+                                </div>
+                            </pb:template>
+                        </model>
+                        <model behaviour="heading" cssClass="m-left">
+                            <param name="content" value="title[@type eq 'volume-number']/string()"/>
+                            <param name="level" value="2"/>
+                        </model>
+                        <model behaviour="heading" cssClass="m-left">
+                            <param name="content" value="title[@type eq 'volume']/string()"/>
+                            <param name="level" value="1"/>
+                        </model>
+                        <model behaviour="block" cssClass="editors m-left">
+                            <param name="content" value="../titleStmt/editor"/>
+                        </model>
+                    </modelSequence>
+                </elementSpec>
+                <elementSpec ident="teiHeader" mode="change">
+                    <modelSequence>
+                        <model behaviour="block" cssClass="cover" pb:mode="cover">
+                            <param name="content" value="fileDesc/seriesStmt"/>
+                        </model>
+                        <model behaviour="block" cssClass="titlePage" pb:mode="titlePage">
+                            <param name="content"
+                                value="(fileDesc/seriesStmt, fileDesc/publicationStmt)"/>
+                        </model>
+                        <model behaviour="block" cssClass="notice">
+                            <pb:template xml:space="preserve" xmlns="">
+                                <p>DEPARTMENT OF STATE</p>
+                                <p>Office of the Historian</p>
+                            </pb:template>
+                        </model>
+                    </modelSequence>
+                    <model behaviour="metadata" output="web"/>
+                </elementSpec>
+                <elementSpec ident="item" mode="change">
+                    <model behaviour="block" cssClass="list"
+                        predicate="ext:get-division-subtype(.) eq 'index'"/>
+                    <!--<model behaviour="pass-through" predicate="preceding-sibling::label">
+                        <pb:template xml:space="preserve" xmlns="">
+                            <dd>[[item]]</dd>
+                        </pb:template>
+                    </model>-->
+                    <!-- description-list items are plain entry lines; the default
+                         listItem behavior would derive a floated <dt> from the
+                         preceding <label> (the dl mechanism), duplicating the
+                         heading on top of the entries -->
+                    <model behaviour="pass-through" predicate="parent::list[@type = 'description' or (not(@type) and parent::item/parent::list[@type = 'description'])]">
+                        <param name="rendclass" value="replace(@rendition, '#', 'document_')"/>
+                        <param name="content" value="node()"/>
+                        <pb:template xml:space="preserve" xmlns=""><li class="[[rendclass]]">[[content]]</li></pb:template>
+                    </model>
+                    <model behaviour="listItem" useSourceRendition="true"/>
+                </elementSpec>
+                <!-- FRUS customization (description lists, 2026-07-19): labels
+                     and items interleave freely — one label may head multiple
+                     items, and label/item groups may repeat. Vanilla TEI demands
+                     strict (label, item)+ pairing, which cannot express a
+                     description list's label heading a run of entries. -->
+                <elementSpec ident="list" mode="change" module="core">
+                    <content>
+                        <sequence>
+                            <alternate minOccurs="0" maxOccurs="unbounded">
+                                <classRef key="model.divTop"/>
+                                <classRef key="model.global"/>
+                                <elementRef key="desc" minOccurs="0" maxOccurs="unbounded"/>
+                            </alternate>
+                            <sequence minOccurs="1" maxOccurs="unbounded">
+                                <alternate>
+                                    <elementRef key="item"/>
+                                    <elementRef key="label"/>
+                                </alternate>
+                                <alternate minOccurs="0" maxOccurs="unbounded">
+                                    <classRef key="model.global"/>
+                                </alternate>
+                            </sequence>
+                            <sequence minOccurs="0" maxOccurs="unbounded">
+                                <classRef key="model.divBottom"/>
+                                <alternate minOccurs="0" maxOccurs="unbounded">
+                                    <classRef key="model.global"/>
+                                </alternate>
+                            </sequence>
+                        </sequence>
+                    </content>
+                    <!-- description lists (type="description", label heading lines):
+                         the dt/dd-shaped FRUS list — label + entries, groups nested
+                         as items holding inner description lists. @subtype surfaces
+                         as a class for CSS (subject = flush; default = 2em hang). -->
+                    <model behaviour="pass-through" predicate="@type = 'description' or (not(@type) and parent::item/parent::list[@type = 'description'])">
+                        <!-- untyped list inside a description item = a group (the inner
+                             type="description" was dropped as redundant, 2026-07-20) -->
+                        <param name="subtype" value="if (@subtype) then @subtype else 'generic'"/>
+                        <param name="rendclass" value="replace(@rendition, '#', 'document_')"/>
+                        <param name="content" value="*"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <ul class="description subtype-[[subtype]] [[rendclass]]">[[content]]</ul>
+                        </pb:template>
+                    </model>
+                    <modelSequence predicate="head">
+                        <model behaviour="paragraph" cssClass="listHead">
+                            <param name="content" value="head/node()"/>
+                        </model>
+                        <model behaviour="pass-through">
+                            <param name="type" value="if (@type) then @type else 'simple'"/>
+                            <param name="rendclass" value="replace(@rendition, '#', 'document_')"/>
+                            <param name="content" value="item"/>
+                            <pb:template xml:space="preserve" xmlns="">
+                                <ul class="[[type]] [[rendclass]]">[[content]]</ul>
+                            </pb:template>
+                        </model>
+                    </modelSequence>
+                    <!--<model behaviour="pass-through" predicate="label">
+                        <param name="content" value="item"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <dl>[[content]]</dl>
+                        </pb:template>
+                    </model>-->
+                    <model behaviour="list" cssClass="signed" predicate="parent::signed"/>
+                    <model behaviour="pass-through"
+                        predicate="ext:get-division-subtype(.) eq 'index'">
+                        <param name="content" value="item"/>
+                    </model>
+                    <!-- labelled lists (label/item pairs, e.g. em-dash sub-points
+                         under bullets) keep the default dl rendering, with source
+                         renditions surfaced so #tab-level-N can control their
+                         indent; without this they fell through to the @rendition
+                         ul model below, which drops the labels -->
+                    <!-- labelled lists (label/item pairs) keep the dl rendering with
+                         source renditions applied (#tab-level-N etc.).
+                         content=items only: the listItem behavior derives each dt
+                         from the item's preceding label sibling; passing all
+                         children would render each label twice. -->
+                    <model behaviour="list" cssClass="simple" useSourceRendition="true"
+                        predicate="label">
+                        <param name="content" value="item"/>
+                    </model>
+                    <!-- lists carrying renditions (e.g. #set-solid dash lists, #columns-2
+                         participants) surface them as document_* classes, matching the
+                         useSourceRendition class convention -->
+                    <model behaviour="pass-through" predicate="@rendition">
+                        <param name="rendclass" value="replace(@rendition, '#', 'document_')"/>
+                        <param name="content" value="item"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <ul class="simple [[rendclass]]">[[content]]</ul>
+                        </pb:template>
+                    </model>
+                    <model behaviour="list" cssClass="simple">
+                        <param name="content" value="item"/>
+                    </model>
+                </elementSpec>
+                <elementSpec ident="head" mode="change">
+                    <model behaviour="block" predicate="parent::figure">
+                        <outputRendition xml:space="preserve">
+                            font-style: italic;
+                        </outputRendition>
+                    </model>
+                    <model behaviour="pass-through" predicate="parent::table">
+                        <param name="content" value="."/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <caption>[[content]]</caption>
+                        </pb:template>
+                    </model>
+                    <model behaviour="block" predicate="parent::lg">
+                        <outputRendition xml:space="preserve">
+                            font-style: italic;
+                        </outputRendition>
+                    </model>
+                    <model behaviour="heading" predicate="parent::div">
+                        <param name="level" value="count(ancestor::div)"/>
+                    </model>
+                    <model behaviour="block"/>
+                </elementSpec>
+                <elementSpec ident="fw" mode="change">
+                    <model behaviour="omit"/>
+                </elementSpec>
+                <!-- FRUS customization: a division may contain trailing nested
+                     divisions AFTER its divBottom elements (closer, signed, etc.).
+                     In print, a document's attachments follow its signature block;
+                     in frus-unbound they are divisions xi:included in flow at that
+                     position. Vanilla TEI forbids div-like content after
+                     model.divBottom — earlier FRUS encodings worked around this
+                     with a custom frus:attachment element and later by parking
+                     attachment includes in <back> (which whole-volume assembly
+                     silently lost). The model below reproduces the P5 div content
+                     model exactly, then permits (model.divLike | model.global)*
+                     at the end. -->
+                <elementSpec ident="div" mode="change" module="textstructure">
+                    <content>
+                        <sequence>
+                            <alternate minOccurs="0" maxOccurs="unbounded">
+                                <classRef key="model.divTop"/>
+                                <classRef key="model.global"/>
+                            </alternate>
+                            <sequence minOccurs="0">
+                                <alternate>
+                                    <alternate minOccurs="1" maxOccurs="unbounded">
+                                        <classRef key="model.divLike"/>
+                                        <classRef key="model.divGenLike"/>
+                                        <classRef key="model.global"/>
+                                    </alternate>
+                                    <sequence>
+                                        <alternate minOccurs="1" maxOccurs="unbounded">
+                                            <classRef key="model.common"/>
+                                            <classRef key="model.global"/>
+                                        </alternate>
+                                        <alternate minOccurs="0" maxOccurs="unbounded">
+                                            <classRef key="model.divLike"/>
+                                            <classRef key="model.divGenLike"/>
+                                            <classRef key="model.global"/>
+                                        </alternate>
+                                    </sequence>
+                                </alternate>
+                                <sequence minOccurs="0" maxOccurs="unbounded">
+                                    <classRef key="model.divBottom"/>
+                                    <alternate minOccurs="0" maxOccurs="unbounded">
+                                        <classRef key="model.global"/>
+                                    </alternate>
+                                </sequence>
+                            </sequence>
+                            <!-- FRUS: attachments (as nested divisions) may follow
+                                 the closer, matching print order -->
+                            <alternate minOccurs="0" maxOccurs="unbounded">
+                                <classRef key="model.divLike"/>
+                                <classRef key="model.global"/>
+                            </alternate>
+                        </sequence>
+                    </content>
+                    <model behaviour="omit" predicate="@xml:id = ('pressrelease', 'toc')"/>
+                    <!-- pending divisions render per the published frus1977-80v27
+                         convention: heading + bracketed placeholder note (and, for
+                         chapters/sections, their pending children follow); they stay
+                         in the Contents and bookmarks -->
+                    <model behaviour="block" cssClass="document pending"
+                        predicate="ext:get-division-type(.) eq 'document-pending'">
+                        <param name="content"
+                            value="(ext:get-heading(.), ext:get-placeholder-note(.))"/>
+                    </model>
+                    <model behaviour="pass-through"
+                        predicate="ends-with(ext:get-division-type(.), '-pending')">
+                        <param name="heading" value="ext:create-heading(.)"/>
+                        <param name="note" value="ext:get-placeholder-note(.)"/>
+                        <param name="content" value="div"/>
+                        <param name="divclass"
+                            value="replace(ext:get-division-type(.), '-pending', '')"/>
+                        <param name="portion"
+                            value="local-name(ancestor::*[local-name() = ('front', 'body', 'back')][1])"/>
+                        <param name="id" value="@xml:id"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <div class="[[portion]] [[divclass]] pending" id="[[id]]">[[heading]]<p class="tei-p2 pending-note">[[note]]</p>[[content]]</div>
+                        </pb:template>
+                    </model>
+                    <!-- print Contents stops at the chapter level (documents are not
+                         listed); chapters render as leaf entries -->
+                    <!-- a chapter with a split title puts the SUBTITLE on its own
+                         hanging line, one tab in, carrying the leader + page number
+                         (the title line stays plain) - matching the print originals -->
+                    <model behaviour="pass-through" output="print" pb:mode="toc"
+                        predicate="$mode eq 'toc' and ext:get-division-type(.) eq 'chapter' and ext:get-subtitle(.)">
+                        <param name="id" value="'#' || @xml:id"/>
+                        <param name="title" value="ext:get-heading(.)"/>
+                        <!-- child nodes, not the title element: the title spec omits
+                             @type='subtitle' in toc mode -->
+                        <param name="subtitle" value="ext:get-subtitle(.)/node()"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <li class="toc-body">
+                                <span class="toc-title">[[title]]</span>
+                                <a class="toc-sub" href="[[id]]">[[subtitle]]</a>
+                            </li>
+                        </pb:template>
+                    </model>
+                    <model behaviour="pass-through" output="print" pb:mode="toc"
+                        predicate="$mode eq 'toc' and ext:get-division-type(.) eq 'chapter'">
+                        <param name="id" value="'#' || @xml:id"/>
+                        <param name="title" value="ext:get-heading(.)"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <li class="toc-body">
+                                <a href="[[id]]">[[title]]</a>
+                            </li>
+                        </pb:template>
+                    </model>
+                    <!-- the compilation line prints without leaders or a page number -->
+                    <model behaviour="pass-through" output="print" pb:mode="toc"
+                        predicate="$mode eq 'toc' and ext:get-division-type(.) eq 'compilation'">
+                        <param name="content" value="div"/>
+                        <param name="title" value="ext:get-heading(.)"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <li class="toc-body">
+                                <span class="toc-comp">[[title]]</span>
+                                <ul>[[content]]</ul>
+                            </li>
+                        </pb:template>
+                    </model>
+                    <model behaviour="pass-through" output="print" pb:mode="toc"
+                        predicate="$mode eq 'toc' and ext:get-division-type(.) eq 'section'">
+                        <!-- child DIVS only — "." passed the division's full content,
+                             which re-rendered the entire volume inside the Contents.
+                             toc-front/toc-back classes drive roman vs arabic targets. -->
+                        <param name="content" value="div"/>
+                        <param name="id" value="'#' || @xml:id"/>
+                        <param name="title" value="ext:get-heading(.)"/>
+                        <param name="portion"
+                            value="local-name(ancestor::*[local-name() = ('front', 'body', 'back')][1])"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <li class="toc-[[portion]]">
+                                <a href="[[id]]">[[title]]</a>
+                                <ul>[[content]]</ul>
+                            </li>
+                        </pb:template>
+                    </model>
+                    <model behaviour="pass-through" output="print" predicate="$mode eq 'toc'">
+                        <param name="content" value="ext:get-heading(.)"/>
+                        <param name="id" value="'#' || @xml:id"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <li>
+                                <a href="[[id]]">[[content]]</a>
+                            </li>
+                        </pb:template>
+                    </model>
+                    <model behaviour="block" cssClass="document"
+                        predicate="ext:get-division-type(.) eq 'document'">
+                        <param name="content"
+                            value="(ext:running-head-span(.), ext:get-attachment-label(.), ext:get-heading(.), ext:get-unplaced-footnotes(.), .)"
+                        />
+                    </model>
+                    <model behaviour="pass-through">
+                        <param name="content" value="."/>
+                        <param name="class" value="ext:create-class-attr(.)"/>
+                        <param name="heading" value="ext:create-heading(.)"/>
+                        <param name="id" value="@xml:id"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <div class="[[class]]" id="[[id]]">[[heading]][[content]]</div>
+                        </pb:template>
+                    </model>
+                </elementSpec>
+                <elementSpec ident="pb" mode="change">
+                    <model behaviour="omit"/>
+                </elementSpec>
+                <elementSpec ident="ref" mode="change">
+                    <!-- compact frus: prefixed cross-references (TEI listPrefixDef,
+                         declared in the volume’s {vol-id}_includes.xml): the prefix expands to the
+                         canonical historicaldocuments URL; fragments survive as-is -->
+                    <model behaviour="link" predicate="starts-with(@target, 'frus:')">
+                        <param name="uri"
+                            value="replace(@target, '^frus:', 'https://history.state.gov/historicaldocuments/')"
+                        />
+                    </model>
+                    <model behaviour="link" predicate="starts-with(@target, 'frus')">
+                        <param name="uri"
+                            value="'https://history.state.gov/historicaldocuments/' || string-join(tokenize(@target, '#'), '/')"
+                        />
+                    </model>
+                    <model behaviour="link" predicate="@target">
+                        <param name="uri" value="@target"/>
+                    </model>
+                    <model behaviour="link" predicate="not(node())">
+                        <param name="content" value="@target"/>
+                        <param name="uri" value="@target"/>
+                    </model>
+                    <model behaviour="inline"/>
+                </elementSpec>
+                <elementSpec ident="divGen" mode="add">
+                    <model behaviour="pass-through" output="print" pb:mode="toc">
+                        <param name="content" value="ancestor::text/(front|back|body)/div"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <div class="front section">
+                                <h1>Contents</h1>
+                                <ul id="toc">[[content]]</ul>
+                            </div>
+                        </pb:template>
+                    </model>
+                </elementSpec>
+                <elementSpec ident="body" mode="change"/>
+                <elementSpec ident="byline" mode="change">
+                    <model behaviour="paragraph" cssClass="byline"/>
+                </elementSpec>
+                <elementSpec ident="opener" mode="change">
+                    <model behaviour="paragraph" cssClass="opener"/>
+                </elementSpec>
+                <elementSpec ident="signed" mode="change">
+                    <model behaviour="paragraph" cssClass="signed" predicate="not(list)"/>
+                    <model behaviour="inline"/>
+                </elementSpec>
+                <elementSpec ident="salute" mode="change">
+                    <model behaviour="inline" cssClass="salute"/>
+                </elementSpec>
+                <!-- table: no outputRendition — print styling (minimal, rule-less,
+                     body-size) lives in the consumer CSS (frus.css table.tei-table);
+                     the old grey-box "font-size: smaller; background-color: #F0F0F0"
+                     was a web-era screen affordance, wrong for print. -->
+                <elementSpec ident="table" mode="change">
+                    <model behaviour="table" useSourceRendition="true"/>
+                </elementSpec>
+                <!-- header rows (row/@role='label') get a class hook so print CSS can
+                     center, bottom-align, and underline column heads (the row
+                     behaviour ignores cssClass, so emit the tr via template) -->
+                <elementSpec ident="row" mode="change">
+                    <model behaviour="pass-through" predicate="@role = 'label'">
+                        <param name="content" value="cell"/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <tr class="label-row">[[content]]</tr>
+                        </pb:template>
+                    </model>
+                    <model behaviour="row"/>
+                </elementSpec>
+                <elementSpec ident="cell" mode="change">
+                    <model behaviour="cell" useSourceRendition="true"/>
+                </elementSpec>
+                <elementSpec ident="closer" mode="change">
+                    <model behaviour="block" cssClass="signatureList" predicate="signed/list"/>
+                    <model behaviour="pass-through"/>
+                </elementSpec>
+                <elementSpec ident="figure" mode="change">
+                    <model behaviour="figure"/>
+                </elementSpec>
+                <elementSpec ident="graphic" mode="change">
+                    <model behaviour="graphic" output="epub">
+                        <param name="width" value="@width"/>
+                        <param name="height" value="@height"/>
+                        <param name="scale" value="@scale"/>
+                        <param name="title" value="desc"/>
+                        <param name="url" value="'Images/' || @url || '.png'"/>
+                    </model>
+                    <model behaviour="graphic" output="print">
+                        <param name="url"
+                            value="'https://static.history.state.gov/frus/' || ancestor::TEI/@xml:id/string() || '/' || @url || '.png'"/>
+                        <param name="width" value="@width"/>
+                        <param name="height" value="@height"/>
+                        <param name="scale" value="@scale"/>
+                        <param name="title" value="desc"/>
+                    </model>
+                </elementSpec>
+                <elementSpec ident="docTitle" mode="change"/>
+                <elementSpec ident="titlePage" mode="change">
+                    <model behaviour="omit" useSourceRendition="true"/>
+                </elementSpec>
+                <elementSpec ident="editor" mode="add">
+                    <model behaviour="pass-through">
+                        <param name="role"
+                            value="if (@role eq 'primary') then 'Editor' else 'General Editor'"/>
+                        <param name="content" value="."/>
+                        <pb:template xml:space="preserve" xmlns="">
+                            <span class="role">[[role]]</span>
+                            <span>[[content]]</span>
+                        </pb:template>
+                    </model>
+                </elementSpec>
+                <elementSpec ident="label" mode="add">
+                    <!--<model behaviour="pass-through" predicate="parent::list">
+                        <pb:template xml:space="preserve" xmlns="">
+                            <dt>[[content]]</dt>
+                        </pb:template>
+                    </model>-->
+                    <!-- a description list's label is a heading LINE (li so the
+                         emitted ul stays valid), not an inline dash marker -->
+                    <model behaviour="pass-through" predicate="parent::list[@type = 'description' or (not(@type) and parent::item/parent::list[@type = 'description'])]">
+                        <param name="content" value="node()"/>
+                        <param name="rendclass" value="replace(@rendition, '#', 'document_')"/>
+                        <pb:template xml:space="preserve" xmlns=""><li class="listLabel [[rendclass]]">[[content]]</li></pb:template>
+                    </model>
+                    <model behaviour="inline"/>
+                </elementSpec>
+                <elementSpec ident="cb" mode="change">
+                    <!-- column break inside a #columns-2 container: emit a
+                         marker block the print CSS turns into
+                         `break-before: column` (Prince honors it) -->
+                    <model behaviour="block" cssClass="column-break"/>
+                </elementSpec>
+                <elementSpec ident="*" mode="add"/>
+                <elementSpec ident="seg" mode="change">
+                    <model behaviour="inline" useSourceRendition="true"/>
+                </elementSpec>
+                <elementSpec ident="date" mode="change">
+                    <model behaviour="paragraph" cssClass="m-left" predicate="$mode eq 'titlePage'"/>
+                    <model behaviour="alternate" output="web" predicate="@when">
+                        <param name="default" value="."/>
+                        <param name="alternate" value="@when"/>
+                    </model>
+                    <model behaviour="inline"/>
+                </elementSpec>
+                <elementSpec ident="publicationStmt" mode="change">
+                    <model behaviour="block" cssClass="publicationStmt t-border"
+                        predicate="$mode eq 'titlePage'">
+                        <param name="content"
+                            value="(publisher, pubPlace, date[@type eq 'publication-date'])"/>
+                    </model>
+                    <model behaviour="block" output="web">
+                        <param name="content" value="availability/licence"/>
+                    </model>
+                    <model behaviour="omit"/>
+                </elementSpec>
+                <elementSpec ident="publisher" mode="add">
+                    <model behaviour="paragraph" cssClass="m-left" predicate="$mode eq 'titlePage'"
+                    />
+                </elementSpec>
+                <elementSpec ident="pubPlace" mode="add">
+                    <model behaviour="paragraph" cssClass="m-left" predicate="$mode eq 'titlePage'"
+                    />
+                </elementSpec>
+                <elementSpec ident="hi" mode="change">
+                    <model behaviour="inline" useSourceRendition="true"/>
+                </elementSpec>
+                <elementSpec ident="unclear" mode="change">
+                    <model behaviour="inline">
+                        <outputRendition scope="before" xml:space="preserve">content: ' [¿] ';</outputRendition>
+                        <outputRendition scope="after" xml:space="preserve">content: ' [?] ';</outputRendition>
+                    </model>
+                </elementSpec>
+            </schemaSpec>
+        </body>
+    </text>
+</TEI>

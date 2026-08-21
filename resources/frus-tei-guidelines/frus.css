@@ -1,0 +1,739 @@
+@namespace tei "http://www.tei-c.org/ns/1.0";
+@namespace oxy "http://www.oxygenxml.com/extensions/author";
+@namespace xi "http://www.w3.org/2001/XInclude";
+@namespace xml "http://www.w3.org/XML/1998/namespace";
+
+TEI {
+    font-family: "Palatino Linotype", "Palatino", "Georgia", serif;
+}
+
+TEI,
+teiHeader,
+fileDesc,
+titleStmt,
+title,
+notesStmt,
+sourceDesc,
+profileDesc,
+settingDesc,
+setting,
+placeName,
+date,
+text,
+front,
+body,
+back,
+div,
+head,
+p,
+ab,
+quote,
+list,
+item,
+table,
+row,
+cell,
+lb,
+closer,
+signed,
+listAnnotation,
+note
+{
+    display: block;    
+}
+
+oxy|processing-instruction[frusGen],
+xi|include,
+relatedItem[type = "canonical"] {
+    display: none !important;
+}
+
+hi,
+persName,
+unclear {
+    display: inline;
+}
+
+sourceDesc {
+    margin-top: 1em;
+    margin-bottom: 1em;
+    font-size: smaller
+}
+
+bibl {
+    display: block;
+    content: "";
+    -oxy-editable: false;
+    color: gray;
+}
+
+bibl:before {
+    content: oxy_concat(attr(type), ": ");
+}
+
+notesStmt {
+    margin-top: 1em;
+}
+
+relatedItem {
+    display: inline-block;
+    border: 1px dashed gray;
+    padding: .5em;
+    margin-left: .2em;
+    font-size: smaller;
+}
+
+relatedItem[type = "prev"]:before {
+    -oxy-link: attr(target);
+    content: oxy_concat("Previous (", oxy_replace(attr(target), ".xml", ""), ")");
+    color: blue;
+}
+
+relatedItem[type = "next"]:before {
+    -oxy-link: attr(target);
+    content: oxy_concat("Next (", oxy_replace(attr(target), ".xml", ""), ")");
+    color: blue;
+}
+
+relatedItem[type = "parent"]:before {
+    -oxy-link: attr(target);
+    content: oxy_concat("Parent (", oxy_replace(attr(target), ".xml", ""), ")");
+    color: blue;
+}
+
+relatedItem[type = "attachment-source"]:before {
+    -oxy-link: attr(target);
+    content: oxy_concat("Attachment Source (", oxy_replace(attr(target), ".xml", ""), ")");
+    color: blue;
+}
+
+title {
+    font-weight: bold;
+    padding-top: 1em;
+}
+
+title:before {
+    content: oxy_xpath("\
+if (string-length(root(.)//bibl[@type eq 'frus-document-number']) gt 0) then\
+    concat(\
+        root(.)//bibl[@type eq 'frus-document-number'],\
+        '. '\
+    )\
+else if (string-length(root(.)//bibl[@type eq 'frus-attachment-label']) gt 0) then\
+    concat(\
+        '[',\
+        root(.)//bibl[@type eq 'frus-attachment-label'],\
+        '] '\
+    )\
+else\
+    ()\
+    ");
+}
+
+title:after {
+    content: oxy_xpath("ancestor::TEI//note[@type eq 'source']/@n");
+    -oxy-link: oxy_concat("#", oxy_xpath("ancestor::TEI//note[@type eq 'source']/@xml:id"));
+    color: blue;
+    vertical-align: top;
+    font-size: smaller;
+    font-weight: normal;
+    position: relative; 
+    top: -0.3em;
+}
+
+setting {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+setting placeName:before {
+    content: "Place: ";
+    font-weight: bold;
+    color: gray;
+}
+
+setting date:before {
+    content: "Date: ";
+    font-weight: bold;
+    color: gray;
+}
+
+setting date[type = "place-at-hint"]:before {
+    content: "[Date hint: ";
+    font-weight: bold;
+    color: gray;
+}
+
+setting date[type = "place-at-hint"]:after {
+    content: "]";
+    font-weight: bold;
+    color: gray;
+}
+
+setting placeName, setting date {
+    text-align: right;
+    margin-bottom: .2em;
+}
+
+ab[type = "footnote-anchors"] {
+    border: 1px gray dashed;
+    padding: 1em;
+    margin-bottom: 1em;
+}
+
+ab[type = "footnote-anchors"] > anchor {
+    display: inline-block;
+    font-size: larger;
+    border: 1px gray dashed;
+    padding-left: .2em;
+    padding-right: .2em;
+}
+
+p {
+    line-height: 1.4em;
+    margin-bottom: .2em;
+    text-indent: 2em;
+}
+
+p[rendition~="#center"] {
+    text-align: center;
+    text-indent: 0em;
+    padding: 1em 0em;
+}
+
+p[rendition~="#section-heading"] {
+    padding-top: 1em;
+}
+
+p[rendition~="#flush"] {
+    text-indent: 0em;
+}
+
+p[rendition~="#right"], closer[rendition~="#right"], signed[rendition~="#right"] {
+    text-indent: 0em;
+    text-align: right;
+}
+
+p[rendition~="#tab-level-1"] {
+    margin-left: 3em;
+    text-indent: 0;
+}
+
+p[rendition~="#tab-level-2"] {
+    margin-left: 6em;
+    text-indent: 0;
+}
+
+p[rendition~="#tab-level-3"] {
+    margin-left: 9em;
+    text-indent: 0;
+}
+
+p[rendition~="#bold"],
+hi[rendition~="#bold"] {
+    font-weight: bold;
+}
+
+p[rendition~="#italic"],
+hi[rendition~="#italic"] {
+    font-style: italic;
+}
+
+p[rendition~="#underline"],
+hi[rendition~="#underline"],
+head[rendition~="#underline"] {
+    text-decoration: underline;
+}
+
+hi[rendition~="#roman"] {
+    font-style: normal;
+}
+
+hi[rendition~="#strikethrough"] {
+    text-decoration: line-through;
+}
+
+quote {
+    line-height: 1.2em;
+    text-indent: 2em;
+    padding-bottom: .2em;
+    padding-left: 2em;
+}
+
+unclear {
+    border-bottom-width: 1px;
+    border-bottom-style: dashed;
+    border-bottom-color: gray;
+}
+
+unclear::before {
+    content: "[¿] ";
+    color: gray;
+}
+
+unclear::after {
+    content: " [?]";
+    color: gray;
+}
+
+list {
+    margin-bottom: .2em;
+}
+
+list[type] {
+    padding-bottom: 1em;
+}
+
+list[type] > head {
+    margin-left: 0;
+    padding-bottom: .2em;
+    text-transform: uppercase;
+    font-size: smaller;
+}
+
+item:not(list) {
+    margin-left: 0em;
+}
+
+item {
+    margin-left: 2em;
+    padding: 0;
+    text-indent: 0em;
+    line-height: 1.4em;
+}
+
+list[type] > item:not(list) {
+    margin-left: 2em;
+    line-height: 1em;
+    font-size: smaller;
+}
+
+list[rendition ~= "#tab-level-1"], list[rendition ~= "#tab-level-1"] list {
+    margin-left: 0em;
+}
+
+list[rendition ~= "#tab-level-2"], list[rendition ~= "#tab-level-2"] list {
+    margin-left: 2em;
+}
+
+list[rendition ~= "#tab-level-3"], list[rendition ~= "#tab-level-3"] list {
+    margin-left: 4em;
+}
+
+list:not([type]) {
+    margin-left: 4em;
+}
+
+list:not([type]) item {
+    display: block;
+    margin-left: 2em;
+    list-style-type: none;
+    line-height: 1.4em;
+}
+
+/* oXygen accommodation: Author mode does not float the label, so the item is
+   pulled up onto the label's line. Float-capable media (browsers, Prince) get
+   the label/item pairing from the float alone; this hack would double-shift
+   and overlap there, hence the oxygen-only media block. */
+@media oxygen {
+    list:not([type]) item {
+        position: relative;
+        top: -1.3em;
+        margin-bottom: -1.3em;
+    }
+}
+
+list:not([type]) head {
+    display: list-item;
+    list-style-type: none;
+    line-height: 1.4em;
+}
+
+list:not([type]) head {
+    padding-top: .2em;
+}
+
+list[type] list:not([type]) {
+    margin-left: 0;
+}
+
+@media oxygen {
+    list[type] list:not([type]) item {
+        top: 0;
+        margin-bottom: 0;
+    }
+}
+
+label {
+    display: block;
+    float: left;
+    clear: left;
+    margin-right: 0.5em;
+}
+
+table {
+    display: table; 
+    width: 100%;
+    margin-bottom: 1em;
+    table-layout: fixed;
+    font-size: smaller;
+    margin: 0em 1em;
+}
+
+table head {
+    display: table-caption;
+    caption-side: top;
+    text-align: center;
+    font-weight: bold;
+    padding: .5em;
+    font-size: larger;
+}
+
+row {
+    display: table-row;
+    margin-bottom: 1em;
+}
+
+row[role = "label"], cell[role = "label"] {
+    font-weight: bold;
+}
+
+cell {
+    display: table-cell;
+    margin-bottom: 1em;
+    padding: .2em;
+}
+
+cell[rendition ~= "#cell-num"] {
+    text-align: right;
+}
+
+cell[rendition ~= "#border-bottom"] {
+    border-bottom: 1px solid black;
+}
+
+cell[rendition ~= "#border-left"] {
+    border-left: 1px solid black;
+}
+
+cell[rendition ~= "#border-right"] {
+    border-right: 1px solid black;
+}
+
+cell[rendition ~= "#border-top"] {
+    border-top: 1px solid black;
+}
+
+cell[rendition ~= "#tab-level-1"] {
+    padding-left: 1em;
+}
+
+cell[rendition ~= "#tab-level-2"] {
+    padding-left: 2em;
+}
+
+cell[rendition ~= "#vertical-align-middle"] {
+    vertical-align: middle;
+}
+
+closer {
+    margin-top: 1em;
+}
+
+signed {
+    font-weight: bold;
+    text-align: right;
+}
+
+listAnnotation {
+    border-top: 1px solid black;
+    margin-top: 2em;
+    margin-bottom: 1em;
+}
+
+note {
+    margin-top: 1em;
+    text-indent: 2em;
+}
+
+note p:first-child {
+    display: inline;
+}
+
+note:before {
+    content: attr(n) " ";
+    vertical-align: top;
+    font-size: smaller;
+    font-weight: normal;
+    position: relative; 
+    top: -0.3em;
+}
+
+note:after {
+    content: " ↩";
+    -oxy-link: attr(corresp);
+    color: blue;
+}
+
+pb {
+    display: block;
+    content: "Page " attr(n);
+    font-weight: bold;
+    padding: 1em;
+    margin: 1em 0em;
+    border: 1px black dashed;
+    color: gray;
+    text-align: center;
+}
+
+p pb, item pb {
+    display: inline;
+    content: "Page " attr(n);
+    font-weight: bold;
+    padding: 0em .5em;
+    border: 1px black dashed;
+    color: gray;
+}
+
+lb {
+    height: 0
+}
+
+/* the pure-CSS footnote marker lives alone so the oXygen-specific declarations
+   below cannot invalidate the rule in stricter browser parsers */
+anchor:after {
+    content: attr(n);
+}
+
+anchor:after {
+    -oxy-link: oxy_concat("#", attr(xml|id), "-content");
+    color: blue;
+}
+
+anchor {
+    vertical-align: top;
+    font-size: smaller;
+    font-weight: normal;
+    position: relative; 
+    top: -0.3em;
+}
+
+back {
+    padding: 1em;
+    margin: 1em 0em;
+    border: 1px black dashed;
+    font-weight: bold;
+    content: "[To access this document’s attachment(s), use the “Next” button at the top of the document.]";
+    color: gray;
+    text-align: center;
+}
+
+
+@media print {
+    @page {
+        size: letter;
+        margin: 1in;
+    }
+}
+/* ============================================================
+   Canonical-vocabulary gap coverage (frus-resources unification,
+   2026-07-03). Selectors for renditions defined in
+   frus-encodingDesc.xml that the original frus-apex stylesheet
+   did not yet cover.
+   ============================================================ */
+
+hi[rendition~="#small-caps"],
+p[rendition~="#small-caps"] {
+    font-variant: small-caps;
+}
+
+hi[rendition~="#all-caps"],
+p[rendition~="#all-caps"] {
+    text-transform: uppercase;
+}
+
+hi[rendition~="#superscript"] {
+    vertical-align: super;
+    font-size: smaller;
+}
+
+hi[rendition~="#subscript"] {
+    vertical-align: sub;
+    font-size: smaller;
+}
+
+p[rendition~="#hanging-indent"], item[rendition~="#hanging-indent"] {
+    padding-left: 1.5em;
+    text-indent: -1.5em;
+}
+
+table[rendition~="#center-block"], figure[rendition~="#center-block"] {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+seg[rendition~="#float-left"], dateline[rendition~="#float-left"] {
+    display: inline;
+    float: left;
+}
+
+seg[rendition~="#float-right"], dateline[rendition~="#float-right"] {
+    display: inline;
+    float: right;
+}
+
+cell[rendition~="#center"],
+row[rendition~="#center"] > cell {
+    /* the cell-default text-align: left is a direct declaration, so row-level
+       centering must target the cells; inheritance alone loses to it */
+    text-align: center;
+}
+
+/* an explicit cell-level mark still beats a row-level one */
+row[rendition~="#center"] > cell[rendition~="#cell-num"] {
+    text-align: right;
+}
+
+
+cell[rendition~="#nowrap"], row[rendition~="#nowrap"] {
+    white-space: nowrap;
+}
+
+cell[rendition~="#top"], row[rendition~="#top"] {
+    vertical-align: top;
+}
+
+cell[rendition~="#middle"], row[rendition~="#middle"] {
+    vertical-align: middle;
+}
+
+cell[rendition~="#bottom"], row[rendition~="#bottom"] {
+    vertical-align: bottom;
+}
+
+cell[rendition~="#nopad"], row[rendition~="#nopad"] {
+    padding-right: 0.5em;
+}
+
+/* Decision 5 (2026-07-03): unmarked cells are left-aligned; #cell-num marks
+   right-aligned numeric columns; #center (on cell or row) marks centered cells. */
+cell {
+    text-align: left;
+}
+
+/* Decision 6: #center on box elements centers the box itself. */
+table[rendition~="#center"], figure[rendition~="#center"] {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* opener block context for dateline floats (#float-right / #float-left). */
+opener, salute, dateline {
+    display: block;
+}
+
+/* dateline reads as one line: its placeName/date are inline within it,
+   overriding the base block-display list. */
+dateline placeName, dateline date {
+    display: inline;
+}
+
+standOff {
+    display: block;
+}
+
+/* oXygen accommodation: Author mode does not apply float, leaving a floated
+   dateline inline-left. Rendering it as a right-/left-aligned block gives the
+   same visual in oXygen; in float-capable media (browsers, Prince) the float
+   still wins because a floated box blockifies and shrink-wraps. */
+dateline[rendition~="#float-right"] {
+    display: block;
+    text-align: right;
+}
+
+dateline[rendition~="#float-left"] {
+    display: block;
+    text-align: left;
+}
+
+/* ------------------------------------------------------------------ */
+/* Print-fidelity renditions (2026-07-05): categories of typographic  */
+/* intention observed in the print volumes (frus1981-88v05 survey).   */
+
+/* letter-spaced: display capitals with open tracking (title-page and
+   imprint lines, e.g. DEPARTMENT OF STATE on p. II). Combines with
+   #small-caps / #all-caps. */
+hi[rendition~="#letter-spaced"],
+p[rendition~="#letter-spaced"],
+ab[rendition~="#letter-spaced"],
+titlePart[rendition~="#letter-spaced"],
+byline[rendition~="#letter-spaced"] {
+    letter-spacing: 0.125em;
+}
+
+/* tight: the group sets solid (wrap leading) with normal paragraph
+   spacing around it — the dash sub-lists and quoted run-on points of
+   frus1981-88v05 p. 681. On a group element the inner blocks lose
+   their own spacing so the group reads as one unit. */
+p[rendition~="#set-solid"],
+quote[rendition~="#set-solid"],
+list[rendition~="#set-solid"],
+item[rendition~="#set-solid"] {
+    line-height: 1.1;
+}
+
+quote[rendition~="#set-solid"] p,
+list[rendition~="#set-solid"] item {
+    line-height: 1.1;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* columns-2: the block's children flow into two columns (participants
+   lists; some front-matter lists in other volumes). Each direct item
+   stays whole — a U.S./Soviet side pair lands one side per column, and
+   grouped delegation lists flow group by group. oXygen Author does not
+   implement CSS multi-columns and renders single-column; acceptable
+   editing fallback, no @media block needed. */
+list[rendition~="#columns-2"],
+div[rendition~="#columns-2"] {
+    columns: 2;
+    column-gap: 2em;
+}
+
+list[rendition~="#columns-2"] > item {
+    break-inside: avoid;
+}
+
+/* the list's own head (PARTICIPANTS) spans above both columns in print */
+list[rendition~="#columns-2"] > head {
+    column-span: all;
+}
+
+/* participants/subject lists: items wrap with a hanging indent in
+   print (continuation lines indent, e.g. MFA Deputy Minister /
+   Komplektov); element-scoped default, no per-item markup needed. */
+list[type="participants"] item,
+list[type="subject"] item {
+    padding-left: 1em;
+    text-indent: -1em;
+}
+
+/* closing salute sets as an indented line of its own (print: "Sincerely,"
+   at paragraph indent, then the right-set signature). */
+closer > salute {
+    text-indent: 2em;
+}
+
+/* speaker labels in memcon dialogue: an italic line of its own at
+   paragraph indent (frus1981-88v05 p. 681 "Dobrynin:"), not the
+   floated label of glossary lists. */
+label[type="speaker"] {
+    float: none;
+    clear: none;
+    display: block;
+    text-indent: 2em;
+    margin-right: 0;
+}
