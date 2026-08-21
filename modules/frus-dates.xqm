@@ -34,7 +34,7 @@ declare function fd:normalize-low($date as xs:string, $timezone as xs:dayTimeDur
             else if ($date castable as xs:date) then
                 let $adjusted-date := adjust-date-to-timezone(xs:date($date), $timezone)
                 return
-                    substring($adjusted-date, 1, 10) || 'T00:00:00' || substring($adjusted-date, 11)
+                    substring(string($adjusted-date), 1, 10) || 'T00:00:00' || substring(string($adjusted-date), 11)
             else if (matches($date, '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$')) then
                 adjust-dateTime-to-timezone(xs:dateTime($date || ':00'), $timezone)
             else if (matches($date, '^\d{4}-\d{2}$')) then
@@ -56,7 +56,7 @@ declare function fd:normalize-high($date as xs:string, $timezone as xs:dayTimeDu
             else if ($date castable as xs:date) then
                 let $adjusted-date := adjust-date-to-timezone(xs:date($date), $timezone)
                 return
-                    substring($adjusted-date, 1, 10) || 'T23:59:59' || substring($adjusted-date, 11)
+                    substring(string($adjusted-date), 1, 10) || 'T23:59:59' || substring(string($adjusted-date), 11)
             else if (matches($date, '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$')) then
                 adjust-dateTime-to-timezone(xs:dateTime($date || ':59'), $timezone)
             else if (matches($date, '^\d{4}-\d{2}$')) then

@@ -120,12 +120,10 @@ describe("search tips and routing (OP#1182)", () => {
     });
 });
 
-// The four date deep-link tests are skipped pending OP#1316: the frus-v2
-// data model lacks what the legacy frus-dates behavior needs (the spec's
-// own data note below predates the skip). Un-skip as acceptance criteria
-// when implementing OP#1316.
+// Date deep-links work against the frus-v2 data via the division-level
+// index fields added in hsg-jinks-data (frus-search-date-min/max; OP#1316).
 describe("legacy FRUS date deep link (OP#1185)", () => {
-    it.skip("a full legacy deep link (q + within=documents + date range + sort-by) lands directly on filtered results", () => {
+    it("a full legacy deep link (q + within=documents + date range + sort-by) lands directly on filtered results", () => {
         // Uses dobrynin/June 1985 (this worktree's one-volume sample data,
         // frus1981-88v05) rather than hsg-shell's own doc-example (Cuba,
         // October 1962) -- the full multi-volume FRUS corpus that example
@@ -139,17 +137,17 @@ describe("legacy FRUS date deep link (OP#1185)", () => {
         cy.get(".usa-collection__item").should("have.length.at.least", 1);
     });
 
-    it.skip("start-date without within is treated as within=documents (frus-dates compatibility)", () => {
+    it("start-date without within is treated as within=documents (frus-dates compatibility)", () => {
         cy.visit("search?start-date=1985-06-12&end-date=1985-06-12");
         cy.contains(".usa-prose", "within documents");
     });
 
-    it.skip("sort-by=relevance with no q silently becomes date-asc", () => {
+    it("sort-by=relevance with no q silently becomes date-asc", () => {
         cy.visit("search?within=documents&start-date=1985-06-12&end-date=1985-06-12&sort-by=relevance");
         cy.contains(".usa-prose", "sorted by dates (oldest first)");
     });
 
-    it.skip("an exact single-day range returns only documents dated that day", () => {
+    it("an exact single-day range returns only documents dated that day", () => {
         cy.visit("search?within=documents&start-date=1985-06-12&end-date=1985-06-12&sort-by=date-asc");
         cy.get(".usa-collection__item").should("have.length.at.least", 1);
         cy.contains(".usa-prose", "between June 12, 1985 and June 12, 1985");
