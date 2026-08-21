@@ -152,9 +152,7 @@
     "search" : true
   },
   "theme" : {
-    "banner" : {
-      "enabled" : true
-    },
+    "banner" : true,
     "logo" : {
       "width" : "1280px",
       "image" : "oh-logo.png",
