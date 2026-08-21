@@ -483,6 +483,23 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     min-width: 0;
 }
 
+/* Same trap, one level down. layout.css makes main a centered flex container
+   whose child is "flex: 1", and a flex item defaults to min-width: auto, so it
+   refuses to shrink below its content's min-content width. One unbreakable run
+   is enough: the prev/next pager label is white-space: nowrap, and a long
+   chapter title ("September 1985 to November 1985 Personal Diplomacy: Reagan,
+   Gorbachev, and the Geneva Summit", frus1981-88v05/d80) measures ~700px
+   against a 632px column. Because main centers its child, the excess spills
+   BOTH ways and the prose lands on top of the sidebars on either side.
+
+   min-width: 0 lets the item shrink back to its track, which is also what makes
+   the pager label's own overflow/text-overflow ellipsis take effect: the
+   max-width: 100% it already carries cannot do this on its own, because a
+   percentage max-width does not constrain an item's min-content contribution. */
+.sticky-layout > main > * {
+    min-width: 0;
+}
+
 /* "Page N" page-break facsimile markers in document and section prose
    (pb elementSpec in resources/odd/hsg-jinks.odd): a grey right-floated
    margin marker, reference parity with hsg-shell's facsimile-link rule
