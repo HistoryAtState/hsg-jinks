@@ -14,7 +14,7 @@
         "background-position" : "center",
         "background-repeat" : "no-repeat",
         "height" : "25rem",
-        "label" : "U.S. Department of State"
+        "label" : "Bound volumes of the Foreign Relations of the United States series on a shelf"
       }
     },
     "logo" : {
@@ -305,6 +305,7 @@
   "skip" : [
     "^data/landing/landing\\.xml",
     "^resources/images/team/",
+    "^resources/images/hero\\.(jpg|webp)$",
     "^resources/images/(typewriter[12]|books|header-bg|paper-texture)\\.jpg",
     "^resources/images/type\\.jpeg",
     "^resources/images/gplv3-rounded-grey-180x60\\.jpg",
