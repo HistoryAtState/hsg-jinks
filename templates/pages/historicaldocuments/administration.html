@@ -17,7 +17,7 @@
     }
     ---
     [% template! title %]
-    <title>[[ normalize-space(string-join((hsg:administration-heading($context)) ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    <title>[[ normalize-space(string-join((hsg:administration-heading($context) || ' - Historical Documents - Office of the Historian') ! string(.), ' ')) ]]</title>
     [% endtemplate %]
 
     [% template breadcrumb %]

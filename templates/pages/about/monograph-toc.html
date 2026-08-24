@@ -17,7 +17,7 @@
     }
     ---
     [% template! title %]
-    <title>[[ normalize-space(string-join((about:monograph-title($context?request?parameters?publication)) ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    <title>[[ normalize-space(string-join(((if ($context?request?parameters?publication = 'faq') then 'FAQs' else about:monograph-title($context?request?parameters?publication)) || ' - About Us - Office of the Historian') ! string(.), ' ')) ]]</title>
     [% endtemplate %]
 
     <!--

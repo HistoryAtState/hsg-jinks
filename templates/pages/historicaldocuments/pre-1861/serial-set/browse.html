@@ -17,7 +17,7 @@
     }
     ---
     [% template! title %]
-    <title>[[ normalize-space(string-join(('U.S. Congressional Serial Set: Documents on ' || sset:region-and-or-subject-name($context) || ' before 1861') ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    <title>[[ normalize-space(string-join((sset:region-and-or-subject-name($context) || ' - U.S. foreign relations materials in the pre-1861 U.S. Congressional Serial Set - Pre-1861 U.S. Foreign Relations Materials - Historical Documents - Office of the Historian') ! string(.), ' ')) ]]</title>
     [% endtemplate %]
 
     [% template breadcrumb %]

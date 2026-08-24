@@ -73,24 +73,20 @@ declare function hsg:page-title($page as xs:string?) as xs:string {
 };
 
 (:~
- : Page-title text for a FRUS volume/division page, mirroring the breadcrumb
- : labels: "Document N" for documents, the division's own title for chapters
- : and compilations, the volume title for landings; empty otherwise.
+ : Page-title text for a FRUS volume/division page: the section title
+ : "Historical Documents", exactly as the reference system serves for every
+ : volume, chapter and document page (verified against the mirror and
+ : production). hsg-shell carries an unwired richer design (its
+ : pages:generate-title tests expect "<head> - Historical Documents - ...");
+ : if that is ever wanted here, this is the function to change. Empty for
+ : non-FRUS doc-backed pages (conferences etc.), which declare their own
+ : titles.
  :)
 declare function hsg:frus-page-title($context as map(*)) as xs:string? {
-    if (exists($context?doc)) then
-        let $division-type := ($context?doc?content//tei:bibl[@type='frus-division-type'])[1]/string()
-        let $volume-title := hsg:volume-title($context?doc?content)
-        return
-            if ($division-type = 'document') then
-                let $number := ($context?doc?content//tei:bibl[@type='frus-document-number'])[1]/string()
-                return "Document " || $number || " - " || $volume-title
-            else if ($division-type = ('chapter', 'compilation')) then
-                ($context?doc?content//tei:titleStmt/tei:title => string-join(' ') => normalize-space())
-                || " - " || $volume-title
-            else
-                $volume-title
-    else ()
+    if (exists($context?doc) and hsg:volume-title($context?doc?content)[. ne '']) then
+        "Historical Documents"
+    else
+        ()
 };
 
 declare function hsg:volume-title($doc as node()?) as xs:string? {

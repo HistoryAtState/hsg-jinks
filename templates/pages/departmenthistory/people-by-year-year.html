@@ -17,7 +17,7 @@
     }
     ---
     [% template! title %]
-    <title>[[ normalize-space(string-join(('Principal Officers and Chiefs of Mission, ' || $context?request?parameters?year) ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    <title>[[ normalize-space(string-join(($context?request?parameters?year || ' - Principals and Chiefs Chronological Listing - People - Department History - Office of the Historian') ! string(.), ' ')) ]]</title>
     [% endtemplate %]
 
     [% template breadcrumb %]

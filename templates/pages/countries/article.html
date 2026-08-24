@@ -10,7 +10,7 @@
     }
     ---
     [% template! title %]
-    <title>[[ normalize-space(string-join((countries:article-heading($context?doc?content)) ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    <title>[[ normalize-space(string-join((countries:page-title($context?doc?content, 'Countries - Office of the Historian')) ! string(.), ' ')) ]]</title>
     [% endtemplate %]
 
     <div>

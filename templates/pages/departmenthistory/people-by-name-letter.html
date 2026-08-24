@@ -17,7 +17,7 @@
     }
     ---
     [% template! title %]
-    <title>[[ normalize-space(string-join(('Principal Officers and Chiefs of Mission, Starting with ' || upper-case($context?request?parameters?letter)) ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    <title>[[ normalize-space(string-join((upper-case($context?request?parameters?letter) || ' - Principals and Chiefs Alphabetical Listing - People - Department History - Office of the Historian') ! string(.), ' ')) ]]</title>
     [% endtemplate %]
 
     [% template breadcrumb %]

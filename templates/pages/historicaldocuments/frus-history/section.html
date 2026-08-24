@@ -17,7 +17,7 @@
     }
     ---
     [% template! title %]
-    <title>[[ normalize-space(string-join((fh:navigation-title($context)) ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    <title>[[ normalize-space(string-join(fh:head-label(fh:division($context?section-id)) ! string(.), '')) || ' - History of the Foreign Relations Series - Historical Documents - Office of the Historian' ]]</title>
     [% endtemplate %]
 
     [# Monograph division view (OP#1294): hsgapi:frus-history-section resolves

@@ -17,7 +17,7 @@
     }
     ---
     [% template! title %]
-    <title>[[ normalize-space(string-join((edu:module-complete-title(edu:current-module($context))) ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    <title>[[ normalize-space(string-join((edu:module-complete-title(edu:current-module($context)) || ' - Curriculum Modules - Education Resources - Office of the Historian') ! string(.), ' ')) ]]</title>
     [% endtemplate %]
 
     [% template breadcrumb %]
