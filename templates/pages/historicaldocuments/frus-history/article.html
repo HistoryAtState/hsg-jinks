@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join((fh:article-title($context)) ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    [% endtemplate %]
+
     [# Single research article view (OP#1294): hsgapi:frus-history-article
        resolves the article (unknown ids 404) and threads article-id into the
        context. Reference parity with hsg-shell's research/article.xml:

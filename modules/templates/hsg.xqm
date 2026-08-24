@@ -61,6 +61,38 @@ declare %private function hsg:resolve-include($header as element()?, $name as xs
  : tags.xqm's resource listings (the direct titleStmt lookup #1101 used
  : misses the xincluded titleStmt of the v2 volume roots).
  :)
+(:~
+ : The document <title> for a page: "<page> - Office of the Historian", or
+ : just the site name when no page title applies (OP#1333; reference parity
+ : with hsg-shell, whose every page carried this pattern). Page templates
+ : pass their own heading; hsg:frus-page-title derives one for the
+ : doc-backed volume pages the layout defaults cover.
+ :)
+declare function hsg:page-title($page as xs:string?) as xs:string {
+    string-join((normalize-space($page)[. ne ''], "Office of the Historian"), " - ")
+};
+
+(:~
+ : Page-title text for a FRUS volume/division page, mirroring the breadcrumb
+ : labels: "Document N" for documents, the division's own title for chapters
+ : and compilations, the volume title for landings; empty otherwise.
+ :)
+declare function hsg:frus-page-title($context as map(*)) as xs:string? {
+    if (exists($context?doc)) then
+        let $division-type := ($context?doc?content//tei:bibl[@type='frus-division-type'])[1]/string()
+        let $volume-title := hsg:volume-title($context?doc?content)
+        return
+            if ($division-type = 'document') then
+                let $number := ($context?doc?content//tei:bibl[@type='frus-document-number'])[1]/string()
+                return "Document " || $number || " - " || $volume-title
+            else if ($division-type = ('chapter', 'compilation')) then
+                ($context?doc?content//tei:titleStmt/tei:title => string-join(' ') => normalize-space())
+                || " - " || $volume-title
+            else
+                $volume-title
+    else ()
+};
+
 declare function hsg:volume-title($doc as node()?) as xs:string? {
     if (not(exists($doc))) then ()
     else

@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join((fh:navigation-title($context)) ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    [% endtemplate %]
+
     [# Monograph division view (OP#1294): hsgapi:frus-history-section resolves
        the division server-side (unknown ids 404 there) and threads section-id
        into the context. Reference parity with hsg-shell's monograph-interior

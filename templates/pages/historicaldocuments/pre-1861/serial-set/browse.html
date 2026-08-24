@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join(('U.S. Congressional Serial Set: Documents on ' || sset:region-and-or-subject-name($context) || ' before 1861') ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    [% endtemplate %]
+
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">

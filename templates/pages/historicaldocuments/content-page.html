@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join((hsg:content-title($context, $context?page-id)) ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    [% endtemplate %]
+
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">

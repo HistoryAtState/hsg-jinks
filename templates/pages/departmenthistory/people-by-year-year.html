@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join(('Principal Officers and Chiefs of Mission, ' || $context?request?parameters?year) ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    [% endtemplate %]
+
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">

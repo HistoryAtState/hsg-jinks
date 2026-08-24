@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join((about:monograph-title($context?request?parameters?publication)) ! string(.), ' ')) || ' - Office of the Historian' ]]</title>
+    [% endtemplate %]
+
     <!--
         Shared TOC page for both FAQ and HAC (OP#1153): aboutapi:view-faq /
         aboutapi:view-hac pass which publication via the "publication" request
