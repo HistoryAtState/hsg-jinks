@@ -47,6 +47,10 @@
               "url" : "about"
             },
             {
+              "label" : "Contact Us",
+              "url" : "about/contact-us"
+            },
+            {
               "label" : "FAQ",
               "url" : "about/faq"
             }
@@ -65,7 +69,7 @@
             },
             {
               "label" : "Countries",
-              "url" : "https://history.state.gov/countries/"
+              "url" : "countries"
             }
           ]
         }
