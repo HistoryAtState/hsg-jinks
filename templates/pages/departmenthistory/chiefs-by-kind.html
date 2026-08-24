@@ -30,8 +30,8 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                [[ dh:chiefs-by-kind-breadcrumb($context, $context?request?parameters?kind) ]]
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                [[ hsg:breadcrumb-rdfa(dh:chiefs-by-kind-breadcrumb($context, $context?request?parameters?kind)) ]]
             </ul>
         </nav>
     </li>

@@ -29,8 +29,8 @@
     [% if exists($context?doc) %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                [[ hsg:collection-breadcrumbs($context) ]]
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                [[ hsg:breadcrumb-rdfa(hsg:collection-breadcrumbs($context)) ]]
             </ul>
         </nav>
     </li>

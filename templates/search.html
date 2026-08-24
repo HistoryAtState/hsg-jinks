@@ -40,9 +40,9 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                <li><a href="[[ $context-path ]]/[[ $context?defaults?browse ]]"><pb-i18n key="breadcrumb.collection-root"></pb-i18n></a></li>
-                <li><pb-i18n key="search.results"></pb-i18n></li>
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                <li typeof="ListItem" property="itemListElement"><a href="[[ $context-path ]]/[[ $context?defaults?browse ]]" typeof="WebPage" property="item"><pb-i18n key="breadcrumb.collection-root"></pb-i18n></a></li>
+                <li typeof="ListItem" property="itemListElement"><pb-i18n key="search.results"></pb-i18n></li>
             </ul>
         </nav>
     </li>

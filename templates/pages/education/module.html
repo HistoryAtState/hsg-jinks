@@ -19,8 +19,8 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                [[ edu:breadcrumb($context, (map{"label": "Curriculum Modules", "href": "/education/modules"}, map{"label": edu:module-complete-title(edu:current-module($context))})) ]]
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                [[ hsg:breadcrumb-rdfa(edu:breadcrumb($context, (map{"label": "Curriculum Modules", "href": "/education/modules"}, map{"label": edu:module-complete-title(edu:current-module($context))}))) ]]
             </ul>
         </nav>
     </li>

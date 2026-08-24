@@ -26,8 +26,8 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                [[ dh:monograph-section-breadcrumb($context) ]]
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                [[ hsg:breadcrumb-rdfa(dh:monograph-section-breadcrumb($context)) ]]
             </ul>
         </nav>
     </li>

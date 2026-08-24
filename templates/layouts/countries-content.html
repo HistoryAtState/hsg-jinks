@@ -18,8 +18,8 @@
     [% if exists($context?doc) %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                [[ countries:breadcrumbs($context) ]]
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                [[ hsg:breadcrumb-rdfa(countries:breadcrumbs($context)) ]]
             </ul>
         </nav>
     </li>

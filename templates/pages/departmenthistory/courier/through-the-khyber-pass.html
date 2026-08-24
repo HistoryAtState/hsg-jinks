@@ -19,8 +19,8 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                [[ dh:breadcrumb($context, (map{"label": "U.S. Diplomatic Couriers", "href": "/departmenthistory/diplomatic-couriers"}, map{"label": "Through the Khyber Pass"})) ]]
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                [[ hsg:breadcrumb-rdfa(dh:breadcrumb($context, (map{"label": "U.S. Diplomatic Couriers", "href": "/departmenthistory/diplomatic-couriers"}, map{"label": "Through the Khyber Pass"}))) ]]
             </ul>
         </nav>
     </li>
