@@ -125,8 +125,12 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
         return $srch:SECTIONS?($section)
     let $dateCapable := count($category) eq 1 and $category = "documents"
     let $fulltextQuery := if (exists($query)) then "hsg-fulltext:(" || srch:escape-unsupported-characters($query) || ") " else ()
-    let $rangeStartStr := translate(string($rangeStart), ':-', '')
-    let $rangeEndStr := translate(string($rangeEnd), ':-', '')
+    (: lower-case: the index analyzer lower-cases the stored date strings
+     : (the "T"), and eXist 7 dropped the AnalyzingQueryParser that used to
+     : apply the same analysis to range endpoints on the query side; an
+     : upper-case "T" in the endpoints silently matches nothing (OP#1316). :)
+    let $rangeStartStr := lower-case(translate(string($rangeStart), ':-', ''))
+    let $rangeEndStr := lower-case(translate(string($rangeEnd), ':-', ''))
     let $dateQuery :=
         if (exists($rangeStart)) then
             "frus-search-date-min:[" || $rangeStartStr || " TO " || $rangeEndStr || "] AND frus-search-date-max:[" || $rangeStartStr || " TO " || $rangeEndStr || "]"
