@@ -119,3 +119,32 @@ declare function config:volume-id($parameters as map(*)?, $node as node()?) as x
     )
 };
 
+(:~
+ : Base URI of the IIIF Image API service serving the FRUS page scans
+ : (OP#1335). The same Cantaloupe instance the reference app's OpenSeadragon
+ : viewer is hardcoded to (hsg-shell resources/scripts/app.js); kept here so
+ : the ODD pb model, the pb-facsimile viewers and the pg_* facsimile page all
+ : share one definition. Must end in "/": pb-facsimile concatenates
+ : base-uri + facs verbatim.
+ :)
+declare variable $config:iiif-image-api as xs:string := "https://ci.history.state.gov/iiif/2/";
+
+(:~
+ : IIIF Image API identifier of the page scan a pb points to, relative to
+ : $config:iiif-image-api ("frus%2Ffrus1981-88v05%2Ftiff%2F0347.tif"). The
+ : image store lays FRUS scans out as frus/{volume}/tiff/{facs}.tif and the
+ : Cantaloupe endpoint expects the path slashes percent-encoded (reference
+ : parity: hsg-shell's app.js builds the identical identifier). Empty when
+ : the pb carries no facs or the node is outside the FRUS collection (e.g.
+ : an in-memory fragment), so models can predicate on it and fall back to a
+ : plain page label.
+ :)
+declare function config:iiif-facs-id($parameters as map(*)?, $pb as element()) as xs:string? {
+    let $volume := config:volume-id($parameters, $pb)
+    return
+        if ($volume != "" and $pb/@facs) then
+            "frus%2F" || $volume || "%2Ftiff%2F" || $pb/@facs || ".tif"
+        else
+            ()
+};
+

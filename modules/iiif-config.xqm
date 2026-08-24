@@ -5,13 +5,17 @@ module namespace iiifc="https://e-editiones.org/api/iiif/config";
 
 import module namespace iiif="https://e-editiones.org/api/iiif" at "lib/api/iiif.xql";
 import module namespace nav="http://www.tei-c.org/tei-simple/navigation" at "navigation.xql";
+import module namespace global="http://e-editiones.org/tei-publisher/odd-global" at "odd-global.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 (:~
- : Base URI of the IIIF image API service to use for the images
+ : Base URI of the IIIF image API service to use for the images: the FRUS
+ : Cantaloupe instance, shared with the ODD pb model and the pb-facsimile
+ : viewers via odd-global.xqm (OP#1335). No trailing slash: iiif.xql joins
+ : base and identifier with "/".
  :)
-declare variable $iiifc:IMAGE_API_BASE := "https://apps.existsolutions.com/cantaloupe/iiif/2";
+declare variable $iiifc:IMAGE_API_BASE := replace($global:iiif-image-api, "/+$", "");
 
 (:~
  : URL prefix to use for the canvas id
@@ -28,11 +32,14 @@ declare function iiifc:milestones($doc as node()) {
 };
 
 (:~
- : Extract the image path from the milestone element. If you need to strip
- : out or add something, this is the place. By default strips any prefix before a colon.
+ : Extract the image path from the milestone element: the same
+ : frus%2F{volume}%2Ftiff%2F{facs}.tif identifier the ODD pb model emits
+ : (odd-global.xqm, OP#1335). The default implementation stripped a prefix
+ : before a colon, which does not fit the FRUS data's bare image numbers
+ : (facs="0347").
  :)
 declare function iiifc:milestone-id($milestone as element()) {
-    replace($milestone/@facs, "^[^:]+:(.*)", "$1")
+    global:iiif-facs-id((), $milestone)
 };
 
 (:~
