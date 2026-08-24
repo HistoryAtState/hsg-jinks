@@ -288,6 +288,20 @@ declare function dh:monograph-section-content($context as map(*)) as element()+ 
     let $s := dh:current-section($context)
     let $division := $s?division
     let $transformed := page:transform($division, map { "mode": "monograph-section" })
+    (: The division's own head renders as the page h1 below, so drop the
+       transform's copy of it (the outermost section's leading heading) or
+       the page shows its title twice (OP#1336). Done here rather than with
+       an empty head model in the ODD: an empty-output model on head in this
+       position crashes eXist 7's serializer with an
+       ArrayIndexOutOfBoundsException. :)
+    let $transformed :=
+        if ($transformed instance of element() and contains($transformed/@class, 'tei-div')) then
+            element { node-name($transformed) } {
+                $transformed/@*,
+                $transformed/node() except $transformed/*[contains(@class, 'tei-head')][1]
+            }
+        else
+            $transformed
     let $body := pages:clean-footnotes($transformed)
     let $footnotes :=
         for $fn in $transformed//*[@class = "footnote"]

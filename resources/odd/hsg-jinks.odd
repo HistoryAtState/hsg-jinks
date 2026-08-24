@@ -177,7 +177,12 @@
         </model><model behaviour="inline"/></elementSpec>
             <elementSpec ident="date" mode="change"><model predicate="$parameters?mode='document-view'" behaviour="inline">
             <desc>In a dateline, render the date as the encoding has it. Without this, the @when model below wins and renders the date twice - once as text and once reformatted ("March 11, 1985" followed by "11th March 1985") - because alternate emits both.</desc>
-        </model><model predicate="$parameters?display='browse' or $parameters?mode=('breadcrumb', 'title')" behaviour="inline"/><model predicate="@when" behaviour="alternate">
+        </model><model predicate="$parameters?display='browse' or $parameters?mode=('breadcrumb', 'title', 'monograph-section')" behaviour="inline">
+            <desc>Monograph sections (short-history, buildings; OP#1336) render a
+                date as the encoding has it: the @when alternate model below would
+                append the normalized value to the display text ("Sept. 5, 1774"
+                followed by "5th September 1774") inside headings and prose.</desc>
+        </model><model predicate="@when" behaviour="alternate">
                         <param name="default" value="if (normalize-space(.)) then . else @when/string()"/>
                         <param name="alternate" value="try { format-date(xs:date(@when), '[D1o] [MNn] [Y]', ($parameters?language, 'en')[1], (), ()) } catch * { @when/string() }"/>
                     </model><model behaviour="inline"/></elementSpec>
