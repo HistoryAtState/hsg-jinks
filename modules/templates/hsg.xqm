@@ -1259,10 +1259,10 @@ declare %private function hsg:doclist-division($target as element(tei:TEI), $pub
  : the volume tree (a chapter's "next" is its first document; a document's
  : "next" is the following document, or the next chapter at a boundary).
  :)
-declare function hsg:prev-next($context as map(*)) {
+declare %private function hsg:prev-next-targets($context as map(*)) as map(*) {
     let $doc := $context?doc?content
     return
-    if (not(exists($doc))) then ()
+    if (not(exists($doc))) then map {}
     else
         let $base := util:collection-name(root($doc))
         let $type := normalize-space(($doc//tei:bibl[@type='frus-division-type'])[1])
@@ -1278,8 +1278,57 @@ declare function hsg:prev-next($context as map(*)) {
                 ($notesStmt/tei:relatedItem[@type='parent']/@target)[1]
             else
                 ($notesStmt/tei:relatedItem[@type='prev']/@target)[1]
-        let $prev := hsg:nav-target($base, $prevTarget)
-        let $next := hsg:nav-target($base, ($notesStmt/tei:relatedItem[@type='next']/@target)[1])
+        return map {
+            "prev": hsg:nav-target($base, $prevTarget),
+            "next": hsg:nav-target($base, ($notesStmt/tei:relatedItem[@type='next']/@target)[1])
+        }
+};
+
+(:~
+ : The head metadata for a doc-backed page (OP#629): a meta description
+ : derived entirely from the teiHeader (no ODD cycle), and link rel prev/
+ : next mirroring the on-page pager (Google ignores the link relations
+ : nowadays but other engines still read them). Non-FRUS doc pages and
+ : pages without a description-worthy header emit nothing rather than
+ : boilerplate; the reference site's static "history.state.gov 3.0 shell"
+ : description is deliberately not copied.
+ :)
+declare function hsg:head-meta($context as map(*)) as element()* {
+    if (not(exists($context?doc))) then ()
+    else
+        let $doc := $context?doc?content
+        let $division-type := normalize-space(($doc//tei:bibl[@type='frus-division-type'])[1])
+        let $volume-title := hsg:volume-title($doc)
+        let $division-title := normalize-space(string-join($doc//tei:fileDesc/tei:titleStmt/tei:title, ' '))
+        let $description :=
+            if ($division-type = 'document') then
+                let $num := normalize-space(($doc//tei:bibl[@type='frus-document-number'])[1])
+                return string-join((
+                    $division-title[. ne ''],
+                    "Document " || $num || " of " || $volume-title,
+                    "Office of the Historian"), " &#8212; ")
+            else if ($division-type ne '' and $volume-title[. ne '']) then
+                string-join(($division-title[. ne ''], $volume-title,
+                    "Office of the Historian"), " &#8212; ")
+            else if ($volume-title[. ne '']) then
+                $volume-title || " &#8212; Foreign Relations of the United States, Office of the Historian, U.S. Department of State"
+            else ()
+        let $targets := hsg:prev-next-targets($context)
+        return (
+            $description[. ne ''] ! <meta name="description" content="{.}"/>,
+            $targets?prev ! <link rel="prev" href="{$context?context-path}/historicaldocuments/{?publication}/{?id}"/>,
+            $targets?next ! <link rel="next" href="{$context?context-path}/historicaldocuments/{?publication}/{?id}"/>
+        )
+};
+
+declare function hsg:prev-next($context as map(*)) {
+    let $doc := $context?doc?content
+    return
+    if (not(exists($doc))) then ()
+    else
+        let $targets := hsg:prev-next-targets($context)
+        let $prev := $targets?prev
+        let $next := $targets?next
         return
             if (empty($prev) and empty($next)) then ()
             else

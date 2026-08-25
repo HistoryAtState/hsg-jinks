@@ -33,6 +33,12 @@
     <title>[[ hsg:page-title(hsg:frus-page-title($context)) ]]</title>
     [% endtemplate %]
 
+    [% template! description %]
+    [# Meta description + link rel prev/next for doc-backed pages (OP#629);
+       pages the header cannot describe keep the generic app description. #]
+    [[ let $meta := hsg:head-meta($context) return if (exists($meta)) then $meta else <meta name="description" content="{$context?description}"/> ]]
+    [% endtemplate %]
+
     [% template breadcrumb %]
     [% if exists($context?doc) %]
     <li>
