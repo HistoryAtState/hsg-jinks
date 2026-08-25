@@ -23,28 +23,28 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                <li>
-                    <a href="[[ $context?context-path ]]/">
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                <li typeof="ListItem" property="itemListElement">
+                    <a href="[[ $context?context-path ]]/" typeof="WebPage" property="item">
                         <pb-i18n key="breadcrumb.home">Home</pb-i18n>
                     </a>
                 </li>
-                <li>
-                    <a href="[[ $context?context-path ]]/historicaldocuments">
+                <li typeof="ListItem" property="itemListElement">
+                    <a href="[[ $context?context-path ]]/historicaldocuments" typeof="WebPage" property="item">
                         <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
                     </a>
                 </li>
-                <li>
-                    <a href="[[ $context?context-path ]]/historicaldocuments/pre-1861">
+                <li typeof="ListItem" property="itemListElement">
+                    <a href="[[ $context?context-path ]]/historicaldocuments/pre-1861" typeof="WebPage" property="item">
                         <pb-i18n key="menu.pre-1861">Pre-1861 U.S. foreign relations materials</pb-i18n>
                     </a>
                 </li>
-                <li>
-                    <a href="[[ $context?context-path ]]/historicaldocuments/pre-1861/serial-set">
+                <li typeof="ListItem" property="itemListElement">
+                    <a href="[[ $context?context-path ]]/historicaldocuments/pre-1861/serial-set" typeof="WebPage" property="item">
                         <pb-i18n key="menu.serial-set">U.S. Congressional Serial Set</pb-i18n>
                     </a>
                 </li>
-                <li aria-current="page">All</li>
+                <li aria-current="page" typeof="ListItem" property="itemListElement">All</li>
             </ul>
         </nav>
     </li>

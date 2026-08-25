@@ -20,13 +20,13 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                <li>
-                    <a href="[[ $context?context-path ]]/">
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                <li typeof="ListItem" property="itemListElement">
+                    <a href="[[ $context?context-path ]]/" typeof="WebPage" property="item">
                         <pb-i18n key="breadcrumb.home">Home</pb-i18n>
                     </a>
                 </li>
-                <li aria-current="page">
+                <li aria-current="page" typeof="ListItem" property="itemListElement">
                     <pb-i18n key="breadcrumb.developer">Developer Resources</pb-i18n>
                 </li>
             </ul>

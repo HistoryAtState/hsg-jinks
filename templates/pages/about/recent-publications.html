@@ -23,8 +23,8 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                [[ about:breadcrumb($context, (map { "label": "Recent Publications" })) ]]
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                [[ hsg:breadcrumb-rdfa(about:breadcrumb($context, (map { "label": "Recent Publications" }))) ]]
             </ul>
         </nav>
     </li>

@@ -23,8 +23,8 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                [[ dh:breadcrumb($context, (map{"label": "People", "href": "/departmenthistory/people"}, map{"label": "Chiefs of Mission", "href": "/departmenthistory/people/chiefsofmission"})) ]]
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                [[ hsg:breadcrumb-rdfa(dh:breadcrumb($context, (map{"label": "People", "href": "/departmenthistory/people"}, map{"label": "Chiefs of Mission", "href": "/departmenthistory/people/chiefsofmission"}))) ]]
             </ul>
         </nav>
     </li>

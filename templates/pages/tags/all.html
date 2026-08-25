@@ -23,8 +23,8 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                [[ tags:breadcrumb($context, (map{"label": "Full Taxonomy"})) ]]
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                [[ hsg:breadcrumb-rdfa(tags:breadcrumb($context, (map{"label": "Full Taxonomy"}))) ]]
             </ul>
         </nav>
     </li>

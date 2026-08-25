@@ -29,8 +29,8 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                [[ ms:breadcrumb($context, ()) ]]
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                [[ hsg:breadcrumb-rdfa(ms:breadcrumb($context, ())) ]]
             </ul>
         </nav>
     </li>

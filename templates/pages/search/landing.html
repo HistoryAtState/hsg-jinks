@@ -21,8 +21,8 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                <li><pb-i18n key="search.results">Search</pb-i18n></li>
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                <li typeof="ListItem" property="itemListElement"><pb-i18n key="search.results">Search</pb-i18n></li>
             </ul>
         </nav>
     </li>

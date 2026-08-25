@@ -30,8 +30,8 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                [[ dh:monograph-toc-breadcrumb($context, $context?request?parameters?publication) ]]
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                [[ hsg:breadcrumb-rdfa(dh:monograph-toc-breadcrumb($context, $context?request?parameters?publication)) ]]
             </ul>
         </nav>
     </li>

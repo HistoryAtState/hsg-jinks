@@ -63,6 +63,38 @@ declare %private function hsg:resolve-include($header as element()?, $name as xs
  : misses the xincluded titleStmt of the v2 volume roots).
  :)
 (:~
+ : schema.org RDFa for breadcrumbs (OP#1334; reference parity with
+ : hsg-shell): each crumb becomes a ListItem/itemListElement, each link a
+ : WebPage/item. Page templates wrap their breadcrumb-building calls in
+ : this, and their "ul" carries typeof="BreadcrumbList" vocab; central so
+ : the dozen section modules that build crumbs need no per-function
+ : markup. Existing attributes (class, aria-current) survive.
+ :)
+declare function hsg:breadcrumb-rdfa($items as element()*) as element()* {
+    for $item in $items
+    return
+        if (local-name($item) = 'li') then
+            element li {
+                $item/@*,
+                attribute typeof { "ListItem" },
+                attribute property { "itemListElement" },
+                for $n in $item/node()
+                return
+                    if ($n instance of element() and local-name($n) = 'a') then
+                        element a {
+                            $n/@*,
+                            attribute typeof { "WebPage" },
+                            attribute property { "item" },
+                            $n/node()
+                        }
+                    else
+                        $n
+            }
+        else
+            $item
+};
+
+(:~
  : The document <title> for a page: "<page> - Office of the Historian", or
  : just the site name when no page title applies (OP#1333; reference parity
  : with hsg-shell, whose every page carried this pattern). Page templates

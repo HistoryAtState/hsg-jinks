@@ -23,8 +23,8 @@
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">
-            <ul>
-                [[ dh:people-by-name-breadcrumb($context, $context?request?parameters?letter) ]]
+            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                [[ hsg:breadcrumb-rdfa(dh:people-by-name-breadcrumb($context, $context?request?parameters?letter)) ]]
             </ul>
         </nav>
     </li>
