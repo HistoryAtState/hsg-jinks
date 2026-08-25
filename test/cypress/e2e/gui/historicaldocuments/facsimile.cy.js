@@ -157,3 +157,17 @@ describe("document page facsimile links", () => {
         cy.get(".hsg-frus__docs-on-page li a").should("contain.text", "Document 80");
     });
 });
+
+describe("bare page-break ids (OP#1315)", () => {
+    it("pg{n} without the underscore 404s instead of serving an accidental page", () => {
+        // the v2 data's internal page-break ids (pg316) used to resolve via
+        // id() into near-empty division pages; the public URL is pg_316
+        cy.request({ url: `historicaldocuments/${VOLUME}/pg316`, failOnStatusCode: false })
+            .its("status")
+            .should("eq", 404);
+    });
+
+    it("the underscore form keeps working", () => {
+        cy.request(`historicaldocuments/${VOLUME}/pg_316`).its("status").should("eq", 200);
+    });
+});

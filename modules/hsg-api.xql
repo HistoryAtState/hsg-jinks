@@ -272,10 +272,15 @@ declare function hsgapi:view-interior($request as map(*)) {
     else
     let $doc := collection($config:data-default || "/" || $publicationId)/id($divisionId)
         [not(self::tei:divGen)]
+        [not(self::tei:pb)]
         (: The volume root marks where the printed TOC goes with
            <divGen xml:id="toc"/>, so id("toc") resolves both that
            placeholder and the real front-matter division (OP#1306);
-           only the division has a page. :)
+           only the division has a page. Page-break ids (pg316) resolve
+           the same way and used to serve accidental near-empty division
+           pages (OP#1315); the public page-image URL is the underscore
+           form (pg_316, the facsimile dispatch above), and the bare id
+           404s exactly as it does on the reference site. :)
     return
         if (not(hsgapi:is-exact-division($doc, $divisionId))) then
             (: id() tokenizes its argument on whitespace, so "d1 d3" resolves to two
