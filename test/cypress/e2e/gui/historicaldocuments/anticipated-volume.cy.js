@@ -1,7 +1,10 @@
 // Anticipated (uncleared) volumes are not browsable (OP#1337; hsg-shell
 // contract): the landing renders but lists no chapter entries, and interior
-// division routes 404. frus1981-88v16 ships chapter-title scaffolding with
-// frus-division-type "chapter-pending" (curated dev subset, OP#1320); if the
+// division routes 404. The gate is VOLUME-level (revisionDesc status at
+// least partially-published, like hsg-shell's select-section): a partially
+// published volume lists and serves its pending divisions, marked
+// li.pending (sidebar-toc.cy.js / volume-landing.cy.js cover that side).
+// frus1981-88v16 is 'being-cleared' (curated dev subset, OP#1320); if the
 // volume is not deployed the tests skip rather than fail.
 
 const VOLUME = "historicaldocuments/frus1981-88v16";
