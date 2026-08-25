@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join(((let $k := $context?request?parameters?countryOrYear return if (dh:visits-is-year($k)) then $k else normalize-space(dh:visits-by-country($k)[last()]/from)) || ' - Visits by Foreign Leaders - Department History - Office of the Historian') ! string(.), ' ')) ]]</title>
+    [% endtemplate %]
+
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">

@@ -177,7 +177,12 @@
         </model><model behaviour="inline"/></elementSpec>
             <elementSpec ident="date" mode="change"><model predicate="$parameters?mode='document-view'" behaviour="inline">
             <desc>In a dateline, render the date as the encoding has it. Without this, the @when model below wins and renders the date twice - once as text and once reformatted ("March 11, 1985" followed by "11th March 1985") - because alternate emits both.</desc>
-        </model><model predicate="$parameters?display='browse' or $parameters?mode=('breadcrumb', 'title')" behaviour="inline"/><model predicate="@when" behaviour="alternate">
+        </model><model predicate="$parameters?display='browse' or $parameters?mode=('breadcrumb', 'title', 'monograph-section')" behaviour="inline">
+            <desc>Monograph sections (short-history, buildings; OP#1336) render a
+                date as the encoding has it: the @when alternate model below would
+                append the normalized value to the display text ("Sept. 5, 1774"
+                followed by "5th September 1774") inside headings and prose.</desc>
+        </model><model predicate="@when" behaviour="alternate">
                         <param name="default" value="if (normalize-space(.)) then . else @when/string()"/>
                         <param name="alternate" value="try { format-date(xs:date(@when), '[D1o] [MNn] [Y]', ($parameters?language, 'en')[1], (), ()) } catch * { @when/string() }"/>
                     </model><model behaviour="inline"/></elementSpec>
@@ -540,16 +545,22 @@
                     shell equivalent: hsg-facsilime-link). The base spec's title-mode,
                     pb-facsimile-viewer and static-site variants are dropped: this app renders pb
                     only through page:transform document/division views, which pass none of those
-                    parameters.</desc>
+                    parameters. The marker is a plain link to the page's facsimile view at
+                    pg_{n} (OP#1335, hsg-shell pmf:pb-link parity): a relative href, resolved
+                    against the document's own /historicaldocuments/{volume}/{division} URL --
+                    the same technique hsg-shell used, and pbs render on no other page. The
+                    legacy URL uses @n, not the v2 data's underscore-less @xml:id (and the
+                    id-less continuation pb at a fragment start has only @n anyway);
+                    hsgapi:view-facsimile translates back. Not a pb-facs-link webcomponent: that
+                    renders href="javascript:;" and can only message a pb-facsimile on the same
+                    page, and the users' expectation (and the reference behaviour) is navigation
+                    to the standalone facsimile page. The predicate asks for a resolvable scan
+                    (global:iiif-facs-id) so pages without images keep the plain label
+                    fallback.</desc>
                 <model output="print" behaviour="omit"/>
-                <model predicate="@facs" behaviour="webcomponent" cssClass="facs pb hsg-facs-link">
-                    <param name="name" value="'pb-facs-link'"/>
+                <model predicate="@n and exists(global:iiif-facs-id($parameters, .))" behaviour="link" cssClass="facs pb hsg-facs-link">
                     <param name="content" value="'[Page ' || @n || ']'"/>
-                    <param name="emit" value="'transcription'"/>
-                    <param name="subscribe" value="'transcription'"/>
-                    <param name="order" value="count($get(.)/preceding::pb) + 1"/>
-                    <param name="emit-on-load" value="'emit-on-load'"/>
-                    <param name="facs" value="let $ref := if ($global:address-by-id)                          then                              root($parameters?root)/descendant-or-self::TEI/@xml:id                          else                              substring-after(document-uri(root($parameters?root)), $global:data-root || '/')                         return 'api/iiif/' || $ref"/>
+                    <param name="uri" value="'pg_' || @n"/>
                 </model>
                 <model behaviour="break" cssClass="pb hsg-facs-link" useSourceRendition="true">
                     <desc>Output Page label when no facsimile information is available</desc>

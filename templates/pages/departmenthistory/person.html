@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join((dh:person-heading($context) || ' - People - Department History - Office of the Historian') ! string(.), ' ')) ]]</title>
+    [% endtemplate %]
+
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">

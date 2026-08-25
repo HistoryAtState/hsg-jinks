@@ -207,6 +207,21 @@ declare function dh:monograph-toc-breadcrumb($context as map(*), $publication as
  : blocks, and doc()/id() lookups are cheap against an in-memory eXist
  : collection.
  :)
+(:~
+ : The page title for a monograph section, reference parity with hsg-shell's
+ : static-titles (OP#1333): short-history sections carry their own head plus
+ : the "Short History" trail; buildings sections all share the monograph
+ : title (upstream renders "<pages:navigation-title> - Buildings - ..." and
+ : that template resolves to the monograph title, not the section head).
+ :)
+declare function dh:monograph-section-title($context as map(*)) as xs:string {
+    if ($context?request?parameters?publication = 'buildings') then
+        "Buildings of the Department of State - Buildings - Department History - Office of the Historian"
+    else
+        normalize-space(dh:current-section($context)?division/tei:head[1])
+        || " - Short History - Department History - Office of the Historian"
+};
+
 declare %private function dh:current-section($context as map(*)) as map(*) {
     let $publication := $context?request?parameters?publication
     let $sectionId := $context?request?parameters?sectionId
@@ -288,6 +303,20 @@ declare function dh:monograph-section-content($context as map(*)) as element()+ 
     let $s := dh:current-section($context)
     let $division := $s?division
     let $transformed := page:transform($division, map { "mode": "monograph-section" })
+    (: The division's own head renders as the page h1 below, so drop the
+       transform's copy of it (the outermost section's leading heading) or
+       the page shows its title twice (OP#1336). Done here rather than with
+       an empty head model in the ODD: an empty-output model on head in this
+       position crashes eXist 7's serializer with an
+       ArrayIndexOutOfBoundsException. :)
+    let $transformed :=
+        if ($transformed instance of element() and contains($transformed/@class, 'tei-div')) then
+            element { node-name($transformed) } {
+                $transformed/@*,
+                $transformed/node() except $transformed/*[contains(@class, 'tei-head')][1]
+            }
+        else
+            $transformed
     let $body := pages:clean-footnotes($transformed)
     let $footnotes :=
         for $fn in $transformed//*[@class = "footnote"]

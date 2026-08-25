@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join(((if ($context?page-id = 'about-frus') then 'About the Foreign Relations Series - Historical Documents' else hsg:content-title($context, $context?page-id)) || ' - Office of the Historian') ! string(.), ' ')) ]]</title>
+    [% endtemplate %]
+
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">

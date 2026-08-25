@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join((normalize-space(string-join(conf:current-section($context)?division/tei:head[1] ! string(.), '')) || ' - ' || (conf:conference-doc($context?request?parameters?conferenceId)//*:titleStmt/*:title[@type = 'short'], conf:conference-title(conf:conference-doc($context?request?parameters?conferenceId)))[. ne ''][1] || ' - Conferences - Office of the Historian') ! string(.), ' ')) ]]</title>
+    [% endtemplate %]
+
     <!--
         Division view: confapi:view-section resolves the division server-side
         and passes conferenceId + sectionId as request parameters, read back

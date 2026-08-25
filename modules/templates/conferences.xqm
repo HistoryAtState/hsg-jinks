@@ -218,7 +218,7 @@ declare function conf:toc($context as map(*), $doc as document-node(), $conferen
  : page's independent [[ ]] interpolation sites re-resolves rather than
  : sharing state, same reasoning as dh:current-section.
  :)
-declare %private function conf:current-section($context as map(*)) as map(*) {
+declare function conf:current-section($context as map(*)) as map(*) {
     let $conferenceId := $context?request?parameters?conferenceId
     let $sectionId := $context?request?parameters?sectionId
     let $doc := conf:conference-doc($conferenceId)

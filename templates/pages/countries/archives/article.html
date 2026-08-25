@@ -9,6 +9,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join((countries:page-title($context?doc?content, 'Archives - Countries - Office of the Historian')) ! string(.), ' ')) ]]</title>
+    [% endtemplate %]
+
     <div>
         <h1>[[ countries:article-heading($context?doc?content) ]]</h1>
         [[ page:transform($context?doc?content, map { "mode": "division" }) ]]
