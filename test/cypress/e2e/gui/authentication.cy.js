@@ -9,6 +9,7 @@
 // checks stay active. A future jinks should generate this guard from the
 // config flag itself.
 const LOGIN_UI = false // config.json "login": false
+const RESTRICTED_UI = false // OP#627: browse.html (the only pb-restricted page) is removed
 
 
 describe('TEI-Publisher Authentication UI', () => {
@@ -19,7 +20,7 @@ describe('TEI-Publisher Authentication UI', () => {
     // Set desktop viewport to ensure all elements are visible
     cy.viewport(1280, 720)
 
-    cy.visit('/browse.html')
+    cy.visit('/')  // /browse.html removed (OP#627); no page in this app renders login/restricted UI
     
     // Wait for page to stabilize
     cy.get('body').should('be.visible')
@@ -66,7 +67,7 @@ describe('TEI-Publisher Authentication UI', () => {
     })
   })
 
-  describe('Restricted Content UI', () => {
+  (RESTRICTED_UI ? describe : describe.skip)('Restricted Content UI', () => {
     it('shows restricted content structure', () => {
       // Check that pb-restricted elements exist (they may not be visible without login)
       cy.get('pb-restricted').should('exist')

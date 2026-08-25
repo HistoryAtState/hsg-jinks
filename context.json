@@ -412,7 +412,7 @@
     "data-default" : "frus-v2-data",
     "direction" : "ltr",
     "template" : "volume-landing.html",
-    "browse" : "browse.html",
+    "browse" : "historicaldocuments",
     "search" : "div",
     "view" : "div",
     "data-exclude" : [ "doc($config:data-root || '/taxonomy.xml')//tei:text", "collection($config:register-root)//tei:text" ],

@@ -59,7 +59,10 @@ declare variable $config:frus-volumes as xs:string := "frus-v2-data";
     declare variable $config:address-by-id as xs:boolean :=  false() ;
 
 
-declare variable $config:browse-page := "browse.html";
+(: The app has no browse page (OP#627: /browse.html was a USWDS-profile
+   demo, removed); the register facet links the base ODD builds from this
+   point at the app's real collection root instead. :)
+declare variable $config:browse-page := "historicaldocuments";
 
 (:~
  : Database path of the document a node being rendered belongs to.
