@@ -293,6 +293,15 @@ declare function hsgapi:view-interior($request as map(*)) {
                so a standalone page could not render them anyway. :)
             error($errors:NOT_FOUND, "division " || $divisionId || " is an attachment of "
                 || hsgapi:attachment-parent($doc) || " and has no page of its own")
+        else if (hsgapi:is-pending($doc)) then
+            (: A division of an anticipated (uncleared) volume: the v2 data
+               ships chapter-title scaffolding with frus-division-type
+               'chapter-pending'/'section-pending' before publication.
+               hsg-shell 404'd interior divs of volumes not at least
+               partially published (its config.xqm select-section); per
+               division here, same contract (OP#1337). :)
+            error($errors:NOT_FOUND, "division " || $divisionId || " of "
+                || $publicationId || " is not yet published")
         else
             vapi:view(map:put($request, "parameters", map:merge((
                 $request?parameters,
@@ -300,6 +309,16 @@ declare function hsgapi:view-interior($request as map(*)) {
                     "docid": substring-after(document-uri(root($doc)), $config:data-root || '/')
                 }
             ))))
+};
+
+(:~
+ : Whether a division is unpublished scaffolding: its per-division TEI header
+ : carries a frus-division-type ending in '-pending' (chapter-pending,
+ : section-pending, document-pending; OP#1337).
+ :)
+declare %private function hsgapi:is-pending($doc as element()?) as xs:boolean {
+    exists($doc) and
+    ends-with(normalize-space((root($doc)//tei:teiHeader//tei:bibl[@type = 'frus-division-type'])[1]), '-pending')
 };
 
 (:~
