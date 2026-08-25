@@ -25,6 +25,14 @@
         }
     }
     ---
+    [% template title %]
+    [# Every page carries "<page> - Office of the Historian" as its title
+       (OP#1333). This default covers the doc-backed FRUS pages and falls
+       back to the bare site name; page templates override it with their
+       own [% template title %] where they know their heading. #]
+    <title>[[ hsg:page-title(hsg:frus-page-title($context)) ]]</title>
+    [% endtemplate %]
+
     [% template breadcrumb %]
     [% if exists($context?doc) %]
     <li>

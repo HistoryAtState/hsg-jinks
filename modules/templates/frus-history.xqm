@@ -60,7 +60,7 @@ declare %private function fh:inline($nodes as node()*) as node()* {
  : A division's head as inline nodes, cleaned of trailing whitespace runs
  : (the source pretty-printing leaves newline-indent runs inside heads).
  :)
-declare %private function fh:head-label($division as element(tei:div)) as node()* {
+declare function fh:head-label($division as element(tei:div)) as node()* {
     fh:tidy-space(fh:inline($division/tei:head[1]/node()))
 };
 

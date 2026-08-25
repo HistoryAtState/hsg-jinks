@@ -7,6 +7,7 @@ declare namespace xi="http://www.w3.org/2001/XInclude";
 
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "../config.xqm";
 import module namespace page="http://teipublisher.com/ns/templates/page" at "page.xqm";
+import module namespace global="http://e-editiones.org/tei-publisher/odd-global" at "../odd-global.xqm";
 
 (:~
  : Build an absolute, externally-resolvable URL for a path relative to this
@@ -61,10 +62,50 @@ declare %private function hsg:resolve-include($header as element()?, $name as xs
  : tags.xqm's resource listings (the direct titleStmt lookup #1101 used
  : misses the xincluded titleStmt of the v2 volume roots).
  :)
+(:~
+ : The document <title> for a page: "<page> - Office of the Historian", or
+ : just the site name when no page title applies (OP#1333; reference parity
+ : with hsg-shell, whose every page carried this pattern). Page templates
+ : pass their own heading; hsg:frus-page-title derives one for the
+ : doc-backed volume pages the layout defaults cover.
+ :)
+declare function hsg:page-title($page as xs:string?) as xs:string {
+    string-join((normalize-space($page)[. ne ''], "Office of the Historian"), " - ")
+};
+
+(:~
+ : Page-title text for a FRUS volume/division page: the section title
+ : "Historical Documents", exactly as the reference system serves for every
+ : volume, chapter and document page (verified against the mirror and
+ : production). hsg-shell carries an unwired richer design (its
+ : pages:generate-title tests expect "<head> - Historical Documents - ...");
+ : if that is ever wanted here, this is the function to change. Empty for
+ : non-FRUS doc-backed pages (conferences etc.), which declare their own
+ : titles.
+ :)
+declare function hsg:frus-page-title($context as map(*)) as xs:string? {
+    if (exists($context?doc) and hsg:volume-title($context?doc?content)[. ne '']) then
+        "Historical Documents"
+    else
+        ()
+};
+
 declare function hsg:volume-title($doc as node()?) as xs:string? {
     if (not(exists($doc))) then ()
     else
         let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
+        return hsg:publication-title($publication)
+};
+
+(:~
+ : The same volume title resolved from the publication id alone, for pages
+ : that render without a context document (the pg_* facsimile page, OP#1335,
+ : whose only handle on the volume is the id threaded through
+ : $context?facsimile).
+ :)
+declare function hsg:publication-title($publication as xs:string?) as xs:string? {
+    if (empty($publication) or $publication = '') then ()
+    else
         let $volume := doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
         let $titleStmt := hsg:resolve-include($volume//tei:teiHeader, 'titleStmt')
         return normalize-space(($titleStmt/tei:title)[1])
@@ -1226,6 +1267,144 @@ declare function hsg:prev-next($context as map(*)) {
                 </nav>
 };
 
+(:~
+ : The deep-zoom facsimile viewer of the pg_* facsimile page (OP#1335): a
+ : pb-facsimile subscribed to the "transcription" channel its emit-on-load
+ : pb-facs-link trigger emits on; the image server base is the shared
+ : $global:iiif-image-api. Control set mirrors the reference viewer's
+ : OpenSeadragon options (hsg-shell app.js: navigator shown, zoom controls,
+ : no sequence buttons).
+ :)
+declare %private function hsg:facsimile-viewer() as element() {
+    <pb-facsimile subscribe="transcription"
+        base-uri="{$global:iiif-image-api}"
+        default-zoom-level="0"
+        show-navigation-control="show-navigation-control"
+        show-navigator="show-navigator"
+        show-home-control="show-home-control"
+        show-full-page-control="show-full-page-control"/>
+};
+
+(:~
+ : Main content of the pg_* facsimile page (OP#1335): the legacy
+ : /historicaldocuments/{volume}/pg_{n} deep links hsg-shell served (each
+ : "[Page N]" link in a document resolves there, and the URLs are cited
+ : externally). Driven by the $context?facsimile map assembled in
+ : hsgapi:view-facsimile: a visually hidden pb-facs-link with emit-on-load
+ : pushes the single page scan into the viewer when the page loads, the
+ : noscript fallback shows the static medium PNG like the reference page
+ : did, and the pager steps through the volume's facsimile sequence
+ : (reference parity: pg_315 &#8592; pg_316 &#8594; pg_317).
+ :)
+(:~
+ : Navigation title for the pg_* facsimile page: the same quiet volume-title
+ : h2 hsg:navigation-title puts on interior division pages, resolved from
+ : the publication id in $context?facsimile because this page has no context
+ : document (see hsgapi:view-facsimile).
+ :)
+declare function hsg:facsimile-title($context as map(*)) as element(h2)? {
+    let $title := hsg:publication-title($context?facsimile?publication)
+    return
+        if ($title != '') then
+            <h2 class="hsg-navigation-title" id="navigation-title">{$title}</h2>
+        else ()
+};
+
+(:~
+ : Breadcrumb trail of the pg_* facsimile page (reference parity: Home >
+ : Historical Documents > volume title > Page N), built on
+ : hsg:section-breadcrumb like the other doc-less pages.
+ :)
+declare function hsg:facsimile-breadcrumbs($context as map(*)) as element(li)* {
+    let $facs := $context?facsimile
+    return
+        if (empty($facs)) then ()
+        else
+            hsg:section-breadcrumb($context, (
+                map {
+                    "label": hsg:publication-title($facs?publication),
+                    "href": "/historicaldocuments/" || $facs?publication
+                },
+                map { "label": "Page " || $facs?n }
+            ))
+};
+
+(:~
+ : "Show Documents on this Page" panel in the pg_* facsimile page's aside
+ : (hsg-shell side:docs-on-page parity, OP#1335): links to every document
+ : whose printed text appears on the page, computed in
+ : hsgapi:docs-on-page and threaded through $context?facsimile?docs.
+ : Deliberate deviation from the reference: hsg-shell rendered the panel
+ : shell with an empty list on pages without documents (front matter);
+ : like the register panels, this one is dropped entirely instead.
+ :)
+declare function hsg:facsimile-docs($context as map(*)) {
+    let $facs := $context?facsimile
+    let $docs := if (exists($facs)) then $facs?docs else ()
+    return
+        if (empty($docs) or array:size($docs) = 0) then ()
+        else
+            <div class="hsg-panel hsg-frus__docs-on-page">
+                <h2 class="hsg-sidebar-title">
+                    <pb-i18n key="historicaldocuments.docs-on-page">Show Documents on this Page</pb-i18n>
+                </h2>
+                <ul class="hsg-list-group">
+                {
+                    for $doc in $docs?*
+                    return
+                        <li>
+                            <a href="{$context?context-path}/historicaldocuments/{$facs?publication}/{$doc?id}">{$doc?label}</a>
+                        </li>
+                }
+                </ul>
+            </div>
+};
+
+declare function hsg:facsimile-page($context as map(*)) {
+    let $facs := $context?facsimile
+    return
+        if (empty($facs)) then ()
+        else
+            <section class="hsg-frus__facsimile-page">
+                <pb-facs-link class="hsg-frus__facsimile-trigger" facs="{$facs?image}" order="1"
+                    emit="transcription" subscribe="transcription"
+                    emit-on-load="emit-on-load">Page {$facs?n}</pb-facs-link>
+                {hsg:facsimile-viewer()}
+                {
+                    if ($facs?png) then
+                        <noscript>
+                            <img class="hsg-frus__facsimile-static" src="{$facs?png}"
+                                alt="Scan of page {$facs?n}"/>
+                        </noscript>
+                    else ()
+                }
+                {
+                    if (exists($facs?prev) or exists($facs?next)) then
+                        <nav class="hsg-frus__pager" aria-label="Page navigation">
+                            {
+                                if (exists($facs?prev)) then
+                                    <a class="hsg-frus__pager-link hsg-frus__pager-prev" rel="prev"
+                                        href="{$context?context-path}/historicaldocuments/{$facs?publication}/{$facs?prev}">
+                                        <span class="hsg-frus__pager-arrow" aria-hidden="true">&#8592;</span>
+                                        <span class="hsg-frus__pager-label">Page {$facs?prev-n}</span>
+                                    </a>
+                                else <span class="hsg-frus__pager-link hsg-frus__pager-empty"/>
+                            }
+                            {
+                                if (exists($facs?next)) then
+                                    <a class="hsg-frus__pager-link hsg-frus__pager-next" rel="next"
+                                        href="{$context?context-path}/historicaldocuments/{$facs?publication}/{$facs?next}">
+                                        <span class="hsg-frus__pager-label">Page {$facs?next-n}</span>
+                                        <span class="hsg-frus__pager-arrow" aria-hidden="true">&#8594;</span>
+                                    </a>
+                                else <span class="hsg-frus__pager-link hsg-frus__pager-empty"/>
+                            }
+                        </nav>
+                    else ()
+                }
+            </section>
+};
+
 (:~ Resolve one relatedItem target (a file path relative to the current
  : division's own file) to the linked division's id, publication and a short
  : label. :)
@@ -1251,8 +1430,10 @@ declare %private function hsg:nav-target($base as xs:string, $rel as xs:string?)
 };
 
 (:~ Resolve a "../a/b.xml"-style relative path against a base collection path,
- : returning the absolute database path. Used to follow relatedItem targets. :)
-declare %private function hsg:resolve-relative($base as xs:string, $rel as xs:string) as xs:string {
+ : returning the absolute database path. Used to follow relatedItem targets;
+ : public because hsgapi:docs-on-page resolves attachment-source targets the
+ : same way (OP#1335). :)
+declare function hsg:resolve-relative($base as xs:string, $rel as xs:string) as xs:string {
     let $baseParts := tokenize($base, '/')[. != '']
     let $relParts := tokenize($rel, '/')[. != '']
     let $combined :=

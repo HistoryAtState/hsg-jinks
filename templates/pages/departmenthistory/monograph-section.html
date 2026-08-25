@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join((dh:monograph-section-title($context)) ! string(.), ' ')) ]]</title>
+    [% endtemplate %]
+
     <!--
         Shared chapter/subchapter page for both Short History and Buildings
         (#1135): dhapi:short-history-section / dhapi:buildings-section

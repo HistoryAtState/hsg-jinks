@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join((dh:travels-listing-title($context?request?parameters?role, $context?request?parameters?personOrCountryId) || ' - ' || (if ($context?request?parameters?role = 'secretary') then 'Travels of the Secretary' else 'Travels of the President') || ' - Travels - Department History - Office of the Historian') ! string(.), ' ')) ]]</title>
+    [% endtemplate %]
+
     <!--
         Shared president/secretary travels listing page (#1096 optimization
         pass, one template for two routes that only ever differed by

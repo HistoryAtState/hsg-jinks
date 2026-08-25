@@ -6,6 +6,7 @@ import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "templates/hsg.xqm";
+import module namespace global="http://e-editiones.org/tei-publisher/odd-global" at "odd-global.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -260,6 +261,15 @@ declare function hsgapi:view-interior($request as map(*)) {
     let $publicationId := $request?parameters?publicationId
     let $divisionId := $request?parameters?divisionId
     let $_ := util:log("INFO", "publicationId: " || $publicationId || " divisionId: " || $divisionId)
+    return
+    (: Legacy page-image deep links (OP#1335): hsg-shell served every printed
+       page at /historicaldocuments/{volume}/pg_{n} and the "[Page N]" links
+       in documents point there. The v2 data writes page-break ids without
+       the underscore (pg316, pgXIX), so the public pg_* form is not
+       resolvable via id() below and gets its own dispatch. :)
+    if (matches($divisionId, "^pg_")) then
+        hsgapi:view-facsimile($request, $publicationId, $divisionId)
+    else
     let $doc := collection($config:data-default || "/" || $publicationId)/id($divisionId)
         [not(self::tei:divGen)]
         (: The volume root marks where the printed TOC goes with
@@ -309,6 +319,125 @@ declare function hsgapi:view-interior($request as map(*)) {
 declare %private function hsgapi:is-pending($doc as element()?) as xs:boolean {
     exists($doc) and
     ends-with(normalize-space((root($doc)//tei:teiHeader//tei:bibl[@type = 'frus-division-type'])[1]), '-pending')
+};
+
+(:~
+ : The pg_* facsimile page (OP#1335): resolve the public underscore form
+ : (pg_316, pg_XIX) to the v2 data's page-break id (pg316, pgXIX), 404 when
+ : the volume has no such page or no scan for it, and render the facsimile
+ : template with a facsimile map carrying what the viewer needs:
+ : the IIIF image identifier, the static PNG fallback and the neighbouring
+ : pages from the volume's surface sequence ({vol}_includes.xml).
+ :)
+declare %private function hsgapi:view-facsimile($request as map(*), $publicationId as xs:string, $divisionId as xs:string) {
+    let $pbId := translate($divisionId, "_", "")
+    let $pb := (collection($config:data-default || "/" || $publicationId)/id($pbId))[self::tei:pb][1]
+    let $image := if (exists($pb)) then global:iiif-facs-id((), $pb) else ()
+    return
+        if (empty($image)) then
+            error($errors:NOT_FOUND, "no page " || $divisionId || " in " || $publicationId)
+        else
+            let $includes := $config:data-default || "/" || $publicationId || "/" || $publicationId || "_includes.xml"
+            let $surface :=
+                if (doc-available($includes)) then
+                    (doc($includes)//tei:surface[@start = "#" || $pbId])[1]
+                else
+                    ()
+            let $prev := hsgapi:facsimile-neighbour($surface/preceding-sibling::tei:surface[@start][1])
+            let $next := hsgapi:facsimile-neighbour($surface/following-sibling::tei:surface[@start][1])
+            return
+                vapi:html(
+                    map:put($request, "parameters", map:merge((
+                        $request?parameters,
+                        map { "file": "pages/volume/facsimile" }
+                    ))),
+                    (: No "data" entry pointing at the volume root here: on
+                       eXist 7 vapi:html's outer map:merge keeps the first
+                       occurrence of a key and context.json already carries
+                       "data", so it would be dropped silently. The template
+                       instead resolves everything from this facsimile map
+                       (hsg:facsimile-title / hsg:facsimile-breadcrumbs). :)
+                    map {
+                        "facsimile": map {
+                            "publication": $publicationId,
+                            "n": string($pb/@n),
+                            "image": $image,
+                            "png": $surface/tei:graphic[@mimeType = "image/png"]/@url/string(),
+                            "prev": $prev?id,
+                            "prev-n": $prev?n,
+                            "next": $next?id,
+                            "next-n": $next?n,
+                            "docs": hsgapi:docs-on-page($config:data-default || "/" || $publicationId, string($pb/@facs))
+                        }
+                    }
+                )
+};
+
+(:~
+ : The documents whose printed text appears on the page with scan number
+ : $facs, for the "Show Documents on this Page" panel (hsg-shell
+ : side:docs-on-page parity, OP#1335). In the v1 single-file data hsg-shell
+ : walked the span from the page's pb to the next; in the per-division v2
+ : data the same set falls out of one containment test: a division overlaps
+ : a page exactly when its file carries a pb with that scan number -- the
+ : canonical pb when the page starts inside the division, the id-less
+ : continuation pb at the fragment start when the division begins mid-page.
+ : (Boundary pbs between documents were hoisted into the chapter files,
+ : which the document-type filter drops, matching the reference's exclusion
+ : of a document starting exactly at the top of the next page.)
+ :
+ : Attachments carry the pbs of the pages inside them but have no page of
+ : their own (see hsgapi:is-attachment), so they resolve to their parent
+ : document. Returned newest-print-order first, i.e. by document number.
+ :)
+declare %private function hsgapi:docs-on-page($volume-collection as xs:string, $facs as xs:string) as array(*) {
+    let $entries :=
+        for $tei in collection($volume-collection)/tei:TEI[descendant::tei:pb[@facs = $facs]]
+        let $owner :=
+            if (hsgapi:is-attachment($tei)) then
+                let $target := ($tei//tei:relatedItem[@type = 'attachment-source']/@target)[1]
+                let $path := hsg:resolve-relative(util:collection-name(root($tei)), $target)
+                return doc($path)/tei:TEI
+            else
+                $tei
+        let $type := normalize-space(($owner//tei:bibl[@type = 'frus-division-type'])[1])
+        where starts-with($type, 'document')
+        let $id := normalize-space(($owner//tei:bibl[@type = 'frus-division-id'])[1])
+        where $id != ''
+        let $number := normalize-space(($owner//tei:bibl[@type = 'frus-document-number'])[1])
+        group by $id
+        let $number := head($number)
+        order by
+            (if ($number castable as xs:integer) then xs:integer($number) else 2147483647),
+            $id
+        return
+            map {
+                "id": $id,
+                "label":
+                    if ($number != '') then
+                        "Document " || $number
+                    else
+                        normalize-space(string-join(head($owner)//tei:teiHeader//tei:titleStmt/tei:title, ' '))
+            }
+    return array { $entries }
+};
+
+(:~
+ : Public pg_-form id and page label of a neighbouring facsimile surface,
+ : derived from its @start pointer (#pg315 becomes pg_315 / "315"). Empty
+ : for the few surfaces whose target does not follow the pg{n} convention,
+ : which then simply get no pager entry.
+ :)
+declare %private function hsgapi:facsimile-neighbour($surface as element()?) as map(*)? {
+    let $target := substring-after($surface/@start, "#")
+    return
+        if (starts-with($target, "pg")) then
+            map {
+                "id": "pg_" || substring-after($target, "pg"),
+                "n": substring-after($target, "pg")
+            }
+        else
+            ()
 };
 
 (:~

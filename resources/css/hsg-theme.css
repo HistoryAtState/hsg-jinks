@@ -896,3 +896,39 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .usa-prose .dateline.document_center {
     display: block;
 }
+
+/* The "[Page N]" markers are plain links to the pg_* facsimile pages
+   (OP#1335); keep them in the muted margin-marker grey rather than the
+   usa-prose link color. */
+.usa-prose a.hsg-facs-link {
+    color: var(--hsg-color-muted);
+}
+
+/* Deep-zoom facsimile viewer on the standalone pg_* facsimile page
+   (OP#1335): pb-facsimile is a flex column whose inner viewer div only
+   takes space when given a height, so size it via its own custom property.
+   Reference parity is a large viewer filling the content column
+   (hsg-shell rendered OpenSeadragon at 800px height). */
+.hsg-frus__facsimile-page pb-facsimile {
+    --pb-facsimile-height: 75vh;
+    height: 75vh;
+}
+
+/* The emit-on-load link that feeds the standalone page's viewer is plumbing,
+   not content: visually hidden but kept in the accessibility tree. */
+.hsg-frus__facsimile-trigger {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+/* The noscript fallback image, as on the reference page: the static medium
+   PNG centered in the content column. */
+.hsg-frus__facsimile-static {
+    display: block;
+    max-width: 100%;
+    margin: 0 auto;
+}

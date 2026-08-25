@@ -1,0 +1,45 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        }
+    }
+    ---
+    [% template breadcrumb %]
+    <li>
+        <nav aria-label="breadcrumb">
+            <ul>
+                [[ hsg:facsimile-breadcrumbs($context) ]]
+            </ul>
+        </nav>
+    </li>
+    [% endtemplate %]
+
+    <!-- Standalone page-image view at /historicaldocuments/{volume}/pg_{n}
+         (OP#1335, reference parity with hsg-shell). This page has no context
+         document (see hsgapi:view-facsimile on why the volume root cannot be
+         threaded through vapi:html's data map): navigation title and
+         breadcrumbs resolve from the facsimile map's publication id, and
+         the viewer, its emit-on-load trigger link, the noscript fallback
+         and the page pager all come from hsg:facsimile-page. One root
+         element, same reason as interior.html: the layout's main is a flex
+         row. -->
+    <div class="hsg-frus__interior">
+        [[ hsg:facsimile-title($context) ]]
+        [[ hsg:facsimile-page($context) ]]
+    </div>
+
+    [% template after %]
+    <!-- The documents printed on this page (reference parity with
+         hsg-shell's docs-on-page aside), then the same section navigation
+         partial the interior pages mount in their right aside. -->
+    [[ hsg:facsimile-docs($context) ]]
+    <div class="hsg-panel hsg-frus__section-nav">
+        [% include "templates/pages/historicaldocuments/sidebar.html" %]
+    </div>
+    [% endtemplate %]
+</template>
