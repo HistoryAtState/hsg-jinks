@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join(($context?request?parameters?year || ' - Principals and Chiefs Chronological Listing - People - Department History - Office of the Historian') ! string(.), ' ')) ]]</title>
+    [% endtemplate %]
+
     [% template breadcrumb %]
     <li>
         <nav aria-label="breadcrumb">

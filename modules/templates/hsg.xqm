@@ -62,6 +62,34 @@ declare %private function hsg:resolve-include($header as element()?, $name as xs
  : tags.xqm's resource listings (the direct titleStmt lookup #1101 used
  : misses the xincluded titleStmt of the v2 volume roots).
  :)
+(:~
+ : The document <title> for a page: "<page> - Office of the Historian", or
+ : just the site name when no page title applies (OP#1333; reference parity
+ : with hsg-shell, whose every page carried this pattern). Page templates
+ : pass their own heading; hsg:frus-page-title derives one for the
+ : doc-backed volume pages the layout defaults cover.
+ :)
+declare function hsg:page-title($page as xs:string?) as xs:string {
+    string-join((normalize-space($page)[. ne ''], "Office of the Historian"), " - ")
+};
+
+(:~
+ : Page-title text for a FRUS volume/division page: the section title
+ : "Historical Documents", exactly as the reference system serves for every
+ : volume, chapter and document page (verified against the mirror and
+ : production). hsg-shell carries an unwired richer design (its
+ : pages:generate-title tests expect "<head> - Historical Documents - ...");
+ : if that is ever wanted here, this is the function to change. Empty for
+ : non-FRUS doc-backed pages (conferences etc.), which declare their own
+ : titles.
+ :)
+declare function hsg:frus-page-title($context as map(*)) as xs:string? {
+    if (exists($context?doc) and hsg:volume-title($context?doc?content)[. ne '']) then
+        "Historical Documents"
+    else
+        ()
+};
+
 declare function hsg:volume-title($doc as node()?) as xs:string? {
     if (not(exists($doc))) then ()
     else

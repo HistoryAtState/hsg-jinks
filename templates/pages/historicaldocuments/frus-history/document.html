@@ -16,6 +16,10 @@
         }
     }
     ---
+    [% template! title %]
+    <title>[[ normalize-space(string-join((fh:document-title($context) || ' - Documents - History of the Foreign Relations Series - Historical Documents - Office of the Historian') ! string(.), ' ')) ]]</title>
+    [% endtemplate %]
+
     [# Single FRUS History document view (OP#1294): hsgapi:frus-history-
        document resolves the document (unknown ids 404) and threads
        document-id into the context. Reference parity with hsg-shell's
