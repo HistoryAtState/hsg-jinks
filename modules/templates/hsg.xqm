@@ -283,18 +283,18 @@ declare %private function hsg:toc-entries($division as element(tei:TEI)?, $divis
         $id = $current or
         ($current-is-document and exists($included//tei:text//xi:include[@xpointer = $current]))
     (: An unpublished division ('chapter-pending', 'section-pending', ...) is
-       not listed at all: hsg-shell's TOC only ever carried published
-       content, and its interior URL 404s (OP#1337), so a listed title
-       would leak chapter names of a volume still in clearance and a link
-       would be dead. :)
+       listed but marked li.pending, exactly as the reference site lists a
+       partially-published volume's pending chapters (OP#1337 review;
+       frus1977-80v27 on the mirror). Fully anticipated volumes never get
+       this far: their landing suppresses the TOC wholesale and their
+       interior pages 404 on the volume-level gate in hsg-api.xql. :)
     let $is-pending := ends-with(normalize-space(($included//tei:bibl[@type='frus-division-type'])[1]), '-pending')
-    where not($is-pending)
     (: Document range "(Documents N-M)", reference parity with hsg-shell's
        sidebar, shown after divisions that contain documents. :)
     let $range-label := hsg:document-range-label(hsg:document-range($included))
     let $children := hsg:toc-entries($included, $divisions, $publication, $current, $current-is-document, $context)
     return
-        <li class="usa-sidenav__item">
+        <li class="usa-sidenav__item{if ($is-pending) then ' pending' else ''}">
             {
                 element a {
                     attribute href {
@@ -871,11 +871,18 @@ declare function hsg:volume-landing-toc($context as map(*)) as element(ul)? {
     if (not(exists($doc))) then ()
     else
         let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
-        let $divisions := hsg:toc-divisions($publication)
-        let $entries := hsg:landing-toc-entries($doc/tei:TEI, $divisions, $publication, $context)
+        (: A volume with no published content at all ('being-cleared' etc.)
+           gets no TOC: the reference suppresses it wholesale and the
+           interior URLs 404 (OP#1337). Partially-published volumes list
+           everything, pending divisions marked (see the entry builder). :)
+        let $published := doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
+            //tei:revisionDesc/@status = ("published", "partially-published")
+        let $entries :=
+            if ($published) then
+                hsg:landing-toc-entries($doc/tei:TEI, hsg:toc-divisions($publication), $publication, $context)
+            else ()
         return
-            (: An anticipated volume lists nothing (every division is pending,
-               OP#1337); emit no ul at all rather than an empty one. :)
+            (: emit no ul at all rather than an empty one :)
             if (exists($entries)) then
                 <ul class="hsg-frus__toc">{$entries}</ul>
             else ()
@@ -891,13 +898,12 @@ declare %private function hsg:landing-toc-entries($division as element(tei:TEI)?
        too; shared logic in hsg:split-title (OP#1085). :)
     let $title := hsg:split-title($included//tei:fileDesc//tei:titleStmt/tei:title)
     let $range-label := hsg:document-range-label(hsg:document-range($included))
-    (: Unpublished division: not listed; same reasoning as hsg:toc-entries
-       (OP#1337). :)
+    (: Unpublished division: listed but marked; same reasoning as
+       hsg:toc-entries (OP#1337). :)
     let $is-pending := ends-with(normalize-space(($included//tei:bibl[@type='frus-division-type'])[1]), '-pending')
-    where not($is-pending)
     let $children := hsg:landing-toc-entries($included, $divisions, $publication, $context)
     return
-        <li>
+        <li class="{if ($is-pending) then 'pending' else ''}">
             <a href="{$context?context-path}/historicaldocuments/{$publication}/{$id}">{$title}</a>
             {$range-label}
             {if (exists($children)) then <ul>{$children}</ul> else ()}

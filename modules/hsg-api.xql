@@ -298,13 +298,13 @@ declare function hsgapi:view-interior($request as map(*)) {
                so a standalone page could not render them anyway. :)
             error($errors:NOT_FOUND, "division " || $divisionId || " is an attachment of "
                 || hsgapi:attachment-parent($doc) || " and has no page of its own")
-        else if (hsgapi:is-pending($doc)) then
-            (: A division of an anticipated (uncleared) volume: the v2 data
-               ships chapter-title scaffolding with frus-division-type
-               'chapter-pending'/'section-pending' before publication.
-               hsg-shell 404'd interior divs of volumes not at least
-               partially published (its config.xqm select-section); per
-               division here, same contract (OP#1337). :)
+        else if (not(hsgapi:volume-published($publicationId))) then
+            (: An anticipated (uncleared) volume: the v2 data ships
+               chapter-title scaffolding before publication. hsg-shell 404'd
+               interior divs of volumes not at least partially published
+               (its config.xqm select-section); same volume-level contract
+               here (OP#1337) -- a partially-published volume's pending
+               divisions stay reachable, as on the reference site. :)
             error($errors:NOT_FOUND, "division " || $divisionId || " of "
                 || $publicationId || " is not yet published")
         else
@@ -317,13 +317,18 @@ declare function hsgapi:view-interior($request as map(*)) {
 };
 
 (:~
- : Whether a division is unpublished scaffolding: its per-division TEI header
- : carries a frus-division-type ending in '-pending' (chapter-pending,
- : section-pending, document-pending; OP#1337).
+ : Whether a volume is at least partially published: its volume-root
+ : document's revisionDesc status. hsg-shell's select-section used exactly
+ : this volume-level gate, and the reference site's behaviour follows it
+ : (OP#1337 review): a partially-published volume serves ALL its division
+ : pages, pending ones included (frus1977-80v27's pending chapters are
+ : listed, marked and clickable on the reference); only a volume with no
+ : published content at all (frus1981-88v16, 'being-cleared') 404s its
+ : interior. A missing status fails closed, like hsg-shell.
  :)
-declare %private function hsgapi:is-pending($doc as element()?) as xs:boolean {
-    exists($doc) and
-    ends-with(normalize-space((root($doc)//tei:teiHeader//tei:bibl[@type = 'frus-division-type'])[1]), '-pending')
+declare %private function hsgapi:volume-published($publicationId as xs:string) as xs:boolean {
+    doc($config:data-default || "/" || $publicationId || "/" || $publicationId || ".xml")
+        //tei:revisionDesc/@status = ("published", "partially-published")
 };
 
 (:~
