@@ -25,8 +25,11 @@ describe("section page (sec6)", () => {
         cy.get(".hsg-frus__pager-next").should("have.attr", "href").and("match", /\/frus1958-60v05mSupp\/sec7$/);
     });
 
-    it("renders page breaks as 'Page N' margin markers, not bare numbers", () => {
-        cy.get("main pb-facs-link.hsg-facs-link").first().should("contain.text", "Page 66");
+    it("renders page breaks as 'Page N' facsimile links, not bare numbers", () => {
+        // plain links to the pg_* facsimile pages since OP#1335
+        cy.get("main a.hsg-facs-link").first()
+            .should("contain.text", "Page 66")
+            .and("have.attr", "href", "pg_66");
     });
 
     it("shows the Persons panel with described entries", () => {
