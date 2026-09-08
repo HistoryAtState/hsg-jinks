@@ -131,6 +131,7 @@
     "landing" : "/db/apps/hsg-jinks/data/landing/landing.xml"
   },
   "defaults" : {
+    "browse" : "historicaldocuments",
     "data" : "/db/apps/frus-data-jinks/data",
     "data-default" : "frus-v2-data",
     "odd" : "hsg-jinks.odd",
@@ -303,6 +304,7 @@
     "profile-theme-uswds"
   ],
   "skip" : [
+    "^templates/browse\\.html$",
     "^data/landing/landing\\.xml",
     "^resources/images/team/",
     "^resources/images/hero\\.(jpg|webp)$",
