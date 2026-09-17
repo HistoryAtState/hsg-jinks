@@ -140,6 +140,13 @@ header.row {
     margin: 0;
 }
 
+/* the intro band's paragraph and its button sit in the same grid-row;
+   without this the paragraph's default top margin pushes its first line
+   below the button's top edge instead of level with it (OP#1397) */
+.section-intro .grid-row p {
+    margin-block-start: 0;
+}
+
 .button-link {
     display: inline-block;
     padding: var(--s-1, 0.5rem) var(--s1, 1rem);
