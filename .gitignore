@@ -25,3 +25,11 @@ test/cypress/downloads/
 /frus-data-jinks-*.xar
 # per-worktree devcontainer settings (ports, compose project name)
 .devcontainer/.env
+
+# Cursor: track plans with the branch; ignore local MCP/rules copies
+.cursor/rules/
+
+# Codacy CLI: keep .codacy/.gitignore; ignore generated + local config dumps
+.codacy/generated/
+.codacy/codacy.config.json
+.codacy/codacy.config.baseline.json
