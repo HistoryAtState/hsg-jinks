@@ -1,4 +1,6 @@
-FROM existdb/existdb:debug
+# Vector-capable eXist 7 image for semantic search MVP (worktree-only; do not
+# merge to main until the feature is ready to land — see .cursor/plans).
+FROM duncdrum/existdb:experimental
 
 ARG PUBLISHER_LIB_VERSION=6.1.0
 ARG JINKS_TEMPLATES_VERSION=1.4.2
