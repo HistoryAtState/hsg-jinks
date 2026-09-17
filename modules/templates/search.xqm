@@ -227,21 +227,42 @@ declare %private function srch:date-range($startDate as xs:string?, $endDate as 
 
 (:~ KNN over FRUS only while other packages lack hsg-embedding. Reuses the
  : same facet map Lucene uses so within/volume filters still apply. :)
-declare %private function srch:query-vector-frus($queryConf as map(*), $q as xs:string) as element()* {
+(:~ KNN over collections that already define hsg-embedding. Packages without
+ : the vector-field simply contribute nothing (caught). FRUS is live in the
+ : pilot; others light up as their collection.xconf gains the field (Phase 2).
+ : Experimental image currently ignores numeric top-k on ft:query-vector;
+ : take the leading VECTOR_K hits (similarity-ordered) so RRF stays bounded. :)
+declare %private function srch:query-vector-sections($queryConf as map(*), $q as xs:string) as element()* {
     if (normalize-space($q) eq "") then
         ()
     else
         try {
             let $vec := vector:embed($q, $srch:EMBED_MODEL)
             let $opts := map:merge(($srch:ft-query-options, $queryConf?facets))
-            (: Experimental image currently ignores numeric top-k on
-             : ft:query-vector; take the leading VECTOR_K hits (similarity
-             : ordered) so RRF stays bounded. :)
-            let $raw := collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $opts)]
+            let $raw := (
+                try { collection("/db/apps/other-publications")//tei:div[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection("/db/apps/other-publications")//tei:body[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection("/db/apps/conferences")//tei:div[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection("/db/apps/hac")//tei:div[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection("/db/apps/frus-history/articles")//tei:body[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection("/db/apps/frus-history/documents")//tei:body[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection("/db/apps/frus-history/monograph")//tei:div[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection("/db/apps/rdcr")//tei:body[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection("/db/apps/wwdai")//tei:body[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection("/db/apps/pocom/people")//persName[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection("/db/apps/travels")//trips[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection("/db/apps/visits")//visit[ft:query-vector(., $vec, $opts)] } catch * { () },
+                try { collection("/db/apps/milestones")//tei:div[ft:query-vector(., $vec, $opts)] } catch * { () }
+            )
             return subsequence($raw, 1, $srch:VECTOR_K)
         } catch * {
             ()
         }
+};
+
+declare %private function srch:query-vector-frus($queryConf as map(*), $q as xs:string) as element()* {
+    srch:query-vector-sections($queryConf, $q)
 };
 
 (:~ Reciprocal Rank Fusion of two hit sequences (Lucene + vector). :)
@@ -328,7 +349,7 @@ declare %private function srch:results($context as map(*)) as map(*) {
                 try { srch:query-sections($queryConf) } catch * { () }
             let $vectorHits :=
                 if ($p?mode eq "hybrid" and exists($p?q)) then
-                    srch:query-vector-frus($queryConf, $p?q)
+                    srch:query-vector-sections($queryConf, $p?q)
                 else
                     ()
             let $fused :=
