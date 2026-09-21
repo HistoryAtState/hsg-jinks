@@ -33,3 +33,6 @@ test/cypress/downloads/
 .codacy/generated/
 .codacy/codacy.config.json
 .codacy/codacy.config.baseline.json
+
+# Large ONNX downloads / conf.xml experiment copies (not part of the app image)
+.devcontainer/onnx-staging/
