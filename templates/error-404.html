@@ -26,9 +26,19 @@
     <div class="fixed-layout">
         <main class="usa-prose">
             <h1>Page not found</h1>
-            <p>The resource you requested could not be found.</p>
-            <p><a class="usa-link" href="[[ $context-path ]]/">Return to the home page</a> or
-                <a class="usa-link" href="[[ $context-path ]]/search">search the site</a>.</p>
+            <p class="usa-intro">We're sorry, we can't find the page you're looking for. It may have
+                been moved, renamed, or the URL may contain a typo.</p>
+            <div class="margin-y-5">
+                <ul class="usa-button-group">
+                    <li class="usa-button-group__item">
+                        <a href="[[ $context-path ]]/" class="usa-button">Visit homepage</a>
+                    </li>
+                    <li class="usa-button-group__item">
+                        <a href="[[ $context-path ]]/search" class="usa-button usa-button--outline">Search the site</a>
+                    </li>
+                </ul>
+            </div>
+            <p class="text-base"><strong>Error code:</strong> 404</p>
         </main>
     </div>
     </body>
