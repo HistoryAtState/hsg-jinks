@@ -629,4 +629,25 @@ describe("hybrid search mode (semantic MVP)", () => {
         cy.visit("search/tips");
         cy.contains("h2", "Hybrid mode").should("exist");
     });
+
+    // pq-01 from doc/semantic_search/semantic-search-paraphrase-eval.md.
+    // A swallowed vector leg, or relevance re-sorted by raw ft:score, makes
+    // hybrid return the keyword sequence. Exact ranks stay unpinned because
+    // FRUS volumes are added over time.
+    it("hybrid relevance order differs from keyword for a paraphrase query", () => {
+        const q = "meeting between Reagan and Gorbachev in Iceland";
+        const firstPageHrefs = (mode) => {
+            cy.visit(`search?q=${encodeURIComponent(q)}&within=documents&mode=${mode}`);
+            cy.get(".usa-collection__heading a").should("have.length.at.least", 1);
+            return cy.get(".usa-collection__heading a").then(($links) => {
+                return [...$links].map((link) => link.getAttribute("href"));
+            });
+        };
+
+        firstPageHrefs("keyword").then((keywordHrefs) => {
+            firstPageHrefs("hybrid").then((hybridHrefs) => {
+                expect(hybridHrefs, "hybrid first page").to.not.deep.equal(keywordHrefs);
+            });
+        });
+    });
 });
