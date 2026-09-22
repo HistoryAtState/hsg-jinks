@@ -118,6 +118,15 @@ describe("search tips and routing (OP#1182)", () => {
         cy.get("pb-search").first().should("have.attr", "action").and("include", "/search");
         cy.get("pb-search").first().should("have.attr", "name", "q");
     });
+
+    it("actually navigates to /search with the typed query when the button is clicked", () => {
+        cy.visit("");
+        cy.get("section[aria-label='Search'] pb-search").shadow().find("input[name='query']").type("dobrynin");
+        cy.get("section[aria-label='Search'] pb-search").find("button[slot='searchButton']").click();
+        cy.location("pathname").should("include", "/search");
+        cy.location("pathname").should("not.include", "index.html");
+        cy.location("search").should("include", "query=dobrynin");
+    });
 });
 
 // Date deep-links work against the frus-v2 data via the division-level
