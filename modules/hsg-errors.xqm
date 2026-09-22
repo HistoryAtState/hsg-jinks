@@ -76,6 +76,17 @@ declare %private function hsg-errors:render($error as map(*), $file as xs:string
                 "http://www.tei-c.org/tei-simple/config": map {
                     "prefix": "config",
                     "at": "modules/config.xqm"
+                },
+                (: templates/layouts/base.html (extended by the 404 page, OP#1398,
+                   to reuse the real site header/nav/footer instead of a bare
+                   standalone page) calls page:resolve-language($context).
+                   Declared explicitly here rather than via ignoreImports=false,
+                   because that flag also controls the site-wide "use" block
+                   library and every ancestor template's own frontmatter
+                   modules -- more than this page needs. :)
+                "http://teipublisher.com/ns/templates/page": map {
+                    "prefix": "page",
+                    "at": "modules/templates/page.xqm"
                 }
             },
             "ignoreImports": true(),
