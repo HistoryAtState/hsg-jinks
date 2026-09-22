@@ -223,15 +223,24 @@ declare %private function srch:date-range($startDate as xs:string?, $endDate as 
 };
 
 
-(: ============== hybrid / vector (FRUS pilot) ============== :)
+(: ============== hybrid / vector ============== :)
 
-(:~ KNN over FRUS only while other packages lack hsg-embedding. Reuses the
- : same facet map Lucene uses so within/volume filters still apply. :)
-(:~ KNN over collections that already define hsg-embedding. Packages without
- : the vector-field simply contribute nothing (caught). FRUS is live in the
- : pilot; others light up as their collection.xconf gains the field (Phase 2).
- : Experimental image currently ignores numeric top-k on ft:query-vector;
- : take the leading VECTOR_K hits (similarity-ordered) so RRF stays bounded. :)
+(:~ Score is read inside the leg. A later ft:query-vector must not be the
+ : thing that decides which nodes survive. :)
+declare %private function srch:scored-vector-hits($nodes as element()*) as map(*)* {
+    for $hit in $nodes
+    return map { "node": $hit, "score": ft:score($hit), "id": generate-id($hit) }
+};
+
+(:~ KNN over collections that define hsg-embedding. Packages without the
+ : vector-field contribute nothing (caught). The options map is the fourth
+ : argument of ft:query-vector; this image atomizes a map passed as k and
+ : the leg then fails. It also ignores numeric top-k and does not return
+ : hits in score order, so each leg is scored explicitly, the legs are
+ : merged by score, and the pool is cut to VECTOR_K. That keeps a later
+ : collection from being dropped because an earlier one filled the pool,
+ : and it keeps the nearest hit when it is not among the first VECTOR_K
+ : nodes in document order. :)
 declare %private function srch:query-vector-sections($queryConf as map(*), $q as xs:string) as element()* {
     if (normalize-space($q) eq "") then
         ()
@@ -239,23 +248,27 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
         try {
             let $vec := vector:embed($q, $srch:EMBED_MODEL)
             let $opts := map:merge(($srch:ft-query-options, $queryConf?facets))
-            let $raw := (
-                try { collection("/db/apps/other-publications")//tei:div[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection("/db/apps/other-publications")//tei:body[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection("/db/apps/conferences")//tei:div[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection("/db/apps/hac")//tei:div[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection("/db/apps/frus-history/articles")//tei:body[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection("/db/apps/frus-history/documents")//tei:body[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection("/db/apps/frus-history/monograph")//tei:div[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection("/db/apps/rdcr")//tei:body[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection("/db/apps/wwdai")//tei:body[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection("/db/apps/pocom/people")//persName[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection("/db/apps/travels")//trips[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection("/db/apps/visits")//visit[ft:query-vector(., $vec, $opts)] } catch * { () },
-                try { collection("/db/apps/milestones")//tei:div[ft:query-vector(., $vec, $opts)] } catch * { () }
+            let $scored := (
+                try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/conferences")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/hac")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/frus-history/articles")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/frus-history/documents")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/frus-history/monograph")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/rdcr")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/wwdai")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/pocom/people")//persName[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/travels")//trips[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/visits")//visit[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/milestones")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () }
             )
-            return subsequence($raw, 1, $srch:VECTOR_K)
+            let $ranked :=
+                for $row in $scored
+                order by $row?score descending empty least, $row?id
+                return $row?node
+            return subsequence($ranked, 1, $srch:VECTOR_K)
         } catch * {
             ()
         }
@@ -357,7 +370,14 @@ declare %private function srch:results($context as map(*)) as map(*) {
                     srch:fuse-rrf($luceneHits, $vectorHits)
                 else
                     $luceneHits
-            let $sorted := srch:sort($fused, $p?("sort-by"))
+            (: Relevance for hybrid is the RRF order. Re-sorting by ft:score
+               puts Lucene scores (about 5) ahead of vector scores (about 1)
+               and the fused order disappears. :)
+            let $sorted :=
+                if ($p?mode eq "hybrid" and $p?("sort-by") eq "relevance" and exists($vectorHits)) then
+                    $fused
+                else
+                    srch:sort($fused, $p?("sort-by"))
             let $volIds :=
                 try { map:keys(ft:facets($luceneHits, "frus-volume-id", ())) }
                 catch * { () }
