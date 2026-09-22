@@ -274,10 +274,6 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
         }
 };
 
-declare %private function srch:query-vector-frus($queryConf as map(*), $q as xs:string) as element()* {
-    srch:query-vector-sections($queryConf, $q)
-};
-
 (:~ Reciprocal Rank Fusion of two hit sequences (Lucene + vector). :)
 declare %private function srch:fuse-rrf($lucene as element()*, $vector as element()*) as element()* {
     let $lIds := $lucene ! generate-id(.)
