@@ -8,9 +8,10 @@ xquery version "3.1";
  : Every section api module's x-error-handler wrapper delegates here, so the
  : status mapping and template choice live in one place: 404 for roaster's
  : NOT_FOUND, 400 for BAD_REQUEST (the search query guard, OP#1273), and the
- : jinks-owned generic error page (which carries the diagnostic details) for
- : everything else. The generic page keeps vapi:handle-error's rendering; the
- : 404/400 pages deliberately show no internals, like the reference.
+ : friendly generic error page for any other error class (real 500s). The
+ : 404/400/500 pages deliberately show no internals, like the reference --
+ : the one exception is FORG0001 (see below), which keeps the jinks-owned
+ : diagnostic page's rendering on purpose.
  :)
 module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors";
 
@@ -42,10 +43,15 @@ declare function hsg-errors:handle($error as map(*)) {
     return
         if ($error?code = ($errors:NOT_FOUND, $errors:BAD_REQUEST)) then
             hsg-errors:render($error, "error-" || $status || ".html", $status)
-        else
+        else if (local-name-from-QName($error?code) eq "FORG0001") then
             (: the jinks-owned generic page renders the diagnostics; only the
                status needs correcting (it hardcodes 200) :)
             map:put(vapi:handle-error($error), xs:QName("router:RESPONSE_CODE"), $status)
+        else
+            (: a real 500 (an uncaught dynamic error, a bug elsewhere in the
+               app, ...): friendly page, not the diagnostic one -- end users
+               should not see a stack trace in production. :)
+            hsg-errors:render($error, "error-500.html", $status)
 };
 
 (:~
@@ -77,13 +83,14 @@ declare %private function hsg-errors:render($error as map(*), $file as xs:string
                     "prefix": "config",
                     "at": "modules/config.xqm"
                 },
-                (: templates/layouts/base.html (extended by the 404 page, OP#1398,
-                   to reuse the real site header/nav/footer instead of a bare
-                   standalone page) calls page:resolve-language($context).
-                   Declared explicitly here rather than via ignoreImports=false,
-                   because that flag also controls the site-wide "use" block
-                   library and every ancestor template's own frontmatter
-                   modules -- more than this page needs. :)
+                (: templates/layouts/base.html (extended by the friendly error
+                   pages, OP#1398, to reuse the real site header/nav/footer
+                   instead of a bare standalone page) calls
+                   page:resolve-language($context). Declared explicitly here
+                   rather than via ignoreImports=false, because that flag also
+                   controls the site-wide "use" block library and every
+                   ancestor template's own frontmatter modules -- more than
+                   these pages need. :)
                 "http://teipublisher.com/ns/templates/page": map {
                     "prefix": "page",
                     "at": "modules/templates/page.xqm"
