@@ -71,6 +71,69 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     width: 100%;
 }
 
+/* Breadcrumb band (OP#1405): the trail moves into its own full-bleed block,
+   a tinted photo behind white text, instead of sitting bare on the page
+   background. Scoped to toolbars that actually carry breadcrumb items so
+   the empty pagination toolbar templates/uswds-blocks.html renders on
+   listing pages (nav[aria-label="breadcrumb"] with no li) is left alone.
+
+   The band is full-width but .toolbar's own box (and so its content) stays
+   put, aligned with the page gutter like every other page element -- only
+   an absolutely positioned ::before is stretched to 100vw, the same
+   full-bleed-background/boxed-content split .page-header and footer use
+   (layout.css), just done with a pseudo-element instead of sizing .toolbar
+   itself, since .toolbar has no inner wrapper to re-box afterwards. */
+.toolbar:has(nav[aria-label="breadcrumb"] li) {
+    --hsg-breadcrumb-band-background: #112f4e; /* unique to this band, not a USWDS/jinks token */
+    position: relative;
+    z-index: 0;
+    color: var(--jinks-color-white);
+    padding-top: var(--hsg-space-6);
+    padding-bottom: var(--hsg-space-6);
+}
+
+.toolbar:has(nav[aria-label="breadcrumb"] li)::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 100vw;
+    margin-left: -50vw;
+    z-index: -1;
+    background-color: var(--hsg-breadcrumb-band-background);
+    background-image: linear-gradient(
+        color-mix(in srgb, var(--hsg-breadcrumb-band-background) 80%, transparent),
+        color-mix(in srgb, var(--hsg-breadcrumb-band-background) 80%, transparent)
+    ), url("../images/capitol-dome-breadcrumb.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* USWDS themes the breadcrumb link's :visited/:hover/:active states for its
+   default light background (a purple visited, a mid-blue hover -- both from
+   palette-navy.css's nav[aria-label=breadcrumb] rules), which stays illegible
+   against this band's own navy background regardless of source order because
+   .toolbar:has(...) a:visited etc. only ties palette-navy.css's selector on
+   specificity (OP#1395: same root cause as .hsg-footer below). Pin every
+   state to the one on-band colour instead of leaving :visited/:hover/:active
+   unset to inherit it. */
+.toolbar:has(nav[aria-label="breadcrumb"] li) a,
+.toolbar:has(nav[aria-label="breadcrumb"] li) a:visited {
+    color: var(--jinks-color-white);
+}
+
+.toolbar:has(nav[aria-label="breadcrumb"] li) a:hover,
+.toolbar:has(nav[aria-label="breadcrumb"] li) a:active {
+    color: var(--jinks-color-white);
+    text-decoration: underline;
+}
+
+.toolbar:has(nav[aria-label="breadcrumb"] li) li[aria-current="page"] {
+    font-weight: 600;
+}
+
 /* Footnotes. A note's content is one or more paragraphs, so the backlink that
    follows it would start a line of its own; the reference site sits it at the
    end of the note's last line. Only the last paragraph goes inline, so notes
