@@ -85,6 +85,25 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     width: 100%;
 }
 
+
+/* USWDS themes the breadcrumb link's :visited/:hover/:active states for its
+   default light background (a purple visited, a mid-blue hover -- both from
+   palette-navy.css's nav[aria-label=breadcrumb] rules), which stays illegible
+   against this band's own navy background regardless of source order because
+   .toolbar:has(...) a:visited etc. only ties palette-navy.css's selector on
+   specificity (OP#1395: same root cause as .hsg-footer below). Pin every
+   state to the one on-band colour instead of leaving :visited/:hover/:active
+   unset to inherit it. */
+.toolbar:has(nav[aria-label="breadcrumb"] li) a,
+.toolbar:has(nav[aria-label="breadcrumb"] li) a:visited {
+    color: var(--jinks-color-white);
+}
+
+.toolbar:has(nav[aria-label="breadcrumb"] li) a:hover,
+.toolbar:has(nav[aria-label="breadcrumb"] li) a:active {
+    color: var(--jinks-color-white);
+    text-decoration: underline;
+}
 /* Footnotes. A note's content is one or more paragraphs, so the backlink that
    follows it would start a line of its own; the reference site sits it at the
    end of the note's last line. Only the last paragraph goes inline, so notes
@@ -129,12 +148,22 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-bottom: var(--hsg-space-3);
 }
 
-.hsg-footer a {
+/* OP#1395: same USWDS light-background :visited/:hover/:active defaults as
+   the breadcrumb band above (palette-navy.css's .usa-footer__secondary-link
+   and .usa-footer__return-to-top rules) -- a purple visited and a mid-blue
+   hover, both unreadable on this footer's navy. Every state gets pinned to
+   the footer's own text colour; hover/active keep the underline as the only
+   state cue instead of a colour shift, since USWDS's palette has no
+   dark-background-safe hover/active colour defined. */
+.hsg-footer a,
+.hsg-footer a:visited {
     color: var(--hsg-footer-text);
     text-decoration: none;
 }
 
-.hsg-footer a:hover {
+.hsg-footer a:hover,
+.hsg-footer a:active {
+    color: var(--hsg-footer-text);
     text-decoration: underline;
 }
 
