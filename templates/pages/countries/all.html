@@ -13,7 +13,7 @@
     <title>All Countries - Countries - Office of the Historian</title>
     [% endtemplate %]
 
-    <div class="section-landing">
+    <div class="section-landing usa-prose">
         <h1>All Countries</h1>
         <p>This section provides historical reference information on the countries with which the
             United States has had diplomatic relations. The articles in this section are listed
@@ -56,17 +56,17 @@
     </div>
 
     [% template after %]
-    <h2>
+    <h2 class="usa-in-page-nav__heading">
         <pb-i18n key="breadcrumb.countries">Countries</pb-i18n>
     </h2>
-    <ul class="usa-sidenav">
-        <li class="usa-sidenav__item">
+    <ul class="usa-in-page-nav__list">
+        <li class="usa-in-page-nav__item usa-in-page-nav__item--primary">
             <a href="[[ $context?context-path ]]/countries">Countries</a>
         </li>
     </ul>
-    <h3>Related Resources</h3>
-    <ul class="usa-sidenav">
-        <li class="usa-sidenav__item">
+    <h3 class="usa-in-page-nav__heading">Related Resources</h3>
+    <ul class="usa-in-page-nav__list">
+        <li class="usa-in-page-nav__item usa-in-page-nav__item--primary">
             <a href="[[ $context?context-path ]]/countries/archives">World Wide Diplomatic Archives
                 Index</a>
         </li>

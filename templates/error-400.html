@@ -24,6 +24,10 @@
     </head>
     <body>
     <div class="fixed-layout">
+        [# OP#1412: this page stands alone (no templates/layouts/base.html), so it
+           needs its own copy of the government banner include; base.html's copy in
+           templates/menu.html never runs for it. #]
+        [% include "templates/banner.html" %]
         <main class="usa-prose">
             <h1>Invalid search query</h1>
             <p>Your search query contained characters that cannot be processed.

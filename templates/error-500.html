@@ -1,0 +1,52 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "extends": "templates/layouts/base.html"
+        }
+    }
+    ---
+    [% template! title %]
+    <title>Something went wrong - Office of the Historian</title>
+    [% endtemplate %]
+
+    [% template footer %]
+    [% include "templates/footer.html" %]
+    [% endtemplate %]
+
+    [# templates/uswds-blocks.html normally supplies these two script blocks
+       site-wide via context.json's templating.use; that list is skipped here
+       (hsg-errors.xqm sets ignoreUse=true, deliberately, so this render
+       doesn't depend on the same global block library every other page
+       does). Declared directly instead -- without them the nav's USWDS JS
+       never initializes and the mega-menu submenus render permanently open. #]
+    [% template scripts %]
+    <script src="[[ $context-path ]]/resources/js/uswds-init.min.js"></script>
+    [% endtemplate %]
+
+    [% template after %]
+    <script src="[[ $context-path ]]/resources/js/uswds.min.js"></script>
+    [% endtemplate %]
+
+    <main>
+        <div class="grid-container usa-prose margin-y-5">
+            <h1>Something went wrong</h1>
+            <p class="usa-intro">An unexpected error occurred while loading this page. Please try
+                again. If the problem continues, contact the Office of the Historian.</p>
+            <div class="margin-y-5">
+                <ul class="usa-button-group">
+                    <li class="usa-button-group__item">
+                        [# Empty href: resolves to the current URL, so this is a plain
+                           reload of the page that errored -- no client script, and no
+                           need to thread the failing request path through the error
+                           handler just to re-link to it. #]
+                        <a href="" class="usa-button">Try again</a>
+                    </li>
+                    <li class="usa-button-group__item">
+                        <a href="[[ $context-path ]]/about/contact-us" class="usa-button usa-button--outline">Contact us</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</template>

@@ -5,7 +5,7 @@
             "modules": {
                 "https://history.state.gov/ns/templates/frus-status": { "at": "modules/templates/frus-status.xqm", "prefix": "status" }
             },
-            "extends": "templates/layouts/hsg-content.html"
+            "extends": "templates/layouts/historicaldocuments-content.html"
         },
         "theme": {
             "layout": {
@@ -63,8 +63,4 @@
             also listed.</p>
         [[ status:report($context) ]]
     </div>
-
-    [% template before %]
-    [% include "templates/pages/historicaldocuments/sidebar.html" %]
-    [% endtemplate %]
 </template>

@@ -19,9 +19,13 @@
 :root {
     /* Colours */
     --hsg-color-muted: #565c65;                 /* USWDS gray-cool-60, theme-color-base */
+    --hsg-color-link: #2c608a;                  /* USWDS blue-70v, theme-color-primary-dark */
     --hsg-color-link-hover: #1a4480;            /* USWDS blue-warm-70v, theme-color-primary-dark */
     --hsg-color-rule: #dfe1e2;                  /* USWDS gray-cool-10, theme-color-base-lighter */
     --hsg-color-accent: #005ea2;                /* USWDS blue-60v, theme-color-primary */
+    --hsg-color-white: #fff;                    /* USWDS white, bg-white/text-white utility color */
+    --hsg-color-text: #2e2e2e;                   /* USWDS gray-80, theme-text-color */
+    --hsg-color-background-muted: #f0f0f0;         /* USWDS gray-5, theme-color-base-lightest */
 
     /* External reference link confirmed dead (404/redirected-away, #1095).
        Flags it visually rather than silently dropping or swapping it; a
@@ -29,6 +33,20 @@
        No USWDS token covers this, so the pair is HSG's own. */
     --hsg-color-link-broken: #b50909;
     --hsg-color-link-broken-visited: #8b0707;
+
+    /* Historical Documents nav band (OP#1400), from the Figma design's own
+       "News" component instance. The tinted navy is Figma's
+       theme/color/primary/darkest (#112f4e), which the USWDS theme profile
+       already exports live as --jinks-colors-700 - var() into that instead
+       of repeating the literal, using the same color-mix() technique
+       landing-page.css's #bottom rule already uses for a tinted variant of
+       it (the opaque card fill below uses --jinks-colors-700 directly, the
+       same way #bottom and .highlight-card do, rather than a same-value
+       alias of it). The text colour has no live export (palette-navy.css
+       only exposes it as a utility class, per this file's own header), so
+       it stays an HSG-level token like the pair above it. */
+    --hsg-color-historicaldocuments-nav-bg: color-mix(in srgb, var(--jinks-colors-700) 80%, transparent); /* Figma fill #112F4E @ 80% */
+    --hsg-color-historicaldocuments-nav-text: #e6e6e6;             /* USWDS gray-10, theme-color-base-lighter (Figma: page/text-color-on-dark) */
 
     /* Type sizes, from the USWDS sans type scale (the app's heading and body
        face is Source Sans), named for the USWDS step they carry. */
@@ -178,12 +196,22 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-bottom: var(--hsg-space-3);
 }
 
-.hsg-footer a {
+/* OP#1395: same USWDS light-background :visited/:hover/:active defaults as
+   the breadcrumb band above (palette-navy.css's .usa-footer__secondary-link
+   and .usa-footer__return-to-top rules) -- a purple visited and a mid-blue
+   hover, both unreadable on this footer's navy. Every state gets pinned to
+   the footer's own text colour; hover/active keep the underline as the only
+   state cue instead of a colour shift, since USWDS's palette has no
+   dark-background-safe hover/active colour defined. */
+.hsg-footer a,
+.hsg-footer a:visited {
     color: var(--hsg-footer-text);
     text-decoration: none;
 }
 
-.hsg-footer a:hover {
+.hsg-footer a:hover,
+.hsg-footer a:active {
+    color: var(--hsg-footer-text);
     text-decoration: underline;
 }
 
@@ -307,6 +335,36 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     .usa-nav__secondary {
         bottom: 5.15rem;
     }
+}
+
+/* Government banner (OP#1412) sits on this theme's dark navy fill
+   (.usa-banner { background-color: #0b4778 } in components.css), but the
+   USWDS defaults for its contents assume the stock light gray fill instead:
+   .usa-banner__header text (#274863) and .usa-banner__button (background
+   #2e2e2e from the shared .usa-accordion__button rule, text #274863) end up
+   dark text on a dark ground, unreadable. Re-declared here with an extra
+   .usa-banner ancestor selector so these win over components.css regardless
+   of load order; the button's own hover/focus states already use a light
+   #e6e6e6 background with dark text and are unaffected. */
+.usa-banner .usa-banner__header,
+.usa-banner .usa-banner__header-action {
+    color: var(--hsg-color-white);
+}
+
+.usa-banner .usa-banner__button {
+    background-color: transparent;
+    color: var(--hsg-color-white);
+}
+
+/* The expanded accordion panel (.usa-banner__content) has no background of
+   its own in components.css -- it's transparent, so its dark ink text
+   (#274863, correct for a normal page background) inherited the same navy
+   fill as the header bar above it once that fill was set, and went
+   dark-on-dark just like the header text did. Stock USWDS keeps this panel
+   on a plain white background even when the header bar is themed; do the
+   same here rather than overriding every nested heading/paragraph color. */
+.usa-banner .usa-banner__content {
+    background-color: var(--hsg-color-white);
 }
 
 .hsg-link-broken {
@@ -843,13 +901,19 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     left: 0;
     font-weight: 700;
 }
-/* Historical Documents section landing: administration cards (OP#1214).
-   The reference site's thumbnail grid rebuilt as USWDS cards. The compiled
-   CSS carries no responsive grid-col utilities, so the card group is sized
-   with its own auto-fill grid instead of per-card grid classes. Portraits
-   are small legacy assets (89x76) served from static.history.state.gov;
-   render them at natural size, centered, rather than stretched to the card
-   width. */
+/* Historical Documents section landing: administration cards (OP#1214),
+   restyled to match the Figma design (OP#1404): a circular portrait, the
+   presidency name as an italic accent-colored link with "Administration"
+   broken out below it as a plain label, and the coverage dates in a
+   usa-tag pill. The compiled CSS carries no responsive grid-col utilities,
+   so the card group is sized with its own auto-fill grid instead of
+   per-card grid classes.
+
+   `.usa-card` itself (not just its `.usa-card__container`) needs an
+   explicit height: 100% (OP#1404): align-items: stretch alone leaves a
+   shorter card unstretched when it sits in the grid's last, incomplete row
+   (27 cards over 4 columns) — a reproducible Chromium stretch bug for this
+   layout, not a spacing/content issue. */
 .hsg-admin-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
@@ -862,6 +926,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-bottom: 0;
     max-width: none;
     width: auto;
+    height: 100%;
 }
 
 .hsg-admin-cards .usa-card__container {
@@ -870,8 +935,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-admin-cards .usa-card__media {
-    text-align: center;
-    padding-top: 1rem;
+    padding: 1rem 1rem 0;
 }
 
 .hsg-admin-cards .usa-card__img {
@@ -880,18 +944,39 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-admin-cards .usa-card__img img {
-    width: 89px;
-    height: 76px;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
     object-fit: cover;
 }
 
 .hsg-admin-cards .usa-card__heading {
-    font-size: 1.05rem;
-    text-align: center;
+    font-size: 1.25rem;
+    font-style: italic;
+    font-weight: 600;
+    line-height: 1.2;
 }
 
-.hsg-admin-cards .usa-card__body {
-    text-align: center;
+.hsg-admin-cards .usa-card__heading a {
+    color: var(--hsg-color-link);
+    text-decoration: none;
+}
+
+.hsg-admin-cards .usa-card__heading a:hover,
+.hsg-admin-cards .usa-card__heading a:focus {
+    text-decoration: underline;
+}
+
+.hsg-admin-cards .hsg-admin-card__type {
+    margin: 0.25rem 0 0;
+    font-style: normal;
+    font-weight: 400;
+    color: var(--hsg-color-text);
+}
+
+.hsg-admin-cards .usa-tag {
+    background-color: var(--hsg-color-background-muted);
+    color: var(--hsg-color-text);
 }
 
 /* Administration page volume listing (OP#1214). */
@@ -903,6 +988,136 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--hsg-color-base-dark, #565c65);
     font-size: 0.9em;
     white-space: nowrap;
+}
+
+/* Historical Documents nav band (OP#1400): a dark card grid of links back
+   into the section, mounted by templates/layouts/historicaldocuments-content.html
+   below every Historical Documents page's own content, full-bleed like the
+   real footer it sits beside (both wrapped in .hsg-historicaldocuments-footer
+   by that layout, since only a direct .sticky-layout child can break out of
+   the content column - see resources/css/layout.css's own
+   ".sticky-layout > .page-header, > footer" rule, which this mirrors for a
+   class instead of an element selector). */
+.sticky-layout > .hsg-historicaldocuments-footer {
+    grid-area: footer;
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
+}
+
+/* Flag-photo watermark tinted navy via background-blend-mode: multiply,
+   the technique landing-page.css's #bottom also uses (not shared - that
+   file is vendored); no separate background-color fallback is needed since
+   the gradient here is a flat colour, not a two-stop fade. Horizontal
+   spacing comes from the inner .grid-container's own gutter, not padding
+   here, to avoid doubling up with how the header/footer box their content. */
+.hsg-historicaldocuments-nav {
+    background-image:
+        url("../images/us-flag-texture.jpg"),
+        linear-gradient(var(--hsg-color-historicaldocuments-nav-bg), var(--hsg-color-historicaldocuments-nav-bg));
+    background-blend-mode: multiply;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: var(--hsg-color-historicaldocuments-nav-text);
+    padding-block: var(--hsg-space-4, 2rem);
+}
+
+/* Figma binds this heading to usa/font-family/heading (400/45.6px), which
+   resolves to Garamond there; this app has no Garamond files or matching
+   token, so it uses its own vendored serif instead (Merriweather Web,
+   already used by h1/.usa-card__heading). font-weight is explicit since a
+   bare h2 here otherwise inherits bold. */
+.hsg-historicaldocuments-nav h2 {
+    color: inherit;
+    font-family: "Merriweather Web", Georgia, Cambria, "Times New Roman", Times, serif;
+    font-weight: 400;
+    font-size: 2.85rem;
+    border-bottom: 1px solid var(--hsg-color-historicaldocuments-nav-text);
+    padding-bottom: var(--hsg-space-2, 1rem);
+    margin-top: 0;
+}
+
+/* Unlike .hsg-admin-cards above, this list is a fixed 8 items
+   (hsg:historicaldocuments-nav-cards), so the grid is pinned to an exact
+   column count per breakpoint (2 up/4 down on mobile, 4 up/2 down on
+   desktop) rather than auto-fill - auto-fill's column count depends on
+   viewport width in a way that stopped lining the cards up into clean
+   rows on wide screens. */
+.hsg-historicaldocuments-nav-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--hsg-space-2, 1rem);
+    padding-left: 0;
+    list-style: none;
+    margin-bottom: 0;
+}
+
+@media (min-width: 64em) {
+    .hsg-historicaldocuments-nav-cards {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* align-self: start opts out of this grid's default row-stretch, which
+   (confirmed by DOM experiment) inflated only the first item of an uneven
+   wrapped row regardless of its content. Every card instead sizes from its
+   own min-height (below) rather than depending on stretch. */
+.hsg-historicaldocuments-nav-card {
+    align-self: start;
+    margin-bottom: 0;
+    max-width: none;
+    width: auto;
+}
+
+/* min-height is this card's equal-height budget now that align-self: start
+   opts it out of the grid's own row-stretch above (heading padding 2rem +
+   the heading's own min-height below + body padding 2rem + arrow icon;
+   still free to grow for a longer label). background-color is flat/opaque
+   like Figma's own cards, which carry no stroke of their own; this repo
+   adds a faint border since without the watermark's tonal variation behind
+   it, an opaque card alone reads as a hard-edged block. color is set
+   explicitly because usa-card__body's own default (dark, body-text) colour
+   otherwise breaks inheritance from the band's text colour above - the
+   same class of bug as the ticket's arrow-contrast issue, just on this
+   container - and covers both the heading link and the arrow's
+   currentColor. */
+.hsg-historicaldocuments-nav-card .usa-card__container {
+    min-height: 12.5rem;
+    margin: 0;
+    background-color: var(--jinks-colors-700);
+    border: 1px solid rgb(230 230 230 / 25%);
+    color: var(--hsg-color-historicaldocuments-nav-text);
+}
+
+/* Fixed min-height (labels run one to four lines depending on viewport)
+   keeps every card the same height instead of each row sizing to its own
+   tallest label. */
+.hsg-historicaldocuments-nav-card .usa-card__heading {
+    min-height: 6.5rem;
+}
+
+.hsg-historicaldocuments-nav-card .usa-card__heading a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.hsg-historicaldocuments-nav-card .usa-card__heading a:hover {
+    text-decoration: underline;
+}
+
+/* No arrow-specific rule needed: the arrow is now the real USWDS icon
+   sprite (.usa-icon, styles.css) rather than a custom glyph, and that
+   class already does fill: currentColor + a 1em square - it inherits the
+   same colour fix as the card's own link text (usa-card__container's
+   color below) instead of needing a second, separate override the way
+   the ticket's original arrow (bound to a stray link-colour token) did. */
+
+/* The highlighted "All Historical Documents" card - a light CTA variant
+   among the otherwise dark cards, per the Figma design. */
+.hsg-historicaldocuments-nav-card--highlight .usa-card__container {
+    background-color: var(--hsg-color-historicaldocuments-nav-text);
+    border-color: var(--hsg-color-historicaldocuments-nav-text);
+    color: var(--hsg-color-accent);
 }
 
 /* ==========================================================================
@@ -994,4 +1209,17 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     display: block;
     max-width: 100%;
     margin: 0 auto;
+}
+
+/* OP#1414: Figma (node 4800-46154, "World Wide Diplomatic Archives Index",
+   and confirmed against About Us / Developer Resources / Open Government
+   Initiative) sets serif body copy, not just serif headings, for
+   long-form prose -- unlike the sans-body .usa-prose default USWDS
+   compiles. Applies to every .usa-prose block sitewide, not just
+   countries, since every content-like section's design calls for it.
+   Merriweather Web is the same serif stack the USWDS theme profile
+   compiles for "serif"-role headings elsewhere (resources/sass/
+   palette-navy.scss's $theme-font-type-serif). */
+.usa-prose {
+    font-family: "Merriweather Web", Georgia, Cambria, "Times New Roman", Times, serif;
 }

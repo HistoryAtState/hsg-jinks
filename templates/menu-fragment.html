@@ -35,7 +35,7 @@
                     <button type="button" class="usa-accordion__button usa-nav__link" aria-expanded="false" aria-controls="submenu-[[ $item?id ]]">
                         <pb-i18n key="menu.[[ $item?id ]]">[[ $item?id ]]</pb-i18n>
                     </button>
-                    <ul class="usa-nav__submenu" id="submenu-[[ $item?id ]]">
+                    <ul class="usa-nav__submenu" id="submenu-[[ $item?id ]]" hidden="hidden">
                         [% for $subitem in $item?subitems?* %]
                         <li class="usa-nav__submenu-item">
                             <a href="[[ $context-path ]]/[[ replace($subitem?url, 'browse\.html', $context?defaults?browse) ]]"><pb-i18n key="menu.[[ $subitem?id ]]">[[ $subitem?id ]]</pb-i18n></a>

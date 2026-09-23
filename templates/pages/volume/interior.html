@@ -5,7 +5,7 @@
             "modules": {
                 "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
             },
-            "extends": "templates/layouts/hsg-content.html"
+            "extends": "templates/layouts/historicaldocuments-content.html"
         }
     }
     ---
@@ -38,12 +38,5 @@
 
     [% template after %]
     [[ hsg:division-asides($context) ]]
-    <!-- The same section navigation partial every other Historical Documents
-         page mounts in its left aside; here it sits in the right aside (the
-         left is taken by the volume TOC), wrapped in the panel chrome the
-         register panels above it use. -->
-    <div class="hsg-panel hsg-frus__section-nav">
-        [% include "templates/pages/historicaldocuments/sidebar.html" %]
-    </div>
     [% endtemplate %]
 </template>

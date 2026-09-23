@@ -5,7 +5,7 @@
             "modules": {
                 "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
             },
-            "extends": "templates/layouts/hsg-content.html"
+            "extends": "templates/layouts/historicaldocuments-content.html"
         },
         "theme": {
             "layout": {
@@ -48,7 +48,4 @@
     <div class="section-landing usa-prose">
         [[ hsg:content-page($context, "quarterly-releases/" || $context?release-id) ]]
     </div>
-    [% template before %]
-    [% include "templates/pages/historicaldocuments/sidebar.html" %]
-    [% endtemplate %]
 </template>

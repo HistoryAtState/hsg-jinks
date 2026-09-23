@@ -13,26 +13,26 @@
     <title>[[ normalize-space(string-join((countries:page-title($context?doc?content, 'Archives - Countries - Office of the Historian')) ! string(.), ' ')) ]]</title>
     [% endtemplate %]
 
-    <div>
+    <div class="usa-prose">
         <h1>[[ countries:article-heading($context?doc?content) ]]</h1>
         [[ page:transform($context?doc?content, map { "mode": "division" }) ]]
     </div>
 
     [% template after %]
-    <h2>Archives</h2>
-    <ul class="usa-sidenav">
-        <li class="usa-sidenav__item">
+    <h2 class="usa-in-page-nav__heading">Archives</h2>
+    <ul class="usa-in-page-nav__list">
+        <li class="usa-in-page-nav__item usa-in-page-nav__item--primary">
             <a href="[[ $context?context-path ]]/countries/archives/all">List of all countries in the
                 World Wide Diplomatic Archives Index</a>
         </li>
-        <li class="usa-sidenav__item">
+        <li class="usa-in-page-nav__item usa-in-page-nav__item--primary">
             <a href="[[ $context?context-path ]]/countries/archives">World Wide Diplomatic Archives
                 Index</a>
         </li>
     </ul>
-    <h3>Related Resources</h3>
-    <ul class="usa-sidenav">
-        <li class="usa-sidenav__item">
+    <h3 class="usa-in-page-nav__heading">Related Resources</h3>
+    <ul class="usa-in-page-nav__list">
+        <li class="usa-in-page-nav__item usa-in-page-nav__item--primary">
             <a href="[[ $context?context-path ]]/countries">
                 <pb-i18n key="breadcrumb.countries">Countries</pb-i18n>
             </a>

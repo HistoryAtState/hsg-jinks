@@ -1,35 +1,49 @@
-<html>
-    <head>
-        <title>Page not found - Office of the Historian</title>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes" />
-        <link rel="shortcut icon" type="image/x-icon" href="[[ $context-path ]]/resources/images/favicon.ico" />
+<template>
+    ---json
+    {
+        "templating": {
+            "extends": "templates/layouts/base.html"
+        }
+    }
+    ---
+    [% template! title %]
+    <title>Page not found - Office of the Historian</title>
+    [% endtemplate %]
 
-        [% for $path in $styles?* %]
-        [% if matches($path, "(?:^https?://|^/).*$") %]
-        <link rel="stylesheet" href="[[ $path ]]" />
-        [% else %]
-        <link rel="stylesheet" href="[[ $context-path ]]/[[ $path ]]" />
-        [% endif %]
-        [% endfor %]
+    [% template footer %]
+    [% include "templates/footer.html" %]
+    [% endtemplate %]
 
-        <style>
-            .fixed-layout > main {
-                display: block;
-                max-width: var(--jinks-content-max-width);
-                margin: 3rem auto;
-                padding: 0 1rem;
-            }
-        </style>
-    </head>
-    <body>
-    <div class="fixed-layout">
-        <main class="usa-prose">
+    [# templates/uswds-blocks.html normally supplies these two script blocks
+       site-wide via context.json's templating.use; that list is skipped here
+       (hsg-errors.xqm sets ignoreUse=true, deliberately, so this render
+       doesn't depend on the same global block library every other page
+       does). Declared directly instead -- without them the nav's USWDS JS
+       never initializes and the mega-menu submenus render permanently open. #]
+    [% template scripts %]
+    <script src="[[ $context-path ]]/resources/js/uswds-init.min.js"></script>
+    [% endtemplate %]
+
+    [% template after %]
+    <script src="[[ $context-path ]]/resources/js/uswds.min.js"></script>
+    [% endtemplate %]
+
+    <main>
+        <div class="grid-container usa-prose margin-y-5">
             <h1>Page not found</h1>
-            <p>The resource you requested could not be found.</p>
-            <p><a class="usa-link" href="[[ $context-path ]]/">Return to the home page</a> or
-                <a class="usa-link" href="[[ $context-path ]]/search">search the site</a>.</p>
-        </main>
-    </div>
-    </body>
-</html>
+            <p class="usa-intro">We're sorry, but the page you requested could not be found. It may
+                have been moved, renamed, or removed. Check the web address, or use one of the
+                options below.</p>
+            <div class="margin-y-5">
+                <ul class="usa-button-group">
+                    <li class="usa-button-group__item">
+                        <a href="[[ $context-path ]]/" class="usa-button">Go to homepage</a>
+                    </li>
+                    <li class="usa-button-group__item">
+                        <a href="[[ $context-path ]]/search" class="usa-button usa-button--outline">Search the site</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</template>
