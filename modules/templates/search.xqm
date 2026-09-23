@@ -30,7 +30,8 @@ xquery version "3.1";
  :    instead of hsg-shell's per-publication html-href() call.
  :  - KWIC summaries are not first trimmed to N matches before summarizing
  :    (hsg-shell's search:trim-matches/milestone-chunk) -- a heavily-matched
- :    hit may show a slightly longer snippet.
+ :    hit is summarized in full, then only the first five snippets are shown
+ :    (OP#1420: each is held to one line on the result card).
  :  - hsg-shell's unused MAX_HITS_SHOWN cap/message, the hardcoded facet-count
  :    badge, and the frus DISPLAY entry's dead absolute-URL branch are not
  :    ported (dead code in the source, not a feature).
@@ -41,11 +42,19 @@ import module namespace kwic = "http://exist-db.org/xquery/kwic";
 import module namespace cache = "http://exist-db.org/xquery/cache" at "java:org.exist.xquery.modules.cache.CacheModule";
 import module namespace page = "http://teipublisher.com/ns/templates/page" at "page.xqm";
 import module namespace fd = "http://history.state.gov/ns/site/hsg/frus-dates" at "../frus-dates.xqm";
+import module namespace ext = "http://history.state.gov/ns/frus/odd-ext" at "../frus-ext.xqm";
+import module namespace global = "http://e-editiones.org/tei-publisher/odd-global" at "../odd-global.xqm";
+import module namespace hsg = "https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
 (:~ FRUS data collection this app actually renders -- see module doc above. :)
 declare variable $srch:FRUS_COL as xs:string := "/db/apps/frus-data-jinks";
+
+(:~ Id of the one GET form (the keyword box) that the results sidebar's
+ : controls and the Sort by select all belong to, so a new keyword search
+ : keeps the filters and sort, and Apply filters keeps the keyword. :)
+declare variable $srch:FORM_ID as xs:string := "hsg-search";
 
 declare variable $srch:ft-query-options as map(*) := map {
     "default-operator": "and",
@@ -259,14 +268,18 @@ declare %private function srch:results($context as map(*)) as map(*) {
         if (exists($cached)) then
             $cached
         else
+            let $started := util:system-dateTime()
             let $range := srch:date-range($p?("start-date"), $p?("end-date"), $p?("start-time"), $p?("end-time"))
             let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), $p?q, $range?start, $range?end)
             let $hits :=
                 try { srch:query-sections($queryConf) } catch * { () }
             let $sorted := srch:sort($hits, $p?("sort-by"))
             let $volIds := map:keys(ft:facets($hits, "frus-volume-id", ()))
+            (: how long the query itself took, kept with the cached entry so
+               a cached page 2 still reports the real cost of the search :)
+            let $took := seconds-from-duration(util:system-dateTime() - $started)
             let $entry := map {
-                "id": $queryId, "hits": $sorted, "results-vol-ids": $volIds,
+                "id": $queryId, "hits": $sorted, "results-vol-ids": $volIds, "took": $took,
                 "range-start": $range?start, "range-end": $range?end, "created": current-dateTime()
             }
             let $store := cache:put($cacheName, $cacheKey, map { "created": $cache?created, "purged": $cache?purged, "queries": map:put($cache?queries, $queryId, $entry) })
@@ -282,6 +295,7 @@ declare %private function srch:results($context as map(*)) as map(*) {
             "hit-count": $hitCount,
             "end": $p?start + count($window) - 1,
             "results-vol-ids": $results?results-vol-ids,
+            "took": $results?took,
             "range-start": $results?("range-start"),
             "range-end": $results?("range-end")
         }
@@ -312,76 +326,117 @@ declare %private function srch:frus-title($doc as element(tei:div)) as xs:string
             $headingString
 };
 
-declare %private function srch:frus-summary($doc as element(tei:div)) as element(div) {
+(:~ One label/value row of a result card's metadata list. :)
+declare %private function srch:meta-row($label as xs:string, $value as item()*) as element()+ {
+    <dt>{$label}</dt>,
+    <dd>{$value}</dd>
+};
+
+(:~ The keyword-in-context snippets of a hit, at most five, each wrapped in
+ : its own span so the card can hold every match to a single line. :)
+declare %private function srch:snippets($summaries as element()*) as element(span)* {
+    for $summary in subsequence($summaries, 1, 5)
+    return <span class="hsg-snippet">{$summary/*}</span>
+};
+
+(:~ Metadata list of a card. :)
+declare %private function srch:meta-list($rows as element()*) as element(dl)? {
+    if (exists($rows)) then <dl class="hsg-result__meta">{$rows}</dl> else ()
+};
+
+(:~
+ : Card content for a FRUS division: the place and date chips and the
+ : recorded/encoded date rows (historical documents only), the resource id,
+ : the keyword snippets and score, and a link to the facsimile of the page
+ : the division starts on. The facsimile link is only offered where the
+ : volume has a scan for that page (global:iiif-facs-id, the same test the
+ : "[Page N]" markers in the document text use), and points at the pg_*
+ : route the hsg-api serves, built from the volume segment of the hit's own
+ : hsg-url so it can never disagree with the title link.
+ :)
+declare %private function srch:frus-card($doc as element(tei:div), $href as xs:string?) as map(*) {
     let $docId := $doc/@xml:id
     let $volId := root($doc)/tei:TEI/@xml:id
+    (: the division subtype is a teiHeader bibl in this data model, not an
+       attribute on the div (see ext:get-division-subtype), so the rows and
+       chips reserved for historical documents key off that :)
+    let $historical := ext:get-division-subtype($doc) eq "historical-document"
     let $dateline := ($doc//tei:dateline[.//tei:date])[1]
     let $date := ($dateline//tei:date)[1]
     let $dateString := normalize-space(string-join($date//text()[not(./ancestor::tei:note)]))
     let $placeName := ($doc//tei:placeName)[1]
     let $placeNameString := normalize-space(string-join($placeName//text()[not(./ancestor::tei:note)]))
     let $highlighted := ft:highlight-field-matches($doc, "hsg-fulltext")
-    let $kwic :=
+    let $snippets := srch:snippets(
         for $hit in subsequence($highlighted//exist:match, 1, 5)
-        return kwic:get-summary($highlighted, $hit, <config width="40"/>)/*
+        return kwic:get-summary($highlighted, $hit, <config width="40"/>)
+    )
     let $score := ft:score($doc)
-    return
-        <div class="usa-prose">
-            <dl>
-            {
-                if ($doc/@subtype eq "historical-document") then (
-                    <dt>Recorded Date</dt>, <dd>{($dateString, "(None)")[. ne ""][1]}</dd>,
-                    <dt>Recorded Location</dt>, <dd>{($placeNameString, "(None)")[. ne ""][1]}</dd>
-                ) else (),
-                <dt>Resource ID</dt>, <dd>{$volId/string()}/{$docId/string()}</dd>,
-                if (exists($kwic)) then (<dt>Keyword Results</dt>, <dd>{$kwic}</dd>) else (),
-                if ($score) then (<dt>Keyword Relevance</dt>, <dd>{$score}</dd>) else ()
-            }
-            </dl>
-        </div>
+    let $pb := ($doc//tei:pb[@n])[1]
+    let $facsimile :=
+        if (exists($pb) and matches($href, "^/historicaldocuments/[^/]+/") and exists(global:iiif-facs-id((), $pb))) then
+            replace($href, "^(/historicaldocuments/[^/]+)/.*$", "$1") || "/pg_" || encode-for-uri($pb/@n)
+        else
+            ()
+    return map {
+        "tags": if ($historical) then ($placeNameString, $dateString)[. ne ""] else (),
+        "summary": srch:meta-list((
+            if ($historical) then (
+                srch:meta-row("Recorded Date", ($dateString, "(None)")[. ne ""][1]),
+                srch:meta-row("Recorded Location", ($placeNameString, "(None)")[. ne ""][1]),
+                if ($date/@when) then srch:meta-row("Encoded Date", <code>when="{string($date/@when)}"</code>) else ()
+            ) else (),
+            srch:meta-row("Resource ID", $volId/string() || "/" || $docId/string()),
+            if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else (),
+            if ($score) then srch:meta-row("Keyword Relevance", $score) else ()
+        )),
+        "facsimile": $facsimile
+    }
 };
 
-(:~ title/summary/href for one hit -- href trusts the hsg-url Lucene field
- : (module doc above) except for the two element types with no such field. :)
+(:~
+ : What one hit renders as: title and href for the card heading, plus
+ : "tags" (chips above the title), "summary" (the metadata list) and
+ : "facsimile" (a path to the page scan), all empty where a hit type has
+ : nothing to show. The href trusts the hsg-url Lucene field (module doc
+ : above) except for the two element types with no such field.
+ :)
 declare %private function srch:render-hit($hit as element()) as map(*) {
-    typeswitch ($hit)
-        case element(persName) return map {
-            "title": string-join(($hit/forename, $hit/surname, $hit/genName), " "),
-            "summary": (),
-            "href": ft:field($hit, "hsg-url")
-        }
-        case element(visit) return map {
-            "title": "Visits By Foreign Leaders: " || string-join($hit/visitor, ", "),
-            "summary": (),
-            "href": ft:field($hit, "hsg-url")
-        }
-        case element(trips) return
-            let $expanded := util:expand($hit)
-            let $count := count($expanded//exist:match/ancestor::trip)
-            return map {
-                "title": "Travels: " || string-join($hit/trip[1]/name, ", "),
-                "summary": <p>{$count || " matching trip" || (if ($count gt 1) then "s" else ())}</p>,
-                "href": ft:field($hit, "hsg-url")
-            }
-        case element(tei:div) return
-            if (ft:field($hit, "hsg-publication") = "frus" or starts-with(base-uri($hit), $srch:FRUS_COL)) then
-                map {
-                    "title": srch:frus-title($hit),
-                    "summary": srch:frus-summary($hit),
-                    "href": ft:field($hit, "hsg-url")
-                }
-            else
-                map {
-                    "title": normalize-space(string-join(($hit/tei:head)[1]//text()[not(./ancestor::tei:note)])),
-                    "summary": kwic:summarize(util:expand($hit), <config xmlns="" width="60"/>)/*,
-                    "href": ft:field($hit, "hsg-url")
-                }
-        case element(tei:body) return map {
-            "title": normalize-space(string-join(($hit/ancestor::tei:TEI//tei:titleStmt/tei:title)[1])),
-            "summary": kwic:summarize(util:expand($hit), <config xmlns="" width="60"/>)/*,
-            "href": ft:field($hit, "hsg-url")
-        }
-        default return map { "title": "Untitled result", "summary": (), "href": "#" }
+    let $href := ft:field($hit, "hsg-url")
+    let $card := function($title as xs:string, $rows as element()*) as map(*) {
+        map { "title": $title, "href": $href, "tags": (), "summary": srch:meta-list($rows), "facsimile": () }
+    }
+    return
+        typeswitch ($hit)
+            case element(persName) return
+                $card(string-join(($hit/forename, $hit/surname, $hit/genName), " "), ())
+            case element(visit) return
+                $card("Visits By Foreign Leaders: " || string-join($hit/visitor, ", "), ())
+            case element(trips) return
+                let $expanded := util:expand($hit)
+                let $count := count($expanded//exist:match/ancestor::trip)
+                return $card("Travels: " || string-join($hit/trip[1]/name, ", "), srch:meta-row("Matching Trips", $count))
+            case element(tei:div) return
+                if (ft:field($hit, "hsg-publication") = "frus" or starts-with(base-uri($hit), $srch:FRUS_COL)) then
+                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit, $href)))
+                else
+                    $card(
+                        normalize-space(string-join(($hit/tei:head)[1]//text()[not(./ancestor::tei:note)])),
+                        srch:keyword-row(kwic:summarize(util:expand($hit), <config xmlns="" width="60"/>))
+                    )
+            case element(tei:body) return
+                $card(
+                    normalize-space(string-join(($hit/ancestor::tei:TEI//tei:titleStmt/tei:title)[1])),
+                    srch:keyword-row(kwic:summarize(util:expand($hit), <config xmlns="" width="60"/>))
+                )
+            default return
+                map { "title": "Untitled result", "href": "#", "tags": (), "summary": (), "facsimile": () }
+};
+
+(:~ The "Keyword Results" row of the non-FRUS hit types, from kwic:summarize. :)
+declare %private function srch:keyword-row($summaries as element()*) as element()* {
+    let $snippets := srch:snippets($summaries)
+    return if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else ()
 };
 
 (: ============== template-facing functions ============== :)
@@ -390,7 +445,7 @@ declare function srch:results-summary($context as map(*)) as element(p) {
     let $r := srch:results($context)
     return
         if ($r?("hit-count") gt 0) then
-            <p class="usa-prose">
+            <p class="usa-prose hsg-results-summary">
                 Displaying {$r?start}&#8211;{$r?end} of <span class="search-count">{format-number($r?("hit-count"), "#,###")}</span> results
                 {
                     string-join((
@@ -403,23 +458,51 @@ declare function srch:results-summary($context as map(*)) as element(p) {
                     ), " ")
                     || ", sorted by " || (switch ($r?("sort-by")) case "date-asc" return "dates (oldest first)" case "date-desc" return "dates (most recent first)" default return "relevance")
                 }.
+                { if (exists($r?took)) then " Search completed in " || format-number($r?took, "0.000") || "s." else () }
             </p>
         else
-            <p class="usa-prose">No results were found.</p>
+            <p class="usa-prose hsg-results-summary">No results were found.</p>
 };
 
+(:~ One card per hit: chips, title link, metadata list, facsimile link. The
+ : list keeps USWDS's usa-collection semantics; the card look is the theme's
+ : (resources/css/hsg-theme.css, "Search results page"). :)
 declare function srch:results-list($context as map(*)) as element(ul) {
     let $r := srch:results($context)
     return
-        <ul class="usa-collection">
+        <ul class="usa-collection hsg-results">
         {
             for $hit in $r?hits
             let $rendered := srch:render-hit($hit)
             return
                 <li class="usa-collection__item">
                     <div class="usa-collection__body">
+                        {
+                            if (exists($rendered?tags)) then
+                                <ul class="usa-collection__meta hsg-result__tags" aria-label="Place and date">
+                                {
+                                    for $tag in $rendered?tags
+                                    return <li class="usa-collection__meta-item usa-tag">{$tag}</li>
+                                }
+                                </ul>
+                            else
+                                ()
+                        }
                         <h3 class="usa-collection__heading"><a href="{$context?context-path}{$rendered?href}">{$rendered?title}</a></h3>
-                        { if (exists($rendered?summary)) then <div class="usa-collection__description">{$rendered?summary}</div> else () }
+                        { $rendered?summary }
+                        {
+                            if (exists($rendered?facsimile)) then
+                                <p class="hsg-result__actions">
+                                    <a class="hsg-result__facsimile" href="{$context?context-path}{$rendered?facsimile}">
+                                        <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+                                            <use href="{$context?context-path}/resources/images/sprite.svg#image"/>
+                                        </svg>
+                                        Facsimile Page
+                                    </a>
+                                </p>
+                            else
+                                ()
+                        }
                     </div>
                 </li>
         }
@@ -441,6 +524,38 @@ declare %private function srch:pagination-query-string($r as map(*), $start as x
     ), "&amp;")
 };
 
+(:~
+ : The page numbers to show, with "…" standing for a skipped run: USWDS's
+ : pagination pattern, which always keeps the first and last page and holds
+ : the whole control to at most seven slots however many pages there are.
+ :)
+declare %private function srch:page-window($current as xs:integer, $last as xs:integer) as item()* {
+    if ($last le 7) then
+        1 to $last
+    else if ($current le 4) then
+        (1 to 5, "&#8230;", $last)
+    else if ($current ge $last - 3) then
+        (1, "&#8230;", ($last - 4) to $last)
+    else
+        (1, "&#8230;", ($current - 1) to ($current + 1), "&#8230;", $last)
+};
+
+(:~ Previous/next link with its USWDS sprite arrow. :)
+declare %private function srch:pagination-arrow($context as map(*), $r as map(*), $start as xs:integer, $direction as xs:string) as element(li) {
+    let $previous := $direction eq "previous"
+    let $icon :=
+        <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+            <use href="{$context?context-path}/resources/images/sprite.svg#{if ($previous) then 'navigate_before' else 'navigate_next'}"/>
+        </svg>
+    let $label := <span class="usa-pagination__link-text"><pb-i18n key="{if ($previous) then 'odd.previous' else 'odd.next'}">{if ($previous) then "Previous" else "Next"}</pb-i18n></span>
+    return
+        <li class="usa-pagination__item usa-pagination__arrow">
+            <a href="?{srch:pagination-query-string($r, $start)}" class="usa-pagination__link usa-pagination__{$direction}-page" aria-label="{if ($previous) then 'Previous' else 'Next'} page">
+                { if ($previous) then ($icon, $label) else ($label, $icon) }
+            </a>
+        </li>
+};
+
 declare function srch:pagination($context as map(*)) as element(nav)? {
     let $r := srch:results($context)
     let $perPage := $r?("per-page")
@@ -450,38 +565,23 @@ declare function srch:pagination($context as map(*)) as element(nav)? {
             ()
         else
             let $currentPage := xs:integer(ceiling($r?start div $perPage))
-            let $maxPages := 7
-            let $lower := max((($currentPage - ($maxPages idiv 2)), 1))
-            let $upper := min(($lower + $maxPages - 1, $pageCount))
-            let $lower := max(($upper - $maxPages + 1, 1))
             return
-                <nav aria-label="Search results pagination" class="usa-pagination">
+                <nav aria-label="Search results pagination" class="usa-pagination hsg-search-pagination">
                     <ul class="usa-pagination__list">
                     {
-                        if ($currentPage gt 1) then
-                            <li class="usa-pagination__item usa-pagination__arrow">
-                                <a href="?{srch:pagination-query-string($r, ($currentPage - 2) * $perPage + 1)}" class="usa-pagination__link usa-pagination__previous-page">
-                                    <pb-i18n key="odd.previous">Previous</pb-i18n>
-                                </a>
-                            </li>
-                        else (),
-                        for $i in $lower to $upper
+                        if ($currentPage gt 1) then srch:pagination-arrow($context, $r, ($currentPage - 2) * $perPage + 1, "previous") else (),
+                        for $item in srch:page-window($currentPage, $pageCount)
                         return
-                            if ($i eq $currentPage) then
-                                <li class="usa-pagination__item usa-pagination__page-no">
-                                    <a href="?{srch:pagination-query-string($r, ($i - 1) * $perPage + 1)}" class="usa-pagination__button usa-current" aria-current="page">{$i}</a>
-                                </li>
+                            if ($item instance of xs:string) then
+                                <li class="usa-pagination__item usa-pagination__overflow" role="presentation"><span>{$item}</span></li>
                             else
                                 <li class="usa-pagination__item usa-pagination__page-no">
-                                    <a href="?{srch:pagination-query-string($r, ($i - 1) * $perPage + 1)}" class="usa-pagination__button">{$i}</a>
+                                    <a href="?{srch:pagination-query-string($r, ($item - 1) * $perPage + 1)}" class="usa-pagination__button{if ($item eq $currentPage) then ' usa-current' else ''}" aria-label="Page {$item}">
+                                    { if ($item eq $currentPage) then attribute aria-current { "page" } else () }
+                                    {$item}
+                                    </a>
                                 </li>,
-                        if ($currentPage lt $pageCount) then
-                            <li class="usa-pagination__item usa-pagination__arrow">
-                                <a href="?{srch:pagination-query-string($r, $currentPage * $perPage + 1)}" class="usa-pagination__link usa-pagination__next-page">
-                                    <pb-i18n key="odd.next">Next</pb-i18n>
-                                </a>
-                            </li>
-                        else ()
+                        if ($currentPage lt $pageCount) then srch:pagination-arrow($context, $r, $currentPage * $perPage + 1, "next") else ()
                     }
                     </ul>
                 </nav>
@@ -491,41 +591,136 @@ declare function srch:pagination($context as map(*)) as element(nav)? {
  : landing page -- which has no query to run -- doesn't trigger one just to
  : render checkbox state. :)
 declare function srch:filter-sections($context as map(*)) as element(fieldset) {
-    let $selected := request:get-parameter("within", ())
-    return
-        <fieldset class="usa-fieldset">
-            <legend class="usa-legend">Filter by Section</legend>
-            {
-                for $section in srch:sections()
-                return
-                    <div class="usa-checkbox">
-                        <input class="usa-checkbox__input" type="checkbox" name="within" id="within-{$section?id}" value="{$section?id}">
-                        { if ($section?id = $selected) then attribute checked { "checked" } else () }
-                        </input>
-                        <label class="usa-checkbox__label" for="within-{$section?id}">{$section?label}</label>
-                    </div>
-            }
-        </fieldset>
+    <fieldset class="usa-fieldset">
+        <legend class="usa-legend">Filter by Section</legend>
+        { srch:section-checkboxes((), request:get-parameter("within", ())) }
+    </fieldset>
 };
 
-declare function srch:filter-volumes($context as map(*)) as element(fieldset)? {
+(:~ The section checkboxes shared by the landing form and the results
+ : sidebar. $form names the form the boxes belong to when they are not
+ : inside it (the sidebar sits outside the search form's element). :)
+declare %private function srch:section-checkboxes($form as xs:string?, $selected as xs:string*) as element(div)* {
+    for $section in srch:sections()
+    return
+        <div class="usa-checkbox">
+            <input class="usa-checkbox__input" type="checkbox" name="within" id="within-{$section?id}" value="{$section?id}">
+            {
+                if (exists($form)) then attribute form { $form } else (),
+                if ($section?id = $selected) then attribute checked { "checked" } else ()
+            }
+            </input>
+            <label class="usa-checkbox__label" for="within-{$section?id}">{$section?label}</label>
+        </div>
+};
+
+(: ============== results sidebar ============== :)
+
+declare %private function srch:filter-group($title as xs:string, $hint as xs:string?, $controls as item()*) as element(fieldset) {
+    <fieldset class="usa-fieldset hsg-filter-group">
+        <legend class="hsg-filter-group__title">{$title}</legend>
+        { if (exists($hint)) then <p class="hsg-filter-group__hint">{$hint}</p> else () }
+        { $controls }
+    </fieldset>
+};
+
+declare %private function srch:filter-field($context as map(*), $name as xs:string, $label as xs:string, $type as xs:string) as element(div) {
+    <div class="hsg-filter-field">
+        <label class="usa-label" for="{$name}">{$label}</label>
+        <input class="usa-input" id="{$name}" name="{$name}" type="{$type}" form="{$srch:FORM_ID}" value="{page:parameter($context, $name, '')}"/>
+    </div>
+};
+
+(:~ "Volume 31, Part 1" style labels are long; the design shows the title
+ : without the series name and with the volume abbreviated. Falls back to the
+ : bare id where the volume's own title can't be read. :)
+declare %private function srch:volume-label($volumeId as xs:string) as xs:string {
+    let $title := hsg:publication-title($volumeId)
+    return
+        if (exists($title) and $title ne "") then
+            replace(replace($title, "^Foreign Relations of the United States,\s*", ""), "Volume ", "Vol. ")
+        else
+            $volumeId
+};
+
+(:~ Reset link for the sidebar: back to the keyword alone, dropping every filter. :)
+declare %private function srch:reset-href($context as map(*)) as xs:string {
+    $context?context-path || "/search?q=" || encode-for-uri(normalize-space(page:parameter($context, "q", "")))
+};
+
+(:~
+ : The whole "Filter by" sidebar of the results page: the Sections, Date and
+ : Volumes groups and the Reset / Apply buttons. Every control names the
+ : search form with @form (see $srch:FORM_ID) instead of being nested in it.
+ :)
+declare function srch:filters($context as map(*)) as element(div) {
+    <div class="hsg-search-filters">
+        <h2 class="hsg-search-filters__heading">Filter by</h2>
+        {
+            srch:filter-group("Sections", (), srch:section-checkboxes($srch:FORM_ID, request:get-parameter("within", ()))),
+            srch:filter-group("Date", "Date search is active only if the Historical Documents section is selected", (
+                <div class="hsg-filter-fields">
+                    { srch:filter-field($context, "start-date", "Start date", "date") }
+                    { srch:filter-field($context, "start-time", "Start time", "time") }
+                </div>,
+                <div class="hsg-filter-fields">
+                    { srch:filter-field($context, "end-date", "End date", "date") }
+                    { srch:filter-field($context, "end-time", "End time", "time") }
+                </div>
+            )),
+            srch:filter-volumes($context)
+        }
+        <div class="hsg-search-filters__actions">
+            <a class="usa-button usa-button--outline" href="{srch:reset-href($context)}">Reset filters</a>
+            <button class="usa-button" type="submit" form="{$srch:FORM_ID}">Apply filters</button>
+        </div>
+    </div>
+};
+
+(:~ "Sort by" select for the heading row of the results. It belongs to the
+ : search form; resources/scripts/search-results.js submits it on change. :)
+declare function srch:sort-select($context as map(*)) as element(div) {
+    let $current := srch:read-params($context)?("sort-by")
+    return
+        <div class="hsg-sort">
+            <label class="usa-label" for="sort-by">Sort by</label>
+            <select class="usa-select" id="sort-by" name="sort-by" form="{$srch:FORM_ID}" data-submit-on-change="">
+            {
+                for $option in (
+                    map { "value": "relevance", "label": "Relevance" },
+                    map { "value": "date-asc", "label": "Dates (oldest first)" },
+                    map { "value": "date-desc", "label": "Dates (most recent first)" }
+                )
+                return
+                    <option value="{$option?value}">
+                    { if ($option?value eq $current) then attribute selected { "selected" } else () }
+                    {$option?label}
+                    </option>
+            }
+            </select>
+        </div>
+};
+
+(:~ The volumes the current hits fall in, as checkboxes. Absent when nothing
+ : matched or no hit is a FRUS volume. The label is clamped to two lines by
+ : the theme; the full title stays available as the tooltip. :)
+declare %private function srch:filter-volumes($context as map(*)) as element(fieldset)? {
     let $r := srch:results($context)
     return
         if (empty($r?("results-vol-ids"))) then
             ()
         else
-            <fieldset class="usa-fieldset">
-                <legend class="usa-legend">Filter by Volume</legend>
-                {
-                    for $volId in $r?("results-vol-ids")
-                    order by $volId
-                    return
-                        <div class="usa-checkbox">
-                            <input class="usa-checkbox__input" type="checkbox" name="volume-id" id="volume-{$volId}" value="{$volId}">
-                            { if ($volId = $r?("volume-id")) then attribute checked { "checked" } else () }
-                            </input>
-                            <label class="usa-checkbox__label" for="volume-{$volId}">{$volId}</label>
-                        </div>
-                }
-            </fieldset>
+            srch:filter-group("Volumes", "Volume search is active only if the Historical Documents section is selected",
+                for $volId in sort($r?("results-vol-ids"))
+                let $label := srch:volume-label($volId)
+                return
+                    <div class="usa-checkbox">
+                        <input class="usa-checkbox__input" type="checkbox" name="volume-id" id="volume-{$volId}" value="{$volId}" form="{$srch:FORM_ID}">
+                        { if ($volId = $r?("volume-id")) then attribute checked { "checked" } else () }
+                        </input>
+                        <label class="usa-checkbox__label" for="volume-{$volId}" title="{hsg:publication-title($volId)}">
+                            <span class="hsg-filter-group__label-text">{$label}</span>
+                        </label>
+                    </div>
+            )
 };

@@ -7,6 +7,11 @@
             },
             "extends": "templates/layouts/hsg-content.html"
         },
+        "script": {
+            "custom": [
+                "resources/scripts/search-results.js"
+            ]
+        },
         "theme": {
             "layout": {
                 "before": {
@@ -31,9 +36,16 @@
     </li>
     [% endtemplate %]
 
-    <div class="usa-prose">
-        <h1><pb-i18n key="search.results">Search results</pb-i18n></h1>
-        <form class="usa-search usa-search--big" role="search" method="get" action="[[ $context-path ]]/search">
+    <div class="usa-prose hsg-search-results">
+        <h1 class="usa-sr-only"><pb-i18n key="search.results">Search results</pb-i18n></h1>
+
+        <p>Read these <a href="[[ $context-path ]]/search/tips">Search Tips</a> to learn all about the search engine's keyword, date filter, volume filter, and sort functions&#8212;as well as some of the search engine's limitations.</p>
+
+        [# The one search form: the sidebar's filters and the Sort by select
+           sit outside it in the markup and join it through their form
+           attribute (see $srch:FORM_ID), so every submit carries keyword,
+           filters and sort together. #]
+        <form class="usa-search usa-search--big hsg-search-form" id="hsg-search" role="search" method="get" action="[[ $context-path ]]/search">
             <label class="usa-sr-only" for="search-field">Search</label>
             <input class="usa-input" id="search-field" type="search" name="q" value="[[ page:parameter($context, 'q', '') ]]"/>
             <button class="usa-button" type="submit">
@@ -41,22 +53,17 @@
             </button>
         </form>
 
+        <div class="hsg-results-header">
+            <h2 class="hsg-results-header__title">Results</h2>
+            [[ srch:sort-select($context) ]]
+        </div>
+
         [[ srch:results-summary($context) ]]
-        [[ srch:pagination($context) ]]
         [[ srch:results-list($context) ]]
         [[ srch:pagination($context) ]]
     </div>
 
     [% template before %]
-    <div class="usa-prose">
-        <h2>Refine Results</h2>
-        <form method="get" action="[[ $context-path ]]/search">
-            <input type="hidden" name="q" value="[[ page:parameter($context, 'q', '') ]]"/>
-            [[ srch:filter-sections($context) ]]
-            [[ srch:filter-volumes($context) ]]
-            <button class="usa-button" type="submit">Apply Filters</button>
-            <a class="usa-button usa-button--outline" href="[[ $context-path ]]/search?q=[[ page:parameter($context, 'q', '') ]]">Reset</a>
-        </form>
-    </div>
+    [[ srch:filters($context) ]]
     [% endtemplate %]
 </template>
