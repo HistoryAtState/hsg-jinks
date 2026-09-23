@@ -19,9 +19,12 @@
 :root {
     /* Colours */
     --hsg-color-muted: #565c65;                 /* USWDS gray-cool-60, theme-color-base */
+    --hsg-color-link: #2c608a;                  /* USWDS blue-70v, theme-color-primary-dark */
     --hsg-color-link-hover: #1a4480;            /* USWDS blue-warm-70v, theme-color-primary-dark */
     --hsg-color-rule: #dfe1e2;                  /* USWDS gray-cool-10, theme-color-base-lighter */
     --hsg-color-accent: #005ea2;                /* USWDS blue-60v, theme-color-primary */
+    --hsg-color-text: #2e2e2e;                   /* USWDS gray-80, theme-text-color */
+    --hsg-color-background-muted: #f0f0f0;         /* USWDS gray-5, theme-color-base-lightest */
 
     /* External reference link confirmed dead (404/redirected-away, #1095).
        Flags it visually rather than silently dropping or swapping it; a
@@ -823,13 +826,19 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     left: 0;
     font-weight: 700;
 }
-/* Historical Documents section landing: administration cards (OP#1214).
-   The reference site's thumbnail grid rebuilt as USWDS cards. The compiled
-   CSS carries no responsive grid-col utilities, so the card group is sized
-   with its own auto-fill grid instead of per-card grid classes. Portraits
-   are small legacy assets (89x76) served from static.history.state.gov;
-   render them at natural size, centered, rather than stretched to the card
-   width. */
+/* Historical Documents section landing: administration cards (OP#1214),
+   restyled to match the Figma design (OP#1404): a circular portrait, the
+   presidency name as an italic accent-colored link with "Administration"
+   broken out below it as a plain label, and the coverage dates in a
+   usa-tag pill. The compiled CSS carries no responsive grid-col utilities,
+   so the card group is sized with its own auto-fill grid instead of
+   per-card grid classes.
+
+   `.usa-card` itself (not just its `.usa-card__container`) needs an
+   explicit height: 100% (OP#1404): align-items: stretch alone leaves a
+   shorter card unstretched when it sits in the grid's last, incomplete row
+   (27 cards over 4 columns) — a reproducible Chromium stretch bug for this
+   layout, not a spacing/content issue. */
 .hsg-admin-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
@@ -842,6 +851,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-bottom: 0;
     max-width: none;
     width: auto;
+    height: 100%;
 }
 
 .hsg-admin-cards .usa-card__container {
@@ -850,8 +860,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-admin-cards .usa-card__media {
-    text-align: center;
-    padding-top: 1rem;
+    padding: 1rem 1rem 0;
 }
 
 .hsg-admin-cards .usa-card__img {
@@ -860,18 +869,39 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-admin-cards .usa-card__img img {
-    width: 89px;
-    height: 76px;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
     object-fit: cover;
 }
 
 .hsg-admin-cards .usa-card__heading {
-    font-size: 1.05rem;
-    text-align: center;
+    font-size: 1.25rem;
+    font-style: italic;
+    font-weight: 600;
+    line-height: 1.2;
 }
 
-.hsg-admin-cards .usa-card__body {
-    text-align: center;
+.hsg-admin-cards .usa-card__heading a {
+    color: var(--hsg-color-link);
+    text-decoration: none;
+}
+
+.hsg-admin-cards .usa-card__heading a:hover,
+.hsg-admin-cards .usa-card__heading a:focus {
+    text-decoration: underline;
+}
+
+.hsg-admin-cards .hsg-admin-card__type {
+    margin: 0.25rem 0 0;
+    font-style: normal;
+    font-weight: 400;
+    color: var(--hsg-color-text);
+}
+
+.hsg-admin-cards .usa-tag {
+    background-color: var(--hsg-color-background-muted);
+    color: var(--hsg-color-text);
 }
 
 /* Administration page volume listing (OP#1214). */

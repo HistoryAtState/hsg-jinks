@@ -387,6 +387,7 @@ declare function hsg:administration-cards($context as map(*)) {
     for $category in hsg:administrations()/tei:category
     for $presidency in $category/tei:catDesc[tei:ptr[@type = 'portrait']]
     let $name := normalize-space($presidency/tei:term)
+    let $short-name := replace($name, ' Administration$', '')
     let $dates := normalize-space($presidency/tei:date[@type = 'coverage'])
     return
         <li class="usa-card hsg-admin-card">
@@ -394,16 +395,17 @@ declare function hsg:administration-cards($context as map(*)) {
                 <div class="usa-card__media">
                     <div class="usa-card__img">
                         <img src="{$presidency/tei:ptr[@type = 'portrait']/@target}"
-                            alt="{replace($name, ' Administration$', '')}" loading="lazy"/>
+                            alt="{$short-name}" loading="lazy"/>
                     </div>
                 </div>
                 <div class="usa-card__header">
                     <h2 class="usa-card__heading">
-                        <a href="{$context?context-path}/historicaldocuments/{$category/@xml:id}">{$name}</a>
+                        <a href="{$context?context-path}/historicaldocuments/{$category/@xml:id}">{$short-name}</a>
                     </h2>
+                    <p class="hsg-admin-card__type">Administration</p>
                 </div>
                 <div class="usa-card__body">
-                    <p>{$dates}</p>
+                    <span class="usa-tag usa-tag--big">{$dates}</span>
                 </div>
             </div>
         </li>
