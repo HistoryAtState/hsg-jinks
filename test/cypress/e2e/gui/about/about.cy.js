@@ -71,6 +71,12 @@ describe("FAQ: accordion landing, section, prev/next, exact-division guard", () 
         });
     });
 
+    it("resolves the $app link placeholders in the answers against the app root", () => {
+        cy.visit("about/faq");
+        cy.get(".hsg-faq a[href*='$app']").should("not.exist");
+        cy.get(".hsg-faq a[href$='/historicaldocuments/about-frus']").should("exist");
+    });
+
     it("interior page still opens and its sidebar marks the section current", () => {
         cy.visit("about/faq/what-is-frus");
         cy.get("main h1").should("contain.text", "Foreign Relations of the United States");
