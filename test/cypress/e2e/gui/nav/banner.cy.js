@@ -1,31 +1,72 @@
-// Official U.S. government banner (OP#1050): the standard USWDS banner,
-// wired as an opt-in via theme.banner in config.json (markup from the
-// theme-sourced templates/banner.html, included inside the .usa-header
-// root; single-root constraint documented in templates/menu.html).
+// Official U.S. government banner (OP#1050, made site-wide including error
+// pages in OP#1412): the standard USWDS banner, wired as an opt-in via
+// theme.banner in config.json (markup from the theme-sourced
+// templates/banner.html). Normal pages pick it up via templates/menu.html,
+// which every page extending templates/layouts/base.html includes; the
+// three standalone error templates (error-404.html, error-400.html,
+// error-page.html) don't extend base.html, so each carries its own
+// [% include "templates/banner.html" %] -- see the comment beside each one.
+// error-page.html (the generic template-compile-error diagnostics page) has
+// no stable URL to trigger it in a test and so isn't exercised below; the
+// 404 and 400 pages below are the ones with a reliable trigger.
 //
 // The spec follows the flag rather than hard-coding one state: config.json
 // is what gets built and deployed, so it is the source of truth for
-// whether the banner must be visible or absent.
+// whether the banner must be visible or absent. OP#1412 requires it on
+// *every* page, current and future, so this file asserts presence/absence
+// across a representative sample of page kinds (mirroring the sample
+// footer.cy.js uses for the same "site-wide chrome" claim) rather than one
+// page, plus both error-page classes that don't go through base.html.
 
 const { theme } = require("../../../../../config.json");
 const bannerEnabled = theme.banner === true;
 
+const VOLUME = "historicaldocuments/frus1981-88v05";
+
+// Representative sample of normal (200-status) page kinds -- new page
+// templates extend templates/layouts/base.html by default, so they inherit
+// the banner automatically; this is a spot check, not the enforcement point.
+const NORMAL_PAGES = [
+    ["landing", "index.html"],
+    ["search", "search"],
+    ["about", "about"],
+    ["volume landing", VOLUME],
+    ["chapter", `${VOLUME}/ch1`],
+    ["document", `${VOLUME}/d1`],
+];
+
+// The standalone error templates: each must carry its own banner include
+// (see comment above) since none of them extend base.html.
+const ERROR_PAGES = [
+    ["404", { url: "asdfg", failOnStatusCode: false }],
+    ["400", { url: "search?q=%22unbalanced", failOnStatusCode: false }],
+];
+
 if (bannerEnabled) {
     describe("government banner (enabled in config.json)", () => {
+        NORMAL_PAGES.forEach(([kind, path]) => {
+            it(`renders on the ${kind} page`, () => {
+                cy.visit(path);
+                cy.get(".usa-banner .usa-banner__header-text", { timeout: 15000 })
+                    .should("contain.text", "An official website of the United States government");
+            });
+        });
+
+        ERROR_PAGES.forEach(([status, visitOptions]) => {
+            it(`renders on the ${status} error page`, () => {
+                cy.visit(visitOptions);
+                cy.get(".usa-banner .usa-banner__header-text", { timeout: 15000 })
+                    .should("contain.text", "An official website of the United States government");
+            });
+        });
+
         it("renders above the navbar on the landing page", () => {
             cy.visit("index.html");
-            cy.get(".usa-banner .usa-banner__header-text", { timeout: 15000 })
-                .should("contain.text", "An official website of the United States government");
             cy.get(".usa-banner").then(($b) => {
                 cy.get(".usa-navbar").then(($n) => {
                     expect($b[0].getBoundingClientRect().top).to.be.lessThan($n[0].getBoundingClientRect().top);
                 });
             });
-        });
-
-        it("renders on content pages too", () => {
-            cy.visit("historicaldocuments/citing-frus");
-            cy.get(".usa-banner", { timeout: 15000 }).should("exist");
         });
 
         it("expands the guidance accordion", () => {
@@ -37,16 +78,20 @@ if (bannerEnabled) {
     });
 } else {
     describe("government banner (disabled in config.json)", () => {
-        it("does not render on the landing page", () => {
-            cy.visit("index.html");
-            cy.get(".usa-header", { timeout: 15000 }).should("exist");
-            cy.get(".usa-banner").should("not.exist");
+        NORMAL_PAGES.forEach(([kind, path]) => {
+            it(`does not render on the ${kind} page`, () => {
+                cy.visit(path);
+                cy.get("body", { timeout: 15000 }).should("exist");
+                cy.get(".usa-banner").should("not.exist");
+            });
         });
 
-        it("does not render on content pages either", () => {
-            cy.visit("historicaldocuments/citing-frus");
-            cy.get(".usa-header", { timeout: 15000 }).should("exist");
-            cy.get(".usa-banner").should("not.exist");
+        ERROR_PAGES.forEach(([status, visitOptions]) => {
+            it(`does not render on the ${status} error page`, () => {
+                cy.visit(visitOptions);
+                cy.get("body", { timeout: 15000 }).should("exist");
+                cy.get(".usa-banner").should("not.exist");
+            });
         });
     });
 }

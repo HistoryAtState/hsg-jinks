@@ -1,6 +1,6 @@
 {
   "theme" : {
-    "banner" : false,
+    "banner" : true,
     "identifier" : {
       "enabled" : false
     },

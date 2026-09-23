@@ -139,7 +139,7 @@ h4 {
 
 :host(pb-lang) ul {
     border-radius: 8px;
-    background: var(--White-White, #FFF);
+    background: var(--jinks-color-white);
     box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0.15);
 }
 
