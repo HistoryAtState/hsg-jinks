@@ -76,6 +76,56 @@ declare function about:monograph-toc($context as map(*), $doc as document-node()
     about:monograph-toc-level($context, $doc/tei:TEI/tei:text/(tei:front | tei:body | tei:back)/tei:div, $route, $current, "usa-sidenav")
 };
 
+(:~
+ : Body of the TOC page (aboutapi:monograph-toc). HAC keeps the sidenav list
+ : of links to its interior pages; the FAQ is a single flat list of
+ : question/answer pairs, so it shows every answer in place as an accordion
+ : instead of linking out to one page per question (OP#1416). Its interior
+ : routes stay live regardless: search results and old links still target them.
+ :)
+declare function about:monograph-landing($context as map(*), $publication as xs:string) as element() {
+    let $doc := about:monograph-doc($publication)
+    return
+        if ($publication = "faq") then
+            about:faq-accordion($doc)
+        else
+            about:monograph-toc($context, $doc, $publication, ())
+};
+
+(:~
+ : USWDS accordion (designsystem.digital.gov/components/accordion), one item
+ : per FAQ division: the question is the button, the answer the collapsible
+ : panel. Toggling is wired site-wide by uswds.min.js (uswds-blocks.html), so
+ : the markup only has to follow the component's contract: a button whose
+ : aria-controls names a panel, with the panel hidden unless its button reads
+ : aria-expanded="true". The first item starts open, as in the Figma design.
+ :
+ : The answer is the division rendered by the same ODD mode the interior page
+ : uses, minus the heading (now the button label) and the wrapping section's
+ : id (the panel id, derived from it, takes over that job).
+ :)
+declare function about:faq-accordion($doc as document-node()) as element(div) {
+    <div class="usa-accordion hsg-faq">
+    {
+        for $division at $pos in $doc/tei:TEI/tei:text/(tei:front | tei:body | tei:back)/tei:div[@xml:id]
+        let $panelId := "faq-" || $division/@xml:id
+        let $expanded := $pos = 1
+        let $answer := page:transform($division, map { "mode": "monograph-section" })
+        return (
+            <h2 class="usa-accordion__heading">
+                <button type="button" class="usa-accordion__button" aria-expanded="{$expanded}" aria-controls="{$panelId}">
+                    {normalize-space($division/tei:head[1])}
+                </button>
+            </h2>,
+            <div id="{$panelId}" class="usa-accordion__content usa-prose">
+                {if (not($expanded)) then attribute hidden {"hidden"} else ()}
+                {$answer/descendant-or-self::section[1]/*[not(contains-token(@class, "tei-head"))]}
+            </div>
+        )
+    }
+    </div>
+};
+
 declare %private function about:monograph-toc-level($context as map(*), $divisions as element(tei:div)*, $route as xs:string, $current as xs:string?, $listClass as xs:string) as element(ul) {
     <ul class="{$listClass}">
     {
