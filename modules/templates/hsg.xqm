@@ -410,6 +410,47 @@ declare function hsg:administration-cards($context as map(*)) {
 };
 
 (:~
+ : Cards for the "Historical documents" nav band mounted by
+ : templates/layouts/historicaldocuments-content.html (OP#1400). Same 8
+ : destinations as templates/pages/historicaldocuments/sidebar.html's
+ : usa-sidenav list -- kept as a second hardcoded copy here because sidebar.html
+ : itself is plain hardcoded markup with no shared data source; if either
+ : list changes, check the other. Order matches the Figma design, which
+ : differs slightly from sidebar.html's order. The last card links back to
+ : the section root (sidebar.html's "Foreign Relations of the United
+ : States" target) under the new design's "All Historical Documents" label
+ : and gets a highlight modifier class for its CTA treatment.
+ :)
+declare function hsg:historicaldocuments-nav-cards($context as map(*)) {
+    let $root := $context?context-path || "/historicaldocuments"
+    for $item in (
+        map { "label": "About the Foreign Relations Series", "href": $root || "/about-frus" },
+        map { "label": "Status of the Foreign Relations Series", "href": $root || "/status-of-the-series" },
+        map { "label": "History of the Foreign Relations Series", "href": $root || "/frus-history" },
+        map { "label": "Other Electronic Resources", "href": $root || "/other-electronic-resources" },
+        map { "label": "Guide to Sources on Vietnam, 1969-1975", "href": $root || "/guide-to-sources-on-vietnam-1969-1975" },
+        map { "label": "Citing the Foreign Relations series", "href": $root || "/citing-frus" },
+        map { "label": "Foreign Relations Ebooks", "href": $root || "/ebooks" },
+        map { "label": "All Historical Documents", "href": $root, "highlight": true() }
+    )
+    return
+        <li class="usa-card hsg-historicaldocuments-nav-card{if ($item?highlight) then ' hsg-historicaldocuments-nav-card--highlight' else ''}">
+            <div class="usa-card__container">
+                <div class="usa-card__header">
+                    <h3 class="usa-card__heading">
+                        <a href="{$item?href}">{$item?label}</a>
+                    </h3>
+                </div>
+                <div class="usa-card__body">
+                    <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+                        <use href="{$context?context-path}/resources/images/sprite.svg#arrow_forward"/>
+                    </svg>
+                </div>
+            </div>
+        </li>
+};
+
+(:~
  : Administration page heading, reference parity with hsg-shell's
  : frus:administration-name: "Ronald Reagan Administration (1981-1989)" with
  : the term-of-office dates, not the coverage dates the landing cards show.

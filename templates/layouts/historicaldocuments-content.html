@@ -1,0 +1,52 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
+            },
+            "extends": "templates/layouts/hsg-content.html"
+        }
+    }
+    ---
+    [# Historical Documents section nav band (OP#1400): every page under
+       /historicaldocuments and /historicaldocuments/{volume} extends this
+       layout instead of hsg-content.html directly, so the band renders once
+       here rather than being copy-pasted into 21 page templates. The
+       section landing page and search deliberately stay on hsg-content.html
+       and never pick this up.
+
+       The band must be full-bleed (100vw) like the real footer, not boxed
+       to the content column - but everything inside [% block content %] and
+       below-content lives inside hsg-content.html's <main>, which
+       .sticky-layout confines to the grid's "content" column (only
+       .page-header and footer, as DIRECT children of .sticky-layout, get
+       the width:100vw breakout - see resources/css/layout.css). So this
+       overrides `footer` instead (template!, replacing hsg-content.html's
+       own, to control ordering deterministically rather than rely on
+       multi-template concatenation order), wrapping the band and the real
+       footer together in one element that takes over the "footer" grid
+       area - two separate top-level items both claiming grid-area: footer
+       would just overlap. #]
+    [% template! footer %]
+    <div class="hsg-historicaldocuments-footer">
+        <section class="hsg-historicaldocuments-nav" aria-label="Historical documents">
+            <div class="grid-container">
+                <h2><pb-i18n key="historicaldocuments.nav-heading">Historical documents</pb-i18n></h2>
+                <ul class="usa-card-group hsg-historicaldocuments-nav-cards">
+                    [[ hsg:historicaldocuments-nav-cards($context) ]]
+                </ul>
+            </div>
+        </section>
+        [% include "templates/footer.html" %]
+    </div>
+    [% endtemplate %]
+
+    [# Pass-through: this layout only supplies a `footer` override above, so
+       the incoming page's real above-content/content blocks must be
+       re-declared here as loose content, or this level's own (empty)
+       content would replace them per jinks-templates' multi-level
+       inheritance rules (see jinks-templates README, "How it works"). #]
+    [% block above-content %][% endblock %]
+    [% block content %][% endblock %]
+</template>

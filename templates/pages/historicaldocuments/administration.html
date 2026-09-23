@@ -5,7 +5,7 @@
             "modules": {
                 "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
             },
-            "extends": "templates/layouts/hsg-content.html"
+            "extends": "templates/layouts/historicaldocuments-content.html"
         },
         "theme": {
             "layout": {
@@ -41,8 +41,4 @@
         [[ hsg:administration-group-info($context) ]]
         [[ hsg:administration-volumes($context) ]]
     </div>
-
-    [% template before %]
-    [% include "templates/pages/historicaldocuments/sidebar.html" %]
-    [% endtemplate %]
 </template>

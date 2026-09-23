@@ -5,7 +5,7 @@
             "modules": {
                 "https://history.state.gov/ns/templates/frus-history": { "at": "modules/templates/frus-history.xqm", "prefix": "fh" }
             },
-            "extends": "templates/layouts/hsg-content.html"
+            "extends": "templates/layouts/historicaldocuments-content.html"
         },
         "theme": {
             "layout": {
@@ -39,9 +39,6 @@
 
     [% template before %]
     [[ fh:article-sidebar($context) ]]
-    <div class="hsg-panel hsg-frus__section-nav">
-        [% include "templates/pages/historicaldocuments/sidebar.html" %]
-    </div>
     [% endtemplate %]
 
     <div class="usa-prose" itemscope="itemscope" itemtype="http://schema.org/Article">

@@ -5,7 +5,7 @@
             "modules": {
                 "https://history.state.gov/ns/templates/serial-set": { "at": "modules/templates/serial-set.xqm", "prefix": "sset" }
             },
-            "extends": "templates/layouts/hsg-content.html"
+            "extends": "templates/layouts/historicaldocuments-content.html"
         },
         "theme": {
             "layout": {
@@ -60,7 +60,4 @@
                 [[ sset:bibls-count($context) ]] sources</a>.</p>
         [[ sset:region-subject-list($context) ]]
     </div>
-    [% template before %]
-    [% include "templates/pages/historicaldocuments/sidebar.html" %]
-    [% endtemplate %]
 </template>

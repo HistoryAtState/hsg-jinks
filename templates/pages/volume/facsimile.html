@@ -5,7 +5,7 @@
             "modules": {
                 "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
             },
-            "extends": "templates/layouts/hsg-content.html"
+            "extends": "templates/layouts/historicaldocuments-content.html"
         }
     }
     ---
@@ -35,11 +35,7 @@
 
     [% template after %]
     <!-- The documents printed on this page (reference parity with
-         hsg-shell's docs-on-page aside), then the same section navigation
-         partial the interior pages mount in their right aside. -->
+         hsg-shell's docs-on-page aside). -->
     [[ hsg:facsimile-docs($context) ]]
-    <div class="hsg-panel hsg-frus__section-nav">
-        [% include "templates/pages/historicaldocuments/sidebar.html" %]
-    </div>
     [% endtemplate %]
 </template>
