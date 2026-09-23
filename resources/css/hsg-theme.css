@@ -1135,3 +1135,16 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     max-width: 100%;
     margin: 0 auto;
 }
+
+/* OP#1414: Figma (node 4800-46154, "World Wide Diplomatic Archives Index",
+   and confirmed against About Us / Developer Resources / Open Government
+   Initiative) sets serif body copy, not just serif headings, for
+   long-form prose -- unlike the sans-body .usa-prose default USWDS
+   compiles. Applies to every .usa-prose block sitewide, not just
+   countries, since every content-like section's design calls for it.
+   Merriweather Web is the same serif stack the USWDS theme profile
+   compiles for "serif"-role headings elsewhere (resources/sass/
+   palette-navy.scss's $theme-font-type-serif). */
+.usa-prose {
+    font-family: "Merriweather Web", Georgia, Cambria, "Times New Roman", Times, serif;
+}
