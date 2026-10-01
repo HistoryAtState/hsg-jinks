@@ -37,12 +37,49 @@ describe("About Us section landing page", () => {
     });
 });
 
-describe("FAQ: TOC, section, prev/next, exact-division guard", () => {
-    it("TOC lists questions, opens a section, and the sidebar marks it current", () => {
+describe("FAQ: accordion landing, section, prev/next, exact-division guard", () => {
+    // OP#1416: the landing page is a USWDS accordion with the answers in
+    // place, not a sidenav list linking out to one page per question. The
+    // interior pages stay live (search results link to them).
+    it("lists every question as an accordion button controlling an answer on the same page", () => {
         cy.visit("about/faq");
         cy.get("main h1").should("contain.text", "Frequently Asked Questions");
-        cy.contains(".usa-sidenav a", "Foreign Relations of the United States").click();
-        cy.location("pathname").should("match", /faq\/what-is-frus$/);
+        cy.get("main .usa-sidenav").should("not.exist");
+        // other-publications is append-only upstream: lower bound, not an exact count
+        cy.get(".hsg-faq.usa-accordion .usa-accordion__button").should("have.length.at.least", 5);
+        cy.get(".hsg-faq .usa-accordion__button").each(($button) => {
+            cy.get(`#${$button.attr("aria-controls")}.usa-accordion__content`).should("exist");
+        });
+    });
+
+    it("opens the first answer, and opening another closes it", () => {
+        cy.visit("about/faq");
+        cy.get(".hsg-faq .usa-accordion__button").first().should("have.attr", "aria-expanded", "true");
+        cy.get("#faq-state-records").should("be.visible");
+        cy.get("#faq-what-is-frus").should("not.be.visible");
+
+        cy.contains(".hsg-faq .usa-accordion__button", "Foreign Relations of the United States").click();
+        cy.get("#faq-what-is-frus").should("be.visible").find("a").should("exist");
+        cy.get("#faq-state-records").should("not.be.visible");
+    });
+
+    it("shows the answer without repeating the question as a heading inside it", () => {
+        cy.visit("about/faq");
+        cy.get("#faq-state-records").within(() => {
+            cy.get("p").should("have.length.at.least", 1);
+            cy.get(".tei-head").should("not.exist");
+        });
+    });
+
+    it("resolves the $app link placeholders in the answers against the app root", () => {
+        cy.visit("about/faq");
+        cy.get(".hsg-faq a[href*='$app']").should("not.exist");
+        cy.get(".hsg-faq a[href$='/historicaldocuments/about-frus']").should("exist");
+    });
+
+    it("interior page still opens and its sidebar marks the section current", () => {
+        cy.visit("about/faq/what-is-frus");
+        cy.get("main h1").should("contain.text", "Foreign Relations of the United States");
         cy.get("nav[aria-label='Side navigation'] a.usa-current").should("exist");
     });
 

@@ -40,7 +40,7 @@
 
     <div class="section-landing usa-prose">
         <h1>[[ about:monograph-title($context?request?parameters?publication) ]]</h1>
-        [[ about:monograph-toc($context, about:monograph-doc($context?request?parameters?publication), $context?request?parameters?publication, ()) ]]
+        [[ about:monograph-landing($context, $context?request?parameters?publication) ]]
     </div>
 
     [% template before %]

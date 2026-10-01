@@ -488,6 +488,15 @@
                 <model predicate="global:volume-id($parameters, .) != '' and starts-with(@target, '#')" behaviour="link">
                     <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || global:volume-id($parameters, .) || '/' || substring-after(@target, '#')"/>
                 </model>
+                <model predicate="starts-with(@target, '$app/')" behaviour="link">
+                    <desc>The other-publications FAQ (and any other document
+                        ported from hsg-shell) encodes internal links as
+                        "$app/..." targets, which hsg-shell's app:fix-links
+                        rewrote to its own app root at render time. Same here:
+                        the placeholder is replaced by the context path
+                        (OP#1416).</desc>
+                    <param name="uri" value="$parameters?context-path || substring-after(@target, '$app')"/>
+                </model>
                 <model predicate="contains(base-uri(root(.)), '/data/content/') and not(matches(@target, '^([a-z][a-z0-9+.-]*:|#|/)'))" behaviour="link">
                     <desc>App-internal links in the app-owned content pages
                         (data/content, OP#1313): targets are app-root-relative
