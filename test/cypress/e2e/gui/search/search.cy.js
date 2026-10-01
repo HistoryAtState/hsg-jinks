@@ -162,3 +162,143 @@ describe("legacy FRUS date deep link (OP#1185)", () => {
         cy.contains(".usa-prose", "between June 12, 1985 and June 12, 1985");
     });
 });
+
+// OP#1420 "Style Search page like the Design": the results page's filter
+// panel, cards and controls. Asserts structure and behaviour, not pixels --
+// the frozen frus-data-jinks baseline supplies the FRUS hits (1989-92 vol.
+// XXXI, document d82, dated 1990-02-23); everything else stays at the
+// "at least" pattern.
+describe("results page: filter panel, cards and controls (OP#1420)", () => {
+    beforeEach(() => {
+        // the filter panel is a sidebar column, hidden below the desktop layout
+        cy.viewport(1440, 900);
+    });
+
+    it("the filter panel has boxed Sections, Date and Volumes groups with Reset and Apply", () => {
+        cy.visit("search?q=salt");
+        cy.get(".hsg-search-filters__heading").should("have.text", "Filter by");
+        cy.get(".hsg-filter-group__title").then(($titles) => {
+            expect([...$titles].map((t) => t.textContent.trim())).to.deep.equal(["Sections", "Date", "Volumes"]);
+        });
+        cy.get(".hsg-filter-group input[name='within']").should("have.length", 7);
+        cy.get("#start-date").should("have.attr", "type", "date");
+        cy.get("#start-time").should("have.attr", "type", "time");
+        cy.get("#end-date").should("have.attr", "type", "date");
+        cy.get("#end-time").should("have.attr", "type", "time");
+        cy.get("input[name='volume-id']").should("have.length.at.least", 1);
+        cy.contains("a.usa-button", "Reset filters").should("be.visible");
+        cy.contains("button.usa-button", "Apply filters").should("be.visible");
+    });
+
+    it("volume checkboxes are labelled with the volume title, not the bare id", () => {
+        cy.visit("search?q=salt");
+        cy.get("label[for^='volume-']").each(($label) => {
+            expect($label.text().trim()).to.not.match(/^frus\d/);
+        });
+        cy.contains("label[for^='volume-']", "Vol. XXXI");
+    });
+
+    it("each hit is a white card with a heading link", () => {
+        cy.visit("search?q=salt");
+        cy.get(".hsg-results .usa-collection__item").should("have.length.at.least", 5).each(($card) => {
+            expect($card.find(".usa-collection__heading a").attr("href")).to.be.a("string").and.not.equal("");
+            expect(getComputedStyle($card[0]).backgroundColor).to.equal("rgb(255, 255, 255)");
+        });
+    });
+
+    it("a historical-document card carries place/date chips, the recorded and encoded date, a highlighted keyword and a facsimile link", () => {
+        cy.visit("search?q=salt&within=documents&volume-id=frus1989-92v31");
+        cy.contains(".usa-collection__item", "82. Memorandum From Senator Warner to President Bush").within(() => {
+            cy.get(".usa-tag").then(($tags) => {
+                expect([...$tags].map((t) => t.textContent.trim())).to.deep.equal(["Washington", "February 23, 1990"]);
+            });
+            cy.contains("dt", "Recorded Date").next("dd").should("have.text", "February 23, 1990");
+            cy.contains("dt", "Recorded Location").next("dd").should("have.text", "Washington");
+            cy.contains("dt", "Encoded Date").next("dd").find("code").should("have.text", 'when="1990-02-23"');
+            cy.get(".hsg-snippet .hi").first().should("have.css", "background-color", "rgb(255, 240, 0)");
+            cy.get("a.hsg-result__facsimile").should("have.attr", "href").and("match", /\/historicaldocuments\/frus1989-92v31\/pg_/);
+        });
+    });
+
+    it("the facsimile link opens the page scan view", () => {
+        cy.visit("search?q=salt&within=documents&volume-id=frus1989-92v31");
+        cy.get("a.hsg-result__facsimile").first().then(($a) => {
+            cy.request($a.prop("href")).its("status").should("eq", 200);
+        });
+    });
+
+    it("a FRUS division that is not a historical document has no date chips or recorded-date rows", () => {
+        cy.visit("search?q=salt&within=documents&volume-id=frus1989-92v31");
+        cy.contains(".usa-collection__item", "Abbreviations and Terms").within(() => {
+            cy.get(".usa-tag").should("not.exist");
+            cy.contains("dt", "Recorded Date").should("not.exist");
+            cy.contains("dt", "Resource ID").should("exist");
+        });
+    });
+
+    it("the summary reports how long the search took", () => {
+        cy.visit("search?q=salt");
+        cy.get(".hsg-results-summary").invoke("text").should("match", /Search completed in \d+\.\d{3}s\./);
+    });
+
+    it("Apply filters keeps the keyword and adds the ticked section", () => {
+        cy.visit("search?q=salt");
+        cy.get("#within-department").check({ force: true });
+        cy.contains("button", "Apply filters").click();
+        cy.location("search").should("include", "q=salt").and("include", "within=department");
+        cy.get("#search-field").should("have.value", "salt");
+        cy.get("#within-department").should("be.checked");
+    });
+
+    it("a new keyword search keeps the ticked filters", () => {
+        cy.visit("search?q=salt&within=department");
+        cy.get("#search-field").clear().type("cuba{enter}");
+        cy.location("search").should("include", "q=cuba").and("include", "within=department");
+    });
+
+    it("Apply filters applies a date range to historical documents", () => {
+        cy.visit("search?q=salt");
+        cy.get("#within-documents").check({ force: true });
+        cy.get("#start-date").type("1990-02-23");
+        cy.get("#end-date").type("1990-02-23");
+        cy.contains("button", "Apply filters").click();
+        cy.location("search").should("include", "start-date=1990-02-23").and("include", "end-date=1990-02-23");
+        cy.contains(".hsg-results-summary", "between February 23, 1990 and February 23, 1990");
+        cy.get("#start-date").should("have.value", "1990-02-23");
+    });
+
+    it("Reset filters goes back to the keyword alone", () => {
+        cy.visit("search?q=salt&within=department&sort-by=date-asc");
+        cy.contains("a", "Reset filters").click();
+        cy.location("search").should("equal", "?q=salt");
+    });
+
+    it("changing Sort by re-runs the search, keeping keyword and filters", () => {
+        cy.visit("search?q=salt&within=documents");
+        cy.get("#sort-by").select("Dates (oldest first)");
+        cy.location("search").should("include", "sort-by=date-asc").and("include", "q=salt").and("include", "within=documents");
+        cy.get("#sort-by").should("have.value", "date-asc");
+        cy.contains(".hsg-results-summary", "sorted by dates (oldest first)");
+    });
+
+    it("pagination keeps the first and last page and marks a skipped run", () => {
+        cy.visit("search?q=salt");
+        cy.get(".hsg-search-pagination .usa-pagination__overflow").should("exist");
+        cy.get(".hsg-search-pagination .usa-current").should("have.attr", "aria-current", "page").and("have.text", "1");
+        cy.get(".hsg-search-pagination .usa-pagination__page-no").last().find("a").invoke("text").then((last) => {
+            expect(parseInt(last, 10)).to.be.greaterThan(5);
+        });
+        cy.get(".hsg-search-pagination .usa-pagination__previous-page").should("not.exist");
+        cy.get(".hsg-search-pagination .usa-pagination__next-page").should("exist");
+    });
+
+    it("results pages carry pagination below the list only", () => {
+        cy.visit("search?q=salt");
+        cy.get("nav.usa-pagination").should("have.length", 1);
+    });
+
+    it("prose links use the theme link colour, not the browser default", () => {
+        cy.visit("search?q=salt");
+        cy.contains(".hsg-search-results > p a", "Search Tips").should("have.css", "color", "rgb(44, 96, 138)");
+    });
+});

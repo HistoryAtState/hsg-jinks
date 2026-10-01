@@ -48,6 +48,23 @@
     --hsg-color-historicaldocuments-nav-bg: color-mix(in srgb, var(--jinks-colors-700) 80%, transparent); /* Figma fill #112F4E @ 80% */
     --hsg-color-historicaldocuments-nav-text: #e6e6e6;             /* USWDS gray-10, theme-color-base-lighter (Figma: page/text-color-on-dark) */
 
+    /* Search results page (OP#1420), from the Figma "Search02" frame. The
+       heading navy is the palette's own body-text colour (palette-navy.css,
+       Figma theme/table/header-text-color), which has no live export; the
+       highlight, code and tonal-button colours are the frame's own. The tonal
+       fill is derived from the live --jinks-colors-500 navy the frame's
+       primary buttons use, so a re-tinted palette carries it along. */
+    --hsg-color-heading: #274863;
+    --hsg-color-highlight: #fff000;             /* keyword match on a result card */
+    --hsg-color-code-text: #d83933;             /* USWDS red-cool-50v */
+    --hsg-color-code-background: #f8dfe2;       /* USWDS red-cool-10 */
+    --hsg-color-tonal-background: color-mix(in srgb, var(--jinks-colors-500) 12%, white);
+
+    /* Type families: the vendored serif (also compiled into .usa-prose below)
+       and the sans that html sets, for controls inside serif prose. */
+    --hsg-font-serif: "Merriweather Web", Georgia, Cambria, "Times New Roman", Times, serif;
+    --hsg-font-sans: "Source Sans Pro Web", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+
     /* Type sizes, from the USWDS sans type scale (the app's heading and body
        face is Source Sans), named for the USWDS step they carry. */
     --hsg-font-size-sm: 1.06rem;                /* USWDS font-sans-sm */
@@ -68,6 +85,18 @@
     --hsg-space-4: var(--uswds-space-4, 2rem);         /* USWDS units(4) */
     --hsg-space-5: var(--uswds-space-5, 2.5rem);       /* USWDS units(5) */
     --hsg-space-6: var(--uswds-space-6, 3rem);         /* USWDS units(6) */
+}
+
+/* Links take the theme link colour. Nothing else set a base colour, so any
+   link without a component rule of its own (prose links, card headings, the
+   volume TOC, footnote markers, the mobile menu) rendered in the browser's
+   default #0000ee. Bare `a` is the lowest specificity there is: every
+   component rule that colours its own links (nav, footer, buttons, cards)
+   still wins. The one visible side effect is that a link with no rule of its
+   own now keeps this colour once visited too, instead of the browser's
+   visited purple. */
+a {
+    color: var(--hsg-color-link);
 }
 
 .fixed-layout > main {
@@ -1178,4 +1207,408 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    palette-navy.scss's $theme-font-type-serif). */
 .usa-prose {
     font-family: "Merriweather Web", Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+/* ==========================================================================
+   Search results page (OP#1420), Figma frame "Search02" (node 4298-69281).
+   A white "Filter by" panel of three boxed groups (Sections, Date, Volumes)
+   with Reset / Apply, beside the keyword box, a Results heading with its
+   Sort by select, and one white card per hit. Everything is scoped to the
+   hsg-search-* / hsg-result* classes: other pages (publications, milestones,
+   conferences) use usa-pagination and usa-collection too and keep their own
+   look.
+   ========================================================================== */
+
+/* Filter panel. The layout's sidebar column is the frame's 320px panel plus
+   its 32px gap to the results, so the gap is the panel's right margin. */
+.hsg-search-filters {
+    margin-right: var(--hsg-space-4);
+    padding: var(--hsg-space-2);
+    background-color: var(--hsg-color-white);
+    color: var(--hsg-color-text);
+}
+
+/* .usa-prose only caps its paragraphs at 68ex (about 640px here, the frame's
+   results column); the form, heading row, card list and pagination take the
+   same width. */
+.usa-prose.hsg-search-results > * {
+    max-width: 40rem;
+}
+
+
+.hsg-search-filters__heading {
+    margin: 0 0 var(--hsg-space-105);
+    font-family: var(--hsg-font-serif);
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--hsg-color-text);
+}
+
+.hsg-filter-group {
+    min-width: 0;
+    margin: 0 0 var(--hsg-space-105);
+    padding: var(--hsg-space-2);
+    border: 1px solid var(--hsg-color-rule);
+    border-radius: 4px;
+    background-color: var(--hsg-color-white);
+}
+
+/* A legend sits on its fieldset's top border unless it is floated out of that
+   special rendering; the float keeps the title inside the box. */
+.hsg-filter-group__title {
+    float: left;
+    width: 100%;
+    margin: 0 0 var(--hsg-space-1);
+    padding: 0;
+    font-family: var(--hsg-font-serif);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--hsg-color-heading);
+}
+
+.hsg-filter-group__title + * {
+    clear: both;
+}
+
+.hsg-filter-group__hint {
+    margin: 0 0 var(--hsg-space-105);
+    font-family: var(--hsg-font-sans);
+    font-size: 0.8125rem;
+    line-height: 1.3;
+}
+
+.hsg-filter-group .usa-checkbox {
+    background: none;
+}
+
+/* White boxes edged in the text colour, navy once checked (the compiled
+   USWDS box takes the page tint and the compiled blue). */
+.hsg-filter-group .usa-checkbox__label::before {
+    background-color: var(--hsg-color-white);
+    box-shadow: 0 0 0 2px var(--hsg-color-text);
+}
+
+.hsg-filter-group .usa-checkbox__input:checked + .usa-checkbox__label::before {
+    background-color: var(--jinks-colors-500);
+    box-shadow: 0 0 0 2px var(--jinks-colors-500);
+}
+
+.hsg-filter-group .usa-checkbox__label {
+    margin-top: var(--hsg-space-1);
+    font-family: var(--hsg-font-sans);
+    font-size: 0.9rem;
+    line-height: 1.3;
+    color: var(--hsg-color-text);
+}
+
+/* A volume title runs long; two lines, the rest under an ellipsis (the full
+   title is the label's tooltip). */
+.hsg-filter-group__label-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+/* Date and time side by side, the date field the wider of the two. */
+.hsg-filter-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--hsg-space-1);
+    margin-bottom: var(--hsg-space-105);
+}
+
+.hsg-filter-field .usa-label {
+    margin: 0;
+    font-family: var(--hsg-font-sans);
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    color: var(--hsg-color-link);
+}
+
+.hsg-filter-field .usa-input {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    height: 2.5rem;
+    margin-top: var(--hsg-space-05);
+    border-radius: 4px;
+    font-family: var(--hsg-font-sans);
+    font-size: 0.875rem;
+}
+
+.hsg-search-filters__actions {
+    display: flex;
+    gap: var(--hsg-space-2);
+}
+
+.hsg-search-filters__actions .usa-button {
+    flex: 1 1 0;
+    margin: 0;
+}
+
+/* The design's buttons are the palette's navy, not the compiled USWDS blue. */
+.hsg-search-filters .usa-button,
+.hsg-search-form .usa-button {
+    background-color: var(--jinks-colors-500);
+    color: var(--hsg-color-white);
+}
+
+.hsg-search-filters .usa-button:hover,
+.hsg-search-form .usa-button:hover {
+    background-color: var(--jinks-colors-700);
+}
+
+.hsg-search-filters .usa-button--outline {
+    background-color: var(--hsg-color-white);
+    box-shadow: inset 0 0 0 2px var(--jinks-colors-500);
+    color: var(--jinks-colors-500);
+}
+
+.hsg-search-filters .usa-button--outline:hover {
+    background-color: var(--jinks-colors-50);
+    color: var(--jinks-colors-700);
+}
+
+/* Keyword box: navy border, rounded outer corners, navy Search button. */
+.hsg-search-form .usa-input {
+    border: 1px solid var(--jinks-colors-500);
+    border-radius: 4px 0 0 4px;
+    font-family: var(--hsg-font-sans);
+}
+
+.hsg-search-form .usa-button {
+    border-radius: 0 4px 4px 0;
+}
+
+/* Results heading and its Sort by select. */
+.hsg-results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--hsg-space-2);
+    margin-top: var(--hsg-space-3);
+}
+
+.hsg-results-header__title {
+    margin: 0;
+    font-size: var(--hsg-font-size-lg);
+    line-height: 1.3;
+    color: var(--hsg-color-text);
+}
+
+.hsg-sort {
+    display: flex;
+    align-items: center;
+    gap: var(--hsg-space-1);
+}
+
+.hsg-sort .usa-label {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--hsg-color-heading);
+}
+
+.hsg-sort .usa-select {
+    width: auto;
+    min-width: 9.5rem;
+    height: 2.5rem;
+    margin: 0;
+    border-radius: 4px;
+    font-family: var(--hsg-font-sans);
+    font-size: 0.9rem;
+}
+
+.hsg-results-summary {
+    margin: var(--hsg-space-1) 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+/* One white card per hit. The list is still a usa-collection; USWDS's
+   divider lines are dropped for the card edge. */
+.hsg-search-results .hsg-results {
+    margin: var(--hsg-space-2) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hsg-results .usa-collection__item {
+    box-sizing: border-box;
+    max-width: none;
+    margin: 0 0 var(--hsg-space-105);
+    padding: var(--hsg-space-3);
+    border: 0;
+    border-radius: 4px;
+    background-color: var(--hsg-color-white);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--hsg-color-text) 15%, transparent);
+}
+
+.hsg-results .usa-collection__body {
+    max-width: none;
+}
+
+.hsg-result__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--hsg-space-1);
+    margin: 0 0 var(--hsg-space-1);
+    padding: 0;
+    list-style: none;
+}
+
+.hsg-result__tags .usa-tag {
+    margin: 0;
+    padding: var(--hsg-space-05) var(--hsg-space-1);
+    border-radius: 2px;
+    background-color: var(--jinks-colors-50);
+    color: var(--hsg-color-link);
+    font-family: var(--hsg-font-sans);
+    font-size: 0.6875rem;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.hsg-results .usa-collection__heading {
+    margin: 0 0 var(--hsg-space-2);
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+/* A hit with nothing to list under its title (a section page, a person) is
+   just the heading, so the space that separates it from a list is dropped. */
+.hsg-results .usa-collection__heading:last-child {
+    margin-bottom: 0;
+}
+
+.hsg-results .usa-collection__heading a {
+    color: var(--hsg-color-link);
+    text-decoration: none;
+}
+
+.hsg-results .usa-collection__heading a:hover,
+.hsg-results .usa-collection__heading a:focus {
+    text-decoration: underline;
+}
+
+/* Labels are the sans, values the serif the prose already sets. */
+.hsg-result__meta {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: var(--hsg-space-05) var(--hsg-space-2);
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--hsg-color-text);
+}
+
+.hsg-result__meta dt {
+    margin: 0;
+    font-family: var(--hsg-font-sans);
+    font-weight: 400;
+}
+
+.hsg-result__meta dd {
+    margin: 0;
+    min-width: 0;
+    font-family: var(--hsg-font-serif);
+}
+
+/* Every match is held to its own line, the overflow under an ellipsis. */
+.hsg-snippet {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hsg-result__meta .hi {
+    background-color: var(--hsg-color-highlight);
+    color: var(--hsg-color-text);
+}
+
+.hsg-result__meta code {
+    padding: 0 var(--hsg-space-1);
+    border-radius: 2px;
+    background-color: var(--hsg-color-code-background);
+    color: var(--hsg-color-code-text);
+    font-family: "Roboto Mono Web", "Bitstream Vera Sans Mono", Consolas, Courier, monospace;
+    font-size: 0.6875rem;
+}
+
+.hsg-result__actions {
+    margin: var(--hsg-space-2) 0 0;
+    text-align: right;
+}
+
+.hsg-result__facsimile {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--hsg-space-1);
+    padding: var(--hsg-space-1) var(--hsg-space-2);
+    border-radius: 4px;
+    background-color: var(--hsg-color-tonal-background);
+    color: var(--jinks-colors-500);
+    font-family: var(--hsg-font-sans);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.hsg-result__facsimile:hover,
+.hsg-result__facsimile:focus {
+    background-color: var(--jinks-colors-200);
+    color: var(--jinks-colors-700);
+}
+
+.hsg-result__facsimile .usa-icon {
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+}
+
+/* Numbered squares, the current page filled navy, Next / Previous as text. */
+.hsg-search-pagination {
+    margin-top: var(--hsg-space-3);
+    background: none;
+}
+
+.hsg-search-pagination .usa-pagination__list {
+    justify-content: center;
+}
+
+.hsg-search-pagination .usa-pagination__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 var(--hsg-space-1);
+    border-radius: 2px;
+    background-color: var(--hsg-color-white);
+    color: var(--hsg-color-link);
+    font-family: var(--hsg-font-sans);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.hsg-search-pagination .usa-pagination__button.usa-current {
+    background-color: var(--jinks-colors-500);
+    color: var(--hsg-color-white);
+}
+
+.hsg-search-pagination .usa-pagination__link {
+    color: var(--hsg-color-link);
+    font-family: var(--hsg-font-sans);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.hsg-search-pagination .usa-pagination__overflow {
+    color: var(--hsg-color-muted);
 }
