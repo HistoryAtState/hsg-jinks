@@ -91,7 +91,7 @@ describe("volume landing page, unpublished chapters", () => {
         cy.get(".hsg-frus__toc li.pending").should("have.length.at.least", 1);
         cy.get(".hsg-frus__toc li.pending > a")
             .first()
-            .should("have.css", "color", "rgb(86, 92, 101)") // --hsg-color-muted
+            .should("have.css", "color", "rgb(92, 92, 92)") // --uswds-color-base-dark (OP#1426)
             .and("have.css", "font-style", "italic");
     });
 
