@@ -71,20 +71,6 @@
     --hsg-font-size-md: 1.13rem;                /* USWDS font-sans-md */
     --hsg-font-size-lg: 1.46rem;                /* USWDS font-sans-lg */
 
-    /* Spacing, on the USWDS spacing scale: one unit is 8px, and the token
-       names are USWDS' own (105 = one and a half units). Sourced from the
-       USWDS theme profile's --uswds-space-* export where available, falling
-       back to the last-known value for apps pinned to an older profile
-       version that doesn't emit it yet. */
-    --hsg-space-05: var(--uswds-space-05, 0.25rem);    /* USWDS units(0.5) */
-    --hsg-space-1: var(--uswds-space-1, 0.5rem);       /* USWDS units(1) */
-    --hsg-space-105: var(--uswds-space-105, 0.75rem);  /* USWDS units(1.5) */
-    --hsg-space-2: var(--uswds-space-2, 1rem);         /* USWDS units(2) */
-    --hsg-space-205: var(--uswds-space-205, 1.25rem);  /* USWDS units(2.5) */
-    --hsg-space-3: var(--uswds-space-3, 1.5rem);       /* USWDS units(3) */
-    --hsg-space-4: var(--uswds-space-4, 2rem);         /* USWDS units(4) */
-    --hsg-space-5: var(--uswds-space-5, 2.5rem);       /* USWDS units(5) */
-    --hsg-space-6: var(--uswds-space-6, 3rem);         /* USWDS units(6) */
 }
 
 /* Links take the theme link colour. Nothing else set a base colour, so any
@@ -102,7 +88,7 @@ a {
 .fixed-layout > main {
     max-width: var(--jinks-content-max-width);
     display: block;
-    margin: var(--hsg-space-3) auto;
+    margin: var(--uswds-space-3) auto;
 }
 
 .fixed-layout > main:has(pb-odd-editor) {
@@ -135,8 +121,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     position: relative;
     z-index: 0;
     color: var(--jinks-color-white);
-    padding-top: var(--hsg-space-6);
-    padding-bottom: var(--hsg-space-6);
+    padding-top: var(--uswds-space-6);
+    padding-bottom: var(--uswds-space-6);
 }
 
 .toolbar:has(nav[aria-label="breadcrumb"] li)::before {
@@ -190,7 +176,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .footnotes .footnote-backlink {
-    margin-left: var(--hsg-space-05);
+    margin-left: var(--uswds-space-05);
     text-decoration: none;
 }
 
@@ -211,7 +197,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     --hsg-footer-social-background: #0e517f;
     background-color: var(--hsg-footer-background);
     color: var(--hsg-footer-text);
-    padding-top: var(--hsg-space-4);
+    padding-top: var(--uswds-space-4);
 }
 
 .hsg-footer .usa-footer__primary-section,
@@ -222,7 +208,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-footer .usa-footer__primary-link {
     color: var(--hsg-footer-heading);
-    margin-bottom: var(--hsg-space-3);
+    margin-bottom: var(--uswds-space-3);
 }
 
 /* OP#1395: same USWDS light-background :visited/:hover/:active defaults as
@@ -245,7 +231,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-footer .usa-footer__secondary-link {
-    margin-bottom: var(--hsg-space-105);
+    margin-bottom: var(--uswds-space-105);
     padding-top: 0;
 }
 
@@ -264,15 +250,15 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-footer .usa-footer__address {
-    margin-top: var(--hsg-space-105);
+    margin-top: var(--uswds-space-105);
 }
 
 .hsg-footer .usa-footer__contact-info {
     align-items: center;
     display: flex;
-    gap: var(--hsg-space-1);
+    gap: var(--uswds-space-1);
     justify-content: flex-start;
-    margin-bottom: var(--hsg-space-1);
+    margin-bottom: var(--uswds-space-1);
 }
 
 .hsg-footer .usa-footer__social-links {
@@ -286,7 +272,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-footer .usa-footer__social-links {
-    margin-top: var(--hsg-space-3);
+    margin-top: var(--uswds-space-3);
 }
 
 .hsg-footer .usa-social-link {
@@ -294,9 +280,9 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     background-color: var(--hsg-footer-social-background);
     border-radius: 50%;
     display: flex;
-    height: var(--hsg-space-6);
+    height: var(--uswds-space-6);
     justify-content: center;
-    width: var(--hsg-space-6);
+    width: var(--uswds-space-6);
 }
 
 .hsg-footer .usa-social-link__icon {
@@ -307,7 +293,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 /* Closing band: the office wordmark left, its place in the department right. */
 .hsg-footer .usa-footer__secondary-section {
-    margin-top: var(--hsg-space-4);
+    margin-top: var(--uswds-space-4);
 }
 
 /* The only logo asset is the navy one the header uses, which disappears against
@@ -343,7 +329,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 @media (max-width: 640px) {
     .hsg-footer .usa-footer__agency {
-        margin-top: var(--hsg-space-3);
+        margin-top: var(--uswds-space-3);
         text-align: left;
     }
 }
@@ -441,15 +427,15 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    and dl/dt/dd laid out as a compact number + text row instead of the
    browser's default definition-list indentation. */
 .usa-prose .footnotes {
-    margin-top: var(--hsg-space-4);
-    padding-top: var(--hsg-space-2);
+    margin-top: var(--uswds-space-4);
+    padding-top: var(--uswds-space-2);
     border-top: 1px solid var(--hsg-color-rule);
 }
 
 .usa-prose .footnotes dl.footnote {
     display: flex;
-    gap: var(--hsg-space-1);
-    margin: 0 0 var(--hsg-space-105);
+    gap: var(--uswds-space-1);
+    margin: 0 0 var(--uswds-space-105);
 }
 
 .usa-prose .footnotes dl.footnote dt {
@@ -476,7 +462,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     display: block;
     max-width: 220px;
     height: auto;
-    margin: var(--hsg-space-105) 0;
+    margin: var(--uswds-space-105) 0;
 }
 
 /* On wider screens the cover floats left and the editor/publisher metadata
@@ -485,27 +471,27 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 @media (min-width: 30em) {
     .hsg-frus__cover {
         float: left;
-        margin: var(--hsg-space-105) var(--hsg-space-4) var(--hsg-space-105) 0;
+        margin: var(--uswds-space-105) var(--uswds-space-4) var(--uswds-space-105) 0;
     }
 }
 
 .hsg-frus__meta {
-    margin-bottom: var(--hsg-space-105);
+    margin-bottom: var(--uswds-space-105);
     overflow: hidden;
 }
 
 .hsg-frus__editor-label {
     font-weight: 700;
-    margin-top: var(--hsg-space-1);
+    margin-top: var(--uswds-space-1);
 }
 
 .hsg-list-editors {
-    margin: 0 0 var(--hsg-space-1);
-    padding-left: var(--hsg-space-205);
+    margin: 0 0 var(--uswds-space-1);
+    padding-left: var(--uswds-space-205);
 }
 
 .hsg-frus__published {
-    margin-top: var(--hsg-space-105);
+    margin-top: var(--uswds-space-105);
     color: var(--hsg-color-muted);
 }
 
@@ -517,8 +503,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    block, same treatment as .usa-prose .footnotes above. */
 .hsg-frus__toc {
     clear: both;
-    margin-top: var(--hsg-space-105);
-    padding-top: var(--hsg-space-105);
+    margin-top: var(--uswds-space-105);
+    padding-top: var(--uswds-space-105);
     border-top: 1px solid var(--jinks-color-border);
     list-style: none;
     padding-left: 0;
@@ -554,14 +540,14 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    document-count range in a muted colour, reference parity with hsg-shell. */
 .toc .usa-sidenav__sublist {
     margin-left: 0;
-    padding-left: var(--hsg-space-2);
+    padding-left: var(--uswds-space-2);
     border-left: 1px solid var(--jinks-color-border);
 }
 
 .toc-range {
     color: var(--hsg-color-muted);
     font-size: 0.85em;
-    margin-left: var(--hsg-space-05);
+    margin-left: var(--uswds-space-05);
 }
 
 /* Index-division entries (persons/terms registers, back-matter index):
@@ -569,30 +555,30 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    "list", no ul wrapper; OP#1317) -- no bullets, hanging indent per entry,
    reference parity with hsg-shell. */
 .usa-prose div.list {
-    padding-left: var(--hsg-space-3);
-    text-indent: calc(-1 * var(--hsg-space-3));
+    padding-left: var(--uswds-space-3);
+    text-indent: calc(-1 * var(--uswds-space-3));
     max-width: none;
 }
 
 .usa-prose div.list div.list {
-    margin-left: var(--hsg-space-3);
-    text-indent: calc(-1 * var(--hsg-space-3));
+    margin-left: var(--uswds-space-3);
+    text-indent: calc(-1 * var(--uswds-space-3));
 }
 
 /* Chapter listing page (#PR-review): each document as a titled entry with its
    dateline, summary and source note, reference parity with hsg-shell's
    toc:document-list -- replacing the old bulleted list of bare title links. */
 .hsg-frus__doclist {
-    margin-top: var(--hsg-space-2);
+    margin-top: var(--uswds-space-2);
 }
 
 .hsg-frus__doc-entry {
-    padding: var(--hsg-space-105) 0;
+    padding: var(--uswds-space-105) 0;
     border-top: 1px solid var(--jinks-color-border);
 }
 
 .hsg-frus__doc-title {
-    margin: 0 0 var(--hsg-space-1);
+    margin: 0 0 var(--uswds-space-1);
     font-size: 1.05rem;
     font-weight: 600;
 }
@@ -600,11 +586,11 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-frus__doc-entry .dateline {
     color: var(--hsg-color-muted);
     font-style: italic;
-    margin: 0 0 var(--hsg-space-1);
+    margin: 0 0 var(--uswds-space-1);
 }
 
 .hsg-frus__doc-entry .summary {
-    margin: 0 0 var(--hsg-space-1);
+    margin: 0 0 var(--uswds-space-1);
 }
 
 .hsg-frus__doc-entry .sourcenote {
@@ -653,7 +639,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    (display block, 4pt left margin, grey, float right). */
 .hsg-facs-link {
     display: block;
-    margin-left: var(--hsg-space-05);
+    margin-left: var(--uswds-space-05);
     color: var(--hsg-color-muted);
     float: right;
     font-size: 0.9rem;
@@ -664,8 +650,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    hsg-shell's navigation title. Rendered as quiet chrome, not the page's own
    h1: the division heading below it stays the visually dominant title. */
 .hsg-navigation-title {
-    margin: 0 0 var(--hsg-space-2);
-    padding-bottom: var(--hsg-space-1);
+    margin: 0 0 var(--uswds-space-2);
+    padding-bottom: var(--uswds-space-1);
     border-bottom: 1px solid var(--hsg-color-rule);
     font-size: 1.05rem;
     font-weight: 600;
@@ -677,14 +663,14 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    gap: var(--hsg-space-105);
-    margin: var(--hsg-space-2) 0;
+    gap: var(--uswds-space-105);
+    margin: var(--uswds-space-2) 0;
 }
 
 .hsg-frus__pager-link {
     display: inline-flex;
     align-items: baseline;
-    gap: var(--hsg-space-1);
+    gap: var(--uswds-space-1);
     max-width: 46%;
     text-decoration: none;
 }
@@ -716,7 +702,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-frus__contents {
     font-size: 1.15rem;
-    margin: var(--hsg-space-2) 0 var(--hsg-space-1);
+    margin: var(--uswds-space-2) 0 var(--uswds-space-1);
 }
 
 /* Headings inside a FRUS division (the TEI head of a document, a section or
@@ -736,7 +722,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-family: var(--jinks-heading-font-family);
     line-height: var(--jinks-heading-line-height);
     font-weight: 700;
-    margin: var(--hsg-space-3) 0 var(--hsg-space-105);
+    margin: var(--uswds-space-3) 0 var(--uswds-space-105);
 }
 
 .hsg-frus__prose h1.tei-head,
@@ -756,7 +742,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    reference site renders it as a bold inline note rather than a heading, the
    attachment's own title below it being the heading. */
 .attachment-label {
-    margin: var(--hsg-space-2) 0 0;
+    margin: var(--uswds-space-2) 0 0;
     font-weight: 700;
 }
 
@@ -775,21 +761,21 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .frus-list-head {
     font-size: 1rem;
     font-weight: 700;
-    margin: var(--hsg-space-1) 0 var(--hsg-space-05);
+    margin: var(--uswds-space-1) 0 var(--uswds-space-05);
 }
 
 .frus-list {
     list-style: none;
     padding-left: 0;
-    margin: 0 0 var(--hsg-space-1);
+    margin: 0 0 var(--uswds-space-1);
 }
 
 .frus-list-head + .frus-list li {
-    margin-left: var(--hsg-space-4);
+    margin-left: var(--uswds-space-4);
 }
 
 .frus-labeled-list {
-    margin: var(--hsg-space-1) 0;
+    margin: var(--uswds-space-1) 0;
 }
 
 .frus-labeled-list dt {
@@ -799,8 +785,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .frus-labeled-list dd {
-    margin-left: var(--hsg-space-5);
-    margin-bottom: var(--hsg-space-05);
+    margin-left: var(--uswds-space-5);
+    margin-bottom: var(--uswds-space-05);
 }
 
 /* A description pair ("SUBJECT" + value): term bold, on its own line, value
@@ -811,17 +797,17 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .frus-description-list dd {
-    margin-left: var(--hsg-space-4);
-    margin-bottom: var(--hsg-space-05);
+    margin-left: var(--uswds-space-4);
+    margin-bottom: var(--uswds-space-05);
 }
 
 .hsg-frus__toc ul {
     list-style: none;
-    padding-left: var(--hsg-space-205);
+    padding-left: var(--uswds-space-205);
 }
 
 .hsg-frus__toc > li {
-    margin-bottom: var(--hsg-space-1);
+    margin-bottom: var(--uswds-space-1);
 }
 
 .hsg-frus__ways-to-explore .hsg-sidebar-title {
@@ -840,7 +826,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-panel + .hsg-panel {
-    margin-top: var(--hsg-space-4);
+    margin-top: var(--uswds-space-4);
 }
 
 .hsg-frus__register .hsg-list-group {
@@ -850,11 +836,11 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-frus__register .hsg-list-group li {
-    margin-bottom: var(--hsg-space-1);
+    margin-bottom: var(--uswds-space-1);
 }
 
 .hsg-frus__ways-to-explore .usa-search {
-    margin-bottom: var(--hsg-space-105);
+    margin-bottom: var(--uswds-space-105);
 }
 
 .hsg-ebook-list,
@@ -865,7 +851,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-link-button {
     display: inline-block;
-    margin: var(--hsg-space-1) 0;
+    margin: var(--uswds-space-1) 0;
 }
 
 /* Re-anchor USWDS's border-box inside the header's accordion nav. layout.css
@@ -920,7 +906,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .conf-conference-list > li.usa-collection__item {
     position: relative;
-    padding-left: var(--hsg-space-4);
+    padding-left: var(--uswds-space-4);
 }
 
 .conf-conference-list > li.usa-collection__item::before {
@@ -946,7 +932,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-admin-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-    gap: var(--hsg-space-2, 1rem);
+    gap: var(--uswds-space-2);
     padding-left: 0;
     list-style: none;
 }
@@ -1010,7 +996,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 /* Administration page volume listing (OP#1214). */
 .hsg-admin__sub-series {
-    margin-top: var(--hsg-space-4, 2rem);
+    margin-top: var(--uswds-space-4);
 }
 
 .hsg-status-notice {
@@ -1048,7 +1034,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     background-position: center;
     background-repeat: no-repeat;
     color: var(--hsg-color-historicaldocuments-nav-text);
-    padding-block: var(--hsg-space-4, 2rem);
+    padding-block: var(--uswds-space-4);
 }
 
 /* Figma binds this heading to usa/font-family/heading (400/45.6px), which
@@ -1062,7 +1048,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-weight: 400;
     font-size: 2.85rem;
     border-bottom: 1px solid var(--hsg-color-historicaldocuments-nav-text);
-    padding-bottom: var(--hsg-space-2, 1rem);
+    padding-bottom: var(--uswds-space-2);
     margin-top: 0;
 }
 
@@ -1075,7 +1061,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-historicaldocuments-nav-cards {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--hsg-space-2, 1rem);
+    gap: var(--uswds-space-2);
     padding-left: 0;
     list-style: none;
     margin-bottom: 0;
@@ -1161,7 +1147,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .usa-prose ul.description {
     list-style: none;
     padding-left: 0;
-    margin: 0 0 var(--hsg-space-2);
+    margin: 0 0 var(--uswds-space-2);
 }
 
 .usa-prose ul.description > li {
@@ -1186,7 +1172,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 /* the optional heading line of a typed list */
 .usa-prose p.listHead {
-    margin: 0 0 var(--hsg-space-05);
+    margin: 0 0 var(--uswds-space-05);
     text-transform: uppercase;
     font-size: 0.9em;
 }
@@ -1266,8 +1252,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 /* Filter panel. The layout's sidebar column is the frame's 320px panel plus
    its 32px gap to the results, so the gap is the panel's right margin. */
 .hsg-search-filters {
-    margin-right: var(--hsg-space-4);
-    padding: var(--hsg-space-2);
+    margin-right: var(--uswds-space-4);
+    padding: var(--uswds-space-2);
     background-color: var(--hsg-color-white);
     color: var(--hsg-color-text);
 }
@@ -1281,7 +1267,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 
 .hsg-search-filters__heading {
-    margin: 0 0 var(--hsg-space-105);
+    margin: 0 0 var(--uswds-space-105);
     font-family: var(--hsg-font-serif);
     font-size: 1.2rem;
     font-weight: 700;
@@ -1291,8 +1277,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-filter-group {
     min-width: 0;
-    margin: 0 0 var(--hsg-space-105);
-    padding: var(--hsg-space-2);
+    margin: 0 0 var(--uswds-space-105);
+    padding: var(--uswds-space-2);
     border: 1px solid var(--hsg-color-rule);
     border-radius: 4px;
     background-color: var(--hsg-color-white);
@@ -1303,7 +1289,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-filter-group__title {
     float: left;
     width: 100%;
-    margin: 0 0 var(--hsg-space-1);
+    margin: 0 0 var(--uswds-space-1);
     padding: 0;
     font-family: var(--hsg-font-serif);
     font-size: 1rem;
@@ -1317,7 +1303,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-filter-group__hint {
-    margin: 0 0 var(--hsg-space-105);
+    margin: 0 0 var(--uswds-space-105);
     font-family: var(--hsg-font-sans);
     font-size: 0.8125rem;
     line-height: 1.3;
@@ -1340,7 +1326,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-filter-group .usa-checkbox__label {
-    margin-top: var(--hsg-space-1);
+    margin-top: var(--uswds-space-1);
     font-family: var(--hsg-font-sans);
     font-size: 0.9rem;
     line-height: 1.3;
@@ -1360,8 +1346,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-filter-fields {
     display: grid;
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    gap: var(--hsg-space-1);
-    margin-bottom: var(--hsg-space-105);
+    gap: var(--uswds-space-1);
+    margin-bottom: var(--uswds-space-105);
 }
 
 .hsg-filter-field .usa-label {
@@ -1377,7 +1363,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     width: 100%;
     max-width: none;
     height: 2.5rem;
-    margin-top: var(--hsg-space-05);
+    margin-top: var(--uswds-space-05);
     border-radius: 4px;
     font-family: var(--hsg-font-sans);
     font-size: 0.875rem;
@@ -1385,7 +1371,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-search-filters__actions {
     display: flex;
-    gap: var(--hsg-space-2);
+    gap: var(--uswds-space-2);
 }
 
 .hsg-search-filters__actions .usa-button {
@@ -1432,8 +1418,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--hsg-space-2);
-    margin-top: var(--hsg-space-3);
+    gap: var(--uswds-space-2);
+    margin-top: var(--uswds-space-3);
 }
 
 .hsg-results-header__title {
@@ -1446,7 +1432,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-sort {
     display: flex;
     align-items: center;
-    gap: var(--hsg-space-1);
+    gap: var(--uswds-space-1);
 }
 
 .hsg-sort .usa-label {
@@ -1467,7 +1453,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-results-summary {
-    margin: var(--hsg-space-1) 0 0;
+    margin: var(--uswds-space-1) 0 0;
     font-size: 0.8125rem;
     line-height: 1.5;
 }
@@ -1475,7 +1461,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 /* One white card per hit. The list is still a usa-collection; USWDS's
    divider lines are dropped for the card edge. */
 .hsg-search-results .hsg-results {
-    margin: var(--hsg-space-2) 0 0;
+    margin: var(--uswds-space-2) 0 0;
     padding: 0;
     list-style: none;
 }
@@ -1483,8 +1469,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-results .usa-collection__item {
     box-sizing: border-box;
     max-width: none;
-    margin: 0 0 var(--hsg-space-105);
-    padding: var(--hsg-space-3);
+    margin: 0 0 var(--uswds-space-105);
+    padding: var(--uswds-space-3);
     border: 0;
     border-radius: 4px;
     background-color: var(--hsg-color-white);
@@ -1498,15 +1484,15 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-result__tags {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--hsg-space-1);
-    margin: 0 0 var(--hsg-space-1);
+    gap: var(--uswds-space-1);
+    margin: 0 0 var(--uswds-space-1);
     padding: 0;
     list-style: none;
 }
 
 .hsg-result__tags .usa-tag {
     margin: 0;
-    padding: var(--hsg-space-05) var(--hsg-space-1);
+    padding: var(--uswds-space-05) var(--uswds-space-1);
     border-radius: 2px;
     background-color: var(--jinks-colors-50);
     color: var(--hsg-color-link);
@@ -1518,7 +1504,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-results .usa-collection__heading {
-    margin: 0 0 var(--hsg-space-2);
+    margin: 0 0 var(--uswds-space-2);
     font-size: 1.25rem;
     font-weight: 700;
     line-height: 1.35;
@@ -1544,7 +1530,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-result__meta {
     display: grid;
     grid-template-columns: max-content minmax(0, 1fr);
-    gap: var(--hsg-space-05) var(--hsg-space-2);
+    gap: var(--uswds-space-05) var(--uswds-space-2);
     margin: 0;
     font-size: 0.8125rem;
     line-height: 1.4;
@@ -1577,7 +1563,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-result__meta code {
-    padding: 0 var(--hsg-space-1);
+    padding: 0 var(--uswds-space-1);
     border-radius: 2px;
     background-color: var(--hsg-color-code-background);
     color: var(--hsg-color-code-text);
@@ -1586,15 +1572,15 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-result__actions {
-    margin: var(--hsg-space-2) 0 0;
+    margin: var(--uswds-space-2) 0 0;
     text-align: right;
 }
 
 .hsg-result__facsimile {
     display: inline-flex;
     align-items: center;
-    gap: var(--hsg-space-1);
-    padding: var(--hsg-space-1) var(--hsg-space-2);
+    gap: var(--uswds-space-1);
+    padding: var(--uswds-space-1) var(--uswds-space-2);
     border-radius: 4px;
     background-color: var(--hsg-color-tonal-background);
     color: var(--jinks-colors-500);
@@ -1618,7 +1604,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 /* Numbered squares, the current page filled navy, Next / Previous as text. */
 .hsg-search-pagination {
-    margin-top: var(--hsg-space-3);
+    margin-top: var(--uswds-space-3);
     background: none;
 }
 
@@ -1632,7 +1618,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     justify-content: center;
     min-width: 2rem;
     height: 2rem;
-    padding: 0 var(--hsg-space-1);
+    padding: 0 var(--uswds-space-1);
     border-radius: 2px;
     background-color: var(--hsg-color-white);
     color: var(--hsg-color-link);
@@ -1672,7 +1658,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-faq .usa-accordion__heading .usa-accordion__button {
     box-sizing: border-box;
     width: 100%;
-    padding: var(--hsg-space-2) var(--hsg-space-6) var(--hsg-space-2) var(--hsg-space-3);
+    padding: var(--uswds-space-2) var(--uswds-space-6) var(--uswds-space-2) var(--uswds-space-3);
     background-color: var(--hsg-color-white);
     background-image: none;
     color: var(--jinks-colors-700);
@@ -1704,7 +1690,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-faq .usa-accordion__content {
-    padding: var(--hsg-space-3);
+    padding: var(--uswds-space-3);
     background-color: var(--hsg-color-white);
     color: var(--hsg-color-text);
 }
