@@ -377,11 +377,14 @@
      * full-bleed grid and the band drifts right, past the chrome above and
      * below it.
      *
-     * box-sizing: content-box is deliberate -- max-width applies to the
-     * content box, so grid + padding measures --jinks-page-max-width plus the
-     * gutters, exactly like .grid-container's border box.
+     * box-sizing: border-box, like the header's and footer's .grid-container
+     * (styles.scss anchors border-box on every usa-* element since 1.4.0):
+     * the gutters sit inside --jinks-page-max-width, so the band's content
+     * edge lines up with the logo and the footer content. With content-box
+     * the gutters sat outside the cap and the whole band started one gutter
+     * left of the header content at any viewport wider than the page box.
      */
-    box-sizing: content-box;
+    box-sizing: border-box;
     max-width: var(--jinks-page-max-width);
     padding-inline: var(--jinks-page-gutter, 2rem);
     margin-inline: auto;
