@@ -42,7 +42,11 @@
     
     --jinks-menubar-color: var(--jinks-colors-light);
     --jinks-menubar-font-size: ;
-    --jinks-menubar-button-color: rgba(165, 165, 165, 0.4);
+    --jinks-menubar-button-color: color-mix(
+        in srgb,
+        var(--uswds-color-base-light) 40%,
+        transparent
+    );
 
     --jinks-toolbar-background-color: ;
     --jinks-toolbar-color: ;
@@ -60,16 +64,24 @@
     
     /* Typography */
 
-    --jinks-base-font-family: ;
+    /* Font families default to the palette's USWDS fonts (exported by
+       styles.scss); a theme.fonts.*.family set in config.json still wins. */
+    
+    --jinks-base-font-family: var(--uswds-font-body);
+    
     --jinks-base-font-size: ;
     --jinks-base-line-height: ;
     --jinks-base-font-weight: ;
 
-    --jinks-content-font-family: ;
+    
+    --jinks-content-font-family: var(--uswds-font-body);
+    
     --jinks-content-font-size: ;
     --jinks-content-line-height: ;
 
-    --jinks-heading-font-family: ;
+    
+    --jinks-heading-font-family: var(--uswds-font-heading);
+    
     --jinks-heading-font-weight:  !important;
     --jinks-heading-line-height: 1.2;
 
@@ -109,8 +121,16 @@
     /* Header, menubar, toolbar, drawer, footer, splash */
 
     /* Overlay for image backgrounds to lighten or darken them */
-    --jinks-overlay-background-color-light: rgba(255, 255, 255, 0.8);
-    --jinks-overlay-background-color-dark: rgba(0, 0, 0, 0.4);
+    --jinks-overlay-background-color-light: color-mix(
+        in srgb,
+        var(--uswds-color-white) 80%,
+        transparent
+    );
+    --jinks-overlay-background-color-dark: color-mix(
+        in srgb,
+        var(--uswds-color-black) 40%,
+        transparent
+    );
 
     /* Overlay for highlights and (CHECK) hero and menubar section */
     --jinks-header-background-color: var(--jinks-overlay-background-color-light);
@@ -123,8 +143,8 @@
     --jinks-color-primary: var(--jinks-colors-700);
     --jinks-color-lighter: var(--jinks-colors-medium);
     --jinks-color-focus: var(--jinks-colors-accent);
-    --jinks-color-border: #ebebeb;
-    --jinks-color-white: #ffffff;
+    --jinks-color-border: var(--uswds-color-base-lighter);
+    --jinks-color-white: var(--uswds-color-white);
     --jinks-footnote-color: var(--jinks-color-primary);
 
     --jinks-h1-color: var(--jinks-colors-600);
@@ -140,8 +160,8 @@
     --jinks-form-border-radius: 90px;
     --jinks-form-border-radius-full: 999px;
     --jinks-form-hover-color: var(--jinks-colors-400);
-    --jinks-form-focus-color1: #3b82f6;
-    --jinks-form-focus-color2: rgba(59, 130, 246, 0.2);
+    --jinks-form-focus-color1: var(--uswds-color-focus);
+    --jinks-form-focus-color2: color-mix(in srgb, var(--uswds-color-focus) 20%, transparent);
     --jinks-form-text-color: var(--jinks-color-primary);
     --jinks-form-control-font-size: 0.875rem;
 
