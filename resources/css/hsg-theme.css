@@ -1,65 +1,17 @@
-/* Design tokens for this app's own components (PR #32 review).
+/* Design tokens: this app owns none. Colours, spacing and type come from
+   the USWDS theme profile, which exports the active palette's values as
+   custom properties (--uswds-color-*, --uswds-space-*, --uswds-font-*;
+   see its README "Design tokens"). Rules var() into those directly, so a
+   palette change carries through without touching this file.
 
-   USWDS 3 publishes most of its design tokens as Sass only. The compiled
-   bundle this app vendors (resources/css/palette-navy.css) therefore exposes
-   utility classes, not custom properties, so there is no USWDS variable to
-   var() into for colours or fonts below - those are HSG-level tokens
-   carrying USWDS token values verbatim and named for the role they play, the
-   USWDS token each one holds named in the comment beside it, so a value can
-   be checked against the design system without leaving this file. Spacing is
-   the exception: the USWDS theme profile exports its spacing scale as
-   --uswds-space-* custom properties, so those var() into a live value with
-   the last-known literal kept as fallback for apps pinned to an older
-   profile version that doesn't emit it yet.
-
-   Rules below take their colours and spacings from these, or from the
-   --jinks-* variables the USWDS theme profile exports; neither literals nor
-   jinks' own every-layout spacing scale (--s-1, --s0, ...) belong here, the
-   latter being a base10-theme construct rather than a USWDS one. */
+   Colours are palette roles, not literals. Where the design asked for a
+   value the palette doesn't have, the nearest palette colour was taken
+   (OP#1426). Tints of a palette colour change its alpha
+   (color-mix(…, transparent)) rather than mixing in a second colour.
+   Neither literals nor jinks' own every-layout spacing scale (--s-1,
+   --s0, ...) belong here, the latter being a base10-theme construct
+   rather than a USWDS one. */
 :root {
-    /* Colours */
-    --hsg-color-muted: #565c65;                 /* USWDS gray-cool-60, theme-color-base */
-    --hsg-color-link: #2c608a;                  /* USWDS blue-70v, theme-color-primary-dark */
-    --hsg-color-link-hover: #1a4480;            /* USWDS blue-warm-70v, theme-color-primary-dark */
-    --hsg-color-rule: #dfe1e2;                  /* USWDS gray-cool-10, theme-color-base-lighter */
-    --hsg-color-accent: #005ea2;                /* USWDS blue-60v, theme-color-primary */
-    --hsg-color-white: #fff;                    /* USWDS white, bg-white/text-white utility color */
-    --hsg-color-text: #2e2e2e;                   /* USWDS gray-80, theme-text-color */
-    --hsg-color-background-muted: #f0f0f0;         /* USWDS gray-5, theme-color-base-lightest */
-
-    /* External reference link confirmed dead (404/redirected-away, #1095).
-       Flags it visually rather than silently dropping or swapping it; a
-       bracketed alternative link follows in the markup where one was found.
-       No USWDS token covers this, so the pair is HSG's own. */
-    --hsg-color-link-broken: #b50909;
-    --hsg-color-link-broken-visited: #8b0707;
-
-    /* Historical Documents nav band (OP#1400), from the Figma design's own
-       "News" component instance. The tinted navy is Figma's
-       theme/color/primary/darkest (#112f4e), which the USWDS theme profile
-       already exports live as --jinks-colors-700 - var() into that instead
-       of repeating the literal, using the same color-mix() technique
-       landing-page.css's #bottom rule already uses for a tinted variant of
-       it (the opaque card fill below uses --jinks-colors-700 directly, the
-       same way #bottom and .highlight-card do, rather than a same-value
-       alias of it). The text colour has no live export (palette-navy.css
-       only exposes it as a utility class, per this file's own header), so
-       it stays an HSG-level token like the pair above it. */
-    --hsg-color-historicaldocuments-nav-bg: color-mix(in srgb, var(--jinks-colors-700) 80%, transparent); /* Figma fill #112F4E @ 80% */
-    --hsg-color-historicaldocuments-nav-text: #e6e6e6;             /* USWDS gray-10, theme-color-base-lighter (Figma: page/text-color-on-dark) */
-
-    /* Search results page (OP#1420), from the Figma "Search02" frame. The
-       heading navy is the palette's own body-text colour (palette-navy.css,
-       Figma theme/table/header-text-color), which has no live export; the
-       highlight, code and tonal-button colours are the frame's own. The tonal
-       fill is derived from the live --jinks-colors-500 navy the frame's
-       primary buttons use, so a re-tinted palette carries it along. */
-    --hsg-color-heading: #274863;
-    --hsg-color-highlight: #fff000;             /* keyword match on a result card */
-    --hsg-color-code-text: #d83933;             /* USWDS red-cool-50v */
-    --hsg-color-code-background: #f8dfe2;       /* USWDS red-cool-10 */
-    --hsg-color-tonal-background: color-mix(in srgb, var(--jinks-colors-500) 12%, white);
-
     /* Type families: the vendored serif (also compiled into .usa-prose below)
        and the sans that html sets, for controls inside serif prose. */
     --hsg-font-serif: "Merriweather Web", Georgia, Cambria, "Times New Roman", Times, serif;
@@ -82,7 +34,7 @@
    own now keeps this colour once visited too, instead of the browser's
    visited purple. */
 a {
-    color: var(--hsg-color-link);
+    color: var(--uswds-color-primary-dark);
 }
 
 .fixed-layout > main {
@@ -117,10 +69,10 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    (layout.css), just done with a pseudo-element instead of sizing .toolbar
    itself, since .toolbar has no inner wrapper to re-box afterwards. */
 .toolbar:has(nav[aria-label="breadcrumb"] li) {
-    --hsg-breadcrumb-band-background: #112f4e; /* unique to this band, not a USWDS/jinks token */
+    --hsg-breadcrumb-band-background: var(--uswds-color-primary-darkest);
     position: relative;
     z-index: 0;
-    color: var(--jinks-color-white);
+    color: var(--uswds-color-white);
     padding-top: var(--uswds-space-6);
     padding-bottom: var(--uswds-space-6);
 }
@@ -154,12 +106,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    unset to inherit it. */
 .toolbar:has(nav[aria-label="breadcrumb"] li) a,
 .toolbar:has(nav[aria-label="breadcrumb"] li) a:visited {
-    color: var(--jinks-color-white);
+    color: var(--uswds-color-white);
 }
 
 .toolbar:has(nav[aria-label="breadcrumb"] li) a:hover,
 .toolbar:has(nav[aria-label="breadcrumb"] li) a:active {
-    color: var(--jinks-color-white);
+    color: var(--uswds-color-white);
     text-decoration: underline;
 }
 
@@ -188,13 +140,14 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 /* Footer (#1086).
    USWDS ships the big footer light-on-white; the design puts the whole thing
    on navy, with both bands sharing one background so the seam disappears.
-   Colours are taken from the design: #173a57 ground, USWDS primary-lighter
-   headings, near-white links, a lighter navy disc behind the social icons. */
+   Colours are the design's snapped to the palette (OP#1426): primary-darkest
+   ground, primary-light headings, primary-lighter links, a primary-darker
+   disc behind the social icons. */
 .hsg-footer {
-    --hsg-footer-background: #173a57;
-    --hsg-footer-heading: var(--jinks-colors-200, #a1d3ff);
-    --hsg-footer-text: #dbe9f7;
-    --hsg-footer-social-background: #0e517f;
+    --hsg-footer-background: var(--uswds-color-primary-darkest);
+    --hsg-footer-heading: var(--uswds-color-primary-light);
+    --hsg-footer-text: var(--uswds-color-primary-lighter);
+    --hsg-footer-social-background: var(--uswds-color-primary-darker);
     background-color: var(--hsg-footer-background);
     color: var(--hsg-footer-text);
     padding-top: var(--uswds-space-4);
@@ -363,12 +316,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    #e6e6e6 background with dark text and are unaffected. */
 .usa-banner .usa-banner__header,
 .usa-banner .usa-banner__header-action {
-    color: var(--hsg-color-white);
+    color: var(--uswds-color-white);
 }
 
 .usa-banner .usa-banner__button {
     background-color: transparent;
-    color: var(--hsg-color-white);
+    color: var(--uswds-color-white);
 }
 
 /* The expanded accordion panel (.usa-banner__content) has no background of
@@ -379,15 +332,15 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    on a plain white background even when the header bar is themed; do the
    same here rather than overriding every nested heading/paragraph color. */
 .usa-banner .usa-banner__content {
-    background-color: var(--hsg-color-white);
+    background-color: var(--uswds-color-white);
 }
 
 .hsg-link-broken {
-    color: var(--hsg-color-link-broken);
+    color: var(--uswds-color-error-dark);
 }
 
 .hsg-link-broken:visited {
-    color: var(--hsg-color-link-broken-visited);
+    color: var(--uswds-color-error-darker);
 }
 
 /* Department History monograph section pages (#1096/#1135, PR review) render
@@ -429,7 +382,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .usa-prose .footnotes {
     margin-top: var(--uswds-space-4);
     padding-top: var(--uswds-space-2);
-    border-top: 1px solid var(--hsg-color-rule);
+    border-top: 1px solid var(--uswds-color-base-lighter);
 }
 
 .usa-prose .footnotes dl.footnote {
@@ -492,7 +445,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-frus__published {
     margin-top: var(--uswds-space-105);
-    color: var(--hsg-color-muted);
+    color: var(--uswds-color-base-dark);
 }
 
 .hsg-frus__published > span {
@@ -524,11 +477,11 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    selector to arrive at an indistinguishable grey, the sidebar leaves the
    colour alone and lets the italic carry the distinction. */
 .hsg-frus__toc li.pending > a {
-    color: var(--hsg-color-muted);
+    color: var(--uswds-color-base-dark);
 }
 
 .hsg-frus__toc li.pending > a:hover {
-    color: var(--hsg-color-link-hover);
+    color: var(--uswds-color-primary-darker);
 }
 
 .hsg-frus__toc li.pending > a,
@@ -545,7 +498,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .toc-range {
-    color: var(--hsg-color-muted);
+    color: var(--uswds-color-base-dark);
     font-size: 0.85em;
     margin-left: var(--uswds-space-05);
 }
@@ -584,7 +537,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-frus__doc-entry .dateline {
-    color: var(--hsg-color-muted);
+    color: var(--uswds-color-base-dark);
     font-style: italic;
     margin: 0 0 var(--uswds-space-1);
 }
@@ -594,13 +547,13 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-frus__doc-entry .sourcenote {
-    color: var(--hsg-color-muted);
+    color: var(--uswds-color-base-dark);
     font-size: 0.9rem;
     margin: 0;
 }
 
 .hsg-frus__doc-entry.pending .hsg-frus__doc-title {
-    color: var(--hsg-color-muted);
+    color: var(--uswds-color-base-dark);
     font-style: italic;
     font-weight: 400;
 }
@@ -640,7 +593,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-facs-link {
     display: block;
     margin-left: var(--uswds-space-05);
-    color: var(--hsg-color-muted);
+    color: var(--uswds-color-base-dark);
     float: right;
     font-size: 0.9rem;
 }
@@ -652,10 +605,10 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-navigation-title {
     margin: 0 0 var(--uswds-space-2);
     padding-bottom: var(--uswds-space-1);
-    border-bottom: 1px solid var(--hsg-color-rule);
+    border-bottom: 1px solid var(--uswds-color-base-lighter);
     font-size: 1.05rem;
     font-weight: 600;
-    color: var(--hsg-color-muted);
+    color: var(--uswds-color-base-dark);
 }
 
 /* Previous / next pager on chapter and document pages. */
@@ -885,7 +838,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 @media (min-width: 64em) {
     .usa-nav__primary-item > .usa-current::after,
     .usa-nav__primary-item > a.usa-current::after {
-        background-color: var(--hsg-color-accent);
+        background-color: var(--uswds-color-primary-dark);
     }
 }
 
@@ -973,7 +926,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-admin-cards .usa-card__heading a {
-    color: var(--hsg-color-link);
+    color: var(--uswds-color-primary-dark);
     text-decoration: none;
 }
 
@@ -986,12 +939,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin: 0.25rem 0 0;
     font-style: normal;
     font-weight: 400;
-    color: var(--hsg-color-text);
+    color: var(--uswds-color-text);
 }
 
 .hsg-admin-cards .usa-tag {
-    background-color: var(--hsg-color-background-muted);
-    color: var(--hsg-color-text);
+    background-color: var(--uswds-color-base-lightest);
+    color: var(--uswds-color-text);
 }
 
 /* Administration page volume listing (OP#1214). */
@@ -1000,7 +953,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-status-notice {
-    color: var(--hsg-color-base-dark, #565c65);
+    color: var(--uswds-color-base-dark);
     font-size: 0.9em;
     white-space: nowrap;
 }
@@ -1028,12 +981,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-historicaldocuments-nav {
     background-image:
         url("../images/us-flag-texture.jpg"),
-        linear-gradient(var(--hsg-color-historicaldocuments-nav-bg), var(--hsg-color-historicaldocuments-nav-bg));
+        linear-gradient(color-mix(in srgb, var(--uswds-color-primary-darkest) 80%, transparent), color-mix(in srgb, var(--uswds-color-primary-darkest) 80%, transparent));
     background-blend-mode: multiply;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    color: var(--hsg-color-historicaldocuments-nav-text);
+    color: var(--uswds-color-base-lighter);
     padding-block: var(--uswds-space-4);
 }
 
@@ -1047,7 +1000,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-family: "Merriweather Web", Georgia, Cambria, "Times New Roman", Times, serif;
     font-weight: 400;
     font-size: 2.85rem;
-    border-bottom: 1px solid var(--hsg-color-historicaldocuments-nav-text);
+    border-bottom: 1px solid var(--uswds-color-base-lighter);
     padding-bottom: var(--uswds-space-2);
     margin-top: 0;
 }
@@ -1099,9 +1052,9 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-historicaldocuments-nav-card .usa-card__container {
     min-height: 12.5rem;
     margin: 0;
-    background-color: var(--jinks-colors-700);
-    border: 1px solid rgb(230 230 230 / 25%);
-    color: var(--hsg-color-historicaldocuments-nav-text);
+    background-color: var(--uswds-color-primary-darkest);
+    border: 1px solid color-mix(in srgb, var(--uswds-color-base-lighter) 25%, transparent);
+    color: var(--uswds-color-base-lighter);
 }
 
 /* Fixed min-height (labels run one to four lines depending on viewport)
@@ -1130,9 +1083,9 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 /* The highlighted "All Historical Documents" card - a light CTA variant
    among the otherwise dark cards, per the Figma design. */
 .hsg-historicaldocuments-nav-card--highlight .usa-card__container {
-    background-color: var(--hsg-color-historicaldocuments-nav-text);
-    border-color: var(--hsg-color-historicaldocuments-nav-text);
-    color: var(--hsg-color-accent);
+    background-color: var(--uswds-color-base-lighter);
+    border-color: var(--uswds-color-base-lighter);
+    color: var(--uswds-color-primary-dark);
 }
 
 /* ==========================================================================
@@ -1194,7 +1147,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    (OP#1335); keep them in the muted margin-marker grey rather than the
    usa-prose link color. */
 .usa-prose a.hsg-facs-link {
-    color: var(--hsg-color-muted);
+    color: var(--uswds-color-base-dark);
 }
 
 /* Deep-zoom facsimile viewer on the standalone pg_* facsimile page
@@ -1254,8 +1207,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-search-filters {
     margin-right: var(--uswds-space-4);
     padding: var(--uswds-space-2);
-    background-color: var(--hsg-color-white);
-    color: var(--hsg-color-text);
+    background-color: var(--uswds-color-white);
+    color: var(--uswds-color-text);
 }
 
 /* .usa-prose only caps its paragraphs at 68ex (about 640px here, the frame's
@@ -1272,16 +1225,16 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-size: 1.2rem;
     font-weight: 700;
     line-height: 1.4;
-    color: var(--hsg-color-text);
+    color: var(--uswds-color-text);
 }
 
 .hsg-filter-group {
     min-width: 0;
     margin: 0 0 var(--uswds-space-105);
     padding: var(--uswds-space-2);
-    border: 1px solid var(--hsg-color-rule);
+    border: 1px solid var(--uswds-color-base-lighter);
     border-radius: 4px;
-    background-color: var(--hsg-color-white);
+    background-color: var(--uswds-color-white);
 }
 
 /* A legend sits on its fieldset's top border unless it is floated out of that
@@ -1295,7 +1248,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-size: 1rem;
     font-weight: 700;
     line-height: 1.4;
-    color: var(--hsg-color-heading);
+    color: var(--uswds-color-ink);
 }
 
 .hsg-filter-group__title + * {
@@ -1316,13 +1269,13 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 /* White boxes edged in the text colour, navy once checked (the compiled
    USWDS box takes the page tint and the compiled blue). */
 .hsg-filter-group .usa-checkbox__label::before {
-    background-color: var(--hsg-color-white);
-    box-shadow: 0 0 0 2px var(--hsg-color-text);
+    background-color: var(--uswds-color-white);
+    box-shadow: 0 0 0 2px var(--uswds-color-text);
 }
 
 .hsg-filter-group .usa-checkbox__input:checked + .usa-checkbox__label::before {
-    background-color: var(--jinks-colors-500);
-    box-shadow: 0 0 0 2px var(--jinks-colors-500);
+    background-color: var(--uswds-color-primary-darker);
+    box-shadow: 0 0 0 2px var(--uswds-color-primary-darker);
 }
 
 .hsg-filter-group .usa-checkbox__label {
@@ -1330,7 +1283,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-family: var(--hsg-font-sans);
     font-size: 0.9rem;
     line-height: 1.3;
-    color: var(--hsg-color-text);
+    color: var(--uswds-color-text);
 }
 
 /* A volume title runs long; two lines, the rest under an ellipsis (the full
@@ -1355,7 +1308,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-family: var(--hsg-font-sans);
     font-size: 0.8125rem;
     line-height: 1.3;
-    color: var(--hsg-color-link);
+    color: var(--uswds-color-primary-dark);
 }
 
 .hsg-filter-field .usa-input {
@@ -1382,29 +1335,29 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 /* The design's buttons are the palette's navy, not the compiled USWDS blue. */
 .hsg-search-filters .usa-button,
 .hsg-search-form .usa-button {
-    background-color: var(--jinks-colors-500);
-    color: var(--hsg-color-white);
+    background-color: var(--uswds-color-primary-darker);
+    color: var(--uswds-color-white);
 }
 
 .hsg-search-filters .usa-button:hover,
 .hsg-search-form .usa-button:hover {
-    background-color: var(--jinks-colors-700);
+    background-color: var(--uswds-color-primary-darkest);
 }
 
 .hsg-search-filters .usa-button--outline {
-    background-color: var(--hsg-color-white);
-    box-shadow: inset 0 0 0 2px var(--jinks-colors-500);
-    color: var(--jinks-colors-500);
+    background-color: var(--uswds-color-white);
+    box-shadow: inset 0 0 0 2px var(--uswds-color-primary-darker);
+    color: var(--uswds-color-primary-darker);
 }
 
 .hsg-search-filters .usa-button--outline:hover {
-    background-color: var(--jinks-colors-50);
-    color: var(--jinks-colors-700);
+    background-color: var(--uswds-color-primary-lightest);
+    color: var(--uswds-color-primary-darkest);
 }
 
 /* Keyword box: navy border, rounded outer corners, navy Search button. */
 .hsg-search-form .usa-input {
-    border: 1px solid var(--jinks-colors-500);
+    border: 1px solid var(--uswds-color-primary-darker);
     border-radius: 4px 0 0 4px;
     font-family: var(--hsg-font-sans);
 }
@@ -1426,7 +1379,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin: 0;
     font-size: var(--hsg-font-size-lg);
     line-height: 1.3;
-    color: var(--hsg-color-text);
+    color: var(--uswds-color-text);
 }
 
 .hsg-sort {
@@ -1439,7 +1392,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin: 0;
     font-size: 0.9rem;
     font-weight: 700;
-    color: var(--hsg-color-heading);
+    color: var(--uswds-color-ink);
 }
 
 .hsg-sort .usa-select {
@@ -1473,8 +1426,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     padding: var(--uswds-space-3);
     border: 0;
     border-radius: 4px;
-    background-color: var(--hsg-color-white);
-    box-shadow: 0 1px 3px color-mix(in srgb, var(--hsg-color-text) 15%, transparent);
+    background-color: var(--uswds-color-white);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--uswds-color-text) 15%, transparent);
 }
 
 .hsg-results .usa-collection__body {
@@ -1494,8 +1447,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin: 0;
     padding: var(--uswds-space-05) var(--uswds-space-1);
     border-radius: 2px;
-    background-color: var(--jinks-colors-50);
-    color: var(--hsg-color-link);
+    background-color: var(--uswds-color-primary-lightest);
+    color: var(--uswds-color-primary-dark);
     font-family: var(--hsg-font-sans);
     font-size: 0.6875rem;
     letter-spacing: 0.02em;
@@ -1517,7 +1470,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-results .usa-collection__heading a {
-    color: var(--hsg-color-link);
+    color: var(--uswds-color-primary-dark);
     text-decoration: none;
 }
 
@@ -1534,7 +1487,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin: 0;
     font-size: 0.8125rem;
     line-height: 1.4;
-    color: var(--hsg-color-text);
+    color: var(--uswds-color-text);
 }
 
 .hsg-result__meta dt {
@@ -1558,15 +1511,15 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-result__meta .hi {
-    background-color: var(--hsg-color-highlight);
-    color: var(--hsg-color-text);
+    background-color: var(--uswds-color-warning-lighter);
+    color: var(--uswds-color-text);
 }
 
 .hsg-result__meta code {
     padding: 0 var(--uswds-space-1);
     border-radius: 2px;
-    background-color: var(--hsg-color-code-background);
-    color: var(--hsg-color-code-text);
+    background-color: var(--uswds-color-code-background);
+    color: var(--uswds-color-code);
     font-family: "Roboto Mono Web", "Bitstream Vera Sans Mono", Consolas, Courier, monospace;
     font-size: 0.6875rem;
 }
@@ -1582,8 +1535,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     gap: var(--uswds-space-1);
     padding: var(--uswds-space-1) var(--uswds-space-2);
     border-radius: 4px;
-    background-color: var(--hsg-color-tonal-background);
-    color: var(--jinks-colors-500);
+    background-color: color-mix(in srgb, var(--uswds-color-primary-darker) 12%, transparent);
+    color: var(--uswds-color-primary-darker);
     font-family: var(--hsg-font-sans);
     font-size: 0.8125rem;
     font-weight: 700;
@@ -1592,8 +1545,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-result__facsimile:hover,
 .hsg-result__facsimile:focus {
-    background-color: var(--jinks-colors-200);
-    color: var(--jinks-colors-700);
+    background-color: var(--uswds-color-primary-light);
+    color: var(--uswds-color-primary-darkest);
 }
 
 .hsg-result__facsimile .usa-icon {
@@ -1620,27 +1573,27 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     height: 2rem;
     padding: 0 var(--uswds-space-1);
     border-radius: 2px;
-    background-color: var(--hsg-color-white);
-    color: var(--hsg-color-link);
+    background-color: var(--uswds-color-white);
+    color: var(--uswds-color-primary-dark);
     font-family: var(--hsg-font-sans);
     font-weight: 700;
     text-decoration: none;
 }
 
 .hsg-search-pagination .usa-pagination__button.usa-current {
-    background-color: var(--jinks-colors-500);
-    color: var(--hsg-color-white);
+    background-color: var(--uswds-color-primary-darker);
+    color: var(--uswds-color-white);
 }
 
 .hsg-search-pagination .usa-pagination__link {
-    color: var(--hsg-color-link);
+    color: var(--uswds-color-primary-dark);
     font-family: var(--hsg-font-sans);
     font-weight: 700;
     text-decoration: none;
 }
 
 .hsg-search-pagination .usa-pagination__overflow {
-    color: var(--hsg-color-muted);
+    color: var(--uswds-color-base-dark);
 }
 
 /* OP#1416: About Us > Frequently Asked Questions as a USWDS accordion, from
@@ -1659,23 +1612,23 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     box-sizing: border-box;
     width: 100%;
     padding: var(--uswds-space-2) var(--uswds-space-6) var(--uswds-space-2) var(--uswds-space-3);
-    background-color: var(--hsg-color-white);
+    background-color: var(--uswds-color-white);
     background-image: none;
-    color: var(--jinks-colors-700);
+    color: var(--uswds-color-primary-darkest);
     font-family: "Merriweather Web", Georgia, Cambria, "Times New Roman", Times, serif;
     font-size: var(--hsg-font-size-md);
     line-height: 1.3;
 }
 
 .hsg-faq .usa-accordion__heading .usa-accordion__button:hover {
-    background-color: var(--hsg-color-background-muted);
-    color: var(--jinks-colors-700);
+    background-color: var(--uswds-color-base-lightest);
+    color: var(--uswds-color-primary-darkest);
 }
 
 .hsg-faq .usa-accordion__heading .usa-accordion__button[aria-expanded="true"],
 .hsg-faq .usa-accordion__heading .usa-accordion__button[aria-expanded="true"]:hover {
-    background-color: var(--jinks-colors-700);
-    color: var(--hsg-color-white);
+    background-color: var(--uswds-color-primary-darkest);
+    color: var(--uswds-color-white);
 }
 
 .hsg-faq .usa-accordion__heading .usa-accordion__button::before {
@@ -1691,8 +1644,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-faq .usa-accordion__content {
     padding: var(--uswds-space-3);
-    background-color: var(--hsg-color-white);
-    color: var(--hsg-color-text);
+    background-color: var(--uswds-color-white);
+    color: var(--uswds-color-text);
 }
 
 .hsg-faq .usa-accordion__content > * {
@@ -1702,9 +1655,9 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 /* Answers carry TEI refs, which nothing else colours: they fell back to the
    browser's default blue. The Figma panel uses the theme link colours. */
 .hsg-faq .usa-accordion__content a {
-    color: var(--hsg-color-link);
+    color: var(--uswds-color-primary-dark);
 }
 
 .hsg-faq .usa-accordion__content a:hover {
-    color: var(--hsg-color-link-hover);
+    color: var(--uswds-color-primary-darker);
 }
