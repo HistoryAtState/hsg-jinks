@@ -215,7 +215,8 @@ describe("results page: filter panel, cards and controls (OP#1420)", () => {
             cy.contains("dt", "Recorded Date").next("dd").should("have.text", "February 23, 1990");
             cy.contains("dt", "Recorded Location").next("dd").should("have.text", "Washington");
             cy.contains("dt", "Encoded Date").next("dd").find("code").should("have.text", 'when="1990-02-23"');
-            cy.get(".hsg-snippet .hi").first().should("have.css", "background-color", "rgb(255, 240, 0)");
+            // The design's #fff000, snapped to the palette's warning-lighter (OP#1426).
+            cy.get(".hsg-snippet .hi").first().should("have.css", "background-color", "rgb(250, 206, 0)");
             cy.get("a.hsg-result__facsimile").should("have.attr", "href").and("match", /\/historicaldocuments\/frus1989-92v31\/pg_/);
         });
     });
