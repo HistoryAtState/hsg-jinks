@@ -5,8 +5,9 @@
 // names, plus hidden start-date/end-date/start-time/end-time fields that carry
 // the actual query parameters. This script
 //
-// - shows the filter only while "Historical Documents" is the only ticked
-//   section, and disables it otherwise so none of it is submitted;
+// - shows the filter, and the volumes filter of the results sidebar, only
+//   while "Historical Documents" is the only ticked section, and disables
+//   them otherwise so none of it is submitted;
 // - on submit, combines the parts into the hidden fields: a year alone gives
 //   "1941", a month and year "1941-12", a full date "1941-12-07"; an hour
 //   (with optional minute) gives a 24-hour "HH:MM".
@@ -85,7 +86,7 @@
     function toggle() {
         var checked = sectionBoxes().filter(function (box) { return box.checked; });
         var active = checked.length === 1 && checked[0].value === "documents";
-        document.querySelectorAll("[data-hsg-date-filter]").forEach(function (filter) {
+        document.querySelectorAll("[data-hsg-documents-only]").forEach(function (filter) {
             filter.hidden = !active;
             filter.disabled = !active;
         });

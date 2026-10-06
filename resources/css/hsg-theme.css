@@ -1276,8 +1276,9 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 /* Date filter (OP#1432): month/day/year and hour/minute/am-pm parts, as on
    the reference site. Offered only while Historical Documents is the only
-   section; [hidden] must win over any display set on the group. */
-[data-hsg-date-filter][hidden] {
+   section (as is the Volumes group); [hidden] must win over any display set
+   on the group. */
+[data-hsg-documents-only][hidden] {
     display: none;
 }
 

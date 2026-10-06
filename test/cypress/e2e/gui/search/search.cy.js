@@ -210,7 +210,7 @@ describe("results page: filter panel, cards and controls (OP#1420)", () => {
     });
 
     it("volume checkboxes are labelled with the volume title, not the bare id", () => {
-        cy.visit("search?q=salt");
+        cy.visit("search?q=salt&within=documents");
         cy.get("label[for^='volume-']").each(($label) => {
             expect($label.text().trim()).to.not.match(/^frus\d/);
         });
@@ -352,19 +352,40 @@ describe("search pages work as on the reference site (OP#1432)", () => {
 
     it("the date filter is offered only while Historical Documents is the only section", () => {
         cy.visit("search?q=salt");
-        cy.get("[data-hsg-date-filter]").should("not.be.visible").and("be.disabled");
+        cy.get(".hsg-date-filter").should("not.be.visible").and("be.disabled");
         cy.get("#within-documents").check({ force: true });
-        cy.get("[data-hsg-date-filter]").should("be.visible").and("not.be.disabled");
+        cy.get(".hsg-date-filter").should("be.visible").and("not.be.disabled");
         cy.get("#within-department").check({ force: true });
-        cy.get("[data-hsg-date-filter]").should("not.be.visible").and("be.disabled");
+        cy.get(".hsg-date-filter").should("not.be.visible").and("be.disabled");
         cy.get("#within-department").uncheck({ force: true });
-        cy.get("[data-hsg-date-filter]").should("be.visible");
+        cy.get(".hsg-date-filter").should("be.visible");
+    });
+
+    it("the volumes filter is offered only while Historical Documents is the only section", () => {
+        cy.visit("search?q=salt");
+        cy.contains(".hsg-filter-group__title", "Volumes").parents("fieldset").first().as("volumes");
+        cy.get("@volumes").should("not.be.visible").and("be.disabled");
+        cy.get("#within-documents").check({ force: true });
+        cy.get("@volumes").should("be.visible").and("not.be.disabled");
+        cy.get("#within-countries").check({ force: true });
+        cy.get("@volumes").should("not.be.visible").and("be.disabled");
+        // a volume-id deep link searches historical documents, so its volumes are shown
+        cy.visit("search?q=salt&volume-id=frus1989-92v31");
+        cy.get("#within-documents").should("be.checked");
+        cy.get("#volume-frus1989-92v31").should("be.visible").and("be.checked");
+    });
+
+    it("a hidden volumes filter is not submitted", () => {
+        cy.visit("search?q=salt&within=documents&volume-id=frus1989-92v31");
+        cy.get("#within-department").check({ force: true });
+        cy.contains("button", "Apply filters").click();
+        cy.location("search").should("include", "within=department").and("not.include", "volume-id");
     });
 
     it("a date-only deep link ticks Historical Documents and opens its date filter", () => {
         cy.visit("search?start-date=1985-06-12&end-date=1985-06-12");
         cy.get("#within-documents").should("be.checked");
-        cy.get("[data-hsg-date-filter]").should("be.visible");
+        cy.get(".hsg-date-filter").should("be.visible");
         cy.get("#start-date-year").should("have.value", "1985");
     });
 

@@ -600,9 +600,20 @@ declare %private function srch:section-checkboxes($form as xs:string?, $selected
 (:~ The date filter only applies to historical documents, so it is offered
  : only while that is the one section searched (reference parity: hsg-shell's
  : app.js shows it only when "Historical Documents" is the sole ticked box).
+ : The volumes filter follows the same rule.
  : resources/scripts/search-dates.js keeps this in step as boxes change. :)
 declare function srch:date-filter-active($within as xs:string*) as xs:boolean {
     deep-equal(distinct-values($within[. ne ""]), "documents")
+};
+
+(:~ The attributes of a filter group that only applies to historical
+ : documents (the date filter and the volumes): marked for
+ : resources/scripts/search-dates.js, and hidden and disabled, so nothing in
+ : it is submitted, unless Historical Documents is the only section. :)
+declare %private function srch:documents-only($within as xs:string*) as attribute()+ {
+    attribute data-hsg-documents-only { "" },
+    if (srch:date-filter-active($within)) then ()
+    else (attribute hidden { "hidden" }, attribute disabled { "disabled" })
 };
 
 (:~ "1985-06-12", "1985-06" or "1985" to its parts; absent parts are (). :)
@@ -691,11 +702,8 @@ declare %private function srch:date-time-fields($context as map(*), $prefix as x
  : it is submitted, unless Historical Documents is the only section searched. :)
 declare %private function srch:date-filter($context as map(*), $within as xs:string*, $form as xs:string?,
         $class as xs:string, $legend as element()) as element(fieldset) {
-    <fieldset class="usa-fieldset {$class}" data-hsg-date-filter="">
-        {
-            if (srch:date-filter-active($within)) then ()
-            else (attribute hidden { "hidden" }, attribute disabled { "disabled" })
-        }
+    <fieldset class="usa-fieldset {$class}">
+        { srch:documents-only($within) }
         { $legend }
         { srch:date-time-fields($context, "start", $form) }
         { srch:date-time-fields($context, "end", $form) }
@@ -711,7 +719,13 @@ declare function srch:landing-date-filter($context as map(*)) as element(fieldse
 (: ============== results sidebar ============== :)
 
 declare %private function srch:filter-group($title as xs:string, $hint as xs:string?, $controls as item()*) as element(fieldset) {
+    srch:filter-group($title, $hint, $controls, ())
+};
+
+declare %private function srch:filter-group($title as xs:string, $hint as xs:string?, $controls as item()*,
+        $attributes as attribute()*) as element(fieldset) {
     <fieldset class="usa-fieldset hsg-filter-group">
+        { $attributes }
         <legend class="hsg-filter-group__title">{$title}</legend>
         { if (exists($hint)) then <p class="hsg-filter-group__hint">{$hint}</p> else () }
         { $controls }
@@ -751,7 +765,7 @@ declare function srch:filters($context as map(*)) as element(div) {
             srch:filter-group("Sections", (), srch:section-checkboxes($srch:FORM_ID, $within)),
             srch:date-filter($context, $within, $srch:FORM_ID, "hsg-filter-group hsg-date-filter",
                 <legend class="hsg-filter-group__title">Date</legend>),
-            srch:filter-volumes($context)
+            srch:filter-volumes($context, $within)
         }
         <div class="hsg-search-filters__actions">
             <a class="usa-button usa-button--outline" href="{srch:reset-href($context)}">Reset filters</a>
@@ -787,13 +801,13 @@ declare function srch:sort-select($context as map(*)) as element(div) {
 (:~ The volumes the current hits fall in, as checkboxes. Absent when nothing
  : matched or no hit is a FRUS volume. The label is clamped to two lines by
  : the theme; the full title stays available as the tooltip. :)
-declare %private function srch:filter-volumes($context as map(*)) as element(fieldset)? {
+declare %private function srch:filter-volumes($context as map(*), $within as xs:string*) as element(fieldset)? {
     let $r := srch:results($context)
     return
         if (empty($r?("results-vol-ids"))) then
             ()
         else
-            srch:filter-group("Volumes", "Volume search is active only if the Historical Documents section is selected",
+            srch:filter-group("Volumes", (),
                 for $volId in sort($r?("results-vol-ids"))
                 let $label := srch:volume-label($volId)
                 return
@@ -804,6 +818,7 @@ declare %private function srch:filter-volumes($context as map(*)) as element(fie
                         <label class="usa-checkbox__label" for="volume-{$volId}" title="{hsg:publication-title($volId)}">
                             <span class="hsg-filter-group__label-text">{$label}</span>
                         </label>
-                    </div>
+                    </div>,
+                srch:documents-only($within)
             )
 };
