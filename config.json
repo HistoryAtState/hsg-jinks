@@ -317,7 +317,7 @@
     "^templates/menu\\.html",
     "^templates/menu-mobile\\.html",
     "^test/cypress/e2e/gui/landing-page\\.cy\\.js",
-    "^test/cypress/e2e/landing\\.cy\\.js",
+    "^test/cypress/e2e/[^/]+\\.cy\\.js$",
     "^templates/footer\\.html",
     "^modules/lib/api\\.json",
     "^data/content/"
