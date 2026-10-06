@@ -9,7 +9,7 @@
         },
         "script": {
             "custom": [
-                "resources/scripts/search-landing.js"
+                "resources/scripts/search-dates.js"
             ]
         }
     }
@@ -22,14 +22,17 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                <li typeof="ListItem" property="itemListElement"><pb-i18n key="search.results">Search</pb-i18n></li>
+                <li typeof="ListItem" property="itemListElement">
+                    <a href="[[ $context-path ]]/" typeof="WebPage" property="item"><pb-i18n key="breadcrumb.home">Home</pb-i18n></a>
+                </li>
+                <li aria-current="page" typeof="ListItem" property="itemListElement"><pb-i18n key="search.search">Search</pb-i18n></li>
             </ul>
         </nav>
     </li>
     [% endtemplate %]
 
     <div class="usa-prose">
-        <h1><pb-i18n key="search.results">Search</pb-i18n></h1>
+        <h1><pb-i18n key="search.search">Search</pb-i18n></h1>
         <p>Search the entire Office of the Historian website by keyword, or read the
         <a href="[[ $context-path ]]/search/tips">search tips</a> for phrase, boolean,
         wildcard, and proximity operators and date/volume filtering.</p>
@@ -45,39 +48,7 @@
 
             [[ srch:filter-sections($context) ]]
 
-            <fieldset class="usa-fieldset">
-                <legend class="usa-legend">Filter by Date (Historical Documents only)</legend>
-                <div class="usa-memorable-date">
-                    <div class="usa-form-group usa-form-group--month">
-                        <label class="usa-label" for="start-date-month">Start month</label>
-                        <input class="usa-input usa-input--inline usa-memorable-date__input" id="start-date-month" name="start-date-month" type="text" maxlength="2" placeholder="MM"/>
-                    </div>
-                    <div class="usa-form-group usa-form-group--day">
-                        <label class="usa-label" for="start-date-day">Start day</label>
-                        <input class="usa-input usa-input--inline usa-memorable-date__input" id="start-date-day" name="start-date-day" type="text" maxlength="2" placeholder="DD"/>
-                    </div>
-                    <div class="usa-form-group usa-form-group--year">
-                        <label class="usa-label" for="start-date-year">Start year</label>
-                        <input class="usa-input usa-input--inline usa-memorable-date__input" id="start-date-year" name="start-date-year" type="text" maxlength="4" placeholder="YYYY"/>
-                    </div>
-                </div>
-                <div class="usa-memorable-date">
-                    <div class="usa-form-group usa-form-group--month">
-                        <label class="usa-label" for="end-date-month">End month</label>
-                        <input class="usa-input usa-input--inline usa-memorable-date__input" id="end-date-month" name="end-date-month" type="text" maxlength="2" placeholder="MM"/>
-                    </div>
-                    <div class="usa-form-group usa-form-group--day">
-                        <label class="usa-label" for="end-date-day">End day</label>
-                        <input class="usa-input usa-input--inline usa-memorable-date__input" id="end-date-day" name="end-date-day" type="text" maxlength="2" placeholder="DD"/>
-                    </div>
-                    <div class="usa-form-group usa-form-group--year">
-                        <label class="usa-label" for="end-date-year">End year</label>
-                        <input class="usa-input usa-input--inline usa-memorable-date__input" id="end-date-year" name="end-date-year" type="text" maxlength="4" placeholder="YYYY"/>
-                    </div>
-                </div>
-                <input type="hidden" name="start-date" id="start-date" value="[[ page:parameter($context, 'start-date', '') ]]"/>
-                <input type="hidden" name="end-date" id="end-date" value="[[ page:parameter($context, 'end-date', '') ]]"/>
-            </fieldset>
+            [[ srch:landing-date-filter($context) ]]
 
             <div class="usa-form-group">
                 <label class="usa-label" for="sort-by">Sort by</label>

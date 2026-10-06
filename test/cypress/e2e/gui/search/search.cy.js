@@ -191,16 +191,19 @@ describe("results page: filter panel, cards and controls (OP#1420)", () => {
     });
 
     it("the filter panel has boxed Sections, Date and Volumes groups with Reset and Apply", () => {
-        cy.visit("search?q=salt");
+        // the Date group is only offered while Historical Documents is the one section
+        cy.visit("search?q=salt&within=documents");
         cy.get(".hsg-search-filters__heading").should("have.text", "Filter by");
         cy.get(".hsg-filter-group__title").then(($titles) => {
             expect([...$titles].map((t) => t.textContent.trim())).to.deep.equal(["Sections", "Date", "Volumes"]);
         });
         cy.get(".hsg-filter-group input[name='within']").should("have.length", 7);
-        cy.get("#start-date").should("have.attr", "type", "date");
-        cy.get("#start-time").should("have.attr", "type", "time");
-        cy.get("#end-date").should("have.attr", "type", "date");
-        cy.get("#end-time").should("have.attr", "type", "time");
+        ["start", "end"].forEach((prefix) => {
+            ["date-month", "date-day", "date-year", "time-hour", "time-minute"].forEach((part) => {
+                cy.get(`#${prefix}-${part}`).should("be.visible").and("not.have.attr", "name");
+            });
+            cy.get(`#${prefix}-time-period`).should("be.visible");
+        });
         cy.get("input[name='volume-id']").should("have.length.at.least", 1);
         cy.contains("a.usa-button", "Reset filters").should("be.visible");
         cy.contains("button.usa-button", "Apply filters").should("be.visible");
@@ -222,7 +225,7 @@ describe("results page: filter panel, cards and controls (OP#1420)", () => {
         });
     });
 
-    it("a historical-document card carries place/date chips, the recorded and encoded date, a highlighted keyword and a facsimile link", () => {
+    it("a historical-document card carries place/date chips, the recorded and encoded date and a highlighted keyword", () => {
         cy.visit("search?q=salt&within=documents&volume-id=frus1989-92v31");
         cy.contains(".usa-collection__item", "82. Memorandum From Senator Warner to President Bush").within(() => {
             cy.get(".usa-tag").then(($tags) => {
@@ -233,14 +236,6 @@ describe("results page: filter panel, cards and controls (OP#1420)", () => {
             cy.contains("dt", "Encoded Date").next("dd").find("code").should("have.text", 'when="1990-02-23"');
             // The design's #fff000, snapped to the palette's warning-lighter (OP#1426).
             cy.get(".hsg-snippet .hi").first().should("have.css", "background-color", "rgb(250, 206, 0)");
-            cy.get("a.hsg-result__facsimile").should("have.attr", "href").and("match", /\/historicaldocuments\/frus1989-92v31\/pg_/);
-        });
-    });
-
-    it("the facsimile link opens the page scan view", () => {
-        cy.visit("search?q=salt&within=documents&volume-id=frus1989-92v31");
-        cy.get("a.hsg-result__facsimile").first().then(($a) => {
-            cy.request($a.prop("href")).its("status").should("eq", 200);
         });
     });
 
@@ -276,12 +271,18 @@ describe("results page: filter panel, cards and controls (OP#1420)", () => {
     it("Apply filters applies a date range to historical documents", () => {
         cy.visit("search?q=salt");
         cy.get("#within-documents").check({ force: true });
-        cy.get("#start-date").type("1990-02-23");
-        cy.get("#end-date").type("1990-02-23");
+        cy.get("#start-date-month").type("02");
+        cy.get("#start-date-day").type("23");
+        cy.get("#start-date-year").type("1990");
+        cy.get("#end-date-month").type("2");
+        cy.get("#end-date-day").type("23");
+        cy.get("#end-date-year").type("1990");
         cy.contains("button", "Apply filters").click();
         cy.location("search").should("include", "start-date=1990-02-23").and("include", "end-date=1990-02-23");
         cy.contains(".hsg-results-summary", "between February 23, 1990 and February 23, 1990");
-        cy.get("#start-date").should("have.value", "1990-02-23");
+        cy.get("#start-date-year").should("have.value", "1990");
+        cy.get("#start-date-month").should("have.value", "02");
+        cy.get("#start-date-day").should("have.value", "23");
     });
 
     it("Reset filters goes back to the keyword alone", () => {
@@ -317,5 +318,122 @@ describe("results page: filter panel, cards and controls (OP#1420)", () => {
     it("prose links use the theme link colour, not the browser default", () => {
         cy.visit("search?q=salt");
         cy.contains(".hsg-search-results > p a", "Search Tips").should("have.css", "color", "rgb(44, 96, 138)");
+    });
+});
+
+// OP#1432: the search form works as on the reference site.
+describe("search pages work as on the reference site (OP#1432)", () => {
+    beforeEach(() => {
+        cy.viewport(1440, 900);
+    });
+
+    it("the results page has a visible Search results heading", () => {
+        cy.visit("search?q=salt");
+        cy.get("main h1").should("be.visible").and("contain.text", "Search results");
+    });
+
+    it("the landing page heading is Search, not Search results", () => {
+        cy.visit("search");
+        cy.get("main h1").should("be.visible").invoke("text").then((t) => expect(t.trim()).to.equal("Search"));
+    });
+
+    it("results span the content column: intro, search form and list are not capped", () => {
+        cy.visit("search?q=salt");
+        cy.get(".hsg-search-results").then(($col) => {
+            const width = $col[0].getBoundingClientRect().width;
+            expect(width).to.be.greaterThan(640); // wider than the old 40rem cap
+            [".hsg-search-results > p", ".hsg-search-form", ".hsg-results"].forEach((sel) => {
+                cy.get(sel).first().should(($el) => {
+                    expect($el[0].getBoundingClientRect().width).to.be.closeTo(width, 1);
+                });
+            });
+        });
+    });
+
+    it("the date filter is offered only while Historical Documents is the only section", () => {
+        cy.visit("search?q=salt");
+        cy.get("[data-hsg-date-filter]").should("not.be.visible").and("be.disabled");
+        cy.get("#within-documents").check({ force: true });
+        cy.get("[data-hsg-date-filter]").should("be.visible").and("not.be.disabled");
+        cy.get("#within-department").check({ force: true });
+        cy.get("[data-hsg-date-filter]").should("not.be.visible").and("be.disabled");
+        cy.get("#within-department").uncheck({ force: true });
+        cy.get("[data-hsg-date-filter]").should("be.visible");
+    });
+
+    it("a date-only deep link ticks Historical Documents and opens its date filter", () => {
+        cy.visit("search?start-date=1985-06-12&end-date=1985-06-12");
+        cy.get("#within-documents").should("be.checked");
+        cy.get("[data-hsg-date-filter]").should("be.visible");
+        cy.get("#start-date-year").should("have.value", "1985");
+    });
+
+    it("a year alone searches that whole year", () => {
+        cy.visit("search?q=salt&within=documents");
+        cy.get("#start-date-year").type("1990");
+        cy.contains("button", "Apply filters").click();
+        cy.location("search").should("include", "start-date=1990").and("not.include", "start-date=1990-");
+        cy.contains(".hsg-results-summary", "between January 1, 1990 and December 31, 1990");
+    });
+
+    it("a month and year on the landing page searches that whole month", () => {
+        cy.visit("search");
+        cy.get("#search-field").type("salt");
+        cy.get("#within-documents").check({ force: true });
+        cy.get("#start-date-month").type("2");
+        cy.get("#start-date-year").type("1990");
+        cy.get("form.usa-form").submit();
+        cy.location("search").should("include", "start-date=1990-02").and("not.include", "start-date=1990-02-");
+        cy.contains(".hsg-results-summary", "between February 1, 1990 and February 28, 1990");
+    });
+
+    it("a time on a full date is sent as 24-hour time, 12 am as midnight", () => {
+        cy.visit("search?q=salt&within=documents");
+        cy.get("#start-date-month").type("02");
+        cy.get("#start-date-day").type("23");
+        cy.get("#start-date-year").type("1990");
+        cy.get("#start-time-hour").type("1");
+        cy.get("#start-time-minute").type("5");
+        cy.get("#start-time-period").select("pm");
+        cy.get("#end-date-month").type("02");
+        cy.get("#end-date-day").type("24");
+        cy.get("#end-date-year").type("1990");
+        cy.get("#end-time-hour").type("12");
+        cy.get("#end-time-period").select("am");
+        cy.contains("button", "Apply filters").click();
+        cy.location("search").should("include", "start-time=13%3A05").and("include", "end-time=00%3A00");
+        cy.get("#start-time-hour").should("have.value", "1");
+        cy.get("#start-time-minute").should("have.value", "05");
+        cy.get("#start-time-period").should("have.value", "pm");
+    });
+
+    it("a time without a full date is not sent, and a partial date keeps filtering", () => {
+        cy.visit("search?q=salt&within=documents");
+        cy.get("#start-date-month").type("02");
+        cy.get("#start-date-year").type("1990");
+        cy.get("#start-time-hour").type("9");
+        cy.contains("button", "Apply filters").click();
+        cy.location("search").should("include", "start-date=1990-02").and("not.include", "start-time=");
+        // a hand-written link with a time on a partial date still filters by the date
+        cy.visit("search?q=salt&within=documents&start-date=1990-02&start-time=13:07");
+        cy.contains(".hsg-results-summary", "between February 1, 1990 and February 28, 1990");
+    });
+
+    it("breadcrumbs follow the search hierarchy without repeating Search", () => {
+        const crumbs = () => cy.get("nav[aria-label='breadcrumb'] li").then(($li) => [...$li].map((li) => li.textContent.trim()));
+        cy.visit("search");
+        crumbs().should("deep.equal", ["Home", "Search"]);
+        cy.visit("search?q=salt");
+        crumbs().should("deep.equal", ["Home", "Search", "Results"]);
+        cy.contains("nav[aria-label='breadcrumb'] a", "Search").should("have.attr", "href").and("match", /\/search$/);
+        cy.visit("search/tips");
+        crumbs().should("deep.equal", ["Home", "Search", "Tips"]);
+    });
+
+    it("search results offer no facsimile link", () => {
+        cy.visit("search?q=salt&within=documents&volume-id=frus1989-92v31");
+        cy.get(".hsg-results .usa-collection__item").should("have.length.at.least", 1);
+        cy.get(".hsg-results").contains("Facsimile").should("not.exist");
+        cy.get(".hsg-results a[href*='/pg_']").should("not.exist");
     });
 });

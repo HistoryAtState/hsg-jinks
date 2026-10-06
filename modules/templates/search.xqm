@@ -43,7 +43,6 @@ import module namespace cache = "http://exist-db.org/xquery/cache" at "java:org.
 import module namespace page = "http://teipublisher.com/ns/templates/page" at "page.xqm";
 import module namespace fd = "http://history.state.gov/ns/site/hsg/frus-dates" at "../frus-dates.xqm";
 import module namespace ext = "http://history.state.gov/ns/frus/odd-ext" at "../frus-ext.xqm";
-import module namespace global = "http://e-editiones.org/tei-publisher/odd-global" at "../odd-global.xqm";
 import module namespace hsg = "https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
@@ -197,14 +196,20 @@ declare %private function srch:sort($hits as element()*, $sortBy as xs:string) a
             return $hit
 };
 
-(:~ US Eastern, hard-coded -- see doc/epic-1102-search-plan.md / frus-dates.xqm. :)
+(:~ US Eastern, hard-coded -- see doc/epic-1102-search-plan.md / frus-dates.xqm.
+ : A time only narrows a full date (YYYY-MM-DD): appended to a year or a
+ : year-month it makes an invalid dateTime and the whole date filter was
+ : silently dropped, so it is ignored there (OP#1432). :)
 declare %private function srch:date-range($startDate as xs:string?, $endDate as xs:string?,
         $startTime as xs:string?, $endTime as xs:string?) as map(*) {
     let $timezone := xs:dayTimeDuration("-PT5H")
+    let $withTime := function($date as xs:string, $time as xs:string?) as xs:string {
+        if ($time and matches($date, "^\d{4}-\d{2}-\d{2}$")) then $date || "T" || $time else $date
+    }
     let $rangeStart :=
-        if ($startDate) then fd:normalize-low($startDate || (if ($startTime) then ("T" || $startTime) else ()), $timezone) else ()
+        if ($startDate) then fd:normalize-low($withTime($startDate, $startTime), $timezone) else ()
     let $rangeEnd :=
-        if ($endDate) then fd:normalize-high($endDate || (if ($endTime) then ("T" || $endTime) else ()), $timezone)
+        if ($endDate) then fd:normalize-high($withTime($endDate, $endTime), $timezone)
         else if ($startDate) then fd:normalize-high($startDate, $timezone)
         else ()
     return map { "start": $rangeStart, "end": $rangeEnd }
@@ -347,14 +352,11 @@ declare %private function srch:meta-list($rows as element()*) as element(dl)? {
 (:~
  : Card content for a FRUS division: the place and date chips and the
  : recorded/encoded date rows (historical documents only), the resource id,
- : the keyword snippets and score, and a link to the facsimile of the page
- : the division starts on. The facsimile link is only offered where the
- : volume has a scan for that page (global:iiif-facs-id, the same test the
- : "[Page N]" markers in the document text use), and points at the pg_*
- : route the hsg-api serves, built from the volume segment of the hit's own
- : hsg-url so it can never disagree with the title link.
+ : and the keyword snippets and score. No facsimile link: search results
+ : don't offer one (OP#1432, a business decision; the reference site didn't
+ : show it either).
  :)
-declare %private function srch:frus-card($doc as element(tei:div), $href as xs:string?) as map(*) {
+declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
     let $docId := $doc/@xml:id
     let $volId := root($doc)/tei:TEI/@xml:id
     (: the division subtype is a teiHeader bibl in this data model, not an
@@ -372,12 +374,6 @@ declare %private function srch:frus-card($doc as element(tei:div), $href as xs:s
         return kwic:get-summary($highlighted, $hit, <config width="40"/>)
     )
     let $score := ft:score($doc)
-    let $pb := ($doc//tei:pb[@n])[1]
-    let $facsimile :=
-        if (exists($pb) and matches($href, "^/historicaldocuments/[^/]+/") and exists(global:iiif-facs-id((), $pb))) then
-            replace($href, "^(/historicaldocuments/[^/]+)/.*$", "$1") || "/pg_" || encode-for-uri($pb/@n)
-        else
-            ()
     return map {
         "tags": if ($historical) then ($placeNameString, $dateString)[. ne ""] else (),
         "summary": srch:meta-list((
@@ -389,22 +385,20 @@ declare %private function srch:frus-card($doc as element(tei:div), $href as xs:s
             srch:meta-row("Resource ID", $volId/string() || "/" || $docId/string()),
             if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else (),
             if ($score) then srch:meta-row("Keyword Relevance", $score) else ()
-        )),
-        "facsimile": $facsimile
+        ))
     }
 };
 
 (:~
  : What one hit renders as: title and href for the card heading, plus
- : "tags" (chips above the title), "summary" (the metadata list) and
- : "facsimile" (a path to the page scan), all empty where a hit type has
- : nothing to show. The href trusts the hsg-url Lucene field (module doc
+ : "tags" (chips above the title) and "summary" (the metadata list), both
+ : empty where a hit type has nothing to show. The href trusts the hsg-url Lucene field (module doc
  : above) except for the two element types with no such field.
  :)
 declare %private function srch:render-hit($hit as element()) as map(*) {
     let $href := ft:field($hit, "hsg-url")
     let $card := function($title as xs:string, $rows as element()*) as map(*) {
-        map { "title": $title, "href": $href, "tags": (), "summary": srch:meta-list($rows), "facsimile": () }
+        map { "title": $title, "href": $href, "tags": (), "summary": srch:meta-list($rows) }
     }
     return
         typeswitch ($hit)
@@ -418,7 +412,7 @@ declare %private function srch:render-hit($hit as element()) as map(*) {
                 return $card("Travels: " || string-join($hit/trip[1]/name, ", "), srch:meta-row("Matching Trips", $count))
             case element(tei:div) return
                 if (ft:field($hit, "hsg-publication") = "frus" or starts-with(base-uri($hit), $srch:FRUS_COL)) then
-                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit, $href)))
+                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit)))
                 else
                     $card(
                         normalize-space(string-join(($hit/tei:head)[1]//text()[not(./ancestor::tei:note)])),
@@ -430,7 +424,7 @@ declare %private function srch:render-hit($hit as element()) as map(*) {
                     srch:keyword-row(kwic:summarize(util:expand($hit), <config xmlns="" width="60"/>))
                 )
             default return
-                map { "title": "Untitled result", "href": "#", "tags": (), "summary": (), "facsimile": () }
+                map { "title": "Untitled result", "href": "#", "tags": (), "summary": () }
 };
 
 (:~ The "Keyword Results" row of the non-FRUS hit types, from kwic:summarize. :)
@@ -464,7 +458,7 @@ declare function srch:results-summary($context as map(*)) as element(p) {
             <p class="usa-prose hsg-results-summary">No results were found.</p>
 };
 
-(:~ One card per hit: chips, title link, metadata list, facsimile link. The
+(:~ One card per hit: chips, title link, metadata list. The
  : list keeps USWDS's usa-collection semantics; the card look is the theme's
  : (resources/css/hsg-theme.css, "Search results page"). :)
 declare function srch:results-list($context as map(*)) as element(ul) {
@@ -490,19 +484,6 @@ declare function srch:results-list($context as map(*)) as element(ul) {
                         }
                         <h3 class="usa-collection__heading"><a href="{$context?context-path}{$rendered?href}">{$rendered?title}</a></h3>
                         { $rendered?summary }
-                        {
-                            if (exists($rendered?facsimile)) then
-                                <p class="hsg-result__actions">
-                                    <a class="hsg-result__facsimile" href="{$context?context-path}{$rendered?facsimile}">
-                                        <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
-                                            <use href="{$context?context-path}/resources/images/sprite.svg#image"/>
-                                        </svg>
-                                        Facsimile Page
-                                    </a>
-                                </p>
-                            else
-                                ()
-                        }
                     </div>
                 </li>
         }
@@ -614,6 +595,119 @@ declare %private function srch:section-checkboxes($form as xs:string?, $selected
         </div>
 };
 
+(: ============== date filter (landing page and results sidebar) ============== :)
+
+(:~ The date filter only applies to historical documents, so it is offered
+ : only while that is the one section searched (reference parity: hsg-shell's
+ : app.js shows it only when "Historical Documents" is the sole ticked box).
+ : resources/scripts/search-dates.js keeps this in step as boxes change. :)
+declare function srch:date-filter-active($within as xs:string*) as xs:boolean {
+    deep-equal(distinct-values($within[. ne ""]), "documents")
+};
+
+(:~ "1985-06-12", "1985-06" or "1985" to its parts; absent parts are (). :)
+declare %private function srch:date-parts($date as xs:string?) as map(*) {
+    let $parts := tokenize(normalize-space($date), "-")[. ne ""]
+    return map { "year": $parts[1], "month": $parts[2], "day": $parts[3] }
+};
+
+(:~ "13:05" to a 12-hour clock: hour 1, minute "05", pm. :)
+declare %private function srch:time-parts($time as xs:string?) as map(*) {
+    if (matches($time, "^\d{1,2}:\d{2}")) then
+        let $hour := xs:integer(substring-before($time, ":"))
+        return map {
+            "hour": string(if ($hour eq 0) then 12 else if ($hour gt 12) then $hour - 12 else $hour),
+            "minute": substring(substring-after($time, ":"), 1, 2),
+            "pm": $hour ge 12
+        }
+    else
+        map {}
+};
+
+(:~ One numeric part of a date or time. It has no name on purpose: only the
+ : combined hidden field (srch:date-time-fields) is submitted. :)
+declare %private function srch:part-field($id as xs:string, $label as xs:string, $value as xs:string?,
+        $maxlength as xs:integer, $placeholder as xs:string, $hint as xs:string, $part as xs:string) as element(div) {
+    <div class="usa-form-group usa-form-group--{if ($maxlength eq 4) then 'year' else 'month'}">
+        <label class="usa-label" for="{$id}">{$label}</label>
+        <input class="usa-input usa-input--inline usa-memorable-date__input" id="{$id}" type="text"
+            inputmode="numeric" maxlength="{$maxlength}" pattern="[0-9]*" placeholder="{$placeholder}"
+            aria-describedby="{$hint}" data-part="{$part}" value="{$value}"/>
+    </div>
+};
+
+(:~
+ : The start or end of the date filter, as on the reference site: month, day
+ : and year, where a year alone or a month and year searches that whole year or
+ : month, plus an optional hour and minute. resources/scripts/search-dates.js
+ : combines the parts into the hidden start-date/end-date and
+ : start-time/end-time fields on submit, so URLs keep the parameters the
+ : backend and legacy deep links use; the parts are filled back from those
+ : parameters here. $form names the search form when the fields sit outside it.
+ :)
+declare %private function srch:date-time-fields($context as map(*), $prefix as xs:string, $form as xs:string?) as element(div) {
+    let $date := srch:date-parts(page:parameter($context, $prefix || "-date", ()))
+    let $time := srch:time-parts(page:parameter($context, $prefix || "-time", ()))
+    let $label := if ($prefix eq "start") then "Start" else "End"
+    let $dateHint := $prefix || "-date-hint"
+    let $timeHint := $prefix || "-time-hint"
+    return
+        <div class="hsg-date-time" data-date-prefix="{$prefix}">
+            <fieldset class="usa-fieldset hsg-date-time__group">
+                <legend class="usa-legend">{$label} date{if ($prefix eq "end") then <span class="usa-hint"> (optional)</span> else ()}</legend>
+                <span class="usa-hint" id="{$dateHint}">{
+                    if ($prefix eq "start") then
+                        "For example: 12 07 1941. A year, or a month and year, on its own searches that whole period."
+                    else
+                        "For example: 08 15 1945. Leave blank to search only the start date or period."
+                }</span>
+                <div class="usa-memorable-date">
+                    { srch:part-field($prefix || "-date-month", "Month", $date?month, 2, "MM", $dateHint, "month") }
+                    { srch:part-field($prefix || "-date-day", "Day", $date?day, 2, "DD", $dateHint, "day") }
+                    { srch:part-field($prefix || "-date-year", "Year", $date?year, 4, "YYYY", $dateHint, "year") }
+                </div>
+            </fieldset>
+            <fieldset class="usa-fieldset hsg-date-time__group">
+                <legend class="usa-legend">{$label} time<span class="usa-hint"> (optional)</span></legend>
+                <span class="usa-hint" id="{$timeHint}">For example: {if ($prefix eq "start") then "09 00 am" else "05 00 pm"}</span>
+                <div class="usa-memorable-date">
+                    { srch:part-field($prefix || "-time-hour", "Hour", $time?hour, 2, "hh", $timeHint, "hour") }
+                    { srch:part-field($prefix || "-time-minute", "Minute", $time?minute, 2, "mm", $timeHint, "minute") }
+                    <div class="usa-form-group hsg-date-time__period">
+                        <label class="usa-label" for="{$prefix}-time-period">am/pm</label>
+                        <select class="usa-select" id="{$prefix}-time-period" data-part="period">
+                            <option value="am">{if ($time?pm) then () else attribute selected { "selected" }}am</option>
+                            <option value="pm">{if ($time?pm) then attribute selected { "selected" } else ()}pm</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+            <input type="hidden" id="{$prefix}-date" name="{$prefix}-date" value="{page:parameter($context, $prefix || '-date', '')}">{ if (exists($form)) then attribute form { $form } else () }</input>
+            <input type="hidden" id="{$prefix}-time" name="{$prefix}-time" value="{page:parameter($context, $prefix || '-time', '')}">{ if (exists($form)) then attribute form { $form } else () }</input>
+        </div>
+};
+
+(:~ The whole date filter: start and end. Hidden, and disabled so nothing in
+ : it is submitted, unless Historical Documents is the only section searched. :)
+declare %private function srch:date-filter($context as map(*), $within as xs:string*, $form as xs:string?,
+        $class as xs:string, $legend as element()) as element(fieldset) {
+    <fieldset class="usa-fieldset {$class}" data-hsg-date-filter="">
+        {
+            if (srch:date-filter-active($within)) then ()
+            else (attribute hidden { "hidden" }, attribute disabled { "disabled" })
+        }
+        { $legend }
+        { srch:date-time-fields($context, "start", $form) }
+        { srch:date-time-fields($context, "end", $form) }
+    </fieldset>
+};
+
+(:~ The landing page's date filter (inside its form). :)
+declare function srch:landing-date-filter($context as map(*)) as element(fieldset) {
+    srch:date-filter($context, request:get-parameter("within", ()), (), "hsg-date-filter",
+        <legend class="usa-legend">Filter by Date (Historical Documents only)</legend>)
+};
+
 (: ============== results sidebar ============== :)
 
 declare %private function srch:filter-group($title as xs:string, $hint as xs:string?, $controls as item()*) as element(fieldset) {
@@ -622,13 +716,6 @@ declare %private function srch:filter-group($title as xs:string, $hint as xs:str
         { if (exists($hint)) then <p class="hsg-filter-group__hint">{$hint}</p> else () }
         { $controls }
     </fieldset>
-};
-
-declare %private function srch:filter-field($context as map(*), $name as xs:string, $label as xs:string, $type as xs:string) as element(div) {
-    <div class="hsg-filter-field">
-        <label class="usa-label" for="{$name}">{$label}</label>
-        <input class="usa-input" id="{$name}" name="{$name}" type="{$type}" form="{$srch:FORM_ID}" value="{page:parameter($context, $name, '')}"/>
-    </div>
 };
 
 (:~ "Volume 31, Part 1" style labels are long; the design shows the title
@@ -654,20 +741,16 @@ declare %private function srch:reset-href($context as map(*)) as xs:string {
  : search form with @form (see $srch:FORM_ID) instead of being nested in it.
  :)
 declare function srch:filters($context as map(*)) as element(div) {
+    (: the sections actually searched, so a date-only deep link (no within)
+       shows Historical Documents ticked and its date filter open :)
+    let $within := srch:read-params($context)?within[. ne "entire-site"]
+    return
     <div class="hsg-search-filters">
         <h2 class="hsg-search-filters__heading">Filter by</h2>
         {
-            srch:filter-group("Sections", (), srch:section-checkboxes($srch:FORM_ID, request:get-parameter("within", ()))),
-            srch:filter-group("Date", "Date search is active only if the Historical Documents section is selected", (
-                <div class="hsg-filter-fields">
-                    { srch:filter-field($context, "start-date", "Start date", "date") }
-                    { srch:filter-field($context, "start-time", "Start time", "time") }
-                </div>,
-                <div class="hsg-filter-fields">
-                    { srch:filter-field($context, "end-date", "End date", "date") }
-                    { srch:filter-field($context, "end-time", "End time", "time") }
-                </div>
-            )),
+            srch:filter-group("Sections", (), srch:section-checkboxes($srch:FORM_ID, $within)),
+            srch:date-filter($context, $within, $srch:FORM_ID, "hsg-filter-group hsg-date-filter",
+                <legend class="hsg-filter-group__title">Date</legend>),
             srch:filter-volumes($context)
         }
         <div class="hsg-search-filters__actions">
