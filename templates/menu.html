@@ -83,23 +83,23 @@
 
                 [% if $menu?search %]
                 <section aria-label="Search">
-                    [% if $context('isStatic') %]
-                    <form action="[[ $context-path ]]/search" class="usa-search usa-search--small" role="search">
-                        <label class="usa-sr-only" for="query"><pb-i18n key="search.search">Search</pb-i18n></label>
-                        <input if="search" type="search" value="" name="q" placeholder="" data-i18n="[placeholder]search.placeholder" class="usa-input"/>
+                    <!-- A plain GET form, not pb-search: pb-search redirects with the
+                         query as "query", but the search page reads "q", so a search
+                         from here landed on the empty search form (OP#1431). The value
+                         is filled server-side when the menu is rendered inline, and by
+                         resources/scripts/search-query.js when nginx serves the menu
+                         as a shared cached fragment. -->
+                    <form action="[[ $context-path ]]/search" method="get" class="usa-search usa-search--small" role="search">
+                        <label class="usa-sr-only" for="hsg-header-search"><pb-i18n key="search.search">Search</pb-i18n></label>
+                        [% if $context('isStatic') %]
+                        <input id="hsg-header-search" type="search" value="" name="q" placeholder="" data-i18n="[placeholder]search.placeholder" class="usa-input"/>
+                        [% else %]
+                        <input id="hsg-header-search" type="search" value="[[ page:parameter($context, 'q', '') ]]" name="q" placeholder="" data-i18n="[placeholder]search.placeholder" class="usa-input"/>
+                        [% endif %]
                         <button class="usa-button" type="submit">
-                            <img src="resources/images/usa-icons-bg/search--white.svg" class="usa-search__submit-icon" alt="" data-18n="[alt]search.search"/>
+                            <img src="[[ $context-path ]]/resources/images/usa-icons-bg/search--white.svg" class="usa-search__submit-icon" alt="" data-18n="[alt]search.search"/>
                         </button>
                     </form>
-                    [% else %]
-                    <div class="usa-search usa-search--small" role="search">
-                        <pb-search action="[[ $context-path ]]/search" name="q" value="[[ page:parameter($context, 'q', '') ]]" redirect="redirect">
-                            <button slot="searchButton" class="usa-button" type="submit">
-                                <img src="./resources/images/usa-icons-bg/search--white.svg" class="usa-search__submit-icon" alt="" data-18n="[alt]search.search"/>
-                            </button>
-                        </pb-search>
-                    </div>
-                    [% endif %]
                 </section>
                 [% endif %]
             </div>

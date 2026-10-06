@@ -113,19 +113,35 @@ describe("search tips and routing (OP#1182)", () => {
         cy.request({ url: "search/anything-else", failOnStatusCode: false }).its("status").should("eq", 404);
     });
 
-    it("the sitewide header search box posts to /search with param q", () => {
+    it("the sitewide header search box is a GET form to /search with param q", () => {
         cy.visit("");
-        cy.get("pb-search").first().should("have.attr", "action").and("include", "/search");
-        cy.get("pb-search").first().should("have.attr", "name", "q");
+        cy.get("section[aria-label='Search'] form")
+            .should("have.attr", "action")
+            .and("match", /\/search$/);
+        cy.get("section[aria-label='Search'] form").should("have.attr", "method", "get");
+        cy.get("section[aria-label='Search'] input[name='q']").should("exist");
     });
 
-    it("actually navigates to /search with the typed query when the button is clicked", () => {
-        cy.visit("");
-        cy.get("section[aria-label='Search'] pb-search").shadow().find("input[name='query']").type("dobrynin");
-        cy.get("section[aria-label='Search'] pb-search").find("button[slot='searchButton']").click();
-        cy.location("pathname").should("include", "/search");
-        cy.location("pathname").should("not.include", "index.html");
-        cy.location("search").should("include", "query=dobrynin");
+    // OP#1431: pb-search redirected with the query as "query", which the
+    // search page ignores, so a header search landed on the empty landing form
+    // and both boxes lost the term.
+    [
+        ["pressing Enter", (input) => input.type("dobrynin{enter}")],
+        ["clicking the search button", (input) => {
+            input.type("dobrynin");
+            cy.get("section[aria-label='Search'] button[type='submit']").click();
+        }],
+    ].forEach(([how, submit]) => {
+        it(`a header search by ${how} shows results and keeps the query in both boxes`, () => {
+            cy.visit("");
+            submit(cy.get("section[aria-label='Search'] input[name='q']"));
+            cy.location("pathname").should("match", /\/search$/);
+            cy.location("search").should("include", "q=dobrynin");
+            cy.get(".usa-collection").should("exist");
+            cy.get(".usa-collection__item").should("have.length.at.least", 1);
+            cy.get("section[aria-label='Search'] input[name='q']").should("have.value", "dobrynin");
+            cy.get("#search-field").should("have.value", "dobrynin");
+        });
     });
 });
 
@@ -215,7 +231,8 @@ describe("results page: filter panel, cards and controls (OP#1420)", () => {
             cy.contains("dt", "Recorded Date").next("dd").should("have.text", "February 23, 1990");
             cy.contains("dt", "Recorded Location").next("dd").should("have.text", "Washington");
             cy.contains("dt", "Encoded Date").next("dd").find("code").should("have.text", 'when="1990-02-23"');
-            cy.get(".hsg-snippet .hi").first().should("have.css", "background-color", "rgb(255, 240, 0)");
+            // The design's #fff000, snapped to the palette's warning-lighter (OP#1426).
+            cy.get(".hsg-snippet .hi").first().should("have.css", "background-color", "rgb(250, 206, 0)");
             cy.get("a.hsg-result__facsimile").should("have.attr", "href").and("match", /\/historicaldocuments\/frus1989-92v31\/pg_/);
         });
     });

@@ -106,10 +106,11 @@ describe("footer content", () => {
     });
 
     it("sits on the navy ground of the design", () => {
+        // The design's #173a57, snapped to the palette's primary-darkest (OP#1426).
         cy.get("footer.usa-footer").should(
             "have.css",
             "background-color",
-            "rgb(23, 58, 87)"
+            "rgb(17, 47, 78)"
         );
     });
 

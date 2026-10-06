@@ -7,13 +7,14 @@
         <ul>
             [% if $menu?search %]
             <li>
-                [% if $context('isStatic') %]
-                <form action="[[ $context-path ]]/search">
-                    <input type="search" value="" name="q" placeholder="" data-i18n="[placeholder]search.placeholder" />
+                <!-- Plain GET form submitting "q", as in templates/menu.html (OP#1431). -->
+                <form action="[[ $context-path ]]/search" method="get" role="search">
+                    [% if $context('isStatic') %]
+                    <input type="search" value="" name="q" placeholder="" data-i18n="[placeholder]search.placeholder" aria-label="Search"/>
+                    [% else %]
+                    <input type="search" value="[[ page:parameter($context, 'q', '') ]]" name="q" placeholder="" data-i18n="[placeholder]search.placeholder" aria-label="Search"/>
+                    [% endif %]
                 </form>
-                [% else %]
-                <pb-search action="[[ $context-path ]]/search" name="q" value="[[ page:parameter($context, 'q', '') ]]" redirect="redirect"></pb-search>
-                [% endif %]
             </li>
             [% endif %]
         </ul>
