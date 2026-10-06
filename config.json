@@ -203,7 +203,8 @@
   ],
   "script" : {
     "custom" : [
-      "resources/scripts/nav-active.js"
+      "resources/scripts/nav-active.js",
+      "resources/scripts/search-query.js"
     ]
   },
   "api" : [
