@@ -607,13 +607,19 @@ declare function srch:date-filter-active($within as xs:string*) as xs:boolean {
 };
 
 (:~ The attributes of a filter group that only applies to historical
- : documents (the date filter and the volumes): marked for
- : resources/scripts/search-dates.js, and hidden and disabled, so nothing in
- : it is submitted, unless Historical Documents is the only section. :)
-declare %private function srch:documents-only($within as xs:string*) as attribute()+ {
-    attribute data-hsg-documents-only { "" },
+ : documents (the date filter and the volumes), marked for
+ : resources/scripts/search-dates.js. Unless Historical Documents is the only
+ : section, the group is disabled, so nothing in it is submitted, and with
+ : $mode "hide" also hidden. The results sidebar shows its groups disabled
+ : ("disable", OP#1440); the landing page still hides its date filter until
+ : its layout is settled (OP#1436). :)
+declare %private function srch:documents-only($within as xs:string*, $mode as xs:string) as attribute()+ {
+    attribute data-hsg-documents-only { $mode },
     if (srch:date-filter-active($within)) then ()
-    else (attribute hidden { "hidden" }, attribute disabled { "disabled" })
+    else (
+        if ($mode eq "hide") then attribute hidden { "hidden" } else (),
+        attribute disabled { "disabled" }
+    )
 };
 
 (:~ "1985-06-12", "1985-06" or "1985" to its parts; absent parts are (). :)
@@ -698,12 +704,13 @@ declare %private function srch:date-time-fields($context as map(*), $prefix as x
         </div>
 };
 
-(:~ The whole date filter: start and end. Hidden, and disabled so nothing in
- : it is submitted, unless Historical Documents is the only section searched. :)
+(:~ The whole date filter: start and end. Disabled, so nothing in it is
+ : submitted, and with $mode "hide" hidden, unless Historical Documents is
+ : the only section searched (srch:documents-only). :)
 declare %private function srch:date-filter($context as map(*), $within as xs:string*, $form as xs:string?,
-        $class as xs:string, $legend as element()) as element(fieldset) {
+        $class as xs:string, $legend as element(), $mode as xs:string) as element(fieldset) {
     <fieldset class="usa-fieldset {$class}">
-        { srch:documents-only($within) }
+        { srch:documents-only($within, $mode) }
         { $legend }
         { srch:date-time-fields($context, "start", $form) }
         { srch:date-time-fields($context, "end", $form) }
@@ -713,7 +720,7 @@ declare %private function srch:date-filter($context as map(*), $within as xs:str
 (:~ The landing page's date filter (inside its form). :)
 declare function srch:landing-date-filter($context as map(*)) as element(fieldset) {
     srch:date-filter($context, request:get-parameter("within", ()), (), "hsg-date-filter",
-        <legend class="usa-legend">Filter by Date (Historical Documents only)</legend>)
+        <legend class="usa-legend">Filter by Date (Historical Documents only)</legend>, "hide")
 };
 
 (: ============== results sidebar ============== :)
@@ -764,7 +771,7 @@ declare function srch:filters($context as map(*)) as element(div) {
         {
             srch:filter-group("Sections", (), srch:section-checkboxes($srch:FORM_ID, $within)),
             srch:date-filter($context, $within, $srch:FORM_ID, "hsg-filter-group hsg-date-filter",
-                <legend class="hsg-filter-group__title">Date</legend>),
+                <legend class="hsg-filter-group__title">Date</legend>, "disable"),
             srch:filter-volumes($context, $within)
         }
         <div class="hsg-search-filters__actions">
@@ -819,6 +826,6 @@ declare %private function srch:filter-volumes($context as map(*), $within as xs:
                             <span class="hsg-filter-group__label-text">{$label}</span>
                         </label>
                     </div>,
-                srch:documents-only($within)
+                srch:documents-only($within, "disable")
             )
 };

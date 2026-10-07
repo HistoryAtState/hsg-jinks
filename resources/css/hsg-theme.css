@@ -1282,6 +1282,18 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     display: none;
 }
 
+/* Results sidebar (OP#1440): a group that doesn't apply stays visible but
+   disabled, faded and labelled, so the filters remain discoverable. */
+[data-hsg-documents-only="disable"]:disabled {
+    opacity: 0.55;
+}
+
+[data-hsg-documents-only="disable"]:disabled > legend::after {
+    content: " (Historical Documents only)";
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
 .hsg-date-time__group {
     margin-top: var(--uswds-space-105);
 }

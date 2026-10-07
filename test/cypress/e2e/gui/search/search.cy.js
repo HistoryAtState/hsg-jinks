@@ -350,32 +350,46 @@ describe("search pages work as on the reference site (OP#1432)", () => {
         });
     });
 
-    it("the date filter is offered only while Historical Documents is the only section", () => {
+    // OP#1440: in the results sidebar a group that doesn't apply stays visible
+    // but disabled (faded, labelled "Historical Documents only")
+    it("the results sidebar's date filter is enabled only while Historical Documents is the only section", () => {
         cy.visit("search?q=salt");
+        cy.get(".hsg-date-filter").should("be.visible").and("be.disabled");
+        cy.get(".hsg-date-filter").should(($f) => expect(Number(getComputedStyle($f[0]).opacity)).to.be.lessThan(1));
+        cy.get("#start-date-year").should("be.disabled");
+        cy.get("#within-documents").check({ force: true });
+        cy.get(".hsg-date-filter").should("be.visible").and("not.be.disabled");
+        cy.get(".hsg-date-filter").should("have.css", "opacity", "1");
+        cy.get("#within-department").check({ force: true });
+        cy.get(".hsg-date-filter").should("be.visible").and("be.disabled");
+        cy.get("#within-department").uncheck({ force: true });
+        cy.get(".hsg-date-filter").should("not.be.disabled");
+    });
+
+    it("the landing page still hides its date filter until Historical Documents is the only section (OP#1436)", () => {
+        cy.visit("search");
         cy.get(".hsg-date-filter").should("not.be.visible").and("be.disabled");
         cy.get("#within-documents").check({ force: true });
         cy.get(".hsg-date-filter").should("be.visible").and("not.be.disabled");
-        cy.get("#within-department").check({ force: true });
+        cy.get("#within-countries").check({ force: true });
         cy.get(".hsg-date-filter").should("not.be.visible").and("be.disabled");
-        cy.get("#within-department").uncheck({ force: true });
-        cy.get(".hsg-date-filter").should("be.visible");
     });
 
-    it("the volumes filter is offered only while Historical Documents is the only section", () => {
+    it("the volumes filter is enabled only while Historical Documents is the only section", () => {
         cy.visit("search?q=salt");
         cy.contains(".hsg-filter-group__title", "Volumes").parents("fieldset").first().as("volumes");
-        cy.get("@volumes").should("not.be.visible").and("be.disabled");
+        cy.get("@volumes").should("be.visible").and("be.disabled");
         cy.get("#within-documents").check({ force: true });
         cy.get("@volumes").should("be.visible").and("not.be.disabled");
         cy.get("#within-countries").check({ force: true });
-        cy.get("@volumes").should("not.be.visible").and("be.disabled");
+        cy.get("@volumes").should("be.visible").and("be.disabled");
         // a volume-id deep link searches historical documents, so its volumes are shown
         cy.visit("search?q=salt&volume-id=frus1989-92v31");
         cy.get("#within-documents").should("be.checked");
         cy.get("#volume-frus1989-92v31").should("be.visible").and("be.checked");
     });
 
-    it("a hidden volumes filter is not submitted", () => {
+    it("a disabled volumes filter is not submitted", () => {
         cy.visit("search?q=salt&within=documents&volume-id=frus1989-92v31");
         cy.get("#within-department").check({ force: true });
         cy.contains("button", "Apply filters").click();
