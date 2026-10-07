@@ -1,6 +1,12 @@
-// Date filter of the search landing page and the results sidebar (OP#1432).
+// The "Filter by" sidebar of the search landing and results pages
+// (OP#1432, OP#1436, OP#1440).
 //
-// modules/templates/search.xqm renders the filter as separate month/day/year
+// Sections: "Entire Office of the Historian Website" is exclusive with the
+// sections. Ticking it clears them, ticking a section clears it, and clearing
+// the last section ticks it again. It has no name: searching the whole site
+// is the absence of a within parameter.
+//
+// Date: modules/templates/search.xqm renders the filter as separate month/day/year
 // and hour/minute/am-pm parts (reference parity with hsg-shell), without
 // names, plus hidden start-date/end-date/start-time/end-time fields that carry
 // the actual query parameters. This script
@@ -8,7 +14,7 @@
 // - enables the filter, and the volumes filter of the results sidebar, only
 //   while "Historical Documents" is the only ticked section, and disables
 //   them otherwise so none of it is submitted. Groups marked
-//   data-hsg-documents-only="hide" are also hidden then; the results sidebar
+//   data-hsg-documents-only="hide" are also hidden then; the sidebar
 //   ("disable") keeps them visible (OP#1440);
 // - on submit, combines the parts into the hidden fields: a year alone gives
 //   "1941", a month and year "1941-12", a full date "1941-12-07"; an hour
@@ -85,6 +91,29 @@
         return Array.prototype.slice.call(document.querySelectorAll('input[type="checkbox"][name="within"]'));
     }
 
+    function entireSiteBox() {
+        return document.querySelector("input[data-hsg-entire-site]");
+    }
+
+    // keep "Entire Office" and the sections mutually exclusive
+    function exclusive(changed) {
+        var entire = entireSiteBox();
+        if (!entire) {
+            return;
+        }
+        var sections = sectionBoxes();
+        if (changed === entire) {
+            if (entire.checked) {
+                sections.forEach(function (box) { box.checked = false; });
+            } else if (!sections.some(function (box) { return box.checked; })) {
+                // nothing would be searched; the whole site is the only default
+                entire.checked = true;
+            }
+        } else {
+            entire.checked = !sections.some(function (box) { return box.checked; });
+        }
+    }
+
     function toggle() {
         var checked = sectionBoxes().filter(function (box) { return box.checked; });
         var active = checked.length === 1 && checked[0].value === "documents";
@@ -94,8 +123,11 @@
         });
     }
 
-    sectionBoxes().forEach(function (box) {
-        box.addEventListener("change", toggle);
+    sectionBoxes().concat(entireSiteBox() || []).forEach(function (box) {
+        box.addEventListener("change", function () {
+            exclusive(box);
+            toggle();
+        });
     });
     // capture phase: runs before the submit is serialized, for whichever form
     // the filter belongs to (the results sidebar joins its form by @form)

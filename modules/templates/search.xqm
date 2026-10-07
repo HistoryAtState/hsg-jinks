@@ -568,20 +568,25 @@ declare function srch:pagination($context as map(*)) as element(nav)? {
                 </nav>
 };
 
-(:~ Reads the raw `within` parameter directly (not via srch:results) so the
- : landing page -- which has no query to run -- doesn't trigger one just to
- : render checkbox state. :)
-declare function srch:filter-sections($context as map(*)) as element(fieldset) {
-    <fieldset class="usa-fieldset">
-        <legend class="usa-legend">Filter by Section</legend>
-        { srch:section-checkboxes((), request:get-parameter("within", ())) }
-    </fieldset>
-};
-
-(:~ The section checkboxes shared by the landing form and the results
- : sidebar. $form names the form the boxes belong to when they are not
- : inside it (the sidebar sits outside the search form's element). :)
+(:~ The section checkboxes of the sidebar, on the landing and the results
+ : page alike. $form names the form the boxes belong to (the sidebar sits
+ : outside the search form's element).
+ :
+ : The first box, "Entire Office of the Historian Website", is ticked when no
+ : section is chosen and is exclusive with the others
+ : (resources/scripts/search-filters.js). It has no name: searching the whole
+ : site is the absence of a within parameter, so URLs and legacy links stay
+ : as they were. :)
 declare %private function srch:section-checkboxes($form as xs:string?, $selected as xs:string*) as element(div)* {
+    <div class="usa-checkbox">
+        <input class="usa-checkbox__input" type="checkbox" id="within-entire-site" data-hsg-entire-site="">
+        {
+            if (exists($form)) then attribute form { $form } else (),
+            if (empty($selected[not(. = ("", "entire-site"))])) then attribute checked { "checked" } else ()
+        }
+        </input>
+        <label class="usa-checkbox__label" for="within-entire-site">Entire Office of the Historian Website</label>
+    </div>,
     for $section in srch:sections()
     return
         <div class="usa-checkbox">
@@ -601,18 +606,17 @@ declare %private function srch:section-checkboxes($form as xs:string?, $selected
  : only while that is the one section searched (reference parity: hsg-shell's
  : app.js shows it only when "Historical Documents" is the sole ticked box).
  : The volumes filter follows the same rule.
- : resources/scripts/search-dates.js keeps this in step as boxes change. :)
+ : resources/scripts/search-filters.js keeps this in step as boxes change. :)
 declare function srch:date-filter-active($within as xs:string*) as xs:boolean {
     deep-equal(distinct-values($within[. ne ""]), "documents")
 };
 
 (:~ The attributes of a filter group that only applies to historical
  : documents (the date filter and the volumes), marked for
- : resources/scripts/search-dates.js. Unless Historical Documents is the only
+ : resources/scripts/search-filters.js. Unless Historical Documents is the only
  : section, the group is disabled, so nothing in it is submitted, and with
- : $mode "hide" also hidden. The results sidebar shows its groups disabled
- : ("disable", OP#1440); the landing page still hides its date filter until
- : its layout is settled (OP#1436). :)
+ : $mode "hide" also hidden. The sidebar of both search pages shows its
+ : groups disabled ("disable", OP#1440, OP#1436). :)
 declare %private function srch:documents-only($within as xs:string*, $mode as xs:string) as attribute()+ {
     attribute data-hsg-documents-only { $mode },
     if (srch:date-filter-active($within)) then ()
@@ -656,7 +660,7 @@ declare %private function srch:part-field($id as xs:string, $label as xs:string,
 (:~
  : The start or end of the date filter, as on the reference site: month, day
  : and year, where a year alone or a month and year searches that whole year or
- : month, plus an optional hour and minute. resources/scripts/search-dates.js
+ : month, plus an optional hour and minute. resources/scripts/search-filters.js
  : combines the parts into the hidden start-date/end-date and
  : start-time/end-time fields on submit, so URLs keep the parameters the
  : backend and legacy deep links use; the parts are filled back from those
@@ -717,12 +721,6 @@ declare %private function srch:date-filter($context as map(*), $within as xs:str
     </fieldset>
 };
 
-(:~ The landing page's date filter (inside its form). :)
-declare function srch:landing-date-filter($context as map(*)) as element(fieldset) {
-    srch:date-filter($context, request:get-parameter("within", ()), (), "hsg-date-filter",
-        <legend class="usa-legend">Filter by Date (Historical Documents only)</legend>, "hide")
-};
-
 (: ============== results sidebar ============== :)
 
 declare %private function srch:filter-group($title as xs:string, $hint as xs:string?, $controls as item()*) as element(fieldset) {
@@ -757,11 +755,20 @@ declare %private function srch:reset-href($context as map(*)) as xs:string {
 };
 
 (:~
- : The whole "Filter by" sidebar of the results page: the Sections, Date and
- : Volumes groups and the Reset / Apply buttons. Every control names the
- : search form with @form (see $srch:FORM_ID) instead of being nested in it.
+ : The whole "Filter by" sidebar, the same on the landing and the results
+ : page (OP#1436): the Sections, Date and Volumes groups and the Reset /
+ : Apply buttons. Every control names the search form with @form (see
+ : $srch:FORM_ID) instead of being nested in it; both pages give their
+ : search form that id.
  :)
 declare function srch:filters($context as map(*)) as element(div) {
+    srch:filters($context, true())
+};
+
+(:~ $volumes false() leaves out the Volumes group: its options are the
+ : volumes of the current hits, so the landing page, which has no search to
+ : run, has none (as in its design). :)
+declare function srch:filters($context as map(*), $volumes as xs:boolean) as element(div) {
     (: the sections actually searched, so a date-only deep link (no within)
        shows Historical Documents ticked and its date filter open :)
     let $within := srch:read-params($context)?within[. ne "entire-site"]
@@ -772,7 +779,7 @@ declare function srch:filters($context as map(*)) as element(div) {
             srch:filter-group("Sections", (), srch:section-checkboxes($srch:FORM_ID, $within)),
             srch:date-filter($context, $within, $srch:FORM_ID, "hsg-filter-group hsg-date-filter",
                 <legend class="hsg-filter-group__title">Date</legend>, "disable"),
-            srch:filter-volumes($context, $within)
+            if ($volumes) then srch:filter-volumes($context, $within) else ()
         }
         <div class="hsg-search-filters__actions">
             <a class="usa-button usa-button--outline" href="{srch:reset-href($context)}">Reset filters</a>

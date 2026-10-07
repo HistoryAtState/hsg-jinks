@@ -1198,9 +1198,18 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 /* The results take the whole content column (OP#1432): intro paragraph,
-   search form, heading row, card list and pagination. none also lifts
-   .usa-prose's own 68ex cap on the paragraph. */
-.usa-prose.hsg-search-results > * {
+   search form, heading row, card list and pagination; so does the landing
+   page's heading, intro and search form (OP#1436: no right sidebar, the main
+   column uses the available width). none also lifts .usa-prose's own 68ex
+   cap on the paragraph. */
+.usa-prose.hsg-search-results > *,
+.usa-prose.hsg-search-landing > * {
+    max-width: none;
+}
+
+/* ... and the search field itself fills the form beside its button
+   (.usa-input is capped at 30rem). */
+.hsg-search-form .usa-input {
     max-width: none;
 }
 
