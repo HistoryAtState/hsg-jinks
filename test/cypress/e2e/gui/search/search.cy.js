@@ -527,6 +527,18 @@ describe("search landing page layout and shared sidebar (OP#1436)", () => {
         });
     });
 
+    it("the sidebar has no fill of its own: groups are white boxes on the page background", () => {
+        ["search", "search?q=salt"].forEach((path) => {
+            cy.visit(path);
+            cy.get("body").then(($body) => {
+                const page = getComputedStyle($body[0]).backgroundColor;
+                cy.get(".hsg-search-filters").should("have.css", "background-color", "rgba(0, 0, 0, 0)");
+                cy.get(".hsg-filter-group").first().should("have.css", "background-color", "rgb(255, 255, 255)");
+                expect(page).to.equal("rgb(236, 241, 247)"); // Figma #-theme/body/background-color #ecf1f7
+            });
+        });
+    });
+
     it("the landing page has no Sort by and a single Search button", () => {
         cy.visit("search");
         cy.get("#sort-by").should("not.exist");

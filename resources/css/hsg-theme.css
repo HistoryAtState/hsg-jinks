@@ -1189,11 +1189,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    ========================================================================== */
 
 /* Filter panel. The layout's sidebar column is the frame's 320px panel plus
-   its 32px gap to the results, so the gap is the panel's right margin. */
+   its 32px gap to the results, so the gap is the panel's right margin. The
+   panel itself has no fill in the design: "Filter by" and the buttons sit on
+   the page background, only the filter groups are white boxes. */
 .hsg-search-filters {
     margin-right: var(--uswds-space-4);
     padding: var(--uswds-space-2);
-    background-color: var(--uswds-color-white);
     color: var(--uswds-color-text);
 }
 
