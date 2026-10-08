@@ -953,12 +953,9 @@ declare %private function hsg:landing-toc-entries($division as element(tei:TEI)?
 };
 
 (:~
- : A document division's printed number ("57", or "A".."C" for an appendix in
- : older data), or the empty sequence. Data baseline 0.3 encodes it as
- : frus-division-n, earlier data as frus-document-number; the first non-empty
- : one wins. Only meaningful for document divisions: chapters carry a
- : frus-division-n too (their chapter number), so callers check the division
- : type first.
+ : A document division's printed number, or the empty sequence: its
+ : frus-division-n (hsg-jinks-data), else frus-document-number. Chapters carry
+ : a frus-division-n too, so callers check the division type first.
  :)
 declare function hsg:document-number($division as node()?) as xs:string? {
     ($division//tei:bibl[@type = ('frus-division-n', 'frus-document-number')]

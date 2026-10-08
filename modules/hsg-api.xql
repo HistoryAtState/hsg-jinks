@@ -462,9 +462,8 @@ declare function hsgapi:is-exact-division($doc as node()*, $divisionId as xs:str
 
 (:~
  : An attachment is encoded with a non-empty frus-attachment-label. Its number
- : cannot tell: older data left the frus-document-number bibl empty, which
- : would not distinguish it from a numbering gap, and data baseline 0.3 gives
- : it a frus-division-n of its own ("185.1" for d185's first attachment).
+ : is read from frus-division-n like any document's ("185.1" for d185's first
+ : attachment).
  :)
 declare function hsgapi:is-attachment($doc as node()?) as xs:boolean {
     exists($doc) and
