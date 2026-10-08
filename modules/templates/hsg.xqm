@@ -754,7 +754,7 @@ declare function hsg:section-breadcrumb($context as map(*), $trail as map(*)*) a
  : When the page being viewed is itself a chapter, document, or compilation,
  : one more crumb -- the current (non-link), final one -- is appended on a
  : new line: the division's own title for a chapter or compilation, or
- : "Document <n>" (its encoded frus-document-number) for a document.
+ : "Document <n>" (see hsg:document-number) for a document.
  :)
 declare function hsg:collection-breadcrumbs($context as map(*)) {
     if (exists($context?doc)) then
@@ -789,8 +789,7 @@ declare function hsg:collection-breadcrumbs($context as map(*)) {
                     => string-join(' ') => normalize-space()
                 return <li class="breadcrumb-current" aria-current="page">{$own-title}</li>
             else if (not($is-landing) and $division-type = 'document') then
-                let $number := ($context?doc?content//tei:bibl[@type='frus-document-number'])[1]/string()
-                return <li class="breadcrumb-current" aria-current="page">Document {$number}</li>
+                <li class="breadcrumb-current" aria-current="page">Document {hsg:document-number($context?doc?content)}</li>
             else ()
         )
 
@@ -954,11 +953,23 @@ declare %private function hsg:landing-toc-entries($division as element(tei:TEI)?
 };
 
 (:~
+ : A document division's printed number ("57", or "A".."C" for an appendix in
+ : older data), or the empty sequence. Data baseline 0.3 encodes it as
+ : frus-division-n, earlier data as frus-document-number; the first non-empty
+ : one wins. Only meaningful for document divisions: chapters carry a
+ : frus-division-n too (their chapter number), so callers check the division
+ : type first.
+ :)
+declare function hsg:document-number($division as node()?) as xs:string? {
+    ($division//tei:bibl[@type = ('frus-division-n', 'frus-document-number')]
+        ! normalize-space(.))[. ne ''][1]
+};
+
+(:~
  : The first and last document numbers under a division's own xi:include
  : tree, for a TOC entry's "(Documents N-M)" suffix. Reference parity with
  : hsg-shell, which read this off a @n attribute the unbound data model
- : doesn't have -- frus-document-number is the equivalent here (numeric, or
- : alphabetic for the appendix: "A".."C").
+ : doesn't have -- hsg:document-number is the equivalent here.
  :
  : Opens only the first and last leaf document at each level, not every one
  : -- the same performance discipline as hsg:toc-divisions.
@@ -978,14 +989,14 @@ declare %private function hsg:leading-document-number($include as element(xi:inc
     let $type := ($root//tei:bibl[@type = 'frus-division-type'])[1]/string()
     return
         (: Documents, published ('document') or not ('document-pending'). An
-           unpublished document carries no frus-document-number, so fall back to
+           unpublished document carries no document number, so fall back to
            the number encoded in its division id ("d148" -> "148"). This is what
            lets a pending chapter (France) still show "(Documents 148-214)",
            reference parity with hsg-shell. :)
         if (starts-with($type, 'document')) then
-            let $num := normalize-space(($root//tei:bibl[@type = 'frus-document-number'])[1])
+            let $num := hsg:document-number($root)
             return
-                if ($num != '') then $num
+                if (exists($num)) then $num
                 else tokenize(replace(normalize-space(($root//tei:bibl[@type = 'frus-division-id'])[1]), '^d', ''), '-')[1]
         else
             let $inner := $root//tei:text//xi:include
@@ -1250,7 +1261,7 @@ declare function hsg:division-listing($context as map(*)) {
  : document is shown muted and unlinked -- it has no page of its own yet. :)
 declare %private function hsg:doclist-document($target as element(tei:TEI), $publication as xs:string,
         $type as xs:string, $context as map(*)) {
-    let $number := normalize-space(($target//tei:bibl[@type='frus-document-number'])[1])
+    let $number := hsg:document-number($target)
     let $id := normalize-space(($target//tei:bibl[@type='frus-division-id'])[1])
     let $head := normalize-space(($target//tei:text/tei:body//tei:head)[1])
     (: The head already begins with the number ("72. Telegram..."); fall back
@@ -1345,7 +1356,7 @@ declare function hsg:head-meta($context as map(*)) as element()* {
         let $division-title := normalize-space(string-join($doc//tei:fileDesc/tei:titleStmt/tei:title, ' '))
         let $description :=
             if ($division-type = 'document') then
-                let $num := normalize-space(($doc//tei:bibl[@type='frus-document-number'])[1])
+                let $num := hsg:document-number($doc)
                 return string-join((
                     $division-title[. ne ''],
                     "Document " || $num || " of " || $volume-title,
@@ -1551,7 +1562,7 @@ declare %private function hsg:nav-target($base as xs:string, $rel as xs:string?)
                 let $publication := normalize-space(($target//tei:bibl[@type='frus-volume-id'])[1])
                 let $label :=
                     if (starts-with($type, 'document')) then
-                        'Document ' || normalize-space(($target//tei:bibl[@type='frus-document-number'])[1])
+                        'Document ' || hsg:document-number($target)
                     else
                         normalize-space(string-join($target//tei:teiHeader//tei:titleStmt/tei:title, ' '))
                 return

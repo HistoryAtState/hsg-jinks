@@ -414,7 +414,7 @@ declare %private function hsgapi:docs-on-page($volume-collection as xs:string, $
         where starts-with($type, 'document')
         let $id := normalize-space(($owner//tei:bibl[@type = 'frus-division-id'])[1])
         where $id != ''
-        let $number := normalize-space(($owner//tei:bibl[@type = 'frus-document-number'])[1])
+        let $number := hsg:document-number($owner)
         group by $id
         let $number := head($number)
         order by
@@ -461,9 +461,10 @@ declare function hsgapi:is-exact-division($doc as node()*, $divisionId as xs:str
 };
 
 (:~
- : An attachment is encoded with a non-empty frus-attachment-label. Its
- : frus-document-number bibl is present but empty, so testing the number would
- : need normalize-space() and would not distinguish it from a numbering gap.
+ : An attachment is encoded with a non-empty frus-attachment-label. Its number
+ : cannot tell: older data left the frus-document-number bibl empty, which
+ : would not distinguish it from a numbering gap, and data baseline 0.3 gives
+ : it a frus-division-n of its own ("185.1" for d185's first attachment).
  :)
 declare function hsgapi:is-attachment($doc as node()?) as xs:boolean {
     exists($doc) and
