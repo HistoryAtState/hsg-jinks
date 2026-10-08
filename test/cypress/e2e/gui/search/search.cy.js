@@ -501,11 +501,18 @@ describe("search landing page layout and shared sidebar (OP#1436)", () => {
             cy.contains("a.usa-button", "Reset filters").should("be.visible");
             cy.contains("button.usa-button", "Apply filters").should("be.visible");
         });
-        // Volumes lists the volumes of the current hits, so only the results page has it
+        // the same groups, in the same order, on both pages
+        const groupTitles = () => cy.get(".hsg-filter-group__title").then(($t) => [...$t].map((t) => t.textContent.trim()));
         cy.visit("search");
-        cy.contains(".hsg-filter-group__title", "Volumes").should("not.exist");
+        groupTitles().should("deep.equal", ["Sections", "Date", "Volumes"]);
+        // Volumes lists the volumes of the current hits: none before a search, only a note
+        cy.contains(".hsg-filter-group__title", "Volumes").parents("fieldset").first().within(() => {
+            cy.get("input[name='volume-id']").should("not.exist");
+            cy.contains(".hsg-filter-group__note", "Run a search to choose from the volumes your results come from.");
+        });
         cy.visit("search?q=salt");
-        cy.contains(".hsg-filter-group__title", "Volumes").should("exist");
+        groupTitles().should("deep.equal", ["Sections", "Date", "Volumes"]);
+        cy.get("input[name='volume-id']").should("have.length.at.least", 1);
     });
 
     it("the sidebar sits left of a main column that uses the remaining width", () => {

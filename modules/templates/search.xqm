@@ -765,9 +765,9 @@ declare function srch:filters($context as map(*)) as element(div) {
     srch:filters($context, true())
 };
 
-(:~ $volumes false() leaves out the Volumes group: its options are the
- : volumes of the current hits, so the landing page, which has no search to
- : run, has none (as in its design). :)
+(:~ $volumes false() is the landing page: its Volumes group has no options,
+ : since they are the volumes of the current hits and there is no search yet,
+ : only a note, so the sidebar has the same groups on both pages (OP#1436). :)
 declare function srch:filters($context as map(*), $volumes as xs:boolean) as element(div) {
     (: the sections actually searched, so a date-only deep link (no within)
        shows Historical Documents ticked and its date filter open :)
@@ -779,7 +779,7 @@ declare function srch:filters($context as map(*), $volumes as xs:boolean) as ele
             srch:filter-group("Sections", (), srch:section-checkboxes($srch:FORM_ID, $within)),
             srch:date-filter($context, $within, $srch:FORM_ID, "hsg-filter-group hsg-date-filter",
                 <legend class="hsg-filter-group__title">Date</legend>, "disable"),
-            if ($volumes) then srch:filter-volumes($context, $within) else ()
+            if ($volumes) then srch:filter-volumes($context, $within) else srch:filter-volumes-placeholder($within)
         }
         <div class="hsg-search-filters__actions">
             <a class="usa-button usa-button--outline" href="{srch:reset-href($context)}">Reset filters</a>
@@ -815,6 +815,15 @@ declare function srch:sort-select($context as map(*)) as element(div) {
 (:~ The volumes the current hits fall in, as checkboxes. Absent when nothing
  : matched or no hit is a FRUS volume. The label is clamped to two lines by
  : the theme; the full title stays available as the tooltip. :)
+(:~ The landing page's Volumes group: no search has run, so there are no
+ : volumes to offer yet, only a note on where they come from. :)
+declare %private function srch:filter-volumes-placeholder($within as xs:string*) as element(fieldset) {
+    srch:filter-group("Volumes", (),
+        <p class="hsg-filter-group__note">Run a search to choose from the volumes your results come from.</p>,
+        srch:documents-only($within, "disable")
+    )
+};
+
 declare %private function srch:filter-volumes($context as map(*), $within as xs:string*) as element(fieldset)? {
     let $r := srch:results($context)
     return
