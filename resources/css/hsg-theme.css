@@ -1189,19 +1189,29 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    ========================================================================== */
 
 /* Filter panel. The layout's sidebar column is the frame's 320px panel plus
-   its 32px gap to the results, so the gap is the panel's right margin. */
+   its 32px gap to the results, so the gap is the panel's right margin. The
+   panel itself has no fill in the design: "Filter by" and the buttons sit on
+   the page background, only the filter groups are white boxes. */
 .hsg-search-filters {
     margin-right: var(--uswds-space-4);
     padding: var(--uswds-space-2);
-    background-color: var(--uswds-color-white);
     color: var(--uswds-color-text);
 }
 
-/* .usa-prose only caps its paragraphs at 68ex (about 640px here, the frame's
-   results column); the form, heading row, card list and pagination take the
-   same width. */
-.usa-prose.hsg-search-results > * {
-    max-width: 40rem;
+/* The results take the whole content column (OP#1432): intro paragraph,
+   search form, heading row, card list and pagination; so does the landing
+   page's heading, intro and search form (OP#1436: no right sidebar, the main
+   column uses the available width). none also lifts .usa-prose's own 68ex
+   cap on the paragraph. */
+.usa-prose.hsg-search-results > *,
+.usa-prose.hsg-search-landing > * {
+    max-width: none;
+}
+
+/* ... and the search field itself fills the form beside its button
+   (.usa-input is capped at 30rem). */
+.hsg-search-form .usa-input {
+    max-width: none;
 }
 
 
@@ -1241,15 +1251,16 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     clear: both;
 }
 
-.hsg-filter-group__hint {
-    margin: 0 0 var(--uswds-space-105);
-    font-family: var(--uswds-font-sans);
-    font-size: 0.8125rem;
-    line-height: 1.3;
-}
-
 .hsg-filter-group .usa-checkbox {
     background: none;
+}
+
+/* The landing page's Volumes group: no options before a search, only this. */
+.hsg-filter-group__note {
+    margin: var(--uswds-space-1) 0 0;
+    font-family: var(--uswds-font-sans);
+    font-size: 0.875rem;
+    line-height: 1.3;
 }
 
 /* White boxes edged in the text colour, navy once checked (the compiled
@@ -1281,31 +1292,79 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     overflow: hidden;
 }
 
-/* Date and time side by side, the date field the wider of the two. */
-.hsg-filter-fields {
-    display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    gap: var(--uswds-space-1);
-    margin-bottom: var(--uswds-space-105);
+/* Date filter (OP#1432): month/day/year and hour/minute/am-pm parts, as on
+   the reference site. Offered only while Historical Documents is the only
+   section (as is the Volumes group); [hidden] must win over any display set
+   on the group. */
+[data-hsg-documents-only][hidden] {
+    display: none;
 }
 
-.hsg-filter-field .usa-label {
-    margin: 0;
+/* Results sidebar (OP#1440): a group that doesn't apply stays visible but
+   disabled, faded and labelled, so the filters remain discoverable. */
+[data-hsg-documents-only="disable"]:disabled {
+    opacity: 0.55;
+}
+
+[data-hsg-documents-only="disable"]:disabled > legend::after {
+    content: " (Historical Documents only)";
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
+.hsg-date-time__group {
+    margin-top: var(--uswds-space-105);
+}
+
+.hsg-date-time__group .usa-legend {
+    margin-top: 0;
+    font-family: var(--uswds-font-sans);
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--uswds-color-text);
+}
+
+.hsg-date-time__group .usa-hint {
+    display: block;
+    font-family: var(--uswds-font-sans);
+    font-size: 0.8125rem;
+    line-height: 1.3;
+}
+
+.hsg-date-time__group .usa-legend .usa-hint {
+    display: inline;
+    font-weight: 400;
+}
+
+.hsg-date-time .usa-memorable-date {
+    flex-wrap: wrap;
+    gap: 0 var(--uswds-space-1);
+}
+
+.hsg-date-time .usa-form-group {
+    margin-top: var(--uswds-space-1);
+    margin-right: 0;
+}
+
+.hsg-date-time .usa-label {
+    margin-top: 0;
     font-family: var(--uswds-font-sans);
     font-size: 0.8125rem;
     line-height: 1.3;
     color: var(--uswds-color-primary-dark);
 }
 
-.hsg-filter-field .usa-input {
-    box-sizing: border-box;
-    width: 100%;
-    max-width: none;
+.hsg-date-time .usa-input,
+.hsg-date-time .usa-select {
     height: 2.5rem;
     margin-top: var(--uswds-space-05);
-    border-radius: 4px;
     font-family: var(--uswds-font-sans);
     font-size: 0.875rem;
+}
+
+.hsg-date-time__period .usa-select {
+    width: 5rem;
 }
 
 .hsg-search-filters__actions {
@@ -1508,37 +1567,6 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--uswds-color-code);
     font-family: var(--uswds-font-code);
     font-size: 0.6875rem;
-}
-
-.hsg-result__actions {
-    margin: var(--uswds-space-2) 0 0;
-    text-align: right;
-}
-
-.hsg-result__facsimile {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--uswds-space-1);
-    padding: var(--uswds-space-1) var(--uswds-space-2);
-    border-radius: 4px;
-    background-color: color-mix(in srgb, var(--uswds-color-primary-darker) 12%, transparent);
-    color: var(--uswds-color-primary-darker);
-    font-family: var(--uswds-font-sans);
-    font-size: 0.8125rem;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.hsg-result__facsimile:hover,
-.hsg-result__facsimile:focus {
-    background-color: var(--uswds-color-primary-light);
-    color: var(--uswds-color-primary-darkest);
-}
-
-.hsg-result__facsimile .usa-icon {
-    width: 1rem;
-    height: 1rem;
-    fill: currentColor;
 }
 
 /* Numbered squares, the current page filled navy, Next / Previous as text. */

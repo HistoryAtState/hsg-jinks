@@ -9,7 +9,8 @@
         },
         "script": {
             "custom": [
-                "resources/scripts/search-results.js"
+                "resources/scripts/search-results.js",
+                "resources/scripts/search-filters.js"
             ]
         },
         "theme": {
@@ -29,15 +30,18 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                <li typeof="ListItem" property="itemListElement"><a href="[[ $context-path ]]/search" typeof="WebPage" property="item"><pb-i18n key="search.results">Search</pb-i18n></a></li>
-                <li typeof="ListItem" property="itemListElement">Results</li>
+                <li typeof="ListItem" property="itemListElement">
+                    <a href="[[ $context-path ]]/" typeof="WebPage" property="item"><pb-i18n key="breadcrumb.home">Home</pb-i18n></a>
+                </li>
+                <li typeof="ListItem" property="itemListElement"><a href="[[ $context-path ]]/search" typeof="WebPage" property="item"><pb-i18n key="search.search">Search</pb-i18n></a></li>
+                <li aria-current="page" typeof="ListItem" property="itemListElement">Results</li>
             </ul>
         </nav>
     </li>
     [% endtemplate %]
 
     <div class="usa-prose hsg-search-results">
-        <h1 class="usa-sr-only"><pb-i18n key="search.results">Search results</pb-i18n></h1>
+        <h1><pb-i18n key="search.results">Search results</pb-i18n></h1>
 
         <p>Read these <a href="[[ $context-path ]]/search/tips">Search Tips</a> to learn all about the search engine's keyword, date filter, volume filter, and sort functions&#8212;as well as some of the search engine's limitations.</p>
 

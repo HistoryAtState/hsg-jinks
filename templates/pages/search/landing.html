@@ -9,7 +9,7 @@
         },
         "script": {
             "custom": [
-                "resources/scripts/search-landing.js"
+                "resources/scripts/search-filters.js"
             ]
         }
     }
@@ -22,73 +22,34 @@
     <li>
         <nav aria-label="breadcrumb">
             <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                <li typeof="ListItem" property="itemListElement"><pb-i18n key="search.results">Search</pb-i18n></li>
+                <li typeof="ListItem" property="itemListElement">
+                    <a href="[[ $context-path ]]/" typeof="WebPage" property="item"><pb-i18n key="breadcrumb.home">Home</pb-i18n></a>
+                </li>
+                <li aria-current="page" typeof="ListItem" property="itemListElement"><pb-i18n key="search.search">Search</pb-i18n></li>
             </ul>
         </nav>
     </li>
     [% endtemplate %]
 
-    <div class="usa-prose">
-        <h1><pb-i18n key="search.results">Search</pb-i18n></h1>
-        <p>Search the entire Office of the Historian website by keyword, or read the
-        <a href="[[ $context-path ]]/search/tips">search tips</a> for phrase, boolean,
-        wildcard, and proximity operators and date/volume filtering.</p>
+    [# Same structure as the results page (OP#1436, Figma "Search"): the
+       search form in the main column, the "Filter by" sidebar beside it,
+       joined to the form through its form attribute. No Sort by here: sorting
+       is offered on the results page. #]
+    <div class="usa-prose hsg-search-landing">
+        <h1><pb-i18n key="search.search">Search</pb-i18n></h1>
 
-        <form class="usa-form" method="get" action="[[ $context-path ]]/search">
-            <div class="usa-search usa-search--big" role="search">
-                <label class="usa-sr-only" for="search-field">Search</label>
-                <input class="usa-input" id="search-field" type="search" name="q" value="[[ page:parameter($context, 'q', '') ]]"/>
-                <button class="usa-button" type="submit">
-                    <span class="usa-search__submit-text">Search</span>
-                </button>
-            </div>
+        <p>Enter one or more words to search the Office of the Historian website. Use the filters to limit your search to a section or date range. For additional guidance, see <a href="[[ $context-path ]]/search/tips">Search tips</a>.</p>
 
-            [[ srch:filter-sections($context) ]]
-
-            <fieldset class="usa-fieldset">
-                <legend class="usa-legend">Filter by Date (Historical Documents only)</legend>
-                <div class="usa-memorable-date">
-                    <div class="usa-form-group usa-form-group--month">
-                        <label class="usa-label" for="start-date-month">Start month</label>
-                        <input class="usa-input usa-input--inline usa-memorable-date__input" id="start-date-month" name="start-date-month" type="text" maxlength="2" placeholder="MM"/>
-                    </div>
-                    <div class="usa-form-group usa-form-group--day">
-                        <label class="usa-label" for="start-date-day">Start day</label>
-                        <input class="usa-input usa-input--inline usa-memorable-date__input" id="start-date-day" name="start-date-day" type="text" maxlength="2" placeholder="DD"/>
-                    </div>
-                    <div class="usa-form-group usa-form-group--year">
-                        <label class="usa-label" for="start-date-year">Start year</label>
-                        <input class="usa-input usa-input--inline usa-memorable-date__input" id="start-date-year" name="start-date-year" type="text" maxlength="4" placeholder="YYYY"/>
-                    </div>
-                </div>
-                <div class="usa-memorable-date">
-                    <div class="usa-form-group usa-form-group--month">
-                        <label class="usa-label" for="end-date-month">End month</label>
-                        <input class="usa-input usa-input--inline usa-memorable-date__input" id="end-date-month" name="end-date-month" type="text" maxlength="2" placeholder="MM"/>
-                    </div>
-                    <div class="usa-form-group usa-form-group--day">
-                        <label class="usa-label" for="end-date-day">End day</label>
-                        <input class="usa-input usa-input--inline usa-memorable-date__input" id="end-date-day" name="end-date-day" type="text" maxlength="2" placeholder="DD"/>
-                    </div>
-                    <div class="usa-form-group usa-form-group--year">
-                        <label class="usa-label" for="end-date-year">End year</label>
-                        <input class="usa-input usa-input--inline usa-memorable-date__input" id="end-date-year" name="end-date-year" type="text" maxlength="4" placeholder="YYYY"/>
-                    </div>
-                </div>
-                <input type="hidden" name="start-date" id="start-date" value="[[ page:parameter($context, 'start-date', '') ]]"/>
-                <input type="hidden" name="end-date" id="end-date" value="[[ page:parameter($context, 'end-date', '') ]]"/>
-            </fieldset>
-
-            <div class="usa-form-group">
-                <label class="usa-label" for="sort-by">Sort by</label>
-                <select class="usa-select" id="sort-by" name="sort-by">
-                    <option value="relevance">Relevance</option>
-                    <option value="date-asc">Dates (oldest first)</option>
-                    <option value="date-desc">Dates (most recent first)</option>
-                </select>
-            </div>
-
-            <button class="usa-button" type="submit">Search</button>
+        <form class="usa-search usa-search--big hsg-search-form" id="hsg-search" role="search" method="get" action="[[ $context-path ]]/search">
+            <label class="usa-sr-only" for="search-field">Search</label>
+            <input class="usa-input" id="search-field" type="search" name="q" value="[[ page:parameter($context, 'q', '') ]]"/>
+            <button class="usa-button" type="submit">
+                <span class="usa-search__submit-text">Search</span>
+            </button>
         </form>
     </div>
+
+    [% template before %]
+    [[ srch:filters($context, false()) ]]
+    [% endtemplate %]
 </template>

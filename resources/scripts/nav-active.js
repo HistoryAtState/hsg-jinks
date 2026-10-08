@@ -6,63 +6,55 @@
 // it with `usa-current`, and mark its parent category button too. Keeping this
 // in app-owned JS (wired via config `script.custom`) avoids editing the
 // profile-owned menu template. See OP#1283.
-(function () {
-    function normalize(pathname) {
-        return (pathname || '').replace(/\/+$/, '') || '/';
-    }
+//
+// A classic script at the end of <body> (base10's script.custom), after the
+// header it reads; the block keeps its bindings out of the shared global scope.
+"use strict";
 
-    function markActive() {
-        var nav = document.querySelector('.usa-nav__primary');
-        if (!nav) {
-            return;
+{
+    const normalize = (pathname) => (pathname || "").replace(/\/+$/, "") || "/";
+
+    const isLocal = (href) => Boolean(href) && !/^(https?:)?\/\//.test(href) && !href.startsWith("#");
+
+    /** The normalized path a link points to, or null if it can't be parsed. */
+    const pathOf = (href) => {
+        try {
+            return normalize(new URL(href, window.location.origin).pathname);
+        } catch {
+            return null;
         }
-        var current = normalize(window.location.pathname);
-        var links = nav.querySelectorAll('a[href]');
-        var best = null;
-        var bestLen = -1;
-        links.forEach(function (link) {
-            var href = link.getAttribute('href');
-            if (!href || /^(https?:)?\/\//.test(href) || href.charAt(0) === '#') {
-                return;
+    };
+
+    const nav = document.querySelector(".usa-nav__primary");
+    if (nav) {
+        const current = normalize(window.location.pathname);
+        // the app root (the logo's link); it only matches itself, so Home does
+        // not win on every page
+        const root = normalize(document.querySelector(".usa-logo__text")?.getAttribute("href") || "/");
+
+        let best = null;
+        let bestLength = -1;
+        for (const link of nav.querySelectorAll("a[href]")) {
+            const href = link.getAttribute("href");
+            const target = isLocal(href) ? pathOf(href) : null;
+            if (target === null) {
+                continue;
             }
-            var target;
-            try {
-                target = normalize(new URL(href, window.location.origin).pathname);
-            } catch (err) {
-                return;
-            }
-            // Match an exact page or a section landing that is a path prefix.
-            // Ignore the root ("/...app root") so Home does not win everywhere.
-            var isRoot = target === normalize(document.querySelector('.usa-logo__text') &&
-                document.querySelector('.usa-logo__text').getAttribute('href') || '/');
-            if (isRoot) {
-                if (current === target && target.length > bestLen) {
-                    best = link;
-                    bestLen = target.length;
-                }
-                return;
-            }
-            if ((current === target || current.indexOf(target + '/') === 0) && target.length > bestLen) {
+            // an exact page, or a section landing that is a path prefix
+            const matches = target === root
+                ? current === target
+                : current === target || current.startsWith(`${target}/`);
+            if (matches && target.length > bestLength) {
                 best = link;
-                bestLen = target.length;
-            }
-        });
-        if (!best) {
-            return;
-        }
-        best.classList.add('usa-current');
-        var item = best.closest('.usa-nav__primary-item');
-        if (item) {
-            var button = item.querySelector('.usa-accordion__button');
-            if (button) {
-                button.classList.add('usa-current');
+                bestLength = target.length;
             }
         }
-    }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', markActive);
-    } else {
-        markActive();
+        if (best) {
+            best.classList.add("usa-current");
+            best.closest(".usa-nav__primary-item")
+                ?.querySelector(".usa-accordion__button")
+                ?.classList.add("usa-current");
+        }
     }
-})();
+}
