@@ -444,3 +444,20 @@ by hand.
 - `test/cypress/e2e/gui/breadcrumb.cy.js` — run against the worktree's own
   container: `dotenv -e .env -- npx cypress run --spec …` (Cypress reads
   `CYPRESS_BASE_URL` from the environment, not from `.env` itself).
+
+## MCPs and plugins used
+
+Get the community edition MCP from https://github.com/jtauschl/openproject-ce-mcp
+
+Add it with
+
+```
+claude mcp add \
+        --env OPENPROJECT_BASE_URL=$OP_BASE_URL \
+        --env OPENPROJECT_API_TOKEN=$OP_TOKEN \
+        --env OPENPROJECT_READ_PROJECTS=hsg-jinks \
+        --env OPENPROJECT_WRITE_PROJECTS=hsg-jinks \
+        --transport stdio \
+        --scope local \
+        openproject -- openproject-ce-mcp
+```
