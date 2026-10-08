@@ -290,7 +290,11 @@
                     relative URL, so no special-casing was needed for those. Each model is scoped
                     to only the "bare filename" shape (no scheme, no leading slash) so it doesn't
                     touch any graphic that already carries a full path/URL elsewhere in the
-                    app.</desc>
+                    app. No model passes @width/@height (#1438): pmf:graphic turns them into an
+                    inline style that pins the image at its print size (e.g. 305px x 450px on
+                    milestones/1969-1976/salt), overriding responsive CSS. hsg-shell's
+                    departmenthistory.odd and frus.odd graphic models omit them for the same
+                    reason, so this is reference parity.</desc>
                 <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and global:volume-id($parameters, .) != ''" behaviour="graphic">
                     <desc>FRUS document graphics (PR #32 review audit): the v2 corpus encodes
                         graphic/@url as a bare, extension-less basename (e.g. "d312p1" in
@@ -302,50 +306,36 @@
                         the collection path of the document being rendered, and is empty outside
                         the FRUS collection, which is what makes it the predicate here too.</desc>
                     <param name="url" value="'https://static.history.state.gov/frus/' || global:volume-id($parameters, .) || '/' || @url || (if (matches(@url, '\.(jpg|jpeg|png|gif|svg)$')) then '' else '.png')"/>
-                    <param name="width" value="@width"/>
-                    <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="(../desc, ../figDesc) => head() => normalize-space()"/>
                 </model>
                 <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(global:source-uri($parameters, .), '/other-publications/short-history/')" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/short-history/' || @url"/>
-                    <param name="width" value="@width"/>
-                    <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
                 <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(global:source-uri($parameters, .), '/other-publications/buildings/')" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/buildings/' || @url"/>
-                    <param name="width" value="@width"/>
-                    <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
                 <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(global:source-uri($parameters, .), '/other-publications/secretary-bios/')" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/secretaries/' || @url"/>
-                    <param name="width" value="@width"/>
-                    <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
                 <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(global:source-uri($parameters, .), '/milestones/chapters/')" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/milestones/' || @url"/>
-                    <param name="width" value="@width"/>
-                    <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
                 <model predicate="not(matches(@url, '^(?:[a-z]+://|/)')) and contains(global:source-uri($parameters, .), '/conferences/data/')" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/conferences/' || @url"/>
-                    <param name="width" value="@width"/>
-                    <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
                 <model predicate="not(matches(@url, '^(?:[a-z]+://|/)'))" behaviour="graphic">
                     <param name="url" value="'https://static.history.state.gov/countries/' || @url"/>
-                    <param name="width" value="@width"/>
-                    <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
@@ -359,8 +349,6 @@
                         ordered last: renders @url as-is for anything the predicated models above
                         didn't already claim.</desc>
                     <param name="url" value="@url"/>
-                    <param name="width" value="@width"/>
-                    <param name="height" value="@height"/>
                     <param name="scale" value="@scale"/>
                     <param name="title" value="desc"/>
                 </model>
