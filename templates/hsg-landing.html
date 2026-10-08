@@ -1,8 +1,0 @@
-<div>
-    [# Latest Publications: newest FRUS volumes (hsg:latest-publications),
-       falling back to the items authored in landing.xml when the query
-       yields nothing -- the hybrid data contract of uswds:cards (OP#1258). #]
-    [% template! landing-publications %]
-    [[ uswds:cards($context, 'publications', $landing?content, 'uswds-landing.odd', hsg:latest-publications($context, 3)) ]]
-    [% endtemplate %]
-</div>

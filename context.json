@@ -425,7 +425,7 @@
     "register-root" : "registers"
   },
   "templating" : {
-    "use" : [ "templates/uswds-blocks.html", "templates/hsg-blocks.html", "templates/hsg-landing.html" ],
+    "use" : [ "templates/uswds-blocks.html", "templates/hsg-blocks.html" ],
     "modules" : {
       "http://teipublisher.com/ns/templates/browse" : {
         "at" : "modules/templates/browse.xqm",

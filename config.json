@@ -328,8 +328,7 @@
   ],
   "templating" : {
     "use" : [
-      "templates/hsg-blocks.html",
-      "templates/hsg-landing.html"
+      "templates/hsg-blocks.html"
     ],
     "modules" : {
       "http://history.state.gov/ns/templates/landing" : {
