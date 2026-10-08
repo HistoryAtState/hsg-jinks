@@ -21,25 +21,7 @@
     [% endtemplate %]
 
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                <li typeof="ListItem" property="itemListElement">
-                    <a href="[[ $context?context-path ]]/" typeof="WebPage" property="item">
-                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-                    </a>
-                </li>
-                <li typeof="ListItem" property="itemListElement">
-                    <a href="[[ $context?context-path ]]/historicaldocuments" typeof="WebPage" property="item">
-                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
-                    </a>
-                </li>
-                <li aria-current="page" typeof="ListItem" property="itemListElement">
-                    <pb-i18n key="menu.status-of-the-series">Status of the Foreign Relations Series</pb-i18n>
-                </li>
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, hsg:section-trail("historicaldocuments", hsg:crumb-i18n("menu.status-of-the-series", "Status of the Foreign Relations Series", ()))) ]]
     [% endtemplate %]
 
     [# Status of the Series report (OP#1292), reference parity with

@@ -10,13 +10,7 @@
     }
     ---
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul>
-                [[ hsg:facsimile-breadcrumbs($context) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, hsg:facsimile-trail($context)) ]]
     [% endtemplate %]
 
     <!-- Standalone page-image view at /historicaldocuments/{volume}/pg_{n}

@@ -232,39 +232,6 @@ declare function tags:volume-tags-panel($context as map(*)) as element(nav)? {
 };
 
 (:~
- : Same breadcrumb shape as dh:breadcrumb (departmenthistory.xqm) -- the
- : section has no backing document for its hub pages, so the trail is fixed
- : per page rather than walked off an ODD structure.
- :)
-declare function tags:breadcrumb($context as map(*), $trail as map(*)*) as element(li)+ {
-    (
-        <li>
-            <a href="{$context?context-path}/">
-                <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-            </a>
-        </li>,
-        if (empty($trail)) then
-            <li aria-current="page">
-                <pb-i18n key="breadcrumb.tags">Tags</pb-i18n>
-            </li>
-        else
-            <li>
-                <a href="{$context?context-path}/tags">
-                    <pb-i18n key="breadcrumb.tags">Tags</pb-i18n>
-                </a>
-            </li>,
-        for $crumb at $pos in $trail
-        return
-            if ($pos = count($trail)) then
-                <li aria-current="page">{$crumb?label}</li>
-            else
-                <li>
-                    <a href="{$context?context-path}{$crumb?href}">{$crumb?label}</a>
-                </li>
-    )
-};
-
-(:~
  : Browse page for one taxonomy entry (#1176). Three states, mirroring
  : hsg-shell's tags:show-tag: direct hits (tagged secretaries and/or FRUS
  : volumes for this exact id, plus a child drill-down if the entry has

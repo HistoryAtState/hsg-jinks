@@ -13,6 +13,10 @@
     <title>Archives - Countries - Office of the Historian</title>
     [% endtemplate %]
 
+    [% template breadcrumb %]
+    [[ hsg:breadcrumbs($context, hsg:section-trail("countries", hsg:crumb-i18n("breadcrumb.archives", "Archives", ()))) ]]
+    [% endtemplate %]
+
     <div class="section-landing usa-prose">
         <h1>World Wide Diplomatic Archives Index</h1>
         <p>The Office of the Historian has for many years provided researchers a guide to the

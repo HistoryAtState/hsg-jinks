@@ -19,15 +19,7 @@
     [% endtemplate %]
 
     [% template breadcrumb %]
-    [% if exists($context?doc) %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(countries:breadcrumbs($context)) ]]
-            </ul>
-        </nav>
-    </li>
-    [% endif %]
+    [[ hsg:breadcrumbs($context, countries:article-trail($context)) ]]
     [% endtemplate %]
 
     [% template footer %]

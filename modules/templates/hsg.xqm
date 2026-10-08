@@ -58,40 +58,112 @@ declare %private function hsg:resolve-include($header as element()?, $name as xs
  : The full title of the publication a division belongs to, resolved from the
  : volume root document (whose titleStmt is xincluded from the shared
  : *_includes.xml; see hsg:resolve-include). Shared by
- : hsg:collection-breadcrumbs and hsg:navigation-title, and public for
+ : hsg:collection-trail and hsg:navigation-title, and public for
  : tags.xqm's resource listings (the direct titleStmt lookup #1101 used
  : misses the xincluded titleStmt of the v2 volume roots).
  :)
 (:~
- : schema.org RDFa for breadcrumbs (OP#1334; reference parity with
- : hsg-shell): each crumb becomes a ListItem/itemListElement, each link a
- : WebPage/item. Page templates wrap their breadcrumb-building calls in
- : this, and their "ul" carries typeof="BreadcrumbList" vocab; central so
- : the dozen section modules that build crumbs need no per-function
- : markup. Existing attributes (class, aria-current) survive.
+ : Whether every breadcrumb trail starts with Home. The one place that
+ : decides it (OP#1437): dropping Home site-wide is flipping this.
  :)
-declare function hsg:breadcrumb-rdfa($items as element()*) as element()* {
-    for $item in $items
-    return
-        if (local-name($item) = 'li') then
-            element li {
-                $item/@*,
-                attribute typeof { "ListItem" },
-                attribute property { "itemListElement" },
-                for $n in $item/node()
-                return
-                    if ($n instance of element() and local-name($n) = 'a') then
-                        element a {
-                            $n/@*,
-                            attribute typeof { "WebPage" },
-                            attribute property { "item" },
-                            $n/node()
-                        }
-                    else
-                        $n
-            }
+declare variable $hsg:BREADCRUMB-HOME := true();
+
+(:~
+ : The root crumb of each site section, keyed by its first path step. A
+ : section's trail starts with it (hsg:section-trail). Labels without an
+ : i18n key render as plain text, as they always have.
+ :)
+declare variable $hsg:SECTION-CRUMBS := map {
+    "about": map { "i18n": "breadcrumb.about", "label": "About Us" },
+    "conferences": map { "i18n": "breadcrumb.conferences", "label": "Conferences" },
+    "countries": map { "i18n": "breadcrumb.countries", "label": "Countries" },
+    "departmenthistory": map { "i18n": "breadcrumb.departmenthistory", "label": "Department History" },
+    "developer": map { "i18n": "breadcrumb.developer", "label": "Developer Resources" },
+    "education": map { "label": "Education" },
+    "historicaldocuments": map { "i18n": "breadcrumb.historicaldocuments", "label": "Historical Documents" },
+    "milestones": map { "i18n": "milestones.title", "label": "Milestones" },
+    "open": map { "i18n": "breadcrumb.open", "label": "Open Government Initiative" },
+    "search": map { "i18n": "search.search", "label": "Search" },
+    "tags": map { "i18n": "breadcrumb.tags", "label": "Tags" }
+};
+
+(:~
+ : One crumb: a label (text or nodes, e.g. a pb-i18n) and an optional href,
+ : a path relative to the app root that hsg:breadcrumbs prefixes with the
+ : context path. A "class" entry is copied onto the crumb's li.
+ :)
+declare function hsg:crumb($label as item()*, $href as xs:string?) as map(*) {
+    map:merge((
+        map { "label": $label },
+        $href ! map { "href": . }
+    ))
+};
+
+(:~
+ : A crumb whose label is a translatable pb-i18n with an English fallback.
+ :)
+declare function hsg:crumb-i18n($key as xs:string, $label as xs:string?, $href as xs:string?) as map(*) {
+    hsg:crumb(<pb-i18n key="{$key}">{$label}</pb-i18n>, $href)
+};
+
+(:~
+ : The trail of a page inside a site section: the section's root crumb
+ : (from $hsg:SECTION-CRUMBS, linking to /$section), then $trail. The
+ : section modules build their trails on this instead of each rendering
+ : "Home, section, trail" themselves (OP#1437).
+ :)
+declare function hsg:section-trail($section as xs:string, $trail as map(*)*) as map(*)+ {
+    let $root := $hsg:SECTION-CRUMBS($section)
+    return (
+        if (exists($root?i18n)) then
+            hsg:crumb-i18n($root?i18n, $root?label, "/" || $section)
         else
-            $item
+            hsg:crumb($root?label, "/" || $section),
+        $trail
+    )
+};
+
+(:~
+ : Render a breadcrumb trail: the one place breadcrumb markup is built
+ : (OP#1437). Pages fill the layout's breadcrumb slot with this and only
+ : supply their trail (hsg:crumb maps, below Home).
+ :
+ : - Home first, if $hsg:BREADCRUMB-HOME.
+ : - Every crumb links to its href except the last, the current page,
+ :   which gets aria-current="page" and no link, href or not.
+ : - schema.org RDFa on every trail (OP#1334; reference parity with
+ :   hsg-shell): the list is a BreadcrumbList, each crumb a
+ :   ListItem/itemListElement, each link a WebPage/item.
+ :)
+declare function hsg:breadcrumbs($context as map(*), $trail as map(*)*) as element(li)? {
+    let $crumbs := (
+        if ($hsg:BREADCRUMB-HOME) then hsg:crumb-i18n("breadcrumb.home", "Home", "/") else (),
+        $trail
+    )
+    return
+        if (empty($trail)) then ()
+        else
+            <li>
+                <nav aria-label="breadcrumb">
+                    <ul typeof="BreadcrumbList" vocab="http://schema.org/">
+                    {
+                        for $crumb at $pos in $crumbs
+                        let $current := $pos = count($crumbs)
+                        return
+                            <li typeof="ListItem" property="itemListElement">
+                            {
+                                $crumb?class ! attribute class { . },
+                                if ($current) then attribute aria-current { "page" } else (),
+                                if ($current or empty($crumb?href)) then
+                                    $crumb?label
+                                else
+                                    <a href="{$context?context-path}{$crumb?href}" typeof="WebPage" property="item">{$crumb?label}</a>
+                            }
+                            </li>
+                    }
+                    </ul>
+                </nav>
+            </li>
 };
 
 (:~
@@ -325,7 +397,7 @@ declare %private function hsg:toc-entries($division as element(tei:TEI)?, $divis
  :
  : A volume is a child collection of the data root holding a TEI file named
  : after it (frus1981-88v05/frus1981-88v05.xml) -- the same shape
- : hsg:collection-breadcrumbs() relies on -- so this discovers volumes rather
+ : hsg:collection-trail() relies on -- so this discovers volumes rather
  : than listing them anywhere.
  :)
 declare function hsg:volume-list($context as map(*)) {
@@ -713,87 +785,44 @@ declare %private function hsg:volume-availability($root as element(tei:TEI)) as 
 };
 
 (:~
- : Breadcrumb for section pages that render without a document of their own
- : (the landing and the administration pages), where the layout's
- : hsg:collection-breadcrumbs is gated on $context?doc. Same trail contract
- : as dh:breadcrumb: Home > Historical Documents [> $trail].
+ : Trail of a FRUS volume page: Historical Documents > volume title. The
+ : volume title is the current crumb only on the volume landing page; on
+ : any interior page it links back there and the division itself is the
+ : current crumb, on a line of its own (.breadcrumb-current, #1082):
+ : "Document <n>" for a document, otherwise the division's own title (the
+ : reference site labels every interior page this way). Empty without a
+ : context document, so the layout default renders no breadcrumb then.
  :)
-declare function hsg:section-breadcrumb($context as map(*), $trail as map(*)*) as element(li)+ {
-    (
-        <li>
-            <a href="{$context?context-path}/">
-                <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-            </a>
-        </li>,
-        if (empty($trail)) then
-            <li aria-current="page">
-                <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
-            </li>
-        else
-            <li>
-                <a href="{$context?context-path}/historicaldocuments">
-                    <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
-                </a>
-            </li>,
-        for $crumb at $pos in $trail
-        return
-            if ($pos = count($trail)) then
-                <li aria-current="page">{$crumb?label}</li>
-            else
-                <li>
-                    <a href="{$context?context-path}{$crumb?href}">{$crumb?label}</a>
-                </li>
-    )
+declare function hsg:collection-trail($context as map(*)) as map(*)* {
+    if (exists($context?doc)) then
+        let $content := $context?doc?content
+        let $components := config:get-relpath($content, $config:data-default) => tokenize("/")
+        let $publication := $components[1]
+        let $is-landing := count($components) = 2
+        let $volume-title := hsg:volume-title($content)
+        return hsg:section-trail("historicaldocuments", (
+            hsg:crumb($volume-title, if ($is-landing) then () else "/historicaldocuments/" || $publication),
+            if ($is-landing) then ()
+            else map:merge((hsg:crumb(hsg:division-crumb-label($content), ()), map { "class": "breadcrumb-current" }))
+        ))
+    else ()
 };
 
 (:~
- : Generate the breadcrumb trail: Home > Historical Documents > volume title.
- : The volume title is the current (non-link) crumb only on the volume
- : landing page; on any interior page it links back there.
- :
- : When the page being viewed is itself a chapter, document, or compilation,
- : one more crumb -- the current (non-link), final one -- is appended on a
- : new line: the division's own title for a chapter or compilation, or
- : "Document <n>" (see hsg:document-number) for a document.
+ : Label of a FRUS division's own crumb: "Document <n>" for a numbered
+ : document (see hsg:document-number), otherwise the division's title
+ : (chapters, compilations, front and back matter, unnumbered documents).
+ : See hsg:split-title: the title may be split into a date range and a
+ : subtitle; a breadcrumb cannot break lines, so join with a space, as the
+ : reference breadcrumb does.
  :)
-declare function hsg:collection-breadcrumbs($context as map(*)) {
-    if (exists($context?doc)) then
-        let $components := config:get-relpath($context?doc?content, $config:data-default) => tokenize("/")
-        let $publication := $components[1]
-        let $is-landing := count($components) = 2
-        let $volume-title := hsg:volume-title($context?doc?content)
-        let $division-type := ($context?doc?content//tei:bibl[@type='frus-division-type'])[1]/string()
-        return (
-            <li>
-                <a href="{$context?context-path}/">
-                    <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-                </a>
-            </li>,
-            <li>
-                <a href="{$context?context-path}/historicaldocuments">
-                    <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
-                </a>
-            </li>,
-            if ($is-landing) then
-                <li aria-current="page">{$volume-title}</li>
-            else
-                <li>
-                    <a href="{$context?context-path}/historicaldocuments/{$publication}">{$volume-title}</a>
-                </li>,
-            if (not($is-landing) and $division-type = ('chapter', 'compilation')) then
-                (: See hsg:split-title: the title may be split into a date
-                   range and a subtitle. A breadcrumb cannot break lines, so
-                   join with a space, as the reference breadcrumb does;
-                   normalize-space for the same reason as there. :)
-                let $own-title := $context?doc?content//tei:titleStmt/tei:title
-                    => string-join(' ') => normalize-space()
-                return <li class="breadcrumb-current" aria-current="page">{$own-title}</li>
-            else if (not($is-landing) and $division-type = 'document') then
-                <li class="breadcrumb-current" aria-current="page">Document {hsg:document-number($context?doc?content)}</li>
-            else ()
-        )
-
-    else ()
+declare %private function hsg:division-crumb-label($content as node()) as xs:string {
+    let $number := hsg:document-number($content)
+    return
+        if (($content//tei:bibl[@type = 'frus-division-type'])[1] = 'document' and exists($number)) then
+            "Document " || $number
+        else
+            $content//tei:titleStmt/tei:title => string-join(' ') => normalize-space()
 };
 
 (:~
@@ -801,7 +830,7 @@ declare function hsg:collection-breadcrumbs($context as map(*)) {
  : info, and the full table of contents (#1080). Replaces the ODD transform
  : for this page entirely -- app chrome (cover image, download links, byte
  : formatting), not generic TEI rendering, the same reasoning that already
- : keeps hsg:volume-toc/hsg:volume-list/hsg:collection-breadcrumbs outside
+ : keeps hsg:volume-toc/hsg:volume-list/hsg:collection-trail outside
  : the ODD pipeline.
  :)
 declare function hsg:volume-landing-content($context as map(*)) {
@@ -1449,21 +1478,18 @@ declare function hsg:facsimile-title($context as map(*)) as element(h2)? {
 };
 
 (:~
- : Breadcrumb trail of the pg_* facsimile page (reference parity: Home >
- : Historical Documents > volume title > Page N), built on
- : hsg:section-breadcrumb like the other doc-less pages.
+ : Trail of the pg_* facsimile page (reference parity: Historical
+ : Documents > volume title > Page N), resolved from $context?facsimile
+ : because this page has no context document.
  :)
-declare function hsg:facsimile-breadcrumbs($context as map(*)) as element(li)* {
+declare function hsg:facsimile-trail($context as map(*)) as map(*)* {
     let $facs := $context?facsimile
     return
         if (empty($facs)) then ()
         else
-            hsg:section-breadcrumb($context, (
-                map {
-                    "label": hsg:publication-title($facs?publication),
-                    "href": "/historicaldocuments/" || $facs?publication
-                },
-                map { "label": "Page " || $facs?n }
+            hsg:section-trail("historicaldocuments", (
+                hsg:crumb(hsg:publication-title($facs?publication), "/historicaldocuments/" || $facs?publication),
+                hsg:crumb("Page " || $facs?n, ())
             ))
 };
 

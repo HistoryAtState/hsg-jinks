@@ -28,13 +28,7 @@
        description, body through the ODD, prev/next by publication date, and
        the article-list sidebar with the current article highlighted. #]
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(fh:article-breadcrumb($context)) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, fh:article-trail($context)) ]]
     [% endtemplate %]
 
     [% template before %]

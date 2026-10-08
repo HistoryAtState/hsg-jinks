@@ -3,6 +3,7 @@ xquery version "3.1";
 module namespace conf="https://history.state.gov/ns/templates/conferences";
 
 import module namespace page="http://teipublisher.com/ns/templates/page" at "page.xqm";
+import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -226,55 +227,18 @@ declare function conf:current-section($context as map(*)) as map(*) {
     return map { "conferenceId": $conferenceId, "doc": $doc, "division": $division }
 };
 
-declare function conf:document-breadcrumb($context as map(*)) as element(li)+ {
+declare function conf:document-trail($context as map(*)) as map(*)+ {
     let $conferenceId := $context?request?parameters?conferenceId
     let $doc := conf:conference-doc($conferenceId)
-    return conf:breadcrumb($context, (map { "label": conf:conference-title($doc) }))
+    return hsg:section-trail("conferences", (map { "label": conf:conference-title($doc) }))
 };
 
-declare function conf:section-breadcrumb($context as map(*)) as element(li)+ {
+declare function conf:section-trail($context as map(*)) as map(*)+ {
     let $s := conf:current-section($context)
-    return conf:breadcrumb($context, (
+    return hsg:section-trail("conferences", (
         map { "label": conf:conference-title($s?doc), "href": "/conferences/" || $s?conferenceId },
         map { "label": normalize-space($s?division/tei:head[1]) }
     ))
-};
-
-(:~
- : Static section breadcrumb: Home > Conferences > $trail. $trail is a
- : sequence of maps { "label": ..., "href": ... }; the last entry renders as
- : the current page (no link). $href is app-relative. Maps, not arrays: a
- : trailing array literal ends in a literal "]]", which collides with this
- : templating engine's "[[ ... ]]" delimiter -- same reasoning as
- : dh:breadcrumb, whose <li> shape this mirrors so both nest identically
- : inside the layout's shared wrapper.
- :)
-declare function conf:breadcrumb($context as map(*), $trail as map(*)*) as element(li)+ {
-    (
-        <li>
-            <a href="{$context?context-path}/">
-                <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-            </a>
-        </li>,
-        if (empty($trail)) then
-            <li aria-current="page">
-                <pb-i18n key="breadcrumb.conferences">Conferences</pb-i18n>
-            </li>
-        else
-            <li>
-                <a href="{$context?context-path}/conferences">
-                    <pb-i18n key="breadcrumb.conferences">Conferences</pb-i18n>
-                </a>
-            </li>,
-        for $crumb at $pos in $trail
-        return
-            if ($pos = count($trail)) then
-                <li aria-current="page">{$crumb?label}</li>
-            else
-                <li>
-                    <a href="{$context?context-path}{$crumb?href}">{$crumb?label}</a>
-                </li>
-    )
 };
 
 (:~

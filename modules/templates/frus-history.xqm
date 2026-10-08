@@ -420,8 +420,8 @@ declare function fh:navigation-title($context as map(*)) as element(h2) {
  : Flat like the live site's own breadcrumb: a chapter's trail does NOT
  : include its part (verified live on /frus-history/chapter-1).
  :)
-declare function fh:section-breadcrumb($context as map(*)) as element(li)+ {
-    hsg:section-breadcrumb($context, (
+declare function fh:section-trail($context as map(*)) as map(*)+ {
+    hsg:section-trail("historicaldocuments", (
         map { "label": fh:frus-history-crumb(), "href": $fh:ROUTE },
         map { "label": fh:head-label(fh:division($context?section-id)) }
     ))
@@ -631,10 +631,10 @@ declare function fh:document-list($context as map(*)) as element()+ {
         )
 };
 
-declare function fh:document-breadcrumb($context as map(*)) as element(li)+ {
+declare function fh:document-trail($context as map(*)) as map(*)+ {
     let $doc := fh:document-doc($context?document-id)
     return
-        hsg:section-breadcrumb($context, (
+        hsg:section-trail("historicaldocuments", (
             map { "label": fh:frus-history-crumb(), "href": $fh:ROUTE },
             map { "label": "Documents", "href": $fh:ROUTE || "/documents" },
             map { "label": normalize-space(($doc//tei:title[@type = 'short'])[1]) }
@@ -799,10 +799,10 @@ declare %private function fh:strip-note-apparatus($nodes as node()*) as node()* 
             default return $node
 };
 
-declare function fh:article-breadcrumb($context as map(*)) as element(li)+ {
+declare function fh:article-trail($context as map(*)) as map(*)+ {
     let $article := fh:article-doc($context?article-id)
     return
-        hsg:section-breadcrumb($context, (
+        hsg:section-trail("historicaldocuments", (
             map { "label": fh:frus-history-crumb(), "href": $fh:ROUTE },
             map { "label": "Research", "href": $fh:ROUTE || "/research" },
             map { "label": fh:tidy-space(fh:inline(($article//tei:title[@type = 'short'])[1]/node())) }
@@ -977,8 +977,8 @@ declare %private function fh:event-blocks($events as element(event)+) as element
  : Appendix A production/timeliness chart
  : ================================================================== :)
 
-declare function fh:appendix-a-breadcrumb($context as map(*)) as element(li)+ {
-    hsg:section-breadcrumb($context, (
+declare function fh:appendix-a-trail($context as map(*)) as map(*)+ {
+    hsg:section-trail("historicaldocuments", (
         map { "label": fh:frus-history-crumb(), "href": $fh:ROUTE },
         map { "label": fh:head-label(fh:division('appendix-a')) }
     ))

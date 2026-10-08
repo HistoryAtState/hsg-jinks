@@ -4,6 +4,8 @@ module namespace countries="https://history.state.gov/ns/templates/countries";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
+import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
+
 (:~
  : rdcr and wwdai are foreign apps (own .xar packages, not this app's own
  : data root) -- same absolute-collection-path technique used to read them
@@ -83,36 +85,21 @@ declare function countries:page-title($doc as document-node(), $suffix as xs:str
 };
 
 (:~
- : Breadcrumb trail for a country/archive article: Home > Countries
- : [> Archives] > title. Deliberately its own function rather than reusing
- : hsg:collection-breadcrumbs (FRUS-specific: assumes documents live under
- : $config:data-default and carry frus-division-type bibls) or the
- : jinks-owned page:collection-breadcrumbs (its config:get-relpath-based walk
- : degrades to nothing for a document outside $config:data-default -- which
- : rdcr/wwdai always are). Distinguishes the two collections from
+ : Trail of a country/archive article: Countries [> Archives] > title.
+ : Deliberately its own function rather than reusing hsg:collection-trail
+ : (FRUS-specific: assumes documents live under $config:data-default and
+ : carry frus-division-type bibls). Distinguishes the two collections from
  : $context?doc?path rather than a separate flag, since vapi:view already
- : puts the absolute docid there.
+ : puts the absolute docid there. Empty without a context document; the
+ : list pages supply their own trails.
  :)
-declare function countries:breadcrumbs($context as map(*)) {
-    if (exists($context?doc)) then (
-        <li>
-            <a href="{$context?context-path}/">
-                <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-            </a>
-        </li>,
-        <li>
-            <a href="{$context?context-path}/countries">
-                <pb-i18n key="breadcrumb.countries">Countries</pb-i18n>
-            </a>
-        </li>,
-        if (starts-with($context?doc?path, $countries:WWDAI_ARTICLES)) then
-            <li>
-                <a href="{$context?context-path}/countries/archives">
-                    <pb-i18n key="breadcrumb.archives">Archives</pb-i18n>
-                </a>
-            </li>
-        else (),
-        <li aria-current="page">{countries:article-heading($context?doc?content)}</li>
-    )
+declare function countries:article-trail($context as map(*)) as map(*)* {
+    if (exists($context?doc)) then
+        hsg:section-trail("countries", (
+            if (starts-with($context?doc?path, $countries:WWDAI_ARTICLES)) then
+                hsg:crumb-i18n("breadcrumb.archives", "Archives", "/countries/archives")
+            else (),
+            hsg:crumb(countries:article-heading($context?doc?content), ())
+        ))
     else ()
 };

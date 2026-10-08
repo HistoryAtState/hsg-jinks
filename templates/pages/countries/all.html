@@ -13,6 +13,10 @@
     <title>All Countries - Countries - Office of the Historian</title>
     [% endtemplate %]
 
+    [% template breadcrumb %]
+    [[ hsg:breadcrumbs($context, hsg:section-trail("countries", hsg:crumb("All Countries", ()))) ]]
+    [% endtemplate %]
+
     <div class="section-landing usa-prose">
         <h1>All Countries</h1>
         <p>This section provides historical reference information on the countries with which the

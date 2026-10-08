@@ -3,6 +3,7 @@ xquery version "3.1";
 module namespace ms="https://history.state.gov/ns/templates/milestones";
 
 import module namespace page="http://teipublisher.com/ns/templates/page" at "page.xqm";
+import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -183,48 +184,14 @@ declare function ms:era-prev-next($doc as document-node(), $current as xs:string
     }
 };
 
-(:~
- : Shared breadcrumb builder: Home > Milestones > $trail, mirroring
- : dh:breadcrumb's shape (maps, not arrays -- a trailing array literal ends in
- : a literal "]]" which collides with this templating engine's "[[ ... ]]"
- : delimiter).
- :)
-declare function ms:breadcrumb($context as map(*), $trail as map(*)*) as element(li)+ {
-    (
-        <li>
-            <a href="{$context?context-path}/">
-                <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-            </a>
-        </li>,
-        if (empty($trail)) then
-            <li aria-current="page">
-                <pb-i18n key="milestones.title">Milestones</pb-i18n>
-            </li>
-        else
-            <li>
-                <a href="{$context?context-path}/milestones">
-                    <pb-i18n key="milestones.title">Milestones</pb-i18n>
-                </a>
-            </li>,
-        for $crumb at $pos in $trail
-        return
-            if ($pos = count($trail)) then
-                <li aria-current="page">{$crumb?label}</li>
-            else
-                <li>
-                    <a href="{$context?context-path}{$crumb?href}">{$crumb?label}</a>
-                </li>
-    )
+declare function ms:all-trail($context as map(*)) as map(*)+ {
+    hsg:section-trail("milestones", (map { "label": "All" }))
 };
 
-declare function ms:all-breadcrumb($context as map(*)) as element(li)+ {
-    ms:breadcrumb($context, (map { "label": "All" }))
-};
-
-declare function ms:era-breadcrumb($context as map(*)) as element(li)+ {
+declare function ms:era-trail($context as map(*)) as map(*)+ {
     let $eraId := $context?request?parameters?eraId
     let $doc := ms:era-doc($eraId)
-    return ms:breadcrumb($context, (map { "label": ms:era-short-title($doc) }))
+    return hsg:section-trail("milestones", (map { "label": ms:era-short-title($doc) }))
 };
 
 (:~
@@ -242,9 +209,9 @@ declare %private function ms:current-article($context as map(*)) as map(*) {
     return map { "eraId": $eraId, "doc": $doc, "division": $division }
 };
 
-declare function ms:article-breadcrumb($context as map(*)) as element(li)+ {
+declare function ms:article-trail($context as map(*)) as map(*)+ {
     let $article := ms:current-article($context)
-    return ms:breadcrumb($context, (
+    return hsg:section-trail("milestones", (
         map { "label": ms:era-short-title($article?doc), "href": "/milestones/" || $article?eraId },
         map { "label": normalize-space($article?division/tei:head[1]) }
     ))

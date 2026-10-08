@@ -33,13 +33,7 @@
         own, so it never actually produces a link on this page either.
     -->
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(conf:document-breadcrumb($context)) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, conf:document-trail($context)) ]]
     [% endtemplate %]
 
     [% template before %]
