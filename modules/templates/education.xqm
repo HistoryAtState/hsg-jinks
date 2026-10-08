@@ -3,6 +3,7 @@ xquery version "3.1";
 module namespace edu="https://history.state.gov/ns/templates/education";
 
 import module namespace page="http://teipublisher.com/ns/templates/page" at "page.xqm";
+import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -21,8 +22,8 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
  : vapi:view route's default hsg-content.html breadcrumb block
  : ($context?doc truthy) wins over a leaf template's own [% template
  : breadcrumb %] override in this templating engine (confirmed live:
- : hsg:collection-breadcrumbs' generic "historicaldocuments" fallback
- : rendered instead of edu:breadcrumb). departmenthistory never hits this
+ : hsg:collection-trail's generic "historicaldocuments" fallback
+ : rendered instead of the page's own trail). departmenthistory never hits this
  : because every one of its routes, including its TEI monograph pages, goes
  : through vapi:html with content re-resolved from request parameters
  : instead -- the same proven pattern this module follows for the module
@@ -211,39 +212,6 @@ declare function edu:module-availability-block($module as element(module)) as el
             </div>
         </div>
     </div>
-};
-
-(:~
- : Static section breadcrumb: Home > Education > $trail. "Education", not
- : "Education Resources" -- verified against the live reference site's own
- : breadcrumb text (history.state.gov/education, PR #17 review). Same
- : pattern as dh:breadcrumb (modules/templates/departmenthistory.xqm):
- : $trail as a sequence of maps { "label": ..., "href": ... }, NOT an array
- : -- an array literal's closing "]]" collides with this templating engine's
- : "[[ ... ]]" expression delimiter.
- :)
-declare function edu:breadcrumb($context as map(*), $trail as map(*)*) as element(li)+ {
-    (
-        <li>
-            <a href="{$context?context-path}/">
-                <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-            </a>
-        </li>,
-        if (empty($trail)) then
-            <li aria-current="page">Education</li>
-        else
-            <li>
-                <a href="{$context?context-path}/education">Education</a>
-            </li>,
-        for $crumb at $pos in $trail
-        return
-            if ($pos = count($trail)) then
-                <li aria-current="page">{$crumb?label}</li>
-            else
-                <li>
-                    <a href="{$context?context-path}{$crumb?href}">{$crumb?label}</a>
-                </li>
-    )
 };
 
 (:~

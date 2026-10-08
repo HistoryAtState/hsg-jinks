@@ -27,13 +27,7 @@
        the full body through the ODD, prev/next by document date, and the
        all-documents sidebar with the current document highlighted. #]
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(fh:document-breadcrumb($context)) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, fh:document-trail($context)) ]]
     [% endtemplate %]
 
     [% template before %]

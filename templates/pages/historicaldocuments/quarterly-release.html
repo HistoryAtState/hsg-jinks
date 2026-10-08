@@ -17,28 +17,7 @@
     }
     ---
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                <li typeof="ListItem" property="itemListElement">
-                    <a href="[[ $context?context-path ]]/" typeof="WebPage" property="item">
-                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-                    </a>
-                </li>
-                <li typeof="ListItem" property="itemListElement">
-                    <a href="[[ $context?context-path ]]/historicaldocuments" typeof="WebPage" property="item">
-                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
-                    </a>
-                </li>
-                <li typeof="ListItem" property="itemListElement">
-                    <a href="[[ $context?context-path ]]/historicaldocuments/quarterly-releases" typeof="WebPage" property="item">
-                        <pb-i18n key="menu.quarterly-releases">Quarterly Releases</pb-i18n>
-                    </a>
-                </li>
-                <li aria-current="page" typeof="ListItem" property="itemListElement">[[ replace($context?release-id, "^(\d+)-q(\d)$", "$1 Quarter $2") ]]</li>
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, hsg:section-trail("historicaldocuments", (hsg:crumb-i18n("menu.quarterly-releases", "Quarterly Releases", "/historicaldocuments/quarterly-releases"), hsg:crumb(replace($context?release-id, "^(\d+)-q(\d)$", "$1 Quarter $2"), ())))) ]]
     [% endtemplate %]
 
     [# One template for all ten frozen announcement pages (OP#1313): the content

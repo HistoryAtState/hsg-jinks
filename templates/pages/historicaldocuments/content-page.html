@@ -21,25 +21,7 @@
     [% endtemplate %]
 
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                <li typeof="ListItem" property="itemListElement">
-                    <a href="[[ $context?context-path ]]/" typeof="WebPage" property="item">
-                        <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-                    </a>
-                </li>
-                <li typeof="ListItem" property="itemListElement">
-                    <a href="[[ $context?context-path ]]/historicaldocuments" typeof="WebPage" property="item">
-                        <pb-i18n key="breadcrumb.historicaldocuments">Historical Documents</pb-i18n>
-                    </a>
-                </li>
-                <li aria-current="page" typeof="ListItem" property="itemListElement">
-                    <pb-i18n key="menu.[[ $context?page-id ]]">[[ hsg:content-title($context, $context?page-id) ]]</pb-i18n>
-                </li>
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, hsg:section-trail("historicaldocuments", hsg:crumb-i18n("menu." || $context?page-id, hsg:content-title($context, $context?page-id), ()))) ]]
     [% endtemplate %]
 
     [# One template for every data-driven static of the section (OP#1313, PR #50

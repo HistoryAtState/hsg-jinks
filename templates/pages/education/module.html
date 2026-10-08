@@ -21,13 +21,7 @@
     [% endtemplate %]
 
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(edu:breadcrumb($context, (map{"label": "Curriculum Modules", "href": "/education/modules"}, map{"label": edu:module-complete-title(edu:current-module($context))}))) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, hsg:section-trail("education", (map{"label": "Curriculum Modules", "href": "/education/modules"}, map{"label": edu:module-complete-title(edu:current-module($context))}))) ]]
     [% endtemplate %]
 
     <div class="usa-prose">

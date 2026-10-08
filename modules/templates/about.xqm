@@ -4,6 +4,7 @@ module namespace about="https://history.state.gov/ns/templates/about";
 
 import module namespace page="http://teipublisher.com/ns/templates/page" at "page.xqm";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "../config.xqm";
+import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -160,45 +161,8 @@ declare function about:monograph-prev-next($doc as document-node(), $current as 
     }
 };
 
-(:~
- : Shared breadcrumb: Home > About Us > $trail. $trail is a sequence of maps
- : { "label": ..., "href": ... }; the last entry renders as the current page
- : (no link). $href is app-relative, e.g. "/about/faq". Mirrors
- : dh:breadcrumb's shape (maps, not arrays -- a trailing array literal ends
- : in a literal "]]", which collides with this templating engine's own
- : "[[ ... ]]" delimiter) so both breadcrumbs nest identically inside the
- : layout's shared wrapper.
- :)
-declare function about:breadcrumb($context as map(*), $trail as map(*)*) as element(li)+ {
-    (
-        <li>
-            <a href="{$context?context-path}/">
-                <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-            </a>
-        </li>,
-        if (empty($trail)) then
-            <li aria-current="page">
-                <pb-i18n key="breadcrumb.about">About Us</pb-i18n>
-            </li>
-        else
-            <li>
-                <a href="{$context?context-path}/about">
-                    <pb-i18n key="breadcrumb.about">About Us</pb-i18n>
-                </a>
-            </li>,
-        for $crumb at $pos in $trail
-        return
-            if ($pos = count($trail)) then
-                <li aria-current="page">{$crumb?label}</li>
-            else
-                <li>
-                    <a href="{$context?context-path}{$crumb?href}">{$crumb?label}</a>
-                </li>
-    )
-};
-
-declare function about:monograph-toc-breadcrumb($context as map(*), $publication as xs:string) as element(li)+ {
-    about:breadcrumb($context, (map { "label": about:monograph-title($publication), "href": "/about/" || $publication }))
+declare function about:monograph-toc-trail($context as map(*), $publication as xs:string) as map(*)+ {
+    hsg:section-trail("about", (map { "label": about:monograph-title($publication), "href": "/about/" || $publication }))
 };
 
 (:~
@@ -216,7 +180,7 @@ declare %private function about:current-section($context as map(*)) as map(*) {
     return map { "publication": $publication, "doc": $doc, "division": $division }
 };
 
-declare function about:monograph-section-breadcrumb($context as map(*)) as element(li)+ {
+declare function about:monograph-section-trail($context as map(*)) as map(*)+ {
     let $s := about:current-section($context)
     let $parent-division := $s?division/parent::tei:div[@xml:id]
     let $trail := (
@@ -226,7 +190,7 @@ declare function about:monograph-section-breadcrumb($context as map(*)) as eleme
         else (),
         map { "label": normalize-space($s?division/tei:head[1]) }
     )
-    return about:breadcrumb($context, $trail)
+    return hsg:section-trail("about", $trail)
 };
 
 declare function about:monograph-section-sidebar($context as map(*)) as element(nav) {

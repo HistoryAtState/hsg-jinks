@@ -28,13 +28,7 @@
         dh:monograph-toc-breadcrumb.
     -->
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(dh:monograph-toc-breadcrumb($context, $context?request?parameters?publication)) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, dh:monograph-toc-trail($context, $context?request?parameters?publication)) ]]
     [% endtemplate %]
 
     <div class="section-landing usa-prose">

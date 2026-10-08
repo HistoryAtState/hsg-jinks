@@ -17,14 +17,11 @@
 
     [% template breadcrumb %]
     [% if exists($context?doc) %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(page:collection-breadcrumbs($context)) ]]
-                <li typeof="ListItem" property="itemListElement">[[ page:transform($context?doc?content, map { "mode": "breadcrumb" }, $context?doc?odd || ".odd") ]]</li>
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, (
+        page:collection-breadcrumbs($context)[not(.//*:pb-i18n/@key = "breadcrumb.document-root")]
+            ! hsg:crumb(*:a/node(), substring-after(*:a/@href, $context?context-path)),
+        hsg:crumb(page:transform($context?doc?content, map { "mode": "breadcrumb" }, $context?doc?odd || ".odd"), ())
+    )) ]]
     [% endif %]
     [% endtemplate %]
 

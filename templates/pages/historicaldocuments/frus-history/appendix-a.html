@@ -32,13 +32,7 @@
        divisions (the fixed /appendix-a route replaces the {sectionId} view
        of this division, matching the reference). #]
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(fh:appendix-a-breadcrumb($context)) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, fh:appendix-a-trail($context)) ]]
     [% endtemplate %]
 
     [% template before %]

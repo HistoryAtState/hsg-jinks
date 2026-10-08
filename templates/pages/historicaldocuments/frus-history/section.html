@@ -28,13 +28,7 @@
        book TOC as the left sidebar with the current division highlighted
        (above the shared section navigation). #]
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(fh:section-breadcrumb($context)) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, fh:section-trail($context)) ]]
     [% endtemplate %]
 
     [% template before %]

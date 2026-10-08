@@ -21,13 +21,7 @@
     [% endtemplate %]
 
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(tags:breadcrumb($context, (map{"label": "Full Taxonomy"}))) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, hsg:section-trail("tags", (map{"label": "Full Taxonomy"}))) ]]
     [% endtemplate %]
 
     <div class="usa-prose">

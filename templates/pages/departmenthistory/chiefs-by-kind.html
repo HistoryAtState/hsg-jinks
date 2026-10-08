@@ -32,13 +32,7 @@
         wrapping template is unified.
     -->
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(dh:chiefs-by-kind-breadcrumb($context, $context?request?parameters?kind)) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, dh:chiefs-by-kind-trail($context, $context?request?parameters?kind)) ]]
     [% endtemplate %]
 
     <div class="usa-prose">

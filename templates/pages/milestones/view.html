@@ -29,13 +29,7 @@
         eraId before this template is ever reached.
     -->
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(ms:era-breadcrumb($context)) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, ms:era-trail($context)) ]]
     [% endtemplate %]
 
     [% template before %]

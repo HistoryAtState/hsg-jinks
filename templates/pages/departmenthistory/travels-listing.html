@@ -36,13 +36,7 @@
         from the president-only template).
     -->
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(dh:travels-listing-breadcrumb($context, $context?request?parameters?role)) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, dh:travels-listing-trail($context, $context?request?parameters?role)) ]]
     [% endtemplate %]
 
     <div class="usa-prose">

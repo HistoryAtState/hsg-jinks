@@ -366,7 +366,7 @@ declare %private function hsgapi:view-facsimile($request as map(*), $publication
                        occurrence of a key and context.json already carries
                        "data", so it would be dropped silently. The template
                        instead resolves everything from this facsimile map
-                       (hsg:facsimile-title / hsg:facsimile-breadcrumbs). :)
+                       (hsg:facsimile-title / hsg:facsimile-trail). :)
                     map {
                         "facsimile": map {
                             "publication": $publicationId,

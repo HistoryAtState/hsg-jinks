@@ -31,13 +31,7 @@
         which office-holders function to call) hadn't been unified yet.
     -->
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(dh:travels-index-breadcrumb($context, $context?request?parameters?role)) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, dh:travels-index-trail($context, $context?request?parameters?role)) ]]
     [% endtemplate %]
 
     <div class="usa-prose">

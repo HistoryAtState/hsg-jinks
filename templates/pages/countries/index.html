@@ -13,6 +13,10 @@
     <title>Countries - Office of the Historian</title>
     [% endtemplate %]
 
+    [% template breadcrumb %]
+    [[ hsg:breadcrumbs($context, hsg:section-trail("countries", ())) ]]
+    [% endtemplate %]
+
     <div class="section-landing usa-prose">
         <h1>
             <pb-i18n key="countries.title">Countries</pb-i18n>

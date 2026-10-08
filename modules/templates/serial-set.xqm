@@ -14,6 +14,7 @@ module namespace sset="https://history.state.gov/ns/templates/serial-set";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
 import module namespace page="http://teipublisher.com/ns/templates/page" at "page.xqm";
+import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
 
 declare variable $sset:doc := doc("/db/apps/other-publications/serial-set/pre-1861.xml");
 
@@ -161,24 +162,21 @@ declare function sset:region-and-or-subject-name($context as map(*)) as xs:strin
 };
 
 (:~
- : The browse page's trailing breadcrumbs: the region linking to its browse
- : page, then the subject when set. Port of ssh:region-and-subject-link.
+ : The browse page's trail: Historical Documents > Pre-1861 > Serial Set,
+ : then the region linking to its browse page and the subject when set
+ : (port of ssh:region-and-subject-link). Without either parameter the
+ : page itself is the current crumb, "Browse".
  :)
-declare function sset:browse-breadcrumbs($context as map(*)) as element(li)* {
+declare function sset:browse-trail($context as map(*)) as map(*)+ {
     let $region := $context?request?parameters?region
     let $subject := $context?request?parameters?subject
-    return (
-        if (exists($region)) then
-            <li>
-                <a href="{sset:browse-href($context, $region, ())}">{$region}</a>
-            </li>
-        else
-            (),
-        if (exists($subject)) then
-            <li aria-current="page">{$subject}</li>
-        else
-            ()
-    )
+    return hsg:section-trail("historicaldocuments", (
+        hsg:crumb-i18n("menu.pre-1861", "Pre-1861 U.S. foreign relations materials", "/historicaldocuments/pre-1861"),
+        hsg:crumb-i18n("menu.serial-set", "U.S. Congressional Serial Set", "/historicaldocuments/pre-1861/serial-set"),
+        $region ! hsg:crumb(., $sset:browse-path || "?region=" || encode-for-uri(.)),
+        $subject ! hsg:crumb(., ()),
+        if (empty(($region, $subject))) then hsg:crumb("Browse", ()) else ()
+    ))
 };
 
 (:~

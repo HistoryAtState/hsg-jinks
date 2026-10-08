@@ -5,6 +5,7 @@ module namespace dh="https://history.state.gov/ns/templates/departmenthistory";
 import module namespace page="http://teipublisher.com/ns/templates/page" at "page.xqm";
 import module namespace pages="http://www.tei-c.org/tei-simple/pages" at "../lib/pages.xql";
 import module namespace nav="http://www.tei-c.org/tei-simple/navigation" at "../navigation.xql";
+import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -131,12 +132,11 @@ declare function dh:monograph-prev-next($doc as document-node(), $current as xs:
 };
 
 (:~
- : Section-page breadcrumb: Home > Department History > <monograph short
- : title> > [chapter title, if $division is one of its subchapters] >
- : current division title. Delegates to dh:breadcrumb for the shared prefix
- : and current-crumb rendering.
+ : Section-page trail: Department History > <monograph short title> >
+ : [chapter title, if $division is one of its subchapters] > current
+ : division title.
  :)
-declare function dh:monograph-breadcrumb($context as map(*), $doc as document-node(), $route as xs:string, $division as element(tei:div)) as element(li)+ {
+declare function dh:monograph-trail($doc as document-node(), $route as xs:string, $division as element(tei:div)) as map(*)+ {
     let $parent-division := $division/parent::tei:div[@xml:id]
     let $trail := (
         map { "label": dh:monograph-short-title($doc), "href": "/departmenthistory/" || $route },
@@ -145,57 +145,12 @@ declare function dh:monograph-breadcrumb($context as map(*), $doc as document-no
         else (),
         map { "label": normalize-space($division/tei:head[1]) }
     )
-    return dh:breadcrumb($context, $trail)
+    return hsg:section-trail("departmenthistory", $trail)
 };
 
-(:~
- : Static section breadcrumb: Home > Department History > $trail. $trail is a
- : sequence of maps { "label": ..., "href": ... }; the last entry renders as
- : the current page (no link). $href is app-relative, e.g.
- : "/departmenthistory/people".
- :
- : Maps, not arrays: a trailing array literal ends in a literal "]]", which
- : collides with this templating engine's "[[ ... ]]" expression delimiter --
- : it closes the interpolation at the first "]]" it scans, truncating the
- : expression. Maps close on "}", so they cannot produce that collision.
- :
- : The section's hub and static-article pages have no backing document, so
- : there is nothing for an ODD-driven breadcrumb (hsg:collection-breadcrumbs's
- : approach on historicaldocuments) to walk -- the trail is fixed per page
- : instead. Mirrors that function's <li> shape so both breadcrumbs nest
- : identically inside the layout's shared wrapper.
- :)
-declare function dh:breadcrumb($context as map(*), $trail as map(*)*) as element(li)+ {
-    (
-        <li>
-            <a href="{$context?context-path}/">
-                <pb-i18n key="breadcrumb.home">Home</pb-i18n>
-            </a>
-        </li>,
-        if (empty($trail)) then
-            <li aria-current="page">
-                <pb-i18n key="breadcrumb.departmenthistory">Department History</pb-i18n>
-            </li>
-        else
-            <li>
-                <a href="{$context?context-path}/departmenthistory">
-                    <pb-i18n key="breadcrumb.departmenthistory">Department History</pb-i18n>
-                </a>
-            </li>,
-        for $crumb at $pos in $trail
-        return
-            if ($pos = count($trail)) then
-                <li aria-current="page">{$crumb?label}</li>
-            else
-                <li>
-                    <a href="{$context?context-path}{$crumb?href}">{$crumb?label}</a>
-                </li>
-    )
-};
-
-declare function dh:monograph-toc-breadcrumb($context as map(*), $publication as xs:string) as element(li)+ {
+declare function dh:monograph-toc-trail($context as map(*), $publication as xs:string) as map(*)+ {
     let $doc := dh:monograph-doc($publication)
-    return dh:breadcrumb($context, (map { "label": dh:monograph-short-title($doc), "href": "/departmenthistory/" || $publication }))
+    return hsg:section-trail("departmenthistory", (map { "label": dh:monograph-short-title($doc), "href": "/departmenthistory/" || $publication }))
 };
 
 (:~
@@ -230,9 +185,9 @@ declare %private function dh:current-section($context as map(*)) as map(*) {
     return map { "publication": $publication, "doc": $doc, "division": $division }
 };
 
-declare function dh:monograph-section-breadcrumb($context as map(*)) as element(li)+ {
+declare function dh:monograph-section-trail($context as map(*)) as map(*)+ {
     let $s := dh:current-section($context)
-    return dh:monograph-breadcrumb($context, $s?doc, $s?publication, $s?division)
+    return dh:monograph-trail($s?doc, $s?publication, $s?division)
 };
 
 declare function dh:monograph-section-sidebar($context as map(*)) as element(nav) {
@@ -604,10 +559,10 @@ declare function dh:person-has-bio($personId as xs:string) as xs:boolean {
     doc-available($dh:OP_COL || "/secretary-bios/" || $personId || ".xml")
 };
 
-declare function dh:person-breadcrumb($context as map(*)) as element(li)+ {
+declare function dh:person-trail($context as map(*)) as map(*)+ {
     let $personId := $context?request?parameters?personId
     let $person := dh:person-doc($personId)
-    return dh:breadcrumb($context, (
+    return hsg:section-trail("departmenthistory", (
         map { "label": "People", "href": "/departmenthistory/people" },
         map { "label": dh:person-name($person) }
     ))
@@ -762,16 +717,16 @@ declare function dh:people-by-name-prev-next($context as map(*), $letter as xs:s
             </nav>
 };
 
-declare function dh:people-by-name-breadcrumb($context as map(*), $letter as xs:string?) as element(li)+ {
+declare function dh:people-by-name-trail($context as map(*), $letter as xs:string?) as map(*)+ {
     let $trail := (
         map { "label": "People", "href": "/departmenthistory/people" },
         map { "label": "By Name", "href": "/departmenthistory/people/by-name" }
     )
     return
         if (empty($letter)) then
-            dh:breadcrumb($context, $trail)
+            hsg:section-trail("departmenthistory", $trail)
         else
-            dh:breadcrumb($context, ($trail, map { "label": "Starting with " || upper-case($letter) }))
+            hsg:section-trail("departmenthistory", ($trail, map { "label": "Starting with " || upper-case($letter) }))
 };
 
 (:~
@@ -887,16 +842,16 @@ declare function dh:people-by-year-prev-next($context as map(*), $year as xs:int
             </nav>
 };
 
-declare function dh:people-by-year-breadcrumb($context as map(*), $year as xs:integer?) as element(li)+ {
+declare function dh:people-by-year-trail($context as map(*), $year as xs:integer?) as map(*)+ {
     let $trail := (
         map { "label": "People", "href": "/departmenthistory/people" },
         map { "label": "By Year", "href": "/departmenthistory/people/by-year" }
     )
     return
         if (empty($year)) then
-            dh:breadcrumb($context, $trail)
+            hsg:section-trail("departmenthistory", $trail)
         else
-            dh:breadcrumb($context, ($trail, map { "label": xs:string($year) }))
+            hsg:section-trail("departmenthistory", ($trail, map { "label": xs:string($year) }))
 };
 
 (:~
@@ -969,14 +924,14 @@ declare function dh:principal-officers-role-content($context as map(*)) as eleme
     )
 };
 
-declare function dh:principal-officers-breadcrumb($context as map(*)) as element(li)+ {
+declare function dh:principal-officers-trail($context as map(*)) as map(*)+ {
     let $roleId := $context?request?parameters?roleId
     let $trail := (map { "label": "People", "href": "/departmenthistory/people" }, map { "label": "Principal Officers", "href": "/departmenthistory/people/principalofficers" })
     return
         if (empty($roleId)) then
-            dh:breadcrumb($context, $trail)
+            hsg:section-trail("departmenthistory", $trail)
         else
-            dh:breadcrumb($context, ($trail, map { "label": normalize-space(dh:principal-position-doc($roleId)/names/plural) }))
+            hsg:section-trail("departmenthistory", ($trail, map { "label": normalize-space(dh:principal-position-doc($roleId)/names/plural) }))
 };
 
 (:~
@@ -1197,19 +1152,19 @@ declare %private function dh:chiefs-trail() as map(*)+ {
  : one template for both): $kind is "country" or "organization", matching
  : the "kind" request parameter dhapi:chiefs-by-kind synthesizes.
  :)
-declare function dh:chiefs-by-kind-breadcrumb($context as map(*), $kind as xs:string) as element(li)+ {
-    dh:breadcrumb($context, (dh:chiefs-trail(), map { "label": "By " || (if ($kind = 'country') then "Country" else "Organization") }))
+declare function dh:chiefs-by-kind-trail($context as map(*), $kind as xs:string) as map(*)+ {
+    hsg:section-trail("departmenthistory", (dh:chiefs-trail(), map { "label": "By " || (if ($kind = 'country') then "Country" else "Organization") }))
 };
 
-declare function dh:chiefs-listing-breadcrumb($context as map(*)) as element(li)+ {
-    dh:breadcrumb($context, (dh:chiefs-trail(), map { "label": dh:chiefs-listing-title($context) }))
+declare function dh:chiefs-listing-trail($context as map(*)) as map(*)+ {
+    hsg:section-trail("departmenthistory", (dh:chiefs-trail(), map { "label": dh:chiefs-listing-title($context) }))
 };
 
 (:~
  : #1142/#1143. Travels and visits are the epic's second, smaller no-ODD
  : record family (21 president-travel files + 34 secretary-travel files +
  : 16 decade-bucketed visit files) -- same "no-ODD" architecture as POCOM,
- : reusing dh:breadcrumb and (for the secretary route's old-id 302)
+ : reusing hsg:section-trail and (for the secretary route's old-id 302)
  : dh:person-canonical-id-for-old-id, but its own, simpler collections:
  : travel person-ids share POCOM's people namespace (confirmed:
  : secretary-travels' filenames match POCOM person-ids exactly, e.g.
@@ -1297,8 +1252,8 @@ declare function dh:travels-destinations($context as map(*), $role as xs:string)
         </ul>
 };
 
-declare function dh:travels-index-breadcrumb($context as map(*), $role as xs:string) as element(li)+ {
-    dh:breadcrumb($context, (
+declare function dh:travels-index-trail($context as map(*), $role as xs:string) as map(*)+ {
+    hsg:section-trail("departmenthistory", (
         map { "label": "Travels", "href": "/departmenthistory/travels" },
         map { "label": if ($role = 'president') then "Travels of the President" else "Travels of the Secretary of State" }
     ))
@@ -1427,9 +1382,9 @@ declare function dh:travels-listing-table($context as map(*), $role as xs:string
             dh:travels-table(dh:travels-trips-by-country($role, $id), 'country')
 };
 
-declare function dh:travels-listing-breadcrumb($context as map(*), $role as xs:string) as element(li)+ {
+declare function dh:travels-listing-trail($context as map(*), $role as xs:string) as map(*)+ {
     let $id := $context?request?parameters?personOrCountryId
-    return dh:breadcrumb($context, (
+    return hsg:section-trail("departmenthistory", (
         map { "label": "Travels", "href": "/departmenthistory/travels" },
         map { "label": if ($role = 'president') then "Travels of the President" else "Travels of the Secretary of State", "href": "/departmenthistory/travels/" || $role },
         map { "label": dh:travels-listing-title($role, $id) }
@@ -1562,13 +1517,13 @@ declare function dh:visits-listing-table($key as xs:string) as element(table) {
         dh:visits-table(dh:visits-by-country($key), true())
 };
 
-declare function dh:visits-index-breadcrumb($context as map(*)) as element(li)+ {
-    dh:breadcrumb($context, (map { "label": "Visits by Foreign Leaders" }))
+declare function dh:visits-index-trail($context as map(*)) as map(*)+ {
+    hsg:section-trail("departmenthistory", (map { "label": "Visits by Foreign Leaders" }))
 };
 
-declare function dh:visits-listing-breadcrumb($context as map(*)) as element(li)+ {
+declare function dh:visits-listing-trail($context as map(*)) as map(*)+ {
     let $key := $context?request?parameters?countryOrYear
-    return dh:breadcrumb($context, (
+    return hsg:section-trail("departmenthistory", (
         map { "label": "Visits by Foreign Leaders", "href": "/departmenthistory/visits" },
         map { "label": dh:visits-listing-title($key) }
     ))

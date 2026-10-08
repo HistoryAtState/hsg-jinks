@@ -28,13 +28,7 @@
         $context?request?parameters in dh:current-section.
     -->
     [% template breadcrumb %]
-    <li>
-        <nav aria-label="breadcrumb">
-            <ul typeof="BreadcrumbList" vocab="http://schema.org/">
-                [[ hsg:breadcrumb-rdfa(dh:monograph-section-breadcrumb($context)) ]]
-            </ul>
-        </nav>
-    </li>
+    [[ hsg:breadcrumbs($context, dh:monograph-section-trail($context)) ]]
     [% endtemplate %]
 
     [% template before %]
