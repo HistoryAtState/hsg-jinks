@@ -26,13 +26,9 @@ test/cypress/downloads/
 # per-worktree devcontainer settings (ports, compose project name)
 .devcontainer/.env
 
-# Cursor: track plans with the branch; ignore local MCP/rules copies
-.cursor/rules/
-
-# Codacy CLI: keep .codacy/.gitignore; ignore generated + local config dumps
-.codacy/generated/
-.codacy/codacy.config.json
-.codacy/codacy.config.baseline.json
+# Cursor and Codacy local tooling
+.cursor/
+.codacy/
 
 # Large ONNX downloads / conf.xml experiment copies (not part of the app image)
 .devcontainer/onnx-staging/
