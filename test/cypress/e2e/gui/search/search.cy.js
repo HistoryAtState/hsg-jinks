@@ -591,6 +591,8 @@ describe("search landing page layout and shared sidebar (OP#1436)", () => {
         cy.location("pathname").should("match", /\/search$/);
         cy.location("search").should("include", "q=salt").and("include", "within=documents");
         cy.get(".usa-collection").should("exist");
+    });
+});
 
 // Hybrid mode: Lucene + eXist vector KNN (FRUS pilot). Default remains
 // keyword; mode=hybrid is opt-in. See .cursor/plans/semantic-search-mvp.md.

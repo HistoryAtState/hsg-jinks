@@ -675,13 +675,13 @@ declare function srch:mode-toggle($context as map(*)) as element(fieldset) {
         <fieldset class="usa-fieldset">
             <legend class="usa-legend">Search mode</legend>
             <div class="usa-radio">
-                <input class="usa-radio__input" id="mode-keyword" type="radio" name="mode" value="keyword">
+                <input class="usa-radio__input" id="mode-keyword" type="radio" name="mode" value="keyword" form="hsg-search">
                 { if ($mode eq "keyword") then attribute checked { "checked" } else () }
                 </input>
                 <label class="usa-radio__label" for="mode-keyword">Keyword (default)</label>
             </div>
             <div class="usa-radio">
-                <input class="usa-radio__input" id="mode-hybrid" type="radio" name="mode" value="hybrid">
+                <input class="usa-radio__input" id="mode-hybrid" type="radio" name="mode" value="hybrid" form="hsg-search">
                 { if ($mode eq "hybrid") then attribute checked { "checked" } else () }
                 </input>
                 <label class="usa-radio__label" for="mode-hybrid">Hybrid (keyword + semantic; FRUS pilot)</label>
