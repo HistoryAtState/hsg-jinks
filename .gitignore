@@ -25,3 +25,10 @@ test/cypress/downloads/
 /frus-data-jinks-*.xar
 # per-worktree devcontainer settings (ports, compose project name)
 .devcontainer/.env
+
+# Cursor and Codacy local tooling
+.cursor/
+.codacy/
+
+# Large ONNX downloads / conf.xml experiment copies (not part of the app image)
+.devcontainer/onnx-staging/

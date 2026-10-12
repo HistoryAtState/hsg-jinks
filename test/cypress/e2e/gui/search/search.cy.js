@@ -593,3 +593,63 @@ describe("search landing page layout and shared sidebar (OP#1436)", () => {
         cy.get(".usa-collection").should("exist");
     });
 });
+
+// Hybrid mode: Lucene + eXist vector KNN (FRUS pilot). Default remains
+// keyword; mode=hybrid is opt-in. See .cursor/plans/semantic-search-mvp.md.
+describe("hybrid search mode (semantic MVP)", () => {
+    it("landing form exposes keyword and hybrid mode radios; keyword is default", () => {
+        cy.visit("search");
+        cy.get("#mode-keyword").should("exist").and("be.checked");
+        cy.get("#mode-hybrid").should("exist").and("not.be.checked");
+    });
+
+    it("mode=hybrid with FRUS scope returns results and keeps hybrid selected", () => {
+        cy.visit("search?q=Kissinger&within=documents&mode=hybrid");
+        cy.get("#mode-hybrid").should("be.checked");
+        cy.get(".usa-collection__item").should("have.length.at.least", 1);
+        cy.contains(".usa-prose", "within documents");
+        cy.location("search").should("include", "mode=hybrid");
+    });
+
+    it("unknown mode values are treated as keyword (200, not 400)", () => {
+        cy.request("search?q=Kissinger&within=documents&mode=not-a-mode")
+            .its("status").should("eq", 200);
+        cy.visit("search?q=Kissinger&within=documents&mode=not-a-mode");
+        cy.get("#mode-keyword").should("be.checked");
+        cy.get(".usa-collection__item").should("have.length.at.least", 1);
+    });
+
+    it("pagination preserves mode=hybrid", () => {
+        cy.visit("search?q=Kissinger&within=documents&mode=hybrid");
+        cy.get("a.usa-pagination__next-page").first().click();
+        cy.location("search").should("include", "mode=hybrid");
+        cy.location("search").should("include", "q=Kissinger");
+        cy.get("#mode-hybrid").should("be.checked");
+    });
+
+    it("tips page documents Hybrid mode", () => {
+        cy.visit("search/tips");
+        cy.contains("h2", "Hybrid mode").should("exist");
+    });
+
+    // pq-01 from doc/semantic_search/semantic-search-paraphrase-eval.md.
+    // A swallowed vector leg, or relevance re-sorted by raw ft:score, makes
+    // hybrid return the keyword sequence. Exact ranks stay unpinned because
+    // FRUS volumes are added over time.
+    it("hybrid relevance order differs from keyword for a paraphrase query", () => {
+        const q = "meeting between Reagan and Gorbachev in Iceland";
+        const firstPageHrefs = (mode) => {
+            cy.visit(`search?q=${encodeURIComponent(q)}&within=documents&mode=${mode}`);
+            cy.get(".usa-collection__heading a").should("have.length.at.least", 1);
+            return cy.get(".usa-collection__heading a").then(($links) => {
+                return [...$links].map((link) => link.getAttribute("href"));
+            });
+        };
+
+        firstPageHrefs("keyword").then((keywordHrefs) => {
+            firstPageHrefs("hybrid").then((hybridHrefs) => {
+                expect(hybridHrefs, "hybrid first page").to.not.deep.equal(keywordHrefs);
+            });
+        });
+    });
+});

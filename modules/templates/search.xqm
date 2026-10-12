@@ -46,6 +46,7 @@ import module namespace ext = "http://history.state.gov/ns/frus/odd-ext" at "../
 import module namespace hsg = "https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
 
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
+declare namespace vector = "http://exist-db.org/xquery/vector";
 
 (:~ FRUS data collection this app actually renders -- see module doc above. :)
 declare variable $srch:FRUS_COL as xs:string := "/db/apps/frus-data-jinks";
@@ -54,6 +55,12 @@ declare variable $srch:FRUS_COL as xs:string := "/db/apps/frus-data-jinks";
  : controls and the Sort by select all belong to, so a new keyword search
  : keeps the filters and sort, and Apply filters keeps the keyword. :)
 declare variable $srch:FORM_ID as xs:string := "hsg-search";
+
+(:~ Hybrid / vector search (FRUS pilot). Local ONNX model shipped with
+ : duncdrum/existdb:experimental. k = KNN pool size before RRF fuse. :)
+declare variable $srch:EMBED_MODEL as xs:string := "all-MiniLM-L6-v2";
+declare variable $srch:VECTOR_K as xs:integer := 50;
+declare variable $srch:RRF_K as xs:integer := 60;
 
 declare variable $srch:ft-query-options as map(*) := map {
     "default-operator": "and",
@@ -215,6 +222,74 @@ declare %private function srch:date-range($startDate as xs:string?, $endDate as 
     return map { "start": $rangeStart, "end": $rangeEnd }
 };
 
+
+(: ============== hybrid / vector ============== :)
+
+(:~ Score is read inside the leg. A later ft:query-vector must not be the
+ : thing that decides which nodes survive. :)
+declare %private function srch:scored-vector-hits($nodes as element()*) as map(*)* {
+    for $hit in $nodes
+    return map { "node": $hit, "score": ft:score($hit), "id": generate-id($hit) }
+};
+
+(:~ KNN over collections that define hsg-embedding. Packages without the
+ : vector-field contribute nothing (caught). The options map is the fourth
+ : argument of ft:query-vector; this image atomizes a map passed as k and
+ : the leg then fails. It also ignores numeric top-k and does not return
+ : hits in score order, so each leg is scored explicitly, the legs are
+ : merged by score, and the pool is cut to VECTOR_K. That keeps a later
+ : collection from being dropped because an earlier one filled the pool,
+ : and it keeps the nearest hit when it is not among the first VECTOR_K
+ : nodes in document order. :)
+declare %private function srch:query-vector-sections($queryConf as map(*), $q as xs:string) as element()* {
+    if (normalize-space($q) eq "") then
+        ()
+    else
+        try {
+            let $vec := vector:embed($q, $srch:EMBED_MODEL)
+            let $opts := map:merge(($srch:ft-query-options, $queryConf?facets))
+            let $scored := (
+                try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/conferences")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/hac")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/frus-history/articles")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/frus-history/documents")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/frus-history/monograph")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/rdcr")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/wwdai")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/pocom/people")//persName[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/travels")//trips[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/visits")//visit[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection("/db/apps/milestones")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () }
+            )
+            let $ranked :=
+                for $row in $scored
+                order by $row?score descending empty least, $row?id
+                return $row?node
+            return subsequence($ranked, 1, $srch:VECTOR_K)
+        } catch * {
+            ()
+        }
+};
+
+(:~ Reciprocal Rank Fusion of two hit sequences (Lucene + vector). :)
+declare %private function srch:fuse-rrf($lucene as element()*, $vector as element()*) as element()* {
+    let $lIds := $lucene ! generate-id(.)
+    let $vIds := $vector ! generate-id(.)
+    let $ids := distinct-values(($lIds, $vIds))
+    for $id in $ids
+    let $lRank := index-of($lIds, $id)[1]
+    let $vRank := index-of($vIds, $id)[1]
+    let $score :=
+        (if (exists($lRank)) then 1 div ($srch:RRF_K + $lRank) else 0)
+        + (if (exists($vRank)) then 1 div ($srch:RRF_K + $vRank) else 0)
+    let $node := ($lucene[generate-id(.) eq $id], $vector[generate-id(.) eq $id])[1]
+    order by $score descending
+    return $node
+};
+
 (: ============== cached hit computation ============== :)
 
 declare %private function srch:read-params($context as map(*)) as map(*) {
@@ -239,11 +314,14 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
             if ($startDate or $volumeId) then "documents" else "entire-site"
         else
             $within
+    let $modeParam := normalize-space(page:parameter($context, "mode", "keyword"))
+    let $mode := if ($modeParam eq "hybrid") then "hybrid" else "keyword"
     return map {
         "q": $q, "within": $section, "volume-id": $volumeId,
         "start-date": $startDate, "end-date": $endDate,
         "start-time": $startTime, "end-time": $endTime,
-        "sort-by": $sortBy, "start": $start, "per-page": $perPage
+        "sort-by": $sortBy, "start": $start, "per-page": $perPage,
+        "mode": $mode
     }
 };
 
@@ -256,7 +334,7 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
 declare %private function srch:results($context as map(*)) as map(*) {
     let $p := srch:read-params($context)
     let $normalized := string-join(
-        let $params := map { "q": $p?q, "within": $p?within, "volume-id": $p?("volume-id"), "start-date": $p?("start-date"), "end-date": $p?("end-date"), "start-time": $p?("start-time"), "end-time": $p?("end-time"), "sort-by": $p?("sort-by") }
+        let $params := map { "q": $p?q, "within": $p?within, "volume-id": $p?("volume-id"), "start-date": $p?("start-date"), "end-date": $p?("end-date"), "start-time": $p?("start-time"), "end-time": $p?("end-time"), "sort-by": $p?("sort-by"), "mode": $p?mode }
         for $key in map:keys($params)
         let $val := $params($key) ! normalize-space(.)[. ne ""]
         order by $key
@@ -276,10 +354,29 @@ declare %private function srch:results($context as map(*)) as map(*) {
             let $started := util:system-dateTime()
             let $range := srch:date-range($p?("start-date"), $p?("end-date"), $p?("start-time"), $p?("end-time"))
             let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), $p?q, $range?start, $range?end)
-            let $hits :=
+            let $luceneHits :=
                 try { srch:query-sections($queryConf) } catch * { () }
-            let $sorted := srch:sort($hits, $p?("sort-by"))
-            let $volIds := map:keys(ft:facets($hits, "frus-volume-id", ()))
+            let $vectorHits :=
+                if ($p?mode eq "hybrid" and exists($p?q)) then
+                    srch:query-vector-sections($queryConf, $p?q)
+                else
+                    ()
+            let $fused :=
+                if (exists($vectorHits)) then
+                    srch:fuse-rrf($luceneHits, $vectorHits)
+                else
+                    $luceneHits
+            (: Relevance for hybrid is the RRF order. Re-sorting by ft:score
+               puts Lucene scores (about 5) ahead of vector scores (about 1)
+               and the fused order disappears. :)
+            let $sorted :=
+                if ($p?mode eq "hybrid" and $p?("sort-by") eq "relevance" and exists($vectorHits)) then
+                    $fused
+                else
+                    srch:sort($fused, $p?("sort-by"))
+            let $volIds :=
+                try { map:keys(ft:facets($luceneHits, "frus-volume-id", ())) }
+                catch * { () }
             (: how long the query itself took, kept with the cached entry so
                a cached page 2 still reports the real cost of the search :)
             let $took := seconds-from-duration(util:system-dateTime() - $started)
@@ -501,7 +598,8 @@ declare %private function srch:pagination-query-string($r as map(*), $start as x
         $r?("end-date")[. ne ""] ! ("end-date=" || .),
         $r?("start-time")[. ne ""] ! ("start-time=" || .),
         $r?("end-time")[. ne ""] ! ("end-time=" || .),
-        "sort-by=" || $r?("sort-by")
+        "sort-by=" || $r?("sort-by"),
+        if ($r?mode eq "hybrid") then "mode=hybrid" else ()
     ), "&amp;")
 };
 
@@ -566,6 +664,29 @@ declare function srch:pagination($context as map(*)) as element(nav)? {
                     }
                     </ul>
                 </nav>
+};
+
+(:~ Keyword vs Hybrid mode radios; preserves selection across landing/results. :)
+declare function srch:mode-toggle($context as map(*)) as element(fieldset) {
+    let $mode :=
+        let $raw := normalize-space(page:parameter($context, "mode", "keyword"))
+        return if ($raw eq "hybrid") then "hybrid" else "keyword"
+    return
+        <fieldset class="usa-fieldset">
+            <legend class="usa-legend">Search mode</legend>
+            <div class="usa-radio">
+                <input class="usa-radio__input" id="mode-keyword" type="radio" name="mode" value="keyword" form="hsg-search">
+                { if ($mode eq "keyword") then attribute checked { "checked" } else () }
+                </input>
+                <label class="usa-radio__label" for="mode-keyword">Keyword (default)</label>
+            </div>
+            <div class="usa-radio">
+                <input class="usa-radio__input" id="mode-hybrid" type="radio" name="mode" value="hybrid" form="hsg-search">
+                { if ($mode eq "hybrid") then attribute checked { "checked" } else () }
+                </input>
+                <label class="usa-radio__label" for="mode-hybrid">Hybrid (keyword + semantic; FRUS pilot)</label>
+            </div>
+        </fieldset>
 };
 
 (:~ The section checkboxes of the sidebar, on the landing and the results
