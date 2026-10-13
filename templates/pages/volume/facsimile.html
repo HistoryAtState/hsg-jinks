@@ -13,6 +13,10 @@
     [[ hsg:breadcrumbs($context, hsg:facsimile-trail($context)) ]]
     [% endtemplate %]
 
+    [% template before %]
+    [[ hsg:facsimile-toc($context) ]]
+    [% endtemplate %]
+
     <!-- Standalone page-image view at /historicaldocuments/{volume}/pg_{n}
          (OP#1335, reference parity with hsg-shell). This page has no context
          document (see hsgapi:view-facsimile on why the volume root cannot be

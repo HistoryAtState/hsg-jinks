@@ -58,6 +58,16 @@ describe("pg_* facsimile page", () => {
             .should("exist");
     });
 
+    it("shows the volume table of contents in the sidebar (OP#1445)", () => {
+        // the same "Contents" sidenav as the volume's document pages; the
+        // reference marks no entry current on a page view
+        cy.get("aside nav.toc").within(() => {
+            cy.get("h5").should("contain.text", "Contents");
+            cy.get(".usa-sidenav a").should("have.length", 15);
+            cy.get(".usa-current").should("not.exist");
+        });
+    });
+
     it("pages to the neighboring scans", () => {
         cy.get(".hsg-frus__pager-prev")
             .should("have.attr", "href")
