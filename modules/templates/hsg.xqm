@@ -237,8 +237,9 @@ declare function hsg:navigation-title($context as map(*)) as element(h2)? {
  : listed. The print table of contents (front/toc.xml) is omitted.
  :
  : Rendered into the layout's `before` block, so it appears on the comp, chapter
- : and document pages -- but not on the volume landing, whose TOC belongs in the
- : main content instead (#1080); see the guard below.
+ : and document pages (and, via hsg:facsimile-toc, the pg_* page) -- but not on
+ : the volume landing, whose TOC belongs in the main content instead (#1080);
+ : see the guard below.
  :
  : The same tree is what #1080 needs in main content, so keep this the only
  : traversal.
@@ -252,21 +253,43 @@ declare function hsg:volume-toc($context as map(*)) {
        frus-volume-id is what identifies the landing page, which has no sidebar:
        its table of contents belongs in the main content (#1080). :)
     if (exists($doc) and $publication != '') then
-        let $current := ($doc//tei:bibl[@type='frus-division-id'])[1]/string()
-        let $current-is-document := ($doc//tei:bibl[@type='frus-division-type'])[1] = 'document'
-        let $volume := doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
-        let $divisions := hsg:toc-divisions($publication)
-        return
-            <nav aria-label="Side navigation" class="toc">
-                <h5>
-                    <pb-i18n key="document.contents">Contents</pb-i18n>
-                </h5>
-                <ul class="usa-sidenav">
-                    {hsg:toc-entries($volume/tei:TEI, $divisions, $publication, $current, $current-is-document, $context)}
-                </ul>
-            </nav>
+        hsg:volume-toc-nav(
+            $publication,
+            ($doc//tei:bibl[@type='frus-division-id'])[1]/string(),
+            ($doc//tei:bibl[@type='frus-division-type'])[1] = 'document',
+            $context
+        )
     else
         ()
+};
+
+(:~
+ : The same table of contents on the pg_* facsimile page (#1445), which has no
+ : context document, only the publication id in $context?facsimile. No entry
+ : is marked current: the reference's TOC never matches a page id either.
+ :)
+declare function hsg:facsimile-toc($context as map(*)) as element(nav)? {
+    let $publication := $context?facsimile?publication
+    return
+        if ($publication != '') then
+            hsg:volume-toc-nav($publication, (), false(), $context)
+        else
+            ()
+};
+
+declare %private function hsg:volume-toc-nav($publication as xs:string, $current as xs:string?,
+        $current-is-document as xs:boolean, $context as map(*)) as element(nav) {
+    let $volume := doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
+    let $divisions := hsg:toc-divisions($publication)
+    return
+        <nav aria-label="Side navigation" class="toc">
+            <h5>
+                <pb-i18n key="document.contents">Contents</pb-i18n>
+            </h5>
+            <ul class="usa-sidenav">
+                {hsg:toc-entries($volume/tei:TEI, $divisions, $publication, $current, $current-is-document, $context)}
+            </ul>
+        </nav>
 };
 
 (:~
