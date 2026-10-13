@@ -573,6 +573,19 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     min-width: 0;
 }
 
+/* Gutter between main and the sidebars: the Figma document frame (ETA-1 Doc,
+   node 4290:20085) spaces the three columns 24px apart (USWDS spacing 3).
+   A margin on the sidebar rather than a grid column-gap: an empty sidebar is
+   display: none but keeps its grid track, so a column-gap would still indent
+   main on pages without one. */
+.sticky-layout > :is(.before-top, .before) {
+    margin-right: var(--uswds-space-3);
+}
+
+.sticky-layout > :is(.after-top, .after) {
+    margin-left: var(--uswds-space-3);
+}
+
 /* "Page N" page-break facsimile markers in document and section prose
    (pb elementSpec in resources/odd/hsg-jinks.odd): a grey right-floated
    margin marker, reference parity with hsg-shell's facsimile-link rule
