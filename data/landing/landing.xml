@@ -14,10 +14,8 @@
     </teiHeader>
     <text>
         <body>
-            <div type="hero" xml:lang="en">
+            <div type="hero" subtype="split" xml:lang="en">
                 <head>The Office of the Historian</head>
-            </div>
-            <div type="intro" xml:lang="en">
                 <p>Our Office provides information to the American people about the
                     Department and its history; U.S. foreign relations and resources to
                     conduct research on Department records; and responds to

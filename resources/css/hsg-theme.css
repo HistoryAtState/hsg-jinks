@@ -322,6 +322,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     background-color: var(--uswds-color-white);
 }
 
+/* No flag in the banner, as on state.gov: the flag is part of the office
+   logo right below it. */
+.usa-banner .usa-banner__header-flag {
+    display: none;
+}
+
 .hsg-link-broken {
     color: var(--uswds-color-error-dark);
 }
@@ -1710,5 +1716,161 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-faq .usa-accordion__content a:hover {
+    color: var(--uswds-color-primary-darker);
+}
+
+/* Landing page Latest News (hsg-landing:news): a white band with a carousel of
+   inset-media cards. The slides scroll horizontally with snap points;
+   resources/scripts/landing-carousel.js drives the arrows and dots and sets
+   "hsg-carousel--static" (no controls) while every slide fits. */
+.landing-layout .section-news {
+    background-color: var(--uswds-color-white);
+}
+
+.hsg-carousel__arrows {
+    display: flex;
+    gap: var(--uswds-space-1);
+}
+
+.hsg-carousel__arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--uswds-space-5);
+    height: var(--uswds-space-5);
+    padding: 0;
+    border: 1px solid var(--uswds-color-base-lighter);
+    border-radius: var(--uswds-border-radius-md, 0.25rem);
+    background-color: var(--uswds-color-white);
+    color: var(--uswds-color-primary-dark);
+    cursor: pointer;
+}
+
+.hsg-carousel__arrow:disabled {
+    color: var(--uswds-color-base-light);
+    cursor: default;
+}
+
+.hsg-carousel__arrow .usa-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.hsg-carousel__slides.usa-card-group {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    margin-top: var(--uswds-space-3);
+}
+
+.hsg-carousel__slide.usa-card {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+}
+
+@media (min-width: 40em) {
+    .hsg-carousel__slide.usa-card {
+        flex-basis: 50%;
+    }
+}
+
+@media (min-width: 64em) {
+    .hsg-carousel__slide.usa-card {
+        flex-basis: calc(100% / 3);
+    }
+}
+
+.hsg-carousel__dots {
+    display: flex;
+    justify-content: center;
+    gap: var(--uswds-space-1);
+    margin-top: var(--uswds-space-3);
+}
+
+.hsg-carousel__dot {
+    width: var(--uswds-space-1);
+    height: var(--uswds-space-1);
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background-color: var(--uswds-color-base-lighter);
+    cursor: pointer;
+    transition: width 0.2s;
+}
+
+.hsg-carousel__dot[aria-current="true"] {
+    width: var(--uswds-space-4);
+    background-color: var(--uswds-color-primary-darker);
+}
+
+.hsg-carousel--static .hsg-carousel__arrows,
+.hsg-carousel--static .hsg-carousel__dots {
+    display: none;
+}
+
+/* Book covers and document scans differ in shape: show them whole on a light
+   tint inside a fixed-height frame, so the cards line up. */
+.hsg-carousel .usa-card__img {
+    height: 12rem;
+    background-color: var(--uswds-color-primary-lighter);
+}
+
+.hsg-carousel .usa-card__img img {
+    object-fit: contain;
+}
+
+.hsg-carousel .usa-card__header .usa-tag {
+    display: inline-block;
+    margin-bottom: var(--uswds-space-1);
+    background-color: var(--uswds-color-primary-lighter);
+    color: var(--uswds-color-primary-dark);
+    font-weight: normal;
+}
+
+.hsg-carousel .usa-card__heading {
+    font-family: var(--jinks-heading-font-family);
+    font-size: var(--uswds-font-size-sans-sm, 1rem);
+    line-height: 1.4;
+}
+
+.hsg-carousel .usa-card__heading a,
+.hsg-carousel .usa-card__heading a:visited {
+    color: var(--uswds-color-primary-dark);
+    text-decoration: none;
+}
+
+.hsg-carousel .usa-card__heading a:hover {
+    text-decoration: underline;
+}
+
+.hsg-carousel .usa-card__body {
+    font-family: var(--jinks-heading-font-family);
+    font-size: 0.875rem;
+    color: var(--uswds-color-text);
+}
+
+.hsg-carousel .usa-card__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--uswds-space-1);
+}
+
+.hsg-carousel .card-date {
+    font-family: var(--jinks-heading-font-family);
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.hsg-carousel .hsg-carousel__more {
+    margin: 0;
+    background-color: var(--uswds-color-primary-lighter);
+    color: var(--uswds-color-primary-dark);
+}
+
+.hsg-carousel .hsg-carousel__more:hover {
+    background-color: var(--uswds-color-primary-light);
     color: var(--uswds-color-primary-darker);
 }

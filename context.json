@@ -454,7 +454,7 @@
     }
   },
   "script" : {
-    "custom" : [ "resources/scripts/nav-active.js", "resources/scripts/search-query.js" ],
+    "custom" : [ "resources/scripts/nav-active.js", "resources/scripts/search-query.js", "resources/scripts/landing-carousel.js" ],
     "webcomponents" : "3.0.0-next-4.21",
     "extra-components" : [ ],
     "cdn" : "https://cdn.jsdelivr.net/npm/@teipublisher/pb-components"

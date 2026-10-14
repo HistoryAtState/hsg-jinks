@@ -204,7 +204,8 @@
   "script" : {
     "custom" : [
       "resources/scripts/nav-active.js",
-      "resources/scripts/search-query.js"
+      "resources/scripts/search-query.js",
+      "resources/scripts/landing-carousel.js"
     ]
   },
   "api" : [
