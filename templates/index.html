@@ -34,12 +34,12 @@ this template will be used as the default landing page
     [% template styles %]
     [% endtemplate %]
     [% template hero %]
-    [% if $landing?content//tei:div[@type='hero'][p or list] %]
+    [% if $landing?content//tei:div[@type='hero'][p or list][not(@subtype = 'split')] %]
     <section class="hero usa-section">
         [[ landing:section($context, 'hero', $landing?content, 'uswds-landing.odd') ]]
     </section>
     [% endif %]
-    [% if $landing?content//tei:div[@type='hero'][not(p) and not(list)] %]
+    [% if $landing?content//tei:div[@type='hero'][@subtype = 'split' or (not(p) and not(list))] %]
     <section class="hero-title usa-section">
         [[ landing:section($context, 'hero', $landing?content, 'uswds-landing.odd') ]]
     </section>

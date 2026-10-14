@@ -149,6 +149,21 @@
     [[content]]
 </div></pb:template>
         </model>
+                    <model predicate="@type='hero' and @subtype='split' and (p or list)" behaviour="pass-through">
+            <desc>Split hero with text: title left, lead text and action links right, the media band is emitted by the template</desc>
+            <param name="heading" value="head/node()"/>
+            <param name="content" value="p/node()"/>
+            <param name="links" value="list[@type='links']"/>
+            <pb:template xml:space="preserve"><div xmlns="" class="grid-container">
+  <div class="grid-row grid-gap-4">
+    <div class="tablet:grid-col-6"><h1>[[heading]]</h1></div>
+    <div class="tablet:grid-col-6 hero-title__text">
+      <p>[[content]]</p>
+      [[links]]
+    </div>
+  </div>
+</div></pb:template>
+        </model>
                     <model predicate="@type='hero' and not(p) and not(list)" behaviour="pass-through">
             <desc>Split hero: title band only, the media band is emitted by the template</desc>
             <param name="heading" value="head/node()"/>
