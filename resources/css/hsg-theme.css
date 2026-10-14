@@ -492,31 +492,44 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-style: italic;
 }
 
-/* Sidebar TOC on a white panel (OP#1462), with darker dividers than USWDS's
-   base-lighter so they still read on white. Nested chapters indent under
-   their compilation. */
+/* Sidebar TOC (OP#1462, Figma node 4290:19930): the USWDS side navigation
+   on white, full width, as the design kit draws it. Top-level entries in the
+   body text colour (base-darker rather than USWDS's base-dark grey); nested
+   entries a size smaller in medium weight, indented by their link padding
+   alone; the document range is part of the entry's text. The link rules
+   repeat the theme's sidenav :not() chains to outrank them. */
 .toc {
     background-color: var(--uswds-color-white);
-    padding: var(--uswds-space-1) var(--uswds-space-2);
 }
 
-.toc .usa-sidenav__item {
-    border-top-color: var(--uswds-color-base-light);
+.toc .usa-sidenav a:not(.usa-button):not(.uswds-button):not(.usa-current) {
+    color: var(--uswds-color-base-darker);
+}
+
+.toc .usa-sidenav a {
+    line-height: 1.3;
 }
 
 .toc .usa-sidenav__sublist {
     margin-left: 0;
-    padding-left: var(--uswds-space-2);
-    border-left: 1px solid var(--uswds-color-base-light);
+    padding-left: 0;
 }
 
-/* Document range "(Documents N-M)", inside the entry's link after its title,
-   as on the reference site: the design's small label type. */
-.toc-range {
-    color: var(--uswds-color-base-dark);
-    font-family: var(--uswds-font-ui);
+.toc .usa-sidenav__sublist a:not(.usa-button):not(.uswds-button) {
     font-size: var(--uswds-font-size-sans-2xs, 0.875rem);
     font-weight: 500;
+    padding-left: var(--uswds-space-4);
+}
+
+/* The current entry: bold in the design's link colour (primary-dark), its
+   indicator bar to match, at either level. */
+.toc .usa-sidenav a.usa-current:not(.usa-button):not(.uswds-button) {
+    color: var(--uswds-color-primary-dark);
+    font-weight: 700;
+}
+
+.toc .usa-sidenav a.usa-current::after {
+    background-color: var(--uswds-color-primary-dark);
 }
 
 /* Index-division entries (persons/terms registers, back-matter index):

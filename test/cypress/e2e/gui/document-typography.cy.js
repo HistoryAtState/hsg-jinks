@@ -2,8 +2,11 @@
 // volume title above the content is a small semi-bold overline in the
 // secondary blue, the division title a 28px semi-bold Merriweather (the
 // variable cut from profile-theme-uswds, which has the 500 weight), and the
-// table of contents sits on a white panel without a "Contents" headline,
-// each document range inside its entry's link as on the reference site.
+// table of contents is the USWDS side navigation on white as the design kit
+// draws it (Figma node 4290:19930): no "Contents" headline, top-level entries
+// 16px regular in the body text colour, nested entries 14px medium indented
+// 32px, the current entry bold in primary-dark, and each document range inside
+// its entry's link as on the reference site.
 
 const DOCUMENT = "historicaldocuments/frus1981-88v05/d1";
 
@@ -58,6 +61,27 @@ describe("document page typography", () => {
                 expect(semibold).to.be.greaterThan(regular);
                 expect(semibold).to.be.lessThan(bold);
             });
+    });
+
+    it("styles the table of contents as the design kit's side navigation", () => {
+        cy.visit("historicaldocuments/frus1981-88v05/ch1");
+        cy.get("nav.toc > ul.usa-sidenav > li > a")
+            .first()
+            .should("have.css", "font-size", "16px")
+            .and("have.css", "font-weight", "400")
+            .and("have.css", "color", "rgb(46, 46, 46)");
+        cy.get("nav.toc .usa-sidenav__sublist a:not(.usa-current)")
+            .first()
+            .should("have.css", "font-weight", "500")
+            .and("have.css", "padding-left", "32px")
+            .invoke("css", "font-size")
+            .then((size) => expect(parseFloat(size)).to.be.closeTo(14, 0.5));
+        cy.get("nav.toc a.usa-current")
+            .should("have.css", "font-weight", "700")
+            .and("have.css", "color", "rgb(44, 96, 138)");
+        cy.get("nav.toc .usa-sidenav__item")
+            .first()
+            .should("have.css", "border-top-color", "rgb(230, 230, 230)");
     });
 
     it("puts the table of contents on a white panel without a headline", () => {
