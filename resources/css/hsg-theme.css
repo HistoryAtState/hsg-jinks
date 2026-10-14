@@ -249,10 +249,20 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 /* Policy links: the closing row, in the headings' light blue and a size
-   down, set off by a rule in the same colour. */
+   down, set off by a rule in the same colour. The rule spans the whole
+   grid-container, its side padding included (USWDS site margins: 1rem,
+   2rem from desktop), so the row steps out by that padding and back in. */
 .hsg-footer .usa-footer__required-links {
     border-top: 1px solid var(--hsg-footer-heading);
-    padding-top: var(--uswds-space-3);
+    margin-inline: calc(-1 * var(--uswds-space-2));
+    padding: var(--uswds-space-3) var(--uswds-space-2) 0;
+}
+
+@media (min-width: 64em) {
+    .hsg-footer .usa-footer__required-links {
+        margin-inline: calc(-1 * var(--uswds-space-4));
+        padding-inline: var(--uswds-space-4);
+    }
 }
 
 .hsg-footer .usa-footer__required-links a,
