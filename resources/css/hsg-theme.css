@@ -607,6 +607,13 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     min-width: 0;
 }
 
+/* No top padding on content pages: the theme gives main the usa-section
+   padding (2rem, 4rem from tablet up), but the sidebars beside it have none,
+   so the prose started 64px below the table of contents. */
+.sticky-layout > main {
+    padding-top: 0;
+}
+
 /* Same trap, one level down. layout.css makes main a centered flex container
    whose child is "flex: 1", and a flex item defaults to min-width: auto, so it
    refuses to shrink below its content's min-content width. One unbreakable run
