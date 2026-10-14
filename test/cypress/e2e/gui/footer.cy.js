@@ -19,21 +19,29 @@ const VOLUME = "historicaldocuments/frus1981-88v05";
     });
 });
 
-// The footer carries real content in the navy design (#1086): four link
-// columns ending in Contact (mail, the office's own social accounts),
-// then the wordmark band. Nothing of the USWDS example survives -- no
+// The footer carries real content in the navy design (#1086): link columns
+// in the nav, then the USWDS big footer's secondary section with the
+// wordmark and agency on the left, social accounts and contact on the right. Nothing of the USWDS example survives -- no
 // placeholder text, no dead javascript:void(0) links, no sign-up form.
 describe("footer content", () => {
     beforeEach(() => cy.visit(`${VOLUME}/ch1`));
 
-    it("has the three link columns of the design", () => {
+    it("has the two link columns of the design", () => {
         cy.get("footer.usa-footer .usa-footer__primary-link").then(($h) =>
             expect([...$h].map((el) => el.textContent.trim())).to.deep.equal([
                 "Learn more",
                 "Topics",
-                "Contact",
             ])
         );
+    });
+
+    it("keeps contact in the secondary section, as the USWDS big footer does", () => {
+        cy.get("footer.usa-footer .usa-footer__nav .usa-footer__contact-links").should(
+            "not.exist"
+        );
+        cy.get(
+            "footer.usa-footer .usa-footer__secondary-section .usa-footer__contact-heading"
+        ).should("have.text", "Contact");
     });
 
     it("carries the policy links in the bottom required-links row", () => {
@@ -99,7 +107,7 @@ describe("footer content", () => {
         cy.get("footer.usa-footer .usa-footer__logo-img")
             .should("have.attr", "alt")
             .and("contain", "Office of the Historian");
-        cy.get("footer.usa-footer .usa-footer__agency").should(
+        cy.get("footer.usa-footer .usa-footer__agency-parent").should(
             "contain.text",
             "United States Department of State"
         );
@@ -122,5 +130,44 @@ describe("footer content", () => {
         cy.get("footer.usa-footer")
             .invoke("text")
             .should("not.match", /<Secondary link|<Topic>|<Name of Agency>/);
+    });
+});
+
+// Below mobile-lg (480px) USWDS runs the footer nav edge to edge and leaves
+// the inset to its components (OP#1465). The document is wider than the
+// viewport there in stock USWDS too (the gapped row's overhang, clipped by
+// body overflow-x: hidden), so these check what a reader sees instead.
+describe("footer on a phone", () => {
+    beforeEach(() => {
+        cy.viewport(390, 844);
+        cy.visit(`${VOLUME}/ch1`);
+    });
+
+    it("keeps every text and icon at least 16px from the screen edges", () => {
+        cy.get(
+            "footer.usa-footer :is(a, p, button, img, .usa-footer__primary-link)"
+        ).each(($el) => {
+            const el = $el[0];
+            if (!el.getClientRects().length) return; // collapsed list
+            const range = el.ownerDocument.createRange();
+            range.selectNodeContents(el);
+            const box = el.tagName === "IMG" ? el.getBoundingClientRect() : range.getBoundingClientRect();
+            if (!box.width) return;
+            expect(box.left, el.textContent.trim() || el.alt).to.be.at.least(16);
+            expect(box.right, el.textContent.trim() || el.alt).to.be.at.most(390 - 16);
+        });
+    });
+
+    it("renders every column heading as a left-aligned bar on the footer ground", () => {
+        cy.get("footer.usa-footer .usa-footer__primary-link").each(($h) => {
+            expect($h).to.have.class("usa-footer__primary-link--button");
+            expect($h.css("background-color")).to.equal("rgba(0, 0, 0, 0)");
+            expect($h.css("justify-content")).to.equal("flex-start");
+            expect($h.css("margin-bottom")).to.equal("0px");
+        });
+    });
+
+    it("shows the wordmark unfiltered", () => {
+        cy.get("footer.usa-footer .usa-footer__logo-img").should("have.css", "filter", "none");
     });
 });

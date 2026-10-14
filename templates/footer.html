@@ -3,19 +3,25 @@
 
     theme.footer:
       columns          array of { heading, links: [ { label, url } ] }
-      contact          { heading, phone, email } rendered as a contact column
+      contact          { heading, phone, email } for the contact block
       social           array of { label, icon, url }; icon is a file name
                        resolved under resources/images/usa-icons/
+                       (contact and social share the secondary section's
+                       right column, as in the USWDS big footer)
       required-links    array of { label, url } shown as a bottom policy row
       signup           { enabled } toggles the usa-sign-up block (default off)
-      agency           { name, parent: { label, url } } for the secondary band
+      agency           { name, parent: { label, url } } next to the logo in
+                       the secondary section
       return-to-top     boolean, shows the "Return to top" link
 
     Relative link urls are resolved against the site root (defaults.site-root)
     or the app context path; absolute http(s) urls are passed through. Config
     defaults live in the theme config.json and mirror a generic agency footer,
     so consumers that set nothing still get a structurally complete footer.
---><footer class="[[ normalize-space('usa-footer usa-footer--big ' || string-join($theme?footer?class, ' ')) ]]">
+-->
+<footer
+    class="[[ normalize-space('usa-footer usa-footer--big ' || string-join($theme?footer?class, ' ')) ]]"
+>
     [% if $theme?footer?return-to-top %]
     <div class="grid-container usa-footer__return-to-top">
         <a href="#"><pb-i18n key="footer.return-to-top">Return to top</pb-i18n></a>
@@ -24,66 +30,58 @@
     <div class="usa-footer__primary-section">
         <div class="grid-container">
             <div class="grid-row grid-gap">
-                <div class="[[ if ($theme?footer?signup?enabled) then 'tablet:grid-col-8' else 'grid-col-12' ]]">
+                <div
+                    class="[[ if ($theme?footer?signup?enabled) then 'tablet:grid-col-8' else 'grid-col-12' ]]"
+                >
                     <nav class="usa-footer__nav" aria-label="Footer navigation">
                         <div class="grid-row grid-gap-4">
                             [% for $col in $theme?footer?columns?* %]
                             <div class="mobile-lg:grid-col-6 desktop:grid-col-3">
-                                <section class="usa-footer__primary-content usa-footer__primary-content--collapsible">
+                                <section
+                                    class="usa-footer__primary-content usa-footer__primary-content--collapsible"
+                                >
                                     <h4 class="usa-footer__primary-link">[[ $col?heading ]]</h4>
                                     <ul class="usa-list usa-list--unstyled">
                                         [% for $link in $col?links?* %]
                                         <li class="usa-footer__secondary-link">
-                                            <a href="[[ if (starts-with($link?url, 'http')) then $link?url else head(($context?defaults?site-root, $context-path)) || '/' || $link?url ]]">[[ $link?label ]]</a>
+                                            <a
+                                                href="[[ if (starts-with($link?url, 'http')) then $link?url else head(($context?defaults?site-root, $context-path)) || '/' || $link?url ]]"
+                                                >[[ $link?label ]]</a
+                                            >
                                         </li>
                                         [% endfor %]
                                     </ul>
                                 </section>
                             </div>
                             [% endfor %]
-                            [% if exists($theme?footer?contact) %]
-                            <div class="mobile-lg:grid-col-6 desktop:grid-col-3">
-                                <section class="usa-footer__primary-content usa-footer__contact-links">
-                                    [% if $theme?footer?contact?heading %]
-                                    <h4 class="usa-footer__primary-link">[[ $theme?footer?contact?heading ]]</h4>
-                                    [% endif %]
-                                    <address class="usa-footer__address">
-                                        [% if $theme?footer?contact?phone %]
-                                        <div class="usa-footer__contact-info">
-                                            <a href="tel:[[ translate($theme?footer?contact?phone, ' ()-', '') ]]">[[ $theme?footer?contact?phone ]]</a>
-                                        </div>
-                                        [% endif %]
-                                        [% if $theme?footer?contact?email %]
-                                        <div class="usa-footer__contact-info">
-                                            <a href="mailto:[[ $theme?footer?contact?email ]]">[[ $theme?footer?contact?email ]]</a>
-                                        </div>
-                                        [% endif %]
-                                    </address>
-                                    [% if exists($theme?footer?social) %]
-                                    <div class="usa-footer__social-links grid-row grid-gap-1">
-                                        [% for $social in $theme?footer?social?* %]
-                                        <div class="grid-col-auto">
-                                            <a class="usa-social-link" href="[[ $social?url ]]">
-                                                <img class="usa-social-link__icon" src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/images/usa-icons/[[ $social?icon ]]" alt="[[ $social?label ]]"/>
-                                            </a>
-                                        </div>
-                                        [% endfor %]
-                                    </div>
-                                    [% endif %]
-                                </section>
-                            </div>
-                            [% endif %]
                         </div>
                     </nav>
                 </div>
                 [% if $theme?footer?signup?enabled %]
                 <div class="tablet:grid-col-4">
                     <div class="usa-sign-up">
-                        <h3 class="usa-sign-up__heading">[[ head(($theme?footer?signup?heading, 'Sign up')) ]]</h3>
-                        <form class="usa-form" action="[[ head(($theme?footer?signup?action, '#')) ]]" method="post">
-                            <label class="usa-label" for="footer-email">[[ head(($theme?footer?signup?label, 'Your email address')) ]]</label>
-                            <input class="usa-input" id="footer-email" name="email" type="email" autocomplete="email"/>
-                            <button class="usa-button" type="submit">[[ head(($theme?footer?signup?button, 'Sign up')) ]]</button>
+                        <h3 class="usa-sign-up__heading">
+                            [[ head(($theme?footer?signup?heading, 'Sign up')) ]]
+                        </h3>
+                        <form
+                            class="usa-form"
+                            action="[[ head(($theme?footer?signup?action, '#')) ]]"
+                            method="post"
+                        >
+                            <label class="usa-label" for="footer-email"
+                                >[[ head(($theme?footer?signup?label, 'Your email address'))
+                                ]]</label
+                            >
+                            <input
+                                class="usa-input"
+                                id="footer-email"
+                                name="email"
+                                type="email"
+                                autocomplete="email"
+                            />
+                            <button class="usa-button" type="submit">
+                                [[ head(($theme?footer?signup?button, 'Sign up')) ]]
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -94,26 +92,80 @@
     <div class="usa-footer__secondary-section">
         <div class="grid-container">
             <div class="grid-row grid-gap">
-                <div class="usa-footer__logo tablet:grid-col-6">
-                    <img class="usa-footer__logo-img" src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/css/[[ $theme?logo?image ]]" alt="[[ $theme?footer?agency?name ]]"/>
+                <div class="usa-footer__logo grid-row mobile-lg:grid-col-6 mobile-lg:grid-gap-2">
+                    <div class="mobile-lg:grid-col-auto">
+                        <img
+                            class="usa-footer__logo-img"
+                            src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/css/[[ $theme?logo?image ]]"
+                            alt="[[ $theme?footer?agency?name ]]"
+                        />
+                    </div>
+                    <div class="mobile-lg:grid-col-auto">
+                        [% if $theme?footer?agency?name %]
+                        <p class="usa-footer__logo-heading">[[ $theme?footer?agency?name ]]</p>
+                        [% endif %]
+                        [% if exists($theme?footer?agency?parent) %]
+                        <p class="usa-footer__agency-parent">
+                            <a href="[[ $theme?footer?agency?parent?url ]]"
+                                >[[ $theme?footer?agency?parent?label ]]</a
+                            >
+                        </p>
+                        [% endif %]
+                    </div>
                 </div>
-                <div class="usa-footer__agency tablet:grid-col-6">
-                    [% if $theme?footer?agency?name %]
-                    <p class="usa-footer__logo-heading">[[ $theme?footer?agency?name ]]</p>
+                [% if exists($theme?footer?contact) or exists($theme?footer?social) %]
+                <div class="usa-footer__contact-links mobile-lg:grid-col-6">
+                    [% if exists($theme?footer?social) %]
+                    <div class="usa-footer__social-links grid-row grid-gap-1">
+                        [% for $social in $theme?footer?social?* %]
+                        <div class="grid-col-auto">
+                            <a class="usa-social-link" href="[[ $social?url ]]">
+                                <img
+                                    class="usa-social-link__icon"
+                                    src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/images/usa-icons/[[ $social?icon ]]"
+                                    alt="[[ $social?label ]]"
+                                />
+                            </a>
+                        </div>
+                        [% endfor %]
+                    </div>
                     [% endif %]
-                    [% if exists($theme?footer?agency?parent) %]
-                    <p class="usa-footer__contact-heading">
-                        <a href="[[ $theme?footer?agency?parent?url ]]">[[ $theme?footer?agency?parent?label ]]</a>
-                    </p>
+                    [% if $theme?footer?contact?heading %]
+                    <p class="usa-footer__contact-heading">[[ $theme?footer?contact?heading ]]</p>
+                    [% endif %]
+                    [% if $theme?footer?contact?phone or $theme?footer?contact?email %]
+                    <address class="usa-footer__address">
+                        <div class="usa-footer__contact-info grid-row grid-gap">
+                            [% if $theme?footer?contact?phone %]
+                            <div class="grid-col-auto">
+                                <a
+                                    href="tel:[[ translate($theme?footer?contact?phone, ' ()-', '') ]]"
+                                    >[[ $theme?footer?contact?phone ]]</a
+                                >
+                            </div>
+                            [% endif %]
+                            [% if $theme?footer?contact?email %]
+                            <div class="grid-col-auto">
+                                <a href="mailto:[[ $theme?footer?contact?email ]]"
+                                    >[[ $theme?footer?contact?email ]]</a
+                                >
+                            </div>
+                            [% endif %]
+                        </div>
+                    </address>
                     [% endif %]
                 </div>
+                [% endif %]
             </div>
             [% if exists($theme?footer?required-links) %]
             <nav class="usa-footer__required-links" aria-label="Important links">
                 <ul class="usa-list usa-list--unstyled grid-row grid-gap-2">
                     [% for $link in $theme?footer?required-links?* %]
                     <li class="grid-col-auto usa-footer__secondary-link">
-                        <a href="[[ if (starts-with($link?url, 'http')) then $link?url else head(($context?defaults?site-root, $context-path)) || '/' || $link?url ]]">[[ $link?label ]]</a>
+                        <a
+                            href="[[ if (starts-with($link?url, 'http')) then $link?url else head(($context?defaults?site-root, $context-path)) || '/' || $link?url ]]"
+                            >[[ $link?label ]]</a
+                        >
                     </li>
                     [% endfor %]
                 </ul>
