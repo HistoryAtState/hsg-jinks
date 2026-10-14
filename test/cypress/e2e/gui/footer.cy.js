@@ -19,20 +19,58 @@ const VOLUME = "historicaldocuments/frus1981-88v05";
     });
 });
 
-// The footer carries real content in the navy design (#1086): four link
-// columns ending in Contact (mail, the office's own social accounts),
-// then the wordmark band. Nothing of the USWDS example survives -- no
+// The footer carries real content in the navy design (#1086), in the theme's
+// "side-by-side" layout of the USWDS big footer: wordmark and agency left of
+// the nav, whose collapsible columns end in Contact (Contact Us, mail, the
+// office's own social accounts); the secondary section keeps the policy row. Nothing of the USWDS example survives -- no
 // placeholder text, no dead javascript:void(0) links, no sign-up form.
 describe("footer content", () => {
     beforeEach(() => cy.visit(`${VOLUME}/ch1`));
 
-    it("has the three link columns of the design", () => {
+    it("has the three collapsible columns of the design", () => {
         cy.get("footer.usa-footer .usa-footer__primary-link").then(($h) =>
             expect([...$h].map((el) => el.textContent.trim())).to.deep.equal([
                 "Learn more",
                 "Topics",
                 "Contact",
             ])
+        );
+        cy.get(
+            "footer.usa-footer .usa-footer__nav .usa-footer__contact.usa-footer__primary-content--collapsible"
+        ).should("exist");
+    });
+
+    it("puts the wordmark above the nav while the columns need the full width", () => {
+        cy.viewport(800, 900);
+        cy.get("footer.usa-footer .usa-footer__brand")
+            .then(($b) => $b[0].getBoundingClientRect())
+            .then((brand) => {
+                cy.get("footer.usa-footer .usa-footer__nav").then(($n) => {
+                    expect(brand.bottom).to.be.at.most($n[0].getBoundingClientRect().top);
+                });
+            });
+        cy.get("footer.usa-footer .usa-footer__primary-link").then(($h) => {
+            const tops = [...$h].map((el) => Math.round(el.getBoundingClientRect().top));
+            expect(new Set(tops).size, "all column headings on one row").to.equal(1);
+        });
+    });
+
+    it("puts the wordmark and agency beside the nav", () => {
+        cy.get("footer.usa-footer .usa-footer__primary-section .usa-footer__brand").within(() => {
+            cy.get(".usa-footer__logo-img").should("exist");
+            cy.get(".usa-footer__logo-heading").should("contain.text", "Office of the Historian");
+        });
+        cy.get("footer.usa-footer .usa-footer__brand")
+            .then(($b) => $b[0].getBoundingClientRect())
+            .then((brand) => {
+                cy.get("footer.usa-footer .usa-footer__nav").then(($n) => {
+                    const nav = $n[0].getBoundingClientRect();
+                    expect(brand.right).to.be.at.most(nav.left);
+                    expect(Math.abs(brand.top - nav.top)).to.be.below(40);
+                });
+            });
+        cy.get("footer.usa-footer .usa-footer__secondary-section .usa-footer__logo").should(
+            "not.exist"
         );
     });
 
@@ -48,7 +86,7 @@ describe("footer content", () => {
         );
     });
 
-    it("carries the hsg-shell 'Learn more' links, including Contact Us", () => {
+    it("carries the hsg-shell 'Learn more' links", () => {
         cy.get("footer.usa-footer .usa-footer__primary-content")
             .first()
             .find("a")
@@ -59,10 +97,23 @@ describe("footer content", () => {
                     ["Home", "/exist/apps/hsg-jinks/"],
                     ["Search", "/exist/apps/hsg-jinks/search"],
                     ["About Us", "/exist/apps/hsg-jinks/about"],
-                    ["Contact Us", "/exist/apps/hsg-jinks/about/contact-us"],
                     ["FAQ", "/exist/apps/hsg-jinks/about/faq"],
                 ])
             );
+    });
+
+    it("sets the policy links off in the headings' colour, under a rule of it", () => {
+        cy.get("footer.usa-footer .usa-footer__primary-link")
+            .first()
+            .then(($h) => {
+                const heading = $h.css("color");
+                cy.get("footer.usa-footer .usa-footer__secondary-section")
+                    .should("have.css", "border-top-color", heading)
+                    .and("have.css", "border-top-style", "solid");
+                cy.get("footer.usa-footer .usa-footer__required-links a").each(($a) =>
+                    expect($a.css("color")).to.equal(heading)
+                );
+            });
     });
 
     it("links every topic within this app, department policies to state.gov", () => {
@@ -77,13 +128,15 @@ describe("footer content", () => {
             .should("have.attr", "href", "https://www.state.gov/privacy-policy/");
     });
 
-    it("reaches the office by phone and mail", () => {
-        cy.get("footer.usa-footer .usa-footer__address a").then(($a) =>
-            expect([...$a].map((el) => el.getAttribute("href"))).to.deep.equal([
-                "tel:2029550200",
-                "mailto:history@state.gov",
-            ])
+    it("reaches the office through Contact Us and mail, not by phone (OP#1459)", () => {
+        cy.get("footer.usa-footer .usa-footer__contact .usa-footer__secondary-link > a").then(
+            ($a) =>
+                expect([...$a].map((el) => el.getAttribute("href"))).to.deep.equal([
+                    "/exist/apps/hsg-jinks/about/contact-us",
+                    "mailto:history@state.gov",
+                ])
         );
+        cy.get('footer.usa-footer a[href^="tel:"]').should("not.exist");
     });
 
     it("links the office's own social accounts", () => {
@@ -99,7 +152,7 @@ describe("footer content", () => {
         cy.get("footer.usa-footer .usa-footer__logo-img")
             .should("have.attr", "alt")
             .and("contain", "Office of the Historian");
-        cy.get("footer.usa-footer .usa-footer__agency").should(
+        cy.get("footer.usa-footer .usa-footer__agency-parent").should(
             "contain.text",
             "United States Department of State"
         );
@@ -122,5 +175,53 @@ describe("footer content", () => {
         cy.get("footer.usa-footer")
             .invoke("text")
             .should("not.match", /<Secondary link|<Topic>|<Name of Agency>/);
+    });
+});
+
+// Below mobile-lg (480px) USWDS runs the footer nav edge to edge and leaves
+// the inset to its components (OP#1465). The document is wider than the
+// viewport there in stock USWDS too (the gapped row's overhang, clipped by
+// body overflow-x: hidden), so these check what a reader sees instead.
+describe("footer on a phone", () => {
+    beforeEach(() => {
+        cy.viewport(390, 844);
+        cy.visit(`${VOLUME}/ch1`);
+    });
+
+    it("keeps every text and icon at least 16px from the screen edges", () => {
+        cy.get(
+            "footer.usa-footer :is(a, p, button, img, .usa-footer__primary-link)"
+        ).each(($el) => {
+            const el = $el[0];
+            if (!el.getClientRects().length) return; // collapsed list
+            const range = el.ownerDocument.createRange();
+            range.selectNodeContents(el);
+            const box = el.tagName === "IMG" ? el.getBoundingClientRect() : range.getBoundingClientRect();
+            if (!box.width) return;
+            expect(box.left, el.textContent.trim() || el.alt).to.be.at.least(16);
+            expect(box.right, el.textContent.trim() || el.alt).to.be.at.most(390 - 16);
+        });
+    });
+
+    it("renders every column heading as a left-aligned bar on the footer ground", () => {
+        cy.get("footer.usa-footer .usa-footer__primary-link").each(($h) => {
+            expect($h).to.have.class("usa-footer__primary-link--button");
+            expect($h.css("background-color")).to.equal("rgba(0, 0, 0, 0)");
+            expect($h.css("justify-content")).to.equal("flex-start");
+            expect($h.css("margin-bottom")).to.equal("0px");
+        });
+    });
+
+    it("draws a single rule between the columns and the policy row", () => {
+        cy.get("footer.usa-footer .usa-footer__nav").should("have.css", "border-bottom-style", "none");
+        cy.get("footer.usa-footer .usa-footer__required-links").should(
+            "have.css",
+            "border-top-style",
+            "none"
+        );
+    });
+
+    it("shows the wordmark unfiltered", () => {
+        cy.get("footer.usa-footer .usa-footer__logo-img").should("have.css", "filter", "none");
     });
 });

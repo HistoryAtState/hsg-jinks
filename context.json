@@ -230,9 +230,6 @@
           "label" : "About Us",
           "url" : "about"
         }, {
-          "label" : "Contact Us",
-          "url" : "about/contact-us"
-        }, {
           "label" : "FAQ",
           "url" : "about/faq"
         } ],
@@ -267,10 +264,14 @@
         "url" : "https://github.com/HistoryAtState"
       } ],
       "class" : "hsg-footer",
+      "layout" : "side-by-side",
       "return-to-top" : true,
       "contact" : {
-        "phone" : "202-955-0200",
         "email" : "history@state.gov",
+        "links" : [ {
+          "label" : "Contact Us",
+          "url" : "about/contact-us"
+        } ],
         "heading" : "Contact"
       }
     },

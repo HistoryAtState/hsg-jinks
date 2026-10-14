@@ -148,7 +148,27 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-footer .usa-footer__primary-link {
     color: var(--hsg-footer-heading);
-    margin-bottom: var(--uswds-space-3);
+}
+
+/* Below mobile-lg USWDS turns each column heading into a full-width
+   disclosure button. It sets no background of its own, so the browser's
+   light grey button face showed through; the bars sit on the footer ground
+   instead, divided by a line in the footer's own palette. */
+.hsg-footer .usa-footer__primary-link--button {
+    background-color: transparent;
+    border-top-color: var(--uswds-color-primary-dark);
+}
+
+/* The secondary section's top rule separates the nav from the policy row
+   at every width; USWDS's own nav bottom border would double it. */
+.hsg-footer .usa-footer__nav {
+    border-bottom: none;
+}
+
+@media (min-width: 30em) {
+    .hsg-footer .usa-footer__primary-link {
+        margin-bottom: var(--uswds-space-3);
+    }
 }
 
 /* OP#1395: same USWDS light-background :visited/:hover/:active defaults as
@@ -179,40 +199,10 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     content: none; /* USWDS's bullet separator; the design has none */
 }
 
-/* Contact column: the mail address sits on one line with its icon. The icons
-   ship as black SVGs, so they are inverted rather than recoloured.
-   USWDS right-aligns .usa-footer__contact-links from tablet up, which is for
-   the example's logo-and-contact band; here the block is a fourth nav column
-   and reads left-aligned like its neighbours. */
-.hsg-footer .usa-footer__contact-links {
-    margin-top: 0;
-    text-align: left;
-}
-
-.hsg-footer .usa-footer__address {
-    margin-top: var(--uswds-space-105);
-}
-
-.hsg-footer .usa-footer__contact-info {
-    align-items: center;
-    display: flex;
-    gap: var(--uswds-space-1);
-    justify-content: flex-start;
-    margin-bottom: var(--uswds-space-1);
-}
-
-.hsg-footer .usa-footer__social-links {
-    justify-content: flex-start;
-}
-
-.hsg-footer__icon {
+/* Contact column (theme.footer.layout "side-by-side"): its phone and mail
+   icons ship as black SVGs, so they are inverted like the social icons. */
+.hsg-footer .usa-footer__contact-icon {
     filter: brightness(0) invert(1);
-    height: 1.25rem;
-    width: 1.25rem;
-}
-
-.hsg-footer .usa-footer__social-links {
-    margin-top: var(--uswds-space-3);
 }
 
 .hsg-footer .usa-social-link {
@@ -232,46 +222,66 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 /* Closing band: the office wordmark left, its place in the department right. */
+/* The secondary section holds the policy row (layout "side-by-side"), set
+   off by a rule in the headings' light blue. */
 .hsg-footer .usa-footer__secondary-section {
-    margin-top: var(--uswds-space-4);
+    border-top: 1px solid var(--hsg-footer-heading);
+    margin-top: 0;
+    padding-top: var(--uswds-space-3);
 }
 
-/* The only logo asset is the navy one the header uses, which disappears against
-   this background; knock it out to white. That flattens the seal and flag to
-   silhouettes -- replace with a proper light variant of the wordmark when the
-   design supplies one. */
+/* The office wordmark (flag, seal, white lettering) as the header shows it.
+   USWDS sizes the footer logo for a square seal (max-width 5rem). */
 .hsg-footer .usa-footer__logo-img {
-    filter: brightness(0) invert(1);
-    max-width: 26rem;
-    width: 100%;
+    max-width: min(26rem, 100%);
 }
 
-.hsg-footer .usa-footer__agency {
-    align-self: end;
-    text-align: right;
-}
-
-.hsg-footer .usa-footer__agency .usa-footer__logo-heading,
-.hsg-footer .usa-footer__agency .usa-footer__contact-heading {
+.hsg-footer .usa-footer__logo-heading,
+.hsg-footer .usa-footer__agency-parent {
     color: var(--hsg-footer-text);
     font-family: var(--uswds-font-heading);
     font-size: 1rem;
-    margin: 0;
+    line-height: 1.4;
+    margin: var(--uswds-space-1) 0 0;
 }
 
-.hsg-footer .usa-footer__agency .usa-footer__logo-heading {
+/* Logo above, agency below with room between, as in the design. */
+.hsg-footer .usa-footer__brand .usa-footer__logo-heading {
+    margin-top: var(--uswds-space-3);
+}
+
+@media (min-width: 40em) {
+    .hsg-footer .usa-footer__brand .usa-footer__logo-heading {
+        margin-top: var(--uswds-space-6);
+    }
+}
+
+.hsg-footer .usa-footer__logo-heading {
     font-weight: 400;
 }
 
-.hsg-footer .usa-footer__agency .usa-footer__contact-heading {
-    font-weight: 700;
+.hsg-footer .usa-footer__agency-parent {
+    font-family: inherit;
+    font-size: var(--uswds-font-size-sans-2xs, 0.875rem);
 }
 
-@media (max-width: 640px) {
-    .hsg-footer .usa-footer__agency {
-        margin-top: var(--uswds-space-3);
-        text-align: left;
-    }
+.hsg-footer .usa-footer__agency-parent a,
+.hsg-footer .usa-footer__agency-parent a:visited {
+    text-decoration: underline;
+}
+
+/* Policy links: the closing row, in the headings' light blue and a size
+   down. Nothing sits above it in the secondary section here. */
+.hsg-footer .usa-footer__required-links {
+    margin-top: 0;
+}
+
+.hsg-footer .usa-footer__required-links a,
+.hsg-footer .usa-footer__required-links a:visited,
+.hsg-footer .usa-footer__required-links a:hover,
+.hsg-footer .usa-footer__required-links a:active {
+    color: var(--hsg-footer-heading);
+    font-size: var(--uswds-font-size-sans-2xs, 0.875rem);
 }
 
 /* Search bar vertical alignment in the header (menu.login/menu.language are
