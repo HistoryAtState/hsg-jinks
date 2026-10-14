@@ -573,6 +573,43 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     min-width: 0;
 }
 
+/* Gutter between main and the sidebars: the Figma document frame (ETA-1 Doc,
+   node 4290:20085) spaces the three columns 24px apart (USWDS spacing 3).
+   A margin on the sidebar rather than a grid column-gap: an empty sidebar is
+   display: none but keeps its grid track, so a column-gap would still indent
+   main on pages without one. */
+.sticky-layout > :is(.before-top, .before) {
+    margin-right: var(--uswds-space-3);
+}
+
+.sticky-layout > :is(.after-top, .after) {
+    margin-left: var(--uswds-space-3);
+}
+
+/* Sidebar width for the USWDS 3 + 6 + 3 layout-grid split: each sidebar a
+   quarter of the page box less one gutter, main the remaining half (302px |
+   628px | 302px at 1440px). Set as the theme's layout.before/after.width in
+   historicaldocuments-content.html. The grid is a size container so that
+   100cqw is the page box's content width, not the viewport's. Declared on
+   :root because the theme declares the layout width variables there, and a
+   var() inside a custom property resolves where that property is declared;
+   the cqw itself still resolves where the sidebar uses it. */
+:root {
+    --hsg-sidebar-width: calc((100cqw + var(--uswds-space-3)) / 4 - var(--uswds-space-3));
+}
+
+.sticky-layout {
+    container-type: inline-size;
+}
+
+/* Lower bound: a sidebar never gets narrower than its own min-content (its
+   longest word or button), so unbreakable content widens the sidebar and
+   narrows main instead of spilling over. At the widths the sidebars are
+   shown (desktop and up) the 3/12 share is always the wider of the two. */
+.sticky-layout > :is(.before, .after) {
+    min-width: min-content;
+}
+
 /* "Page N" page-break facsimile markers in document and section prose
    (pb elementSpec in resources/odd/hsg-jinks.odd): a grey right-floated
    margin marker, reference parity with hsg-shell's facsimile-link rule
