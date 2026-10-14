@@ -73,6 +73,20 @@ describe("footer content", () => {
             );
     });
 
+    it("sets the policy links off in the headings' colour, under a rule of it", () => {
+        cy.get("footer.usa-footer .usa-footer__primary-link")
+            .first()
+            .then(($h) => {
+                const heading = $h.css("color");
+                cy.get("footer.usa-footer .usa-footer__required-links")
+                    .should("have.css", "border-top-color", heading)
+                    .and("have.css", "border-top-style", "solid");
+                cy.get("footer.usa-footer .usa-footer__required-links a").each(($a) =>
+                    expect($a.css("color")).to.equal(heading)
+                );
+            });
+    });
+
     it("links every topic within this app, department policies to state.gov", () => {
         ["Historical Documents", "Department History", "Countries"].forEach((label) => {
             cy.get("footer.usa-footer a")

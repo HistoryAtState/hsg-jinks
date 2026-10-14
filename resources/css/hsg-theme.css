@@ -248,6 +248,21 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-weight: 700;
 }
 
+/* Policy links: the closing row, in the headings' light blue and a size
+   down, set off by a rule in the same colour. */
+.hsg-footer .usa-footer__required-links {
+    border-top: 1px solid var(--hsg-footer-heading);
+    padding-top: var(--uswds-space-3);
+}
+
+.hsg-footer .usa-footer__required-links a,
+.hsg-footer .usa-footer__required-links a:visited,
+.hsg-footer .usa-footer__required-links a:hover,
+.hsg-footer .usa-footer__required-links a:active {
+    color: var(--hsg-footer-heading);
+    font-size: var(--uswds-font-size-sans-2xs, 0.875rem);
+}
+
 /* Search bar vertical alignment in the header (menu.login/menu.language are
    off, see config.json). USWDS's own extended-header source positions
    .usa-nav__secondary with a hardcoded `bottom: 4rem` (their own comment:
