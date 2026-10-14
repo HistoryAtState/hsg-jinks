@@ -19,8 +19,9 @@
                        section; logo and agency left, social and contact
                        right in the secondary section
       side-by-side     logo and agency left of the link columns in the
-                       primary section (where the reference puts the sign-up
-                       block beside the nav), contact as one more collapsible
+                       primary section from desktop up, above them below
+                       that (where the reference puts the sign-up block
+                       beside the nav), contact as one more collapsible
                        column; the secondary section keeps the policy row
 
     Relative link urls are resolved against the site root (defaults.site-root)
@@ -42,7 +43,7 @@
         <div class="grid-container">
             <div class="grid-row grid-gap">
                 [% if $side %]
-                <div class="usa-footer__brand tablet:grid-col-5">
+                <div class="usa-footer__brand desktop:grid-col-5">
                     <div class="usa-footer__logo">
                         <img
                             class="usa-footer__logo-img"
@@ -63,13 +64,13 @@
                 </div>
                 [% endif %]
                 <div
-                    class="[[ if ($side) then 'tablet:grid-col-7' else if ($theme?footer?signup?enabled) then 'tablet:grid-col-8' else 'grid-col-12' ]]"
+                    class="[[ if ($side) then 'desktop:grid-col-7' else if ($theme?footer?signup?enabled) then 'tablet:grid-col-8' else 'grid-col-12' ]]"
                 >
                     <nav class="usa-footer__nav" aria-label="Footer navigation">
                         <div class="grid-row grid-gap-4">
                             [% for $col in $theme?footer?columns?* %]
                             <div
-                                class="[[ if ($side) then 'mobile-lg:grid-col-6 desktop:grid-col-4' else 'mobile-lg:grid-col-6 desktop:grid-col-3' ]]"
+                                class="[[ if ($side) then 'mobile-lg:grid-col-6 tablet:grid-col-4' else 'mobile-lg:grid-col-6 desktop:grid-col-3' ]]"
                             >
                                 <section
                                     class="usa-footer__primary-content usa-footer__primary-content--collapsible"
@@ -89,7 +90,7 @@
                             </div>
                             [% endfor %]
                             [% if $side and (exists($theme?footer?contact) or exists($theme?footer?social)) %]
-                            <div class="mobile-lg:grid-col-6 desktop:grid-col-4">
+                            <div class="mobile-lg:grid-col-6 tablet:grid-col-4">
                                 <section
                                     class="usa-footer__primary-content usa-footer__primary-content--collapsible usa-footer__contact"
                                 >

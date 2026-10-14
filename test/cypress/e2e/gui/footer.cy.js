@@ -40,6 +40,21 @@ describe("footer content", () => {
         ).should("exist");
     });
 
+    it("puts the wordmark above the nav while the columns need the full width", () => {
+        cy.viewport(800, 900);
+        cy.get("footer.usa-footer .usa-footer__brand")
+            .then(($b) => $b[0].getBoundingClientRect())
+            .then((brand) => {
+                cy.get("footer.usa-footer .usa-footer__nav").then(($n) => {
+                    expect(brand.bottom).to.be.at.most($n[0].getBoundingClientRect().top);
+                });
+            });
+        cy.get("footer.usa-footer .usa-footer__primary-link").then(($h) => {
+            const tops = [...$h].map((el) => Math.round(el.getBoundingClientRect().top));
+            expect(new Set(tops).size, "all column headings on one row").to.equal(1);
+        });
+    });
+
     it("puts the wordmark and agency beside the nav", () => {
         cy.get("footer.usa-footer .usa-footer__primary-section .usa-footer__brand").within(() => {
             cy.get(".usa-footer__logo-img").should("exist");
