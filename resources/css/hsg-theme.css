@@ -500,6 +500,9 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    them. */
 .toc {
     background-color: var(--uswds-color-white);
+    /* Room before the band below the content row, which the panel otherwise
+       touches wherever it is the row's tallest column (e.g. a compilation). */
+    margin-block-end: var(--uswds-space-6);
 }
 
 .toc .usa-sidenav a:not(.usa-button):not(.uswds-button):not(.usa-current) {

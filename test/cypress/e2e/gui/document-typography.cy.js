@@ -99,6 +99,16 @@ describe("document page typography", () => {
             });
     });
 
+    it("keeps the table of contents clear of the band below on short pages", () => {
+        cy.visit("historicaldocuments/frus1981-88v05/comp");
+        cy.get("aside nav.toc").then(($toc) => {
+            const panel = $toc[0].getBoundingClientRect();
+            cy.get(".hsg-historicaldocuments-footer").then(($band) => {
+                expect($band[0].getBoundingClientRect().top - panel.bottom).to.be.at.least(48);
+            });
+        });
+    });
+
     it("shows each document range inside its entry's link", () => {
         cy.get("aside nav.toc .toc-range")
             .should("have.length.at.least", 1)
