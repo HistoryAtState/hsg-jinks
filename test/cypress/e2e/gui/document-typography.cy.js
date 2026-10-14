@@ -82,6 +82,13 @@ describe("document page typography", () => {
         cy.get("nav.toc .usa-sidenav__item")
             .first()
             .should("have.css", "border-top-color", "rgb(230, 230, 230)");
+        // the range is muted, in its entry's size and weight
+        cy.get("nav.toc .toc-range").each(($range) => {
+            const entry = getComputedStyle($range.parent()[0]);
+            expect($range.css("color")).to.equal("rgb(92, 92, 92)");
+            expect($range.css("font-size")).to.equal(entry.fontSize);
+            expect($range.css("font-weight")).to.equal(entry.fontWeight);
+        });
     });
 
     it("puts the table of contents on a white panel without a headline", () => {

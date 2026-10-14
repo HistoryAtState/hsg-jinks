@@ -496,8 +496,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    on white, full width, as the design kit draws it. Top-level entries in the
    body text colour (base-darker rather than USWDS's base-dark grey); nested
    entries a size smaller in medium weight, indented by their link padding
-   alone; the document range is part of the entry's text. The link rules
-   repeat the theme's sidenav :not() chains to outrank them. */
+   alone. The link rules repeat the theme's sidenav :not() chains to outrank
+   them. */
 .toc {
     background-color: var(--uswds-color-white);
 }
@@ -530,6 +530,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .toc .usa-sidenav a.usa-current::after {
     background-color: var(--uswds-color-primary-dark);
+}
+
+/* Document range "(Documents N-M)" after an entry's title, inside its link:
+   muted, in the entry's own size and weight. */
+.toc .toc-range {
+    color: var(--uswds-color-base-dark);
 }
 
 /* Index-division entries (persons/terms registers, back-matter index):
