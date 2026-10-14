@@ -283,9 +283,6 @@ declare %private function hsg:volume-toc-nav($publication as xs:string, $current
     let $divisions := hsg:toc-divisions($publication)
     return
         <nav aria-label="Side navigation" class="toc">
-            <h5>
-                <pb-i18n key="document.contents">Contents</pb-i18n>
-            </h5>
             <ul class="usa-sidenav">
                 {hsg:toc-entries($volume/tei:TEI, $divisions, $publication, $current, $current-is-document, $context)}
             </ul>
@@ -384,8 +381,9 @@ declare %private function hsg:toc-entries($division as element(tei:TEI)?, $divis
        this far: their landing suppresses the TOC wholesale and their
        interior pages 404 on the volume-level gate in hsg-api.xql. :)
     let $is-pending := ends-with(normalize-space(($included//tei:bibl[@type='frus-division-type'])[1]), '-pending')
-    (: Document range "(Documents N-M)", reference parity with hsg-shell's
-       sidebar, shown after divisions that contain documents. :)
+    (: Document range "(Documents N-M)" inside the entry's link, after its
+       title, as hsg-shell's sidebar shows it, for divisions that contain
+       documents. :)
     let $range-label := hsg:document-range-label(hsg:document-range($included))
     let $children := hsg:toc-entries($included, $divisions, $publication, $current, $current-is-document, $context)
     return
@@ -399,10 +397,10 @@ declare %private function hsg:toc-entries($division as element(tei:TEI)?, $divis
                         attribute class {"usa-current"},
                         attribute aria-current {"page"}
                     ) else (),
-                    $title
+                    $title,
+                    if (exists($range-label)) then <span class="toc-range">{$range-label}</span> else ()
                 }
             }
-            {if (exists($range-label)) then <span class="toc-range">{$range-label}</span> else ()}
             {
                 if (exists($children)) then
                     <ul class="usa-sidenav__sublist">{$children}</ul>

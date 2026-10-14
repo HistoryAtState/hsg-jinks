@@ -28,7 +28,12 @@ const FRONT = [
 const COMPILATION = "Soviet Union, March 1985–October 1986";
 const BACK = ["Appendix", "Index"];
 
-const text = (el) => el.textContent.replace(/\s+/g, " ").trim();
+// An entry's title, without the document range its link also carries.
+const text = (el) => {
+    const copy = el.cloneNode(true);
+    copy.querySelectorAll(".toc-range").forEach((range) => range.remove());
+    return copy.textContent.replace(/\s+/g, " ").trim();
+};
 
 describe("sidebar table of contents", () => {
     ["comp", "ch1", "d1"].forEach((page) => {

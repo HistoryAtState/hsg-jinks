@@ -492,18 +492,31 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-style: italic;
 }
 
-/* Sidebar TOC: indent nested chapters under their compilation, and show the
-   document-count range in a muted colour, reference parity with hsg-shell. */
+/* Sidebar TOC on a white panel (OP#1462), with darker dividers than USWDS's
+   base-lighter so they still read on white. Nested chapters indent under
+   their compilation. */
+.toc {
+    background-color: var(--uswds-color-white);
+    padding: var(--uswds-space-1) var(--uswds-space-2);
+}
+
+.toc .usa-sidenav__item {
+    border-top-color: var(--uswds-color-base-light);
+}
+
 .toc .usa-sidenav__sublist {
     margin-left: 0;
     padding-left: var(--uswds-space-2);
-    border-left: 1px solid var(--jinks-color-border);
+    border-left: 1px solid var(--uswds-color-base-light);
 }
 
+/* Document range "(Documents N-M)", inside the entry's link after its title,
+   as on the reference site: the design's small label type. */
 .toc-range {
     color: var(--uswds-color-base-dark);
-    font-size: 0.85em;
-    margin-left: var(--uswds-space-05);
+    font-family: var(--uswds-font-ui);
+    font-size: var(--uswds-font-size-sans-2xs, 0.875rem);
+    font-weight: 500;
 }
 
 /* Index-division entries (persons/terms registers, back-matter index):
@@ -646,9 +659,10 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin: 0 0 var(--uswds-space-2);
     padding-bottom: var(--uswds-space-1);
     border-bottom: 1px solid var(--uswds-color-base-lighter);
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--uswds-color-base-dark);
+    font-family: var(--uswds-font-heading);
+    font-size: var(--uswds-font-size-serif-sm);
+    font-weight: 500;
+    color: var(--uswds-color-secondary);
 }
 
 /* Previous / next pager on chapter and document pages. */
@@ -718,9 +732,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin: var(--uswds-space-3) 0 var(--uswds-space-105);
 }
 
+/* The division's own title: the design's 28px small H1, semi-bold
+   (OP#1462). The variable Merriweather has the 500 cut. */
 .hsg-frus__prose h1.tei-head,
 .hsg-frus__division-title {
-    font-size: var(--uswds-font-size-sans-lg);
+    font-size: 1.75rem;
+    font-weight: 500;
 }
 
 .hsg-frus__prose h2.tei-head {
