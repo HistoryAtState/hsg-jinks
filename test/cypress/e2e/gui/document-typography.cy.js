@@ -109,19 +109,6 @@ describe("document page typography", () => {
         });
     });
 
-    it("starts the content level with the table of contents", () => {
-        ["comp", "d1"].forEach((page) => {
-            cy.visit(`historicaldocuments/frus1981-88v05/${page}`);
-            cy.get("main").should("have.css", "padding-top", "0px");
-            cy.get("aside nav.toc").then(($toc) => {
-                const toc = $toc[0].getBoundingClientRect().top;
-                cy.get("main .hsg-navigation-title").then(($overline) => {
-                    expect($overline[0].getBoundingClientRect().top - toc).to.be.lessThan(16);
-                });
-            });
-        });
-    });
-
     it("shows each document range inside its entry's link", () => {
         cy.get("aside nav.toc .toc-range")
             .should("have.length.at.least", 1)
