@@ -59,10 +59,9 @@ describe("pg_* facsimile page", () => {
     });
 
     it("shows the volume table of contents in the sidebar (OP#1445)", () => {
-        // the same "Contents" sidenav as the volume's document pages; the
-        // reference marks no entry current on a page view
-        cy.get("aside nav.toc").within(() => {
-            cy.get("h5").should("contain.text", "Contents");
+        // the same sidenav as the volume's document pages; the reference
+        // marks no entry current on a page view
+        cy.get('aside nav.toc[aria-label="Side navigation"]').within(() => {
             cy.get(".usa-sidenav a").should("have.length", 15);
             cy.get(".usa-current").should("not.exist");
         });
