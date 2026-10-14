@@ -107,19 +107,9 @@ describe("footer content", () => {
             .first()
             .then(($h) => {
                 const heading = $h.css("color");
-                cy.get("footer.usa-footer .usa-footer__required-links")
+                cy.get("footer.usa-footer .usa-footer__secondary-section")
                     .should("have.css", "border-top-color", heading)
                     .and("have.css", "border-top-style", "solid");
-                cy.get("footer.usa-footer .usa-footer__secondary-section > .grid-container").then(
-                    ($c) => {
-                        const box = $c[0].getBoundingClientRect();
-                        cy.get("footer.usa-footer .usa-footer__required-links").then(($r) => {
-                            const rule = $r[0].getBoundingClientRect();
-                            expect(rule.left).to.be.closeTo(box.left, 1);
-                            expect(rule.right).to.be.closeTo(box.right, 1);
-                        });
-                    }
-                );
                 cy.get("footer.usa-footer .usa-footer__required-links a").each(($a) =>
                     expect($a.css("color")).to.equal(heading)
                 );
@@ -220,6 +210,15 @@ describe("footer on a phone", () => {
             expect($h.css("justify-content")).to.equal("flex-start");
             expect($h.css("margin-bottom")).to.equal("0px");
         });
+    });
+
+    it("draws a single rule between the columns and the policy row", () => {
+        cy.get("footer.usa-footer .usa-footer__nav").should("have.css", "border-bottom-style", "none");
+        cy.get("footer.usa-footer .usa-footer__required-links").should(
+            "have.css",
+            "border-top-style",
+            "none"
+        );
     });
 
     it("shows the wordmark unfiltered", () => {
