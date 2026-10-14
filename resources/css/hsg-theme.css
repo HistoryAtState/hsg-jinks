@@ -197,12 +197,10 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     content: none; /* USWDS's bullet separator; the design has none */
 }
 
-/* Contact block: the secondary section's right column, laid out by USWDS
-   (stacked below mobile-lg, right-aligned from there). */
-.hsg-footer .usa-footer__contact-heading {
-    color: var(--hsg-footer-heading);
-    font-family: var(--uswds-font-heading);
-    font-size: 0.98rem; /* the column headings' size, not USWDS's h3 */
+/* Contact column (theme.footer.layout "side-by-side"): its phone and mail
+   icons ship as black SVGs, so they are inverted like the social icons. */
+.hsg-footer .usa-footer__contact-icon {
+    filter: brightness(0) invert(1);
 }
 
 .hsg-footer .usa-social-link {
@@ -223,7 +221,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 /* Closing band: the office wordmark left, its place in the department right. */
 .hsg-footer .usa-footer__secondary-section {
-    margin-top: var(--uswds-space-4);
+    margin-top: 0;
 }
 
 /* The office wordmark (flag, seal, white lettering) as the header shows it.
@@ -237,7 +235,19 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--hsg-footer-text);
     font-family: var(--uswds-font-heading);
     font-size: 1rem;
+    line-height: 1.4;
     margin: var(--uswds-space-1) 0 0;
+}
+
+/* Logo above, agency below with room between, as in the design. */
+.hsg-footer .usa-footer__brand .usa-footer__logo-heading {
+    margin-top: var(--uswds-space-3);
+}
+
+@media (min-width: 40em) {
+    .hsg-footer .usa-footer__brand .usa-footer__logo-heading {
+        margin-top: var(--uswds-space-6);
+    }
 }
 
 .hsg-footer .usa-footer__logo-heading {
@@ -245,7 +255,13 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-footer .usa-footer__agency-parent {
-    font-weight: 700;
+    font-family: inherit;
+    font-size: var(--uswds-font-size-sans-2xs, 0.875rem);
+}
+
+.hsg-footer .usa-footer__agency-parent a,
+.hsg-footer .usa-footer__agency-parent a:visited {
+    text-decoration: underline;
 }
 
 /* Policy links: the closing row, in the headings' light blue and a size

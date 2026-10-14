@@ -2,17 +2,26 @@
     USWDS "big" footer, driven entirely by the theme.footer config block.
 
     theme.footer:
+      layout           "stacked" (default) or "side-by-side", see below
       columns          array of { heading, links: [ { label, url } ] }
-      contact          { heading, phone, email } for the contact block
+      contact          { heading, phone, email, links: [ { label, url } ] }
+                       for the contact block; links only in "side-by-side"
       social           array of { label, icon, url }; icon is a file name
                        resolved under resources/images/usa-icons/
-                       (contact and social share the secondary section's
-                       right column, as in the USWDS big footer)
       required-links    array of { label, url } shown as a bottom policy row
-      signup           { enabled } toggles the usa-sign-up block (default off)
-      agency           { name, parent: { label, url } } next to the logo in
-                       the secondary section
+      signup           { enabled } toggles the usa-sign-up block (default off,
+                       "stacked" only)
+      agency           { name, parent: { label, url } } next to the logo
       return-to-top     boolean, shows the "Return to top" link
+
+    Layouts, both built from the USWDS big footer's parts:
+      stacked          the USWDS reference: link columns in the primary
+                       section; logo and agency left, social and contact
+                       right in the secondary section
+      side-by-side     logo and agency left of the link columns in the
+                       primary section (where the reference puts the sign-up
+                       block beside the nav), contact as one more collapsible
+                       column; the secondary section keeps the policy row
 
     Relative link urls are resolved against the site root (defaults.site-root)
     or the app context path; absolute http(s) urls are passed through. Config
@@ -22,6 +31,8 @@
 <footer
     class="[[ normalize-space('usa-footer usa-footer--big ' || string-join($theme?footer?class, ' ')) ]]"
 >
+    [% let $side = $theme?footer?layout = 'side-by-side' %]
+    [% let $root = head(($context?defaults?site-root, $context-path)) %]
     [% if $theme?footer?return-to-top %]
     <div class="grid-container usa-footer__return-to-top">
         <a href="#"><pb-i18n key="footer.return-to-top">Return to top</pb-i18n></a>
@@ -30,13 +41,36 @@
     <div class="usa-footer__primary-section">
         <div class="grid-container">
             <div class="grid-row grid-gap">
+                [% if $side %]
+                <div class="usa-footer__brand tablet:grid-col-5">
+                    <div class="usa-footer__logo">
+                        <img
+                            class="usa-footer__logo-img"
+                            src="[[ $root ]]/resources/css/[[ $theme?logo?image ]]"
+                            alt="[[ $theme?footer?agency?name ]]"
+                        />
+                    </div>
+                    [% if $theme?footer?agency?name %]
+                    <p class="usa-footer__logo-heading">[[ $theme?footer?agency?name ]]</p>
+                    [% endif %]
+                    [% if exists($theme?footer?agency?parent) %]
+                    <p class="usa-footer__agency-parent">
+                        <a href="[[ $theme?footer?agency?parent?url ]]"
+                            >[[ $theme?footer?agency?parent?label ]]</a
+                        >
+                    </p>
+                    [% endif %]
+                </div>
+                [% endif %]
                 <div
-                    class="[[ if ($theme?footer?signup?enabled) then 'tablet:grid-col-8' else 'grid-col-12' ]]"
+                    class="[[ if ($side) then 'tablet:grid-col-7' else if ($theme?footer?signup?enabled) then 'tablet:grid-col-8' else 'grid-col-12' ]]"
                 >
                     <nav class="usa-footer__nav" aria-label="Footer navigation">
                         <div class="grid-row grid-gap-4">
                             [% for $col in $theme?footer?columns?* %]
-                            <div class="mobile-lg:grid-col-6 desktop:grid-col-3">
+                            <div
+                                class="[[ if ($side) then 'mobile-lg:grid-col-6 desktop:grid-col-4' else 'mobile-lg:grid-col-6 desktop:grid-col-3' ]]"
+                            >
                                 <section
                                     class="usa-footer__primary-content usa-footer__primary-content--collapsible"
                                 >
@@ -45,7 +79,7 @@
                                         [% for $link in $col?links?* %]
                                         <li class="usa-footer__secondary-link">
                                             <a
-                                                href="[[ if (starts-with($link?url, 'http')) then $link?url else head(($context?defaults?site-root, $context-path)) || '/' || $link?url ]]"
+                                                href="[[ if (starts-with($link?url, 'http')) then $link?url else $root || '/' || $link?url ]]"
                                                 >[[ $link?label ]]</a
                                             >
                                         </li>
@@ -54,10 +88,82 @@
                                 </section>
                             </div>
                             [% endfor %]
+                            [% if $side and (exists($theme?footer?contact) or exists($theme?footer?social)) %]
+                            <div class="mobile-lg:grid-col-6 desktop:grid-col-4">
+                                <section
+                                    class="usa-footer__primary-content usa-footer__primary-content--collapsible usa-footer__contact"
+                                >
+                                    <h4 class="usa-footer__primary-link">
+                                        [[ head(($theme?footer?contact?heading, 'Contact')) ]]
+                                    </h4>
+                                    <ul class="usa-list usa-list--unstyled">
+                                        [% for $link in $theme?footer?contact?links?* %]
+                                        <li class="usa-footer__secondary-link">
+                                            <a
+                                                href="[[ if (starts-with($link?url, 'http')) then $link?url else $root || '/' || $link?url ]]"
+                                                >[[ $link?label ]]</a
+                                            >
+                                        </li>
+                                        [% endfor %]
+                                        [% if $theme?footer?contact?phone %]
+                                        <li
+                                            class="usa-footer__secondary-link usa-footer__contact-info"
+                                        >
+                                            <img
+                                                class="usa-footer__contact-icon"
+                                                src="[[ $root ]]/resources/images/usa-icons/phone.svg"
+                                                alt=""
+                                            />
+                                            <a
+                                                href="tel:[[ translate($theme?footer?contact?phone, ' ()-', '') ]]"
+                                                >[[ $theme?footer?contact?phone ]]</a
+                                            >
+                                        </li>
+                                        [% endif %]
+                                        [% if $theme?footer?contact?email %]
+                                        <li
+                                            class="usa-footer__secondary-link usa-footer__contact-info"
+                                        >
+                                            <img
+                                                class="usa-footer__contact-icon"
+                                                src="[[ $root ]]/resources/images/usa-icons/mail.svg"
+                                                alt=""
+                                            />
+                                            <a href="mailto:[[ $theme?footer?contact?email ]]"
+                                                >[[ $theme?footer?contact?email ]]</a
+                                            >
+                                        </li>
+                                        [% endif %]
+                                        [% if exists($theme?footer?social) %]
+                                        <li class="usa-footer__secondary-link">
+                                            <div
+                                                class="usa-footer__social-links grid-row grid-gap-1"
+                                            >
+                                                [% for $social in $theme?footer?social?* %]
+                                                <div class="grid-col-auto">
+                                                    <a
+                                                        class="usa-social-link"
+                                                        href="[[ $social?url ]]"
+                                                    >
+                                                        <img
+                                                            class="usa-social-link__icon"
+                                                            src="[[ $root ]]/resources/images/usa-icons/[[ $social?icon ]]"
+                                                            alt="[[ $social?label ]]"
+                                                        />
+                                                    </a>
+                                                </div>
+                                                [% endfor %]
+                                            </div>
+                                        </li>
+                                        [% endif %]
+                                    </ul>
+                                </section>
+                            </div>
+                            [% endif %]
                         </div>
                     </nav>
                 </div>
-                [% if $theme?footer?signup?enabled %]
+                [% if not($side) and $theme?footer?signup?enabled %]
                 <div class="tablet:grid-col-4">
                     <div class="usa-sign-up">
                         <h3 class="usa-sign-up__heading">
@@ -91,12 +197,13 @@
     </div>
     <div class="usa-footer__secondary-section">
         <div class="grid-container">
+            [% if not($side) %]
             <div class="grid-row grid-gap">
                 <div class="usa-footer__logo grid-row mobile-lg:grid-col-6 mobile-lg:grid-gap-2">
                     <div class="mobile-lg:grid-col-auto">
                         <img
                             class="usa-footer__logo-img"
-                            src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/css/[[ $theme?logo?image ]]"
+                            src="[[ $root ]]/resources/css/[[ $theme?logo?image ]]"
                             alt="[[ $theme?footer?agency?name ]]"
                         />
                     </div>
@@ -122,7 +229,7 @@
                             <a class="usa-social-link" href="[[ $social?url ]]">
                                 <img
                                     class="usa-social-link__icon"
-                                    src="[[ head(($context?defaults?site-root, $context-path)) ]]/resources/images/usa-icons/[[ $social?icon ]]"
+                                    src="[[ $root ]]/resources/images/usa-icons/[[ $social?icon ]]"
                                     alt="[[ $social?label ]]"
                                 />
                             </a>
@@ -157,13 +264,14 @@
                 </div>
                 [% endif %]
             </div>
+            [% endif %]
             [% if exists($theme?footer?required-links) %]
             <nav class="usa-footer__required-links" aria-label="Important links">
                 <ul class="usa-list usa-list--unstyled grid-row grid-gap-2">
                     [% for $link in $theme?footer?required-links?* %]
                     <li class="grid-col-auto usa-footer__secondary-link">
                         <a
-                            href="[[ if (starts-with($link?url, 'http')) then $link?url else head(($context?defaults?site-root, $context-path)) || '/' || $link?url ]]"
+                            href="[[ if (starts-with($link?url, 'http')) then $link?url else $root || '/' || $link?url ]]"
                             >[[ $link?label ]]</a
                         >
                     </li>
@@ -173,4 +281,6 @@
             [% endif %]
         </div>
     </div>
+    [% endlet %]
+    [% endlet %]
 </footer>

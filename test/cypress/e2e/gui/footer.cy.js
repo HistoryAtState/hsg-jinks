@@ -19,29 +19,44 @@ const VOLUME = "historicaldocuments/frus1981-88v05";
     });
 });
 
-// The footer carries real content in the navy design (#1086): link columns
-// in the nav, then the USWDS big footer's secondary section with the
-// wordmark and agency on the left, social accounts and contact on the right. Nothing of the USWDS example survives -- no
+// The footer carries real content in the navy design (#1086), in the theme's
+// "side-by-side" layout of the USWDS big footer: wordmark and agency left of
+// the nav, whose collapsible columns end in Contact (Contact Us, mail, the
+// office's own social accounts); the secondary section keeps the policy row. Nothing of the USWDS example survives -- no
 // placeholder text, no dead javascript:void(0) links, no sign-up form.
 describe("footer content", () => {
     beforeEach(() => cy.visit(`${VOLUME}/ch1`));
 
-    it("has the two link columns of the design", () => {
+    it("has the three collapsible columns of the design", () => {
         cy.get("footer.usa-footer .usa-footer__primary-link").then(($h) =>
             expect([...$h].map((el) => el.textContent.trim())).to.deep.equal([
                 "Learn more",
                 "Topics",
+                "Contact",
             ])
         );
+        cy.get(
+            "footer.usa-footer .usa-footer__nav .usa-footer__contact.usa-footer__primary-content--collapsible"
+        ).should("exist");
     });
 
-    it("keeps contact in the secondary section, as the USWDS big footer does", () => {
-        cy.get("footer.usa-footer .usa-footer__nav .usa-footer__contact-links").should(
+    it("puts the wordmark and agency beside the nav", () => {
+        cy.get("footer.usa-footer .usa-footer__primary-section .usa-footer__brand").within(() => {
+            cy.get(".usa-footer__logo-img").should("exist");
+            cy.get(".usa-footer__logo-heading").should("contain.text", "Office of the Historian");
+        });
+        cy.get("footer.usa-footer .usa-footer__brand")
+            .then(($b) => $b[0].getBoundingClientRect())
+            .then((brand) => {
+                cy.get("footer.usa-footer .usa-footer__nav").then(($n) => {
+                    const nav = $n[0].getBoundingClientRect();
+                    expect(brand.right).to.be.at.most(nav.left);
+                    expect(Math.abs(brand.top - nav.top)).to.be.below(40);
+                });
+            });
+        cy.get("footer.usa-footer .usa-footer__secondary-section .usa-footer__logo").should(
             "not.exist"
         );
-        cy.get(
-            "footer.usa-footer .usa-footer__secondary-section .usa-footer__contact-heading"
-        ).should("have.text", "Contact");
     });
 
     it("carries the policy links in the bottom required-links row", () => {
@@ -56,7 +71,7 @@ describe("footer content", () => {
         );
     });
 
-    it("carries the hsg-shell 'Learn more' links, including Contact Us", () => {
+    it("carries the hsg-shell 'Learn more' links", () => {
         cy.get("footer.usa-footer .usa-footer__primary-content")
             .first()
             .find("a")
@@ -67,7 +82,6 @@ describe("footer content", () => {
                     ["Home", "/exist/apps/hsg-jinks/"],
                     ["Search", "/exist/apps/hsg-jinks/search"],
                     ["About Us", "/exist/apps/hsg-jinks/about"],
-                    ["Contact Us", "/exist/apps/hsg-jinks/about/contact-us"],
                     ["FAQ", "/exist/apps/hsg-jinks/about/faq"],
                 ])
             );
@@ -109,13 +123,15 @@ describe("footer content", () => {
             .should("have.attr", "href", "https://www.state.gov/privacy-policy/");
     });
 
-    it("reaches the office by phone and mail", () => {
-        cy.get("footer.usa-footer .usa-footer__address a").then(($a) =>
-            expect([...$a].map((el) => el.getAttribute("href"))).to.deep.equal([
-                "tel:2029550200",
-                "mailto:history@state.gov",
-            ])
+    it("reaches the office through Contact Us and mail, not by phone (OP#1459)", () => {
+        cy.get("footer.usa-footer .usa-footer__contact .usa-footer__secondary-link > a").then(
+            ($a) =>
+                expect([...$a].map((el) => el.getAttribute("href"))).to.deep.equal([
+                    "/exist/apps/hsg-jinks/about/contact-us",
+                    "mailto:history@state.gov",
+                ])
         );
+        cy.get('footer.usa-footer a[href^="tel:"]').should("not.exist");
     });
 
     it("links the office's own social accounts", () => {

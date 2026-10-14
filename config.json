@@ -25,10 +25,12 @@
     "footer" : {
       "$replace" : [
         "columns",
+        "contact",
         "social",
         "required-links"
       ],
       "class" : "hsg-footer",
+      "layout" : "side-by-side",
       "return-to-top" : true,
       "columns" : [
         {
@@ -45,10 +47,6 @@
             {
               "label" : "About Us",
               "url" : "about"
-            },
-            {
-              "label" : "Contact Us",
-              "url" : "about/contact-us"
             },
             {
               "label" : "FAQ",
@@ -76,8 +74,13 @@
       ],
       "contact" : {
         "heading" : "Contact",
-        "phone" : "202-955-0200",
-        "email" : "history@state.gov"
+        "email" : "history@state.gov",
+        "links" : [
+          {
+            "label" : "Contact Us",
+            "url" : "about/contact-us"
+          }
+        ]
       },
       "social" : [
         {
