@@ -33,7 +33,7 @@
   "styles" : [ "https://cdn.jsdelivr.net/npm/theme-toggles@4.10.1/css/classic.min.css", "resources/css/layout.css", "resources/css/jinks-variables.css", "resources/css/components.css", "resources/css/hsg-theme.css", "resources/css/frus-renditions.css" ],
   "_noDeploy" : false,
   "profile-versions" : {
-    "profile-theme-uswds" : "1.4.0",
+    "profile-theme-uswds" : "1.9.1",
     "docker" : "1.0.0",
     "base10" : "1.0.0",
     "landing-page" : "1.0.0"
