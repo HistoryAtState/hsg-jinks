@@ -8,8 +8,6 @@
 # a newer v2.
 FROM joewiz/hsg-project:v2
 
-ARG EDITOR_VERSION=1.1.0
-
 ARG HTTP_PORT=8080
 ARG HTTPS_PORT=8443
 
@@ -66,8 +64,7 @@ RUN ln -s /exist /usr/local/exist
 # Development additions the go-live image does not carry. eXist autodeploys
 # whatever in autodeploy/ is not installed yet, in alphabetical order, so these
 # install on first boot, after the image's own packages.
-RUN curl -fL -o /usr/local/exist/autodeploy/atom-editor-${EDITOR_VERSION}.xar https://github.com/wolfgangmm/existdb-langserver/raw/master/resources/atom-editor-${EDITOR_VERSION}.xar
-
+#
 # The jinks generator is built from main: we track jinks main. The zz- prefix
 # installs it after its dependencies (jinks-templates, tei-publisher-lib,
 # roaster, jwt).

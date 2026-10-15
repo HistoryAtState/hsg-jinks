@@ -88,8 +88,7 @@ live with. It is a vector-capable eXist 7 (`all-MiniLM-L6-v2` under
 So worktrees test new versions of hsg-jinks against the go-live baseline
 rather than against a set of versions pinned here. `Dockerfile.dev` only
 adds what development needs on top: ant, git and node for building, the
-jinks generator (built from `main`), the USWDS theme baseline xar and the
-atom-editor package.
+jinks generator (built from `main`) and the USWDS theme baseline xar.
 
 The tag is tracked, not pinned. Docker's cache keeps using the image it
 already pulled; to pick up a newer `v2`, rebuild with
