@@ -99,8 +99,8 @@ describe("document page shows all relevant data", () => {
         cy.get("main .footnote-backlink").should("have.length", 2);
     });
 
-    it("mounts the register panels and the volume TOC beside the text", () => {
-        cy.get("aside .hsg-frus__register", { timeout: 15000 }).should("have.length", 2);
+    it("mounts the register lists and the volume TOC beside the text", () => {
+        cy.get("aside .hsg-frus__register-list", { timeout: 15000 }).should("have.length", 2);
         cy.get("aside ul.usa-sidenav").should("exist");
     });
 

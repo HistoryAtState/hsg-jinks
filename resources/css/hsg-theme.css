@@ -846,12 +846,9 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-top: 0;
 }
 
-/* Interior-page right sidebar: the Persons and Abbreviations and Terms
-   register panels (hsg:division-asides) plus the shared section-navigation
-   partial (historicaldocuments/sidebar.html) in a panel wrapper. Same quiet
-   chrome as the landing sidebar's ways-to-explore panel; consecutive panels
-   get breathing room. The partial brings its own usa-sidenav markup, so the
-   panel only needs to align its plain h2 with the register titles. */
+/* Sidebar panels (FRUS History downloads and resources, ways to explore,
+   documents on this page): same quiet chrome as the landing sidebar's
+   ways-to-explore panel; consecutive panels get breathing room. */
 .hsg-frus__register .hsg-sidebar-title,
 .hsg-frus__section-nav h2 {
     margin-top: 0;
@@ -869,6 +866,13 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 .hsg-frus__register .hsg-list-group li {
     margin-bottom: var(--uswds-space-1);
+}
+
+/* Interior-page right sidebar: the Persons and Abbreviations and Terms
+   lists (hsg:division-asides) in one USWDS in-page navigation, each list
+   with its own left rule and a gap before the next. */
+.hsg-frus__register-list + .hsg-frus__register-list {
+    margin-top: var(--uswds-space-105);
 }
 
 .hsg-frus__ways-to-explore .usa-search {
