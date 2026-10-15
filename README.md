@@ -216,14 +216,21 @@ docker compose -f .devcontainer/docker-compose.yml exec existdb sh .devcontainer
 
 ## USWDS profile baseline
 
-`profile-theme-uswds` is **private and unreleased**, so `docker.externalXar`
-can't reach it. The container build COPYs whatever xar sits in
-`.devcontainer/` (gitignored). To keep parallel worktrees comparable they all
-use the same **frozen baseline**:
+`profile-theme-uswds` is **private**, so neither `docker.externalXar` nor an
+anonymous download in `Dockerfile.dev` can reach its releases, and the base
+image doesn't carry it yet (HistoryAtState/hsg-project#64). The container
+build COPYs whatever xar sits in `.devcontainer/` (gitignored). To keep
+parallel worktrees comparable they all use the same **baseline**: the
+theme's **latest release** (v1.9.1 at the time of writing).
 
-- The baseline is the `hsg-baseline` tag in the profile checkout, built once
-  and stored as `~/.config/hsg/xars/profile-theme-uswds-baseline.xar`
-  (`profile-theme-uswds-BASELINE.txt` beside it records commit + date).
+- The baseline is stored as `~/.config/hsg/xars/profile-theme-uswds-baseline.xar`
+  (`profile-theme-uswds-BASELINE.txt` beside it records release, commit and
+  sha256). Fetch it with an authenticated `gh`:
+
+  ```sh
+  gh release download v<version> -R eeditiones/profile-theme-uswds \
+      -p profile-theme-uswds.xar -O ~/.config/hsg/xars/profile-theme-uswds-baseline.xar
+  ```
 - `tools/new-worktree.sh` copies it into every new worktree — identical theme
   everywhere.
 - **Worktrees whose WP fixes the profile itself** are the exception: create a
@@ -239,12 +246,13 @@ use the same **frozen baseline**:
 
   (Pipe `n`: `jinks update` prompts on conflicts and dies without a TTY. The
   `build.xml` / `expath-pkg.xml` conflicts are app-specific — keep ours.)
-- **When a profile fix merges to its `main`**: move the `hsg-baseline` tag,
-  rebuild, replace the shared xar and update `profile-theme-uswds-BASELINE.txt`.
+- **When the profile publishes a new release**: download it as above
+  (overwriting the old xar) and update `profile-theme-uswds-BASELINE.txt`.
   Other worktrees pick the new baseline up on their next container rebuild —
-  nobody is forced to absorb it mid-work. Don't chase `context.json`'s
-  `profile-versions`; it is sticky by design and only `-r` (never use it)
-  recomputes it.
+  nobody is forced to absorb it mid-work. `context.json`'s
+  `profile-versions` is sticky (only `-r`, which must never be used,
+  recomputes it), so when the app picks up a release, edit the theme's entry
+  there by hand along with the copied CSS.
 
 ## Data
 
