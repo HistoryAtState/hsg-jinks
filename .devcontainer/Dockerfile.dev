@@ -87,14 +87,18 @@ WORKDIR /usr/local/exist
 
 EXPOSE ${HTTP_PORT} ${HTTPS_PORT} 8001 5005
 
-# The image's own JAVA_TOOL_OPTIONS plus -Xss16m. JAVA_TOOL_OPTIONS applies to
-# every java process in the container, so keep it free of a JDWP agent: once
-# eXist holds the debug port, any other java process (ant in init.sh) fails to
-# start.
+# The image's own JAVA_TOOL_OPTIONS, with G1 instead of its ZGC, plus -Xss16m.
+# JAVA_TOOL_OPTIONS applies to every java process in the container, so keep it
+# free of a JDWP agent: once eXist holds the debug port, any other java process
+# (ant in init.sh) fails to start.
+#
+# G1: ZGC let the container sit at ~3.4 of its 4 GB right after startup and
+# got it OOM-killed during an app install; G1 keeps the footprint well below
+# the limit (docker-compose.yml mem_limit, heap 75% of it).
 #
 # -Xss16m: jinks' generator:filter-conflicts (modules/generator.xql:133) is
 # non-tail-recursive with one frame per file written. profile-theme-uswds copies
 # ~2600 resource files, which overflows the default JVM thread stack and makes
 # POST /api/generator fail with java.lang.StackOverflowError. Remove once jinks
 # makes that function iterative.
-ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8 -Dsun.jnu.encoding=UTF-8 -Djava.awt.headless=true -Dorg.exist.db-connection.cacheSize=256M -Dorg.exist.db-connection.pool.max=20 -Dlog4j.configurationFile=/exist/etc/log4j2.xml -Dexist.home=/exist -Dexist.configurationFile=/exist/etc/conf.xml -Djetty.home=/exist -Dexist.jetty.config=/exist/etc/jetty/standard.enabled-jetty-configs -XX:+UseNUMA -XX:+UseZGC -XX:+UseStringDeduplication -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError -Xss16m"
+ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8 -Dsun.jnu.encoding=UTF-8 -Djava.awt.headless=true -Dorg.exist.db-connection.cacheSize=256M -Dorg.exist.db-connection.pool.max=20 -Dlog4j.configurationFile=/exist/etc/log4j2.xml -Dexist.home=/exist -Dexist.configurationFile=/exist/etc/conf.xml -Djetty.home=/exist -Dexist.jetty.config=/exist/etc/jetty/standard.enabled-jetty-configs -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError -Xss16m"
