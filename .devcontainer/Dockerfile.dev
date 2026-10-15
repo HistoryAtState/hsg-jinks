@@ -25,6 +25,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
     && node -v && npm -v
 
+# xst: init.sh queries eXist and installs the app with it.
+RUN npm install -g @existdb/xst@4.1.0 && xst --version
+
 # Install python pip and upgrade it to latest version
 RUN if [ "${INSTALL_NER}" = "true" ]; then \
     apt-get -y install --no-install-recommends python3-pip \

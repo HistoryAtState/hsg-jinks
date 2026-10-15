@@ -175,20 +175,25 @@ worktree, or the Docker image build stays a one-time step in
 `new-worktree.sh`, because it lives in git, in `~/.config/hsg/`, or gets
 baked into the image before `init.sh` ever runs.
 
-`init.sh` currently:
+`init.sh` currently, using [`xst`](https://www.npmjs.com/package/@existdb/xst)
+(pinned to 4.1.0 in `Dockerfile.dev` and the CI workflow) against the eXist
+on port 8080:
 
 - adds `admin` to the `tei` group (security-manager state; without it a
   later `jinks sync` writes auth errors as file content instead of failing
   loudly)
-- builds and installs the full app xar (`ant` + `repo:install-and-deploy-from-db`),
-  first `repo:undeploy`/`repo:remove`-ing any existing registration of the
-  same package. `repo:install-and-deploy-from-db` silently drops some files
-  instead of overwriting them when run against an already-registered
-  package (observed: the roaster API-spec modules vanish, breaking the
-  router). Harmless the first time (nothing's registered yet), but this
-  script is also meant to be re-run by hand to redeploy edited code without
-  recreating the container — `xst package install` avoids the same trap by
-  always clearing the old registration first, so `init.sh` does the same.
+- builds the app xar with `ant` and installs it with
+  `xst package install --force`, which replaces any installed hsg-jinks,
+  including the one the base image ships. `xst` undeploys and removes the
+  old registration first; `repo:install-and-deploy-from-db` on top of a
+  registered package silently drops files (observed: the roaster API-spec
+  modules vanish, breaking the router). `--force` because the version
+  number stays 1.0.0 between builds.
+
+It exports `EXISTDB_SERVER`/`EXISTDB_USER`/`EXISTDB_PASS` itself: exported
+values win over the worktree's `.env`, which holds the host port. CI runs
+the same script on the runner, where 8080 is the published container port.
+Never run it on the host here: host port 8080 is the read-only mirror.
 
 It does *not* install `frus-data-jinks` or the USWDS theme: the data is part
 of the base image's database and the theme autodeploys from the baseline xar

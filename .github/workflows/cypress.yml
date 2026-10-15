@@ -34,14 +34,6 @@ jobs:
           docker logs exist | tail -100
           exit 1
 
-      # Same seed path as the devcontainer: build the app xar with ant and
-      # install it over the image's own hsg-jinks.
-      - name: Install this build of the app
-        run: sh .devcontainer/init.sh
-
-      - name: Check the app answers
-        run: curl -sf -o /dev/null http://localhost:8080/exist/apps/hsg-jinks/index.html
-
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -49,7 +41,17 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          npm install -g @existdb/xst@4.1.0
+
+      # Same seed path as the devcontainer: build the app xar with ant and
+      # install it over the image's own hsg-jinks.
+      - name: Install this build of the app
+        run: sh .devcontainer/init.sh
+
+      - name: Check the app answers
+        run: curl -sf -o /dev/null http://localhost:8080/exist/apps/hsg-jinks/index.html
 
       - name: Run Cypress
         run: npx cypress run --config video=false
