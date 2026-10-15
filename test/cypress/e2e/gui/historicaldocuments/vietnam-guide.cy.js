@@ -30,9 +30,11 @@ describe("the vietnam-guide page", () => {
         cy.get("main a[href='https://history.state.gov']", { timeout: 15000 }).should("exist");
     });
 
-    it("has the section navigation in the left sidebar, linking here", () => {
-        cy.get("aside.before ul.usa-sidenav", { timeout: 15000 }).should("exist");
-        cy.get("aside.before ul.usa-sidenav a[href$='guide-to-sources-on-vietnam-1969-1975']")
-            .should("exist");
+    it("has the Historical Documents nav card band, linking here", () => {
+        // The section navigation is a card band below the content since
+        // OP#1400, not a left sidebar.
+        cy.get(".hsg-historicaldocuments-nav", { timeout: 15000 })
+            .find(".hsg-historicaldocuments-nav-card").should("have.length", 8);
+        cy.get(".hsg-historicaldocuments-nav-card a[href$='guide-to-sources-on-vietnam-1969-1975']").should("exist");
     });
 });

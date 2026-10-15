@@ -15,8 +15,10 @@ describe("the administrations grid", () => {
     it("shows one card per presidency with portrait and coverage dates", () => {
         cy.get("main .hsg-admin-cards > li.usa-card").should("have.length.at.least", 25);
         cy.get("main .hsg-admin-cards .usa-card__media img").should("have.length.at.least", 25);
-        cy.contains("main .usa-card", "Abraham Lincoln Administration")
-            .should("contain.text", "1861–1865")
+        // Name as the card heading, "Administration" on its own line.
+        cy.contains("main .usa-card", "Abraham Lincoln")
+            .should("contain.text", "Administration")
+            .and("contain.text", "1861–1865")
             .find("a")
             .should("have.attr", "href")
             .and("match", /historicaldocuments\/lincoln$/);
@@ -33,8 +35,8 @@ describe("the administrations grid", () => {
     });
 
     it("has the section navigation in the left sidebar", () => {
-        cy.get("aside.before ul.usa-sidenav > li").should("have.length", 8);
-        cy.get("aside.before ul.usa-sidenav a[href$='historicaldocuments/about-frus']").should("exist");
+        cy.get("aside.before ul.usa-in-page-nav__list > li").should("have.length", 8);
+        cy.get("aside.before .usa-in-page-nav__list a[href$='historicaldocuments/about-frus']").should("exist");
     });
 });
 
