@@ -102,12 +102,16 @@ describe("page-width alignment", () => {
                         .then(($el) => $el[0].getBoundingClientRect().left)
                         .should("be.closeTo", pageLeft, 2);
                     // ... and the band ends where the header's content ends.
-                    // Interior pages carry a populated right sidebar (the
-                    // division asides, PR #32 review), so the band's right
-                    // edge is .after's; main itself stops at the sidebar.
-                    cy.get(".after")
-                        .then(($el) => $el[0].getBoundingClientRect().right)
-                        .should("be.closeTo", pageRight, 2);
+                    // Document pages carry a populated right sidebar (the
+                    // Persons and Terms lists), so their band ends with
+                    // .after. Compilation and chapter pages have none (the
+                    // lists are hidden on listings), .after is not rendered
+                    // and main spans its column, so their band ends with
+                    // main.
+                    cy.get("main, .after").should(($els) => {
+                        const right = Math.max(...[...$els].map((el) => el.getBoundingClientRect().right));
+                        expect(right).to.be.closeTo(pageRight, 2);
+                    });
                 });
             });
         });
