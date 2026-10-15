@@ -1,14 +1,11 @@
-// Interior division page chrome and sidebar (PR #32 review comment):
-// the volume-title h2 above the content, prev/next on section pages, the
-// "Page N" page-break markers, and the right-hand sidebar (Persons,
-// Abbreviations & Terms, Historical Documents). Reference parity with
-// hsg-shell's volume-interior template (navigation title, fh:facets,
-// site.xml "sections" aside).
+// Interior division page chrome and sidebar: the volume-title h2 above the
+// content, prev/next on section pages, the "Page N" page-break markers, and
+// the right-hand sidebar (Persons, Abbreviations & Terms as one USWDS in-page
+// navigation). Reference parity with hsg-shell's volume-interior template
+// (navigation title, fh:facets).
 //
 // frus1958-60v05mSupp is a frozen microfiche supplement (published 2020,
-// content stable), so exact assertions against its data are safe; the
-// Historical Documents panel is fixed UI chrome, so its 7-link count is
-// asserted exactly.
+// content stable), so exact assertions against its data are safe.
 
 const VOLUME_TITLE =
     "Foreign Relations of the United States, 1958–1960, Volume V, Microfiche Supplement, American Republics";
@@ -32,40 +29,56 @@ describe("section page (sec6)", () => {
             .and("have.attr", "href", "pg_66");
     });
 
-    it("shows the Persons panel with described entries", () => {
-        cy.get(".hsg-frus__register").eq(0).within(() => {
-            cy.get(".hsg-sidebar-title").should("contain.text", "Persons");
-            // 8 persName refs in sec6; the supplement is frozen.
-            cy.get("li a").should("have.length", 8);
-            cy.get("li a").first()
+    it("lists the registers in one in-page navigation", () => {
+        cy.get("aside nav.usa-in-page-nav__nav").within(() => {
+            cy.get(".usa-in-page-nav__heading").should("contain.text", "On this page");
+            cy.get("ul.usa-in-page-nav__list").should("have.length", 2);
+        });
+    });
+
+    it("leads the Persons list with a link to the register", () => {
+        cy.get(".hsg-frus__register-list").eq(0).within(() => {
+            cy.get(".usa-in-page-nav__item--primary").should("have.length", 1)
+                .and("contain.text", "Persons")
+                .find("a").should("have.attr", "href")
+                .and("match", /\/frus1958-60v05mSupp\/persons$/);
+            // 8 persName refs in sec6, plus the primary item; the supplement
+            // is frozen.
+            cy.get("li").should("have.length", 9);
+            cy.get("li").eq(1).find("a")
                 .should("contain.text", "Betancourt, Romulo")
-                .and("have.attr", "title")
-                .and("contain", "President of Venezuela");
+                .and("have.attr", "href").and("match", /\/persons#p_/);
         });
     });
 
-    it("shows the Abbreviations & Terms panel", () => {
-        cy.get(".hsg-frus__register").eq(1).within(() => {
-            cy.get(".hsg-sidebar-title").should("contain.text", "Abbreviations & Terms");
-            cy.get("li a").should("have.length", 1)
-                .first().should("contain.text", "OAS")
-                .and("have.attr", "title")
-                .and("contain", "Organization of American States");
+    it("leads the Abbreviations & Terms list with a link to the register", () => {
+        cy.get(".hsg-frus__register-list").eq(1).within(() => {
+            cy.get(".usa-in-page-nav__item--primary").should("contain.text", "Abbreviations & Terms")
+                .find("a").should("have.attr", "href").and("match", /\/terms$/);
+            cy.get("li").should("have.length", 2);
+            cy.get("li").eq(1).should("contain.text", "OAS");
         });
     });
 
-    it("shows the Historical Documents section navigation", () => {
-        // The shared sidebar partial in a panel wrapper: plain h2 heading and
-        // usa-sidenav markup, not the register panels' hsg-sidebar-title.
-        cy.get(".hsg-frus__section-nav").within(() => {
-            cy.get("h2").should("contain.text", "Historical Documents");
-            // 7 reference-parity links plus the section landing (OP#1214),
-            // all context-path-relative now.
-            cy.get("ul.usa-sidenav li a").should("have.length", 8);
-            cy.get("li a").first().should("have.attr", "href")
-                .and("match", /\/historicaldocuments$/);
-            cy.get("li a").eq(1).should("have.attr", "href").and("contain", "about-frus");
-        });
+    it("shows a register entry's description as a USWDS tooltip", () => {
+        // The USWDS script moves the title into the tooltip body and wraps
+        // the link; the body shows on hover.
+        cy.contains(".hsg-frus__register-list a", "Betancourt, Romulo")
+            .should("have.class", "usa-tooltip__trigger")
+            .and("not.have.attr", "title");
+        cy.contains(".hsg-frus__register-list a", "Betancourt, Romulo").trigger("mouseover");
+        cy.contains(".usa-tooltip__body", "President of Venezuela").should("be.visible");
+        cy.contains(".hsg-frus__register-list a", "OAS").trigger("mouseover");
+        cy.contains(".usa-tooltip__body", "Organization of American States").should("be.visible");
+    });
+
+    it("keeps register links working", () => {
+        // USWDS cancels clicks on usa-in-page-nav__link; register links must
+        // not carry it.
+        cy.get(".hsg-frus__register-list a.usa-in-page-nav__link").should("not.exist");
+        cy.contains(".hsg-frus__register-list a", "Betancourt, Romulo").click();
+        cy.location("pathname").should("match", /\/frus1958-60v05mSupp\/persons$/);
+        cy.location("hash").should("match", /^#p_/);
     });
 });
 
@@ -89,24 +102,21 @@ describe("document page (eta_d1) chrome", () => {
         });
     });
 
-    it("shows the register panels in the sidebar", () => {
-        cy.get(".hsg-frus__register").should("have.length.at.least", 1);
-        cy.get(".hsg-frus__section-nav").should("exist");
+    it("shows the register lists in the sidebar", () => {
+        cy.get(".hsg-frus__register-list").should("have.length.at.least", 1);
     });
 });
 
 describe("container pages keep the sidebar minimal", () => {
-    it("chapter page has the section nav but no register panels", () => {
+    it("chapter page has no register lists", () => {
         cy.visit("historicaldocuments/frus1958-60v05mSupp/ch1");
-        cy.get(".hsg-frus__section-nav").should("exist");
-        cy.get(".hsg-frus__register").should("not.exist");
+        cy.get(".hsg-frus__registers").should("not.exist");
         cy.get("main h2.hsg-navigation-title").should("have.text", VOLUME_TITLE);
     });
 
-    it("compilation page has the section nav but no register panels", () => {
+    it("compilation page has no register lists", () => {
         cy.visit("historicaldocuments/frus1958-60v05mSupp/comp1");
-        cy.get(".hsg-frus__section-nav").should("exist");
-        cy.get(".hsg-frus__register").should("not.exist");
+        cy.get(".hsg-frus__registers").should("not.exist");
     });
 });
 

@@ -1151,22 +1151,24 @@ declare %private function hsg:bytes-to-readable($bytes as xs:integer?) as xs:str
 };
 
 (:~
- : Right-hand sidebar panels for interior division pages (PR #32 review):
- : Persons and Abbreviations &amp; Terms panels listing the registered
- : entities the current division references. Data-driven panels only; the
- : static Historical Documents section navigation is not built here but
- : included as a template partial by templates/pages/volume/interior.html's
- : `after` block, the same sidebar.html every other page in the section
- : mounts. Rendered into the layout's `after` block by that template,
- : mirroring how the volume landing mounts hsg:volume-ways-to-explore.
+ : Right-hand sidebar of interior division pages: the Persons and
+ : Abbreviations &amp; Terms the division references, as one USWDS in-page
+ : navigation ("On this page"). Each register is a list of its own, led by a
+ : primary item linking to the register page.
  :
- : Reference parity with hsg-shell's fh:facets/fh:view-persons/fh:view-gloss
- : plus the site.xml "sections" aside, with one structural difference: shell
- : resolved #p_X / #t_X ids with id() inside the same monolithic volume
- : document, while frus-v2-data keeps the registers in separate front-matter
- : files (front/persons.xml, front/terms.xml) where the entries are marked
- : persName/term @sameAs="#p_X" rather than @xml:id -- so the lookup is a
- : cross-file @sameAs match.
+ : The markup is what the USWDS script generates, written out server-side
+ : and without the parts that tie it to the script: no "usa-in-page-nav"
+ : root (the script would append a list built from the page's headings) and
+ : no link class (the script cancels clicks on those links and scrolls to
+ : their fragment instead). The component styles still apply.
+ :
+ : Reference parity with hsg-shell's fh:facets/fh:view-persons/fh:view-gloss,
+ : with one structural difference: shell resolved #p_X / #t_X ids with id()
+ : inside the same monolithic volume document, while frus-v2-data keeps the
+ : registers in separate front-matter files (front/persons.xml,
+ : front/terms.xml) where the entries are marked persName/term
+ : @sameAs="#p_X" rather than @xml:id -- so the lookup is a cross-file
+ : @sameAs match.
  :)
 declare function hsg:division-asides($context as map(*)) {
     let $doc := $context?doc?content
@@ -1182,36 +1184,42 @@ declare function hsg:division-asides($context as map(*)) {
            nothing. :)
         let $show-registers := not($type = 'compilation' or starts-with($type, 'chapter') or $subtype = 'index')
         let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
-        return (
+        let $registers :=
             if ($show-registers) then (
-                hsg:register-panel($context, $publication,
+                hsg:register-list($context, $publication,
                     'historicaldocuments.persons', 'Persons', 'persons',
                     $doc//tei:persName/@corresp,
                     doc($config:data-default || "/" || $publication || "/front/persons.xml")//tei:persName[@sameAs]),
-                hsg:register-panel($context, $publication,
+                hsg:register-list($context, $publication,
                     'historicaldocuments.terms', 'Abbreviations &amp; Terms', 'terms',
                     $doc//tei:gloss/@target,
                     doc($config:data-default || "/" || $publication || "/front/terms.xml")//tei:term[@sameAs])
             ) else ()
-        )
+        return
+            if (empty($registers)) then ()
+            else
+                <nav class="usa-in-page-nav__nav hsg-frus__registers" aria-labelledby="hsg-registers-heading">
+                    <h2 class="usa-in-page-nav__heading" id="hsg-registers-heading">
+                        <pb-i18n key="historicaldocuments.onThisPage">On this page</pb-i18n>
+                    </h2>
+                    {$registers}
+                </nav>
 };
 
 (:~
- : One register panel (Persons or Abbreviations &amp; Terms): every distinct
- : reference the division makes, resolved against the volume's register list
- : and rendered as a link to the register page with the entry's description
- : as its tooltip -- fh:get-persons/fh:get-gloss parity, including the
+ : One register list (Persons or Abbreviations &amp; Terms): every distinct
+ : reference the division makes, resolved against the volume's register and
+ : rendered as a link to the register page, with the entry's description as
+ : a USWDS tooltip -- fh:get-persons/fh:get-gloss parity, including the
  : name-sorted order and the hide-if-empty behaviour (a division with no
- : references gets no panel).
+ : references gets no list).
  :
- : Both sides are grouped rather than scanned (PR #32 review): $idrefs arrives
- : with duplicates (a division names the same person up to 249 times) and the
- : register runs to 441 entries, so pairing them with a predicate lookup per
- : reference walked the register once per distinct id. One group-by pass over
- : each side turns that into a map lookup, and drops the caller's own
- : distinct-values with it -- grouping the references dedupes them anyway.
+ : Both sides are grouped rather than scanned: $idrefs arrives with
+ : duplicates (a division names the same person up to 249 times) and the
+ : register runs to 441 entries, so one group-by pass over each side turns
+ : the pairing into a map lookup.
  :)
-declare %private function hsg:register-panel($context as map(*), $publication as xs:string,
+declare %private function hsg:register-list($context as map(*), $publication as xs:string,
         $key as xs:string, $label as xs:string, $page as xs:string,
         $idrefs as node()*, $register as element()*) {
     let $byId := map:merge(
@@ -1219,27 +1227,32 @@ declare %private function hsg:register-panel($context as map(*), $publication as
         group by $id := string($entry/@sameAs)
         return map:entry($id, head($entry))
     )
+    let $href := $context?context-path || "/historicaldocuments/" || $publication || "/" || $page
     let $entries :=
         for $ref in $idrefs
         group by $idref := string($ref)
         let $name := $byId($idref)
         where exists($name)
         let $display := normalize-space($name)
+        let $description := hsg:register-description($name)
         order by $display
         return
-            <li>
-                <a href="{$context?context-path}/historicaldocuments/{$publication}/{$page}{$idref}"
-                    title="{hsg:register-description($name)}">{$display}</a>
-            </li>
+            <li class="usa-in-page-nav__item">{
+                if ($description) then
+                    <a href="{$href}{$idref}" class="usa-tooltip" data-position="top"
+                        title="{$description}">{$display}</a>
+                else
+                    <a href="{$href}{$idref}">{$display}</a>
+            }</li>
     return
         if (empty($entries)) then ()
         else
-            <div class="hsg-panel hsg-frus__register">
-                <h2 class="hsg-sidebar-title">
-                    <pb-i18n key="{$key}">{$label}</pb-i18n>
-                </h2>
-                <ul class="hsg-list-group">{$entries}</ul>
-            </div>
+            <ul class="usa-in-page-nav__list hsg-frus__register-list">
+                <li class="usa-in-page-nav__item usa-in-page-nav__item--primary">
+                    <a href="{$href}"><pb-i18n key="{$key}">{$label}</pb-i18n></a>
+                </li>
+                {$entries}
+            </ul>
 };
 
 (:~
