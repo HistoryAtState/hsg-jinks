@@ -1,15 +1,12 @@
-# Vector-capable eXist 7 image for semantic search MVP (worktree-only; do not
-# merge to main until the feature is ready to land — see .cursor/plans).
-FROM duncdrum/existdb:experimental
-
-ARG PUBLISHER_LIB_VERSION=6.1.0
-ARG JINKS_TEMPLATES_VERSION=1.4.2
-ARG ROUTER_VERSION=1.12.2
-ARG EDITOR_VERSION=1.0.1
-ARG CRYPTO_VERSION=6.0.1
-ARG JWT_VERSION=2.0.1
-ARG CAROUSEL_VERSION=0.11.10
-
+# Baseline: joewiz/hsg-project:v2, the go-live image of this app. It is a
+# vector-capable eXist 7 with the whole database baked in (/exist/data):
+# hsg-jinks, frus-data-jinks with its vector index, the HistoryAtState data
+# packages and the runtime libraries (tei-publisher-lib, jinks-templates,
+# roaster, jwt, crypto, carousel). Worktree containers test new versions of
+# hsg-jinks against it: init.sh replaces the baked-in app with the worktree's
+# build. The tag is tracked, not pinned: `docker compose build --pull` picks up
+# a newer v2.
+FROM joewiz/hsg-project:v2
 
 ARG HTTP_PORT=8080
 ARG HTTPS_PORT=8443
@@ -19,16 +16,17 @@ ARG INSTALL_TEXLIVE="false"
 
 #custom-----> Start custom code
 
-# existdb/existdb:debug (OP#1288 experiment) ships a full JDK 21 (not just a
-# JRE) at $JAVA_HOME already, and runs as root with no vscode user -- unlike
-# the previous mcr.microsoft.com/devcontainers/java base, ant just needs
-# installing via apt, no sdkman/su-vscode dance.
+# The image carries a JDK but no build tooling; init.sh builds the app with
+# ant inside the container, and the jinks build below needs git.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ant git curl ca-certificates gnupg
 
 RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
     && node -v && npm -v
+
+# xst: init.sh queries eXist and installs the app with it.
+RUN npm install -g @existdb/xst@4.1.0 && xst --version
 
 # Install python pip and upgrade it to latest version
 RUN if [ "${INSTALL_NER}" = "true" ]; then \
@@ -62,121 +60,41 @@ RUN if [ "${INSTALL_NER}" = "true" ]; then \
     && python3 -m spacy download en_core_web_sm; \
     fi
 
-# eXist itself ships baked into this base image at /exist, not /usr/local/exist
-# -- symlink so the rest of this repo's tooling (init.sh, JAVA_OPTS below,
-# every autodeploy path in this Dockerfile) needs no path changes.
+# eXist lives at /exist in this image; the rest of this repo's tooling
+# expects /usr/local/exist.
 RUN ln -s /exist /usr/local/exist
 
-# jinks-templates is pinned to a release rather than built from main: its
-# version number is stamped by semantic-release, so a source build always
-# identifies itself as 1.0.0 -- which is what this container reported while
-# actually carrying whatever main held that day.
-RUN curl -L -o /usr/local/exist/autodeploy/004.xar https://exist-db.org/exist/apps/public-repo/public/jinks-templates-${JINKS_TEMPLATES_VERSION}.xar
-
-# If tei-publisher-lib version is "master", build it. Otherwise download the specified version.
-RUN if [ "${PUBLISHER_LIB_VERSION}" = "master" ]; then \
-        git clone https://github.com/eeditiones/tei-publisher-lib.git \
-        && cd tei-publisher-lib \
-        && ant \
-        && cp build/*.xar /usr/local/exist/autodeploy/005.xar; \
-    else \
-        curl -L -o /usr/local/exist/autodeploy/tei-publisher-lib-${PUBLISHER_LIB_VERSION}.xar https://exist-db.org/exist/apps/public-repo/public/tei-publisher-lib-${PUBLISHER_LIB_VERSION}.xar; \
-    fi
-
-# roaster already ships in this base image's own autodeploy/ set (verified:
-# existdb/existdb:debug bundles roaster-1.12.2.xar, matching ROUTER_VERSION
-# below exactly) -- not re-fetched here to avoid a redundant duplicate install.
-RUN test -f /usr/local/exist/autodeploy/roaster-${ROUTER_VERSION}.xar || \
-    curl -L -o /usr/local/exist/autodeploy/roaster-${ROUTER_VERSION}.xar https://exist-db.org/exist/apps/public-repo/public/roaster-${ROUTER_VERSION}.xar
-RUN curl -L -o /usr/local/exist/autodeploy/atom-editor-${EDITOR_VERSION}.xar https://github.com/wolfgangmm/existdb-langserver/raw/master/resources/atom-editor-${EDITOR_VERSION}.xar
-RUN curl -L -o /usr/local/exist/autodeploy/expath-crypto-module-${CRYPTO_VERSION}.xar https://exist-db.org/exist/apps/public-repo/public/expath-crypto-module-${CRYPTO_VERSION}.xar
-RUN curl -L -o /usr/local/exist/autodeploy/jwt-${JWT_VERSION}.xar https://exist-db.org/exist/apps/public-repo/public/jwt-${JWT_VERSION}.xar
-
-# carousel (modules/templates/hsg-landing.xqm) is a software component
-# released via semantic-release with the xar attached as a GitHub Release
-# asset -- same pinned-fetch pattern as roaster/jwt/crypto above, just a
-# different host.
-RUN curl -fL -o /usr/local/exist/autodeploy/carousel-${CAROUSEL_VERSION}.xar https://github.com/HistoryAtState/carousel/releases/download/v${CAROUSEL_VERSION}/carousel.xar
-
-# All 12 external HistoryAtState data packages -- countries (rdcr, wwdai,
-# OP#1095), departmenthistory (gsh, other-publications, pocom, travels,
-# visits, OP#1096), milestones (OP#1098), about's HAC documents (hac,
-# OP#1097), conferences (OP#1099), tags (OP#1101) and frus-history (the
-# monograph/documents/articles/events behind /historicaldocuments/
-# frus-history, OP#1294) -- always track each repo's LATEST
-# GitHub release (decision 2026-08-07, after the milestones/conferences/
-# education epics merged: no data package stays pinned; the full Cypress
-# suite is expected green against current releases). GitHub's
-# /releases/latest/download/ redirect resolves that without needing a
-# version number or an API call. Docker layer caching means a plain rebuild
-# won't refetch once cached -- use `docker compose build --no-cache` (or
-# bump something above this line) to actually pick up a new release.
-RUN curl -fL -o /usr/local/exist/autodeploy/wwdai.xar https://github.com/HistoryAtState/wwdai/releases/latest/download/wwdai.xar
-RUN curl -fL -o /usr/local/exist/autodeploy/rdcr.xar https://github.com/HistoryAtState/rdcr/releases/latest/download/rdcr.xar
-RUN curl -fL -o /usr/local/exist/autodeploy/conferences.xar https://github.com/HistoryAtState/conferences/releases/latest/download/conferences.xar
-RUN curl -fL -o /usr/local/exist/autodeploy/gsh.xar https://github.com/HistoryAtState/gsh/releases/latest/download/gsh.xar
-RUN curl -fL -o /usr/local/exist/autodeploy/milestones.xar https://github.com/HistoryAtState/milestones/releases/latest/download/milestones.xar
-RUN curl -fL -o /usr/local/exist/autodeploy/other-publications.xar https://github.com/HistoryAtState/other-publications/releases/latest/download/other-publications.xar
-RUN curl -fL -o /usr/local/exist/autodeploy/pocom.xar https://github.com/HistoryAtState/pocom/releases/latest/download/pocom.xar
-RUN curl -fL -o /usr/local/exist/autodeploy/travels.xar https://github.com/HistoryAtState/travels/releases/latest/download/travels.xar
-RUN curl -fL -o /usr/local/exist/autodeploy/visits.xar https://github.com/HistoryAtState/visits/releases/latest/download/visits.xar
-RUN curl -fL -o /usr/local/exist/autodeploy/hac.xar https://github.com/HistoryAtState/hac/releases/latest/download/hac.xar
-RUN curl -fL -o /usr/local/exist/autodeploy/tags.xar https://github.com/HistoryAtState/tags/releases/latest/download/tags.xar
-RUN curl -fL -o /usr/local/exist/autodeploy/frus-history.xar https://github.com/HistoryAtState/frus-history/releases/latest/download/frus-history.xar
-
-# The jinks generator and the USWDS theme profile are both built from main:
-# we track jinks main, and profile-theme-uswds has no release at all.
-# eXist autodeploys alphabetically, so the zz-/zzz- prefixes force these to
-# install last -- after jinks-templates, tei-publisher-lib, roaster and jwt,
-# all of which jinks declares as dependencies.
+# Development additions the go-live image does not carry. eXist autodeploys
+# whatever in autodeploy/ is not installed yet, in alphabetical order, so these
+# install on first boot, after the image's own packages.
+#
+# The jinks generator is built from main: we track jinks main. The zz- prefix
+# installs it after its dependencies (jinks-templates, tei-publisher-lib,
+# roaster, jwt).
 RUN git clone https://github.com/eeditiones/jinks.git \
     && cd jinks \
     && ant \
     && cp build/*.xar /usr/local/exist/autodeploy/zz-jinks.xar
 
-# profile-theme-uswds is a PRIVATE repo, so it cannot be cloned anonymously here
-# (and it publishes no releases, so `docker.externalXar` has no URL to fetch).
-# Instead we copy in a xar built from the local checkout. Refresh it with:
-#   cd ../../profile-theme-uswds && ant       # from a worktree; see README "Workspace layout"
-#   cp build/profile-theme-uswds-*.xar <this repo>/.devcontainer/
-# The xar is gitignored -- it is a build artifact, not source.
+# profile-theme-uswds is a PRIVATE repo, so it cannot be fetched anonymously
+# here. Instead we copy in a xar built from the local checkout; new-worktree.sh
+# copies it from ~/.config/hsg/xars/. The xar is gitignored: it is a build
+# artifact, not source.
 COPY profile-theme-uswds-*.xar /usr/local/exist/autodeploy/zzz-profile-theme-uswds.xar
-
-# frus-data-jinks (hsg-jinks-data) has no GitHub release yet either, so for now
-# it follows the same frozen-baseline pattern as profile-theme-uswds above --
-# baked into autodeploy rather than built or installed per-container, so it
-# survives every container rebuild automatically. Refresh it with:
-#   cd ../../hsg-jinks-data && ant             # from a worktree; see README "Workspace layout"
-#   cp build/frus-data-jinks-*.xar <this repo>/.devcontainer/
-# Once a release exists, switch this to a curl fetch like tei-publisher-lib/
-# roaster/jwt above and drop the manual copy step in new-worktree.sh.
-# The xar is gitignored -- it is a build artifact, not source.
-COPY frus-data-jinks-*.xar /usr/local/exist/autodeploy/zzzz-frus-data-jinks.xar
 
 
 WORKDIR /usr/local/exist
 
 EXPOSE ${HTTP_PORT} ${HTTPS_PORT} 8001 5005
 
-# This base image bakes JAVA_TOOL_OPTIONS with sensible defaults for the
-# eXist server itself (encoding, container-aware heap sizing, ZGC) -- but
-# JAVA_TOOL_OPTIONS is a global env var every java invocation in the
-# container inherits, not just eXist's. Its -DEBUG variant also bakes in a
-# JDWP debug agent bound to port 5005; once eXist is up and holding that
-# port, any OTHER java process launched in the same container (e.g. `ant`,
-# run by init.sh's postCreateCommand to build jinks/tei-publisher-lib) fails
-# outright with "JDWP Transport dt_socket failed to initialize" -- ant's own
-# JVM can't start, so the build silently produces no build/*.xar at all.
-# Reconstruct JAVA_TOOL_OPTIONS to keep the useful defaults and this
-# project's own -Xss16m (see below) but drop the JDWP agent, rather than
-# blindly appending to the inherited value. Re-enable JDWP deliberately
-# (e.g. only in docker-compose's `environment:`) if remote-debugging eXist
-# itself is wanted -- it's a real feature of this base image, just not safe
-# to leave globally on for every java process by default.
+# The image's own JAVA_TOOL_OPTIONS plus -Xss16m. JAVA_TOOL_OPTIONS applies to
+# every java process in the container, so keep it free of a JDWP agent: once
+# eXist holds the debug port, any other java process (ant in init.sh) fails to
+# start.
 #
 # -Xss16m: jinks' generator:filter-conflicts (modules/generator.xql:133) is
 # non-tail-recursive with one frame per file written. profile-theme-uswds copies
 # ~2600 resource files, which overflows the default JVM thread stack and makes
 # POST /api/generator fail with java.lang.StackOverflowError. Remove once jinks
 # makes that function iterative.
-ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8 -Dsun.jnu.encoding=UTF-8 -Djava.awt.headless=true -Dorg.exist.db-connection.cacheSize=256M -Dorg.exist.db-connection.pool.max=20 -Dlog4j.configurationFile=/exist/etc/log4j2.xml -Dexist.home=/exist -Dexist.configurationFile=/exist/etc/conf.xml -Djetty.home=/exist -Dexist.jetty.config=/exist/etc/jetty/standard.enabled-jetty-configs -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError -Xss16m"
+ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8 -Dsun.jnu.encoding=UTF-8 -Djava.awt.headless=true -Dorg.exist.db-connection.cacheSize=256M -Dorg.exist.db-connection.pool.max=20 -Dlog4j.configurationFile=/exist/etc/log4j2.xml -Dexist.home=/exist -Dexist.configurationFile=/exist/etc/conf.xml -Djetty.home=/exist -Dexist.jetty.config=/exist/etc/jetty/standard.enabled-jetty-configs -XX:+UseNUMA -XX:+UseZGC -XX:+UseStringDeduplication -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError -Xss16m"

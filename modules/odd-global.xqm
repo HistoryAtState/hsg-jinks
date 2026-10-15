@@ -123,6 +123,42 @@ declare function config:volume-id($parameters as map(*)?, $node as node()?) as x
 };
 
 (:~
+ : App URL of a FRUS cross-reference (a ref's @target), or the empty sequence
+ : when the ref is not one: outside the FRUS collection, or a target that is
+ : neither "#…" nor "frus…". Reference parity with hsg-shell's pmf:ref. The
+ : volume id is read once per call.
+ :
+ : Target forms in the v2 data:
+ : - "#d5", "#pg747", "#pgVII": a division or page of the same volume
+ : - "frus1977-80v26#d271": a division of another volume
+ : - "frus1958-60v10p2": another volume's landing page
+ : - "frus:frus1906p1/pg_280": a page of another volume
+ :
+ : Page-break ids carry no underscore ("pg747"); the public page URL does
+ : ("pg_747", see hsgapi:view-interior), so page targets are mapped to it.
+ :)
+declare function config:frus-ref-uri($parameters as map(*)?, $node as element()) as xs:string? {
+    let $volume := config:volume-id($parameters, $node)
+    let $target := replace(string($node/@target), "^frus:", "")
+    let $page := function($id as xs:string) {
+        replace($id, "^pg([0-9]+|[IVXLCDMivxlcdm]+)$", "pg_$1")
+    }
+    let $path :=
+        if ($volume = "") then
+            ()
+        else if (starts-with($target, "#")) then
+            $volume || "/" || $page(substring($target, 2))
+        else if (starts-with($target, "frus") and contains($target, "#")) then
+            substring-before($target, "#") || "/" || $page(substring-after($target, "#"))
+        else if (starts-with($target, "frus")) then
+            $target
+        else
+            ()
+    return
+        $path ! ($parameters?context-path || "/historicaldocuments/" || .)
+};
+
+(:~
  : Base URI of the IIIF Image API service serving the FRUS page scans
  : (OP#1335). The same Cantaloupe instance the reference app's OpenSeadragon
  : viewer is hardcoded to (hsg-shell resources/scripts/app.js); kept here so

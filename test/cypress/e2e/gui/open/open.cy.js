@@ -23,7 +23,7 @@ describe("Open Government Initiative landing page", () => {
 
     it("lists both datasets in the sidebar", () => {
         cy.visit("open");
-        cy.get(".usa-sidenav").within(() => {
+        cy.get("aside.before ul.usa-in-page-nav__list").within(() => {
             cy.contains("a", "Bibliographic Metadata of the").should("have.attr", "href").and("match", /\/open\/frus-metadata$/);
             cy.contains("a", "Latest Volumes of").should("have.attr", "href").and("match", /\/open\/frus-latest$/);
         });

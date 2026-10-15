@@ -146,6 +146,21 @@ describe("FRUS cross-reference resolution (PR #32 review)", () => {
         cy.visit("historicaldocuments/frus1958-60v05mSupp/eta_d1");
         cy.get('main a[href$="/historicaldocuments/frus1958-60v10p2/d303"]').should("exist");
     });
+
+    it("maps page refs to the public pg_N page URL", () => {
+        // "#pg31": page-break ids carry no underscore, the page URL does.
+        cy.visit("historicaldocuments/frus1861/toc");
+        cy.get('main a[href$="/historicaldocuments/frus1861/pg_31"]').should("exist");
+        cy.get('main a[href$="/historicaldocuments/frus1861/pg31"]').should("not.exist");
+        cy.request("historicaldocuments/frus1861/pg_31").its("status").should("eq", 200);
+    });
+
+    it("drops the frus: prefix of cross-volume refs", () => {
+        // "frus:frus1981-88v03" in the preface's list of related volumes
+        cy.visit("historicaldocuments/frus1981-88v05/preface");
+        cy.get('main a[href$="/historicaldocuments/frus1981-88v03"]').should("exist");
+        cy.get('main a[href*="/historicaldocuments/frus:"]').should("not.exist");
+    });
 });
 
 describe("ODD audit regressions (PR #32 review)", () => {

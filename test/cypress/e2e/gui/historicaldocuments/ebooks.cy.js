@@ -53,7 +53,10 @@ describe("the ebooks page", () => {
             .should("exist");
     });
 
-    it("has the section navigation in the left sidebar", () => {
-        cy.get("aside.before ul.usa-sidenav", { timeout: 15000 }).should("exist");
+    it("has the Historical Documents nav card band", () => {
+        // The section navigation is a card band below the content since
+        // OP#1400, not a left sidebar.
+        cy.get(".hsg-historicaldocuments-nav", { timeout: 15000 })
+            .find(".hsg-historicaldocuments-nav-card").should("have.length", 8);
     });
 });
