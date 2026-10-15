@@ -1,0 +1,67 @@
+name: Cypress
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: cypress-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cypress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out the app
+        uses: actions/checkout@v4
+
+      # The baseline is the image the app goes live with: eXist 7 with the
+      # libraries, the HistoryAtState data packages and frus-data-jinks (with
+      # its vector index) baked into the database. Port 8080 is what
+      # .devcontainer/init.sh and cypress.config.cjs expect.
+      - name: Start the baseline image
+        run: |
+          docker run -d --name exist -p 8080:8080 joewiz/hsg-project:v2
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/exist/rest/db || true)
+            echo "attempt $i: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 5
+          done
+          docker logs exist | tail -100
+          exit 1
+
+      # Same seed path as the devcontainer: build the app xar with ant and
+      # install it over the image's own hsg-jinks.
+      - name: Install this build of the app
+        run: sh .devcontainer/init.sh
+
+      - name: Check the app answers
+        run: curl -sf -o /dev/null http://localhost:8080/exist/apps/hsg-jinks/index.html
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .tool-versions
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Cypress
+        run: npx cypress run --config video=false
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: test/cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: eXist log
+        if: failure()
+        run: docker logs exist 2>&1 | tail -300
