@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Create a parallel-work worktree of hsg-jinks with its own devcontainer
 # instance: allocates a free host port pair, writes the per-worktree config
-# (.env + .devcontainer/.env), copies in the baseline USWDS profile + data
-# xars, builds + starts the container, then generates + deploys the app
-# (data and theme autodeploy from the baked-in baselines -- see
+# (.env + .devcontainer/.env), copies in the baseline USWDS profile xar,
+# builds + starts the container on the joewiz/hsg-project:v2 baseline image
+# (data and libraries baked in, theme autodeploys -- see README "Baseline
+# image"), then deploys the worktree's app over the image's own build (see
 # .devcontainer/init.sh and README "Container initialization").
 #
 # Usage:
@@ -31,14 +32,13 @@
 # Shared machine-local state (never in git): ~/.config/hsg/
 #   worktree-ports.tsv                    slug <tab> http <tab> https <tab> path
 #   xars/profile-theme-uswds-baseline.xar frozen theme baseline (see README)
-#   xars/frus-data-jinks-baseline.xar     frozen data baseline (see README "Data")
+# The FRUS data comes with the base image (README "Baseline image").
 
 set -euo pipefail
 
 CONFIG_DIR="$HOME/.config/hsg"
 REGISTRY="$CONFIG_DIR/worktree-ports.tsv"
 BASELINE_XAR="$CONFIG_DIR/xars/profile-theme-uswds-baseline.xar"
-BASELINE_DATA_XAR="$CONFIG_DIR/xars/frus-data-jinks-baseline.xar"
 BASE_HTTP=8090   # main's ports; worktrees allocate upward from +1
 BASE_HTTPS=8453
 
@@ -84,11 +84,6 @@ http_port=$((BASE_HTTP + n)); https_port=$((BASE_HTTPS + n))
 [ -f "$BASELINE_XAR" ] || {
     echo "error: baseline profile xar missing: $BASELINE_XAR" >&2
     echo "build it from the profile checkout (README 'USWDS profile baseline')" >&2
-    exit 1
-}
-[ -f "$BASELINE_DATA_XAR" ] || {
-    echo "error: baseline data xar missing: $BASELINE_DATA_XAR" >&2
-    echo "build it from hsg-jinks-data (README 'Data')" >&2
     exit 1
 }
 
@@ -150,7 +145,6 @@ cat > "$wt_path/.existdb.json" <<EOF
 EOF
 
 cp "$BASELINE_XAR" "$wt_path/.devcontainer/profile-theme-uswds-baseline.xar"
-cp "$BASELINE_DATA_XAR" "$wt_path/.devcontainer/frus-data-jinks-baseline.xar"
 
 echo "==> npm ci"
 (cd "$wt_path" && npm ci --no-audit --no-fund)

@@ -8,15 +8,8 @@ services:
       context: .
       dockerfile: Dockerfile.dev
       args:
-        # Pinned baseline -- see README "Pinned baseline" before changing.
-        # EXIST_VERSION dropped (OP#1288 experiment): eXist now comes from
-        # the existdb/existdb:debug base image itself, not a pinned tarball.
-        PUBLISHER_LIB_VERSION: "6.1.0"
-        JINKS_TEMPLATES_VERSION: "1.4.2"
-        ROUTER_VERSION: "1.12.2"
-        JWT_VERSION: "2.0.1"
-        CRYPTO_VERSION: "6.0.1"
-        CAROUSEL_VERSION: "0.11.10"
+        # eXist, the libraries and the data come from the base image
+        # (joewiz/hsg-project:v2) -- see README "Baseline image".
         HTTP_PORT: "8080"
         HTTPS_PORT: "8443"
         INSTALL_NER: "false"

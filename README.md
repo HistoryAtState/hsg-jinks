@@ -72,36 +72,31 @@ sync overwrite them.
 StackOverflow on large profiles (`generator:filter-conflicts` recurses per file;
 USWDS ships ~2600). Remove when Jinks fixes it.
 
-### Pinned baseline
+### Baseline image
 
-Software dependencies (and `carousel`, released via semantic-release) are
-pinned to a release, in
-`.devcontainer/docker-compose.yml` → `build.args` (the `Dockerfile.dev` `ARG`
-defaults mirror them):
+`Dockerfile.dev` builds on **`joewiz/hsg-project:v2`**, the image this app goes
+live with. It is a vector-capable eXist 7 (`all-MiniLM-L6-v2` under
+`/exist/onnx-models`) whose database is baked in:
 
-| package | version | note |
-|---|---|---|
-| jinks-templates | 1.4.2 | pinned to the public-repo release. Building it from `main` — which this container used to do — always self-identifies as **1.0.0**, because semantic-release stamps the version only when publishing |
-| roaster | 1.12.2 | 1.11.0 answers an empty `POST /api/login` with 401 instead of clearing the session, which fails a generated test (#1216) |
-| tei-publisher-lib | 6.1.0 | |
-| eXist | 6.4.0 | |
-| wwdai | 0.6.5 | countries-section data (OP#1095): `HistoryAtState/wwdai` GitHub Release asset |
-| rdcr | 0.8.7 | countries-section data (OP#1095): `HistoryAtState/rdcr` GitHub Release asset |
-| carousel | 0.11.10 | landing-page carousel: `HistoryAtState/carousel` GitHub Release asset |
+- `hsg-jinks` itself, which every worktree container replaces with its own
+  build (see "Container initialization" below)
+- `frus-data-jinks` with its vector index for semantic search
+- the runtime libraries: tei-publisher-lib, jinks-templates, roaster, jwt,
+  crypto, carousel
+- the HistoryAtState data packages (see "External data packages" below)
 
-After changing any of them, rebuild the container and confirm with
-`xst package list --versions` — `xst package install` has been seen reporting
-`updated to X@<new>` while the deployed collection stayed on the old version.
+So worktrees test new versions of hsg-jinks against the go-live baseline
+rather than against a set of versions pinned here. `Dockerfile.dev` only
+adds what development needs on top: ant, git and node for building, the
+jinks generator (built from `main`), the USWDS theme baseline xar and the
+atom-editor package.
 
-The remaining data packages — `gsh`, `other-publications`, `pocom`,
-`travels`, `visits`, `milestones`, `hac` — are deliberately **not**
-version-pinned; `Dockerfile.dev` fetches each one's `/releases/latest/`
-asset. They're append-only content packages (see CLAUDE.md "Cypress
-assertions on data-package counts"), so the devcontainer should always
-reflect whatever's currently published rather than freeze to a version that
-goes stale the moment a new record is added upstream. Docker's layer cache
-means a plain rebuild won't refetch once cached — use `docker compose build
---no-cache` to actually pick up newly-published releases.
+The tag is tracked, not pinned. Docker's cache keeps using the image it
+already pulled; to pick up a newer `v2`, rebuild with
+`docker compose -f .devcontainer/docker-compose.yml build --pull`. After a
+rebuild, `xst package list --versions` shows what the image brought —
+`xst package install` has been seen reporting `updated to X@<new>` while the
+deployed collection stayed on the old version.
 
 ## Parallel worktrees
 
@@ -144,7 +139,7 @@ shared `~/.config/hsg/` — never in tracked files:
 | `.env` (worktree root) | `EXISTDB_SERVER` (**this worktree's port**), `EXISTDB_USER/PASS`, `CYPRESS_BASE_URL` |
 | `.devcontainer/.env` | `HSG_HTTP_PORT`, `HSG_HTTPS_PORT`, `COMPOSE_PROJECT_NAME` (see `env.template`) |
 | `~/.config/hsg/worktree-ports.tsv` | slug → port registry |
-| `~/.config/hsg/xars/` | frozen baseline profile + data xars (next sections) |
+| `~/.config/hsg/xars/` | frozen baseline profile xar ("USWDS profile baseline" below) |
 | `~/.config/hsg/secrets.env` | `OP_TOKEN` — `source` it before OpenProject curl calls; the token never appears in a repo or a command line |
 
 Port rules (unchanged in spirit from the old "Remapping ports" section):
@@ -196,10 +191,12 @@ baked into the image before `init.sh` ever runs.
   recreating the container — `xst package install` avoids the same trap by
   always clearing the old registration first, so `init.sh` does the same.
 
-It does *not* install `frus-data-jinks` or the USWDS theme — those autodeploy
-from the frozen baseline xars baked into the image (see "USWDS profile
-baseline" and "Data" below), so they survive container recreation with no
-help from this script. It also does not run `jinks create` — this is a Mode B
+It does *not* install `frus-data-jinks` or the USWDS theme: the data is part
+of the base image's database and the theme autodeploys from the baseline xar
+baked into the image (see "Baseline image" above and "USWDS profile
+baseline" below), so both survive container recreation with no help from
+this script. The app xar it installs replaces the `hsg-jinks` that ships in
+the base image. It also does not run `jinks create` — this is a Mode B
 repo, so config.json's generated output is already committed to git; a plain
 xar install redeploys that same content through the same underlying
 mechanism `jinks create` itself uses, without the registration conflict
@@ -253,42 +250,23 @@ use the same **frozen baseline**:
 
 `hsg-jinks-data` (the legacy FRUS corpus, deployed as `/db/apps/frus-data-jinks`
 with volumes under `data/frus-v2-data/` and guidelines apparatus under
-`data/frus-tei-guidelines-resources/`) has no GitHub release either, so it
-follows the exact same **frozen baseline** pattern as the USWDS profile above —
-baked into the image's `autodeploy/` at `.devcontainer/Dockerfile.dev` build
-time, not built or installed per-container. That matters because eXist's database
-lives entirely inside the container (no volume): anything installed only at
-*runtime* (the old approach: `ant` + `xst package install` against the
-running instance) is gone the moment the container is recreated, with no
-warning that it's missing until a page 404s.
+`data/frus-tei-guidelines-resources/`) comes with the base image
+(`frus-data-jinks` 0.4, with the vector index for semantic search). It is a
+curated multi-volume subset: every volume the landing page links plus
+representative era/structure samples — the authoritative list lives in
+`hsg-jinks-data`'s `build.xml`. The full corpus (694 volumes, ~4.6 GB) is a
+separate infra decision.
 
-> Note: the `data/Publications` and `data/Resources` collections were renamed to
-> `data/frus-v2-data` and `data/frus-tei-guidelines-resources` when the full
-> legacy corpus (694 volumes) landed. The app's `data-default` points at
-> `frus-v2-data`. The frozen baseline xar is a curated multi-volume subset:
-> every volume the landing page links (so those links resolve) plus
-> representative era/structure samples — the authoritative list lives in
-> `hsg-jinks-data`'s `build.xml`. The full corpus (694 volumes, ~4.6 GB) is
-> impractical to bake into the image and is a separate infra decision.
+To test against a different build of the data, install it into *this
+worktree's own* container (never port 8080):
 
-- The baseline is stored as `~/.config/hsg/xars/frus-data-jinks-baseline.xar`
-  (`frus-data-jinks-BASELINE.txt` beside it records commit + date). Refresh
-  it the same way as the profile baseline:
+```sh
+cd ../../hsg-jinks-data && ant
+xst --config <worktree>/.xstrc package install --force build/frus-data-jinks-*.xar
+```
 
-  ```sh
-  cd ../../hsg-jinks-data && ant
-  cp build/frus-data-jinks-*.xar ~/.config/hsg/xars/frus-data-jinks-baseline.xar
-  ```
-
-  Then rebuild any worktree's container to pick it up.
-- `tools/new-worktree.sh` copies it into every new worktree's `.devcontainer/`
-  alongside the theme baseline; `Dockerfile.dev` `COPY`s both into
-  `autodeploy/` so eXist installs them itself on every fresh boot.
-- More data packages are coming. Until any of them have GitHub releases to
-  fetch directly (like `tei-publisher-lib`/`roaster`/`jwt` already do in
-  `Dockerfile.dev`), each one follows this same freeze-and-copy-in pattern —
-  install pre-built packages, don't build them from source inside every
-  container.
+That is runtime-only: eXist's database lives in the container's writable
+layer, so recreating the container brings back the image's data.
 
 ### External data packages (GitHub releases)
 
@@ -296,17 +274,11 @@ Beyond `frus-data-jinks` above, running the app also needs 12 data packages —
 the ones backing `/departmenthistory`, `/countries`, `/conferences`,
 `/about`, `/tags`, `/milestones`, `/api/v1/catalog`, and
 `/historicaldocuments/frus-history` — each maintained in its own repo under
-`github.com/HistoryAtState` and, unlike `frus-data-jinks`, already published
-as a versioned `.xar` GitHub release. That means none of them need the
-frozen-baseline treatment. All 12 are `curl`'d into `autodeploy/`
-in `Dockerfile.dev` — every fresh container build already has them
-installed, no manual step required — and every one of them always fetches
-its repo's `/releases/latest/` asset (decision 2026-08-07, after the
-milestones/conferences/education epics merged: no data package stays
-pinned, and the full Cypress suite is expected to run green against the
-current releases; when a count-style test breaks on a refresh, fix the
-test per "Cypress assertions on data-package counts" in `CLAUDE.md`, don't
-pin the data).
+`github.com/HistoryAtState` and published as a versioned `.xar` GitHub
+release. The base image brings all of them; which release each one is at
+is the image's choice (`xst package list --versions`). When a count-style
+test breaks on a newer image, fix the test per "Cypress assertions on
+data-package counts" in `CLAUDE.md`, don't pin the data.
 
 | Repo | Latest release |
 |---|---|
@@ -341,9 +313,8 @@ done
 ```
 
 That's a runtime-only change (eXist's database isn't persisted, see "Data"
-above) — it won't survive the next container recreation, but the container
-already refetches every package's `/releases/latest/` on the next
-`docker compose build --no-cache`, so nothing needs pinning or bumping.
+above) — it won't survive the next container recreation, which brings back
+the base image's releases.
 
 These packages are append-only upstream — see `CLAUDE.md` ("Cypress
 assertions on data-package counts") before writing a test that counts
