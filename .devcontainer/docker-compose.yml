@@ -22,7 +22,8 @@ services:
       - "${HSG_HTTPS_PORT:-8453}:8443"
     volumes:
       - ..:/workspaces/hsg-jinks:cached
-    environment:
-      # Lower per worktree (HSG_JVM_RAM in .devcontainer/.env) when running
-      # several instances side by side.
-      - JVM_MAX_RAM_PERCENTAGE=${HSG_JVM_RAM:-75.0}
+    # The JVM sizes its heap to 75% of this limit (JAVA_TOOL_OPTIONS in
+    # Dockerfile.dev). Without a limit it takes 75% of the whole Docker VM,
+    # and two or three eXist instances side by side get one OOM-killed.
+    # Override per worktree with HSG_MEM_LIMIT in .devcontainer/.env.
+    mem_limit: ${HSG_MEM_LIMIT:-4g}
