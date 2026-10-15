@@ -431,10 +431,12 @@
                     per-division v2 data the target is a different file, so a bare fragment goes
                     nowhere); "frus1977-80v26#d271" (175, mostly footnotes) points into another
                     volume; "frus1958-60v10p2" (80) at another volume's landing page. Each becomes
-                    an app URL under /historicaldocuments/. The volume id for same-volume refs
-                    comes from global:volume-id, which reads it off the collection path (see the
-                    graphic elementSpec on why not the teiHeader); it is empty outside the FRUS
-                    collection, which is what scopes these three models to it.
+                    an app URL under /historicaldocuments/, built by global:frus-ref-uri (which
+                    also maps page targets, "#pg747" and "frus:frus1906p1/pg_280", to the
+                    public pg_N page URL). Its volume id comes from the collection path (see the
+                    graphic elementSpec on why not the teiHeader) and is empty outside the FRUS
+                    collection, which is what scopes the FRUS model to it. The predicate tests
+                    the target first, so other refs never reach the helper.
                     Other collections keep the base
                     behaviour via the copied fallback models below (including the base
                     correspondence models, which deployed data still matches). http/mailto targets
@@ -467,14 +469,8 @@
                             <template slot="alternate"><pb-i18n key="odd.[[type]]"/>:  [[ content ]]</template>
             </pb-popover></li></pb:template>
                 </model>
-                <model predicate="global:volume-id($parameters, .) != '' and starts-with(@target, 'frus') and contains(@target, '#')" behaviour="link">
-                    <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || substring-before(@target, '#') || '/' || substring-after(@target, '#')"/>
-                </model>
-                <model predicate="global:volume-id($parameters, .) != '' and starts-with(@target, 'frus')" behaviour="link">
-                    <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || @target"/>
-                </model>
-                <model predicate="global:volume-id($parameters, .) != '' and starts-with(@target, '#')" behaviour="link">
-                    <param name="uri" value="$parameters?context-path || '/historicaldocuments/' || global:volume-id($parameters, .) || '/' || substring-after(@target, '#')"/>
+                <model predicate="matches(@target, '^(#|frus)') and exists(global:frus-ref-uri($parameters, .))" behaviour="link">
+                    <param name="uri" value="global:frus-ref-uri($parameters, .)"/>
                 </model>
                 <model predicate="starts-with(@target, '$app/')" behaviour="link">
                     <desc>The other-publications FAQ (and any other document
