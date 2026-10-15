@@ -29,7 +29,7 @@ describe("the quarterly releases index", () => {
         });
         // the 2017-q2 entry also announces the Iran retrospective volume
         cy.get("main a[href$='historicaldocuments/frus1951-54Iran']").should("exist");
-        cy.get("aside.before ul.usa-sidenav").should("exist");
+        cy.get(".hsg-historicaldocuments-nav .hsg-historicaldocuments-nav-card").should("have.length", 8);
     });
 });
 

@@ -64,9 +64,11 @@ describe("the status of the series page", () => {
             });
     });
 
-    it("has the section navigation in the left sidebar", () => {
-        cy.get("aside.before ul.usa-sidenav", { timeout: 15000 })
-            .find("a[href$='historicaldocuments/status-of-the-series']")
-            .should("exist");
+    it("has the Historical Documents nav card band, linking here", () => {
+        // The section navigation is a card band below the content since
+        // OP#1400, not a left sidebar.
+        cy.get(".hsg-historicaldocuments-nav", { timeout: 15000 })
+            .find(".hsg-historicaldocuments-nav-card").should("have.length", 8);
+        cy.get(".hsg-historicaldocuments-nav-card a[href$='historicaldocuments/status-of-the-series']").should("exist");
     });
 });

@@ -11,9 +11,10 @@ describe("About Us section landing page", () => {
     it("lists links to every about/* subsection", () => {
         cy.visit("about");
         cy.get("main h1").should("contain.text", "About Us");
-        cy.get("nav[aria-label='Side navigation'], .usa-sidenav").should("exist");
-        cy.contains(".usa-sidenav a", "Frequently Asked Questions").should("have.attr", "href").and("match", /\/about\/faq$/);
-        cy.contains(".usa-sidenav a", "Historical Advisory Committee").should("have.attr", "href").and("match", /\/about\/hac$/);
+        // The section navigation uses the USWDS in-page navigation markup.
+        cy.get("aside.before ul.usa-in-page-nav__list").should("exist");
+        cy.contains("aside.before .usa-in-page-nav__list a", "Frequently Asked Questions").should("have.attr", "href").and("match", /\/about\/faq$/);
+        cy.contains("aside.before .usa-in-page-nav__list a", "Historical Advisory Committee").should("have.attr", "href").and("match", /\/about\/hac$/);
     });
 
     it("sidebar order and labels match the reference site's aside#sections exactly", () => {
@@ -22,7 +23,7 @@ describe("About Us section landing page", () => {
         // self-link -- confirmed live, not just against controller.xql's
         // route order.
         cy.visit("about");
-        cy.get(".usa-sidenav a").then(($links) => {
+        cy.get("aside.before .usa-in-page-nav__list a").then(($links) => {
             const labels = [...$links].map((el) => el.textContent.trim());
             expect(labels).to.deep.equal([
                 "Contact Us",
