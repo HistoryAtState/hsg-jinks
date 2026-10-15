@@ -51,10 +51,11 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
    The band is full-width but .toolbar's own box (and so its content) stays
    put, aligned with the page gutter like every other page element -- only
-   an absolutely positioned ::before is stretched to 100vw, the same
-   full-bleed-background/boxed-content split .page-header and footer use
-   (layout.css), just done with a pseudo-element instead of sizing .toolbar
-   itself, since .toolbar has no inner wrapper to re-box afterwards. */
+   an absolutely positioned ::before is stretched to the page width (100cqw:
+   the layout grid is a size container as wide as the visible page, so a
+   classic scrollbar is not counted), the same full-bleed-background/
+   boxed-content split .page-header and footer use, just done with a
+   pseudo-element since .toolbar has no inner wrapper to re-box afterwards. */
 .toolbar:has(nav[aria-label="breadcrumb"] li) {
     --hsg-breadcrumb-band-background: var(--uswds-color-primary-darkest);
     position: relative;
@@ -70,8 +71,8 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     top: 0;
     bottom: 0;
     left: 50%;
-    width: 100vw;
-    margin-left: -50vw;
+    width: 100cqw;
+    margin-left: -50cqw;
     z-index: -1;
     background-color: var(--hsg-breadcrumb-band-background);
     background-image: linear-gradient(
@@ -638,19 +639,15 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 /* Sidebar width for the USWDS 3 + 6 + 3 layout-grid split: each sidebar a
-   quarter of the page box less one gutter, main the remaining half (302px |
-   628px | 302px at 1440px). Set as the theme's layout.before/after.width in
-   historicaldocuments-content.html. The grid is a size container so that
-   100cqw is the page box's content width, not the viewport's. Declared on
-   :root because the theme declares the layout width variables there, and a
-   var() inside a custom property resolves where that property is declared;
-   the cqw itself still resolves where the sidebar uses it. */
+   quarter of the content band less one gutter, main the remaining half
+   (302px | 628px | 302px at 1440px). Set as the theme's
+   layout.before/after.width in historicaldocuments-content.html.
+   --jinks-page-band-width is the theme's capped band width (layout.css).
+   Declared on :root because the theme declares the layout width variables
+   there, and a var() inside a custom property resolves where that property
+   is declared. */
 :root {
-    --hsg-sidebar-width: calc((100cqw + var(--uswds-space-3)) / 4 - var(--uswds-space-3));
-}
-
-.sticky-layout {
-    container-type: inline-size;
+    --hsg-sidebar-width: calc((var(--jinks-page-band-width) + var(--uswds-space-3)) / 4 - var(--uswds-space-3));
 }
 
 /* Lower bound: a sidebar never gets narrower than its own min-content (its
@@ -1045,14 +1042,10 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    into the section, mounted by templates/layouts/historicaldocuments-content.html
    below every Historical Documents page's own content, full-bleed like the
    real footer it sits beside (both wrapped in .hsg-historicaldocuments-footer
-   by that layout, since only a direct .sticky-layout child can break out of
-   the content column - see resources/css/layout.css's own
-   ".sticky-layout > .page-header, > footer" rule, which this mirrors for a
-   class instead of an element selector). */
+   by that layout). The footer row of the layout grid spans the whole width,
+   so taking that area is enough. */
 .sticky-layout > .hsg-historicaldocuments-footer {
     grid-area: footer;
-    width: 100vw;
-    margin-inline: calc(50% - 50vw);
 }
 
 /* Flag-photo watermark tinted navy via background-blend-mode: multiply,

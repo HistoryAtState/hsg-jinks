@@ -48,18 +48,9 @@ describe("page-width alignment", () => {
             // own 32px (2rem) padding-inline, so its content edge -- where
             // the logo sits -- is the actual page box left edge to compare
             // against.
-            // Tolerance is half a classic scrollbar (8px), not 1px: the
-            // header band escapes the capped grid via width: 100vw +
-            // margin-inline: calc(50% - 50vw) (layout.css), and 100vw
-            // includes the vertical scrollbar, so with classic scrollbars
-            // (Cypress' Electron; Windows) the whole header sits
-            // scrollbar/2 left of the layout. Overlay scrollbars
-            // (production macOS) show no offset. A real fix needs a
-            // scrollbar-width compensation in the jinks-managed layout,
-            // upstream.
             left(".usa-logo").then((logoLeft) => {
                 left('nav[aria-label="breadcrumb"]').should((crumbLeft) => {
-                    expect(crumbLeft).to.be.closeTo(logoLeft, 8);
+                    expect(crumbLeft).to.be.closeTo(logoLeft, 1);
                 });
             });
         });

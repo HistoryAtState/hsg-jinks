@@ -358,49 +358,42 @@
      */
     min-height: 100vh;
     grid-template-rows: auto auto 1fr auto;
-    grid-template-columns:
-        0.001fr
-        1fr
-        0.001fr;
-    grid-template-areas:
-        "header header header"
-        "before-top content-top after-top"
-        "before content after"
-        "footer footer footer";
-    position: relative;
     /*
-     * The page box lives on the grid itself, so the whole content band --
-     * sidebars included -- is capped and centred as one, in line with the
-     * header's and footer's own .grid-container (hsg-jinks#1217). Capping
-     * main alone, as this used to, only lines up on pages without sidebars:
-     * once .before takes the first column, main centres in what is left of a
-     * full-bleed grid and the band drifts right, past the chrome above and
-     * below it.
-     *
-     * box-sizing: border-box, like the header's and footer's .grid-container
-     * (styles.scss anchors border-box on every usa-* element since 1.4.0):
-     * the gutters sit inside --jinks-page-max-width, so the band's content
-     * edge lines up with the logo and the footer content. With content-box
-     * the gutters sat outside the cap and the whole band started one gutter
-     * left of the header content at any viewport wider than the page box.
+     * A full-bleed grid: header and footer span the whole width (full-start
+     * to full-end) and box their content with their own .grid-container, as
+     * USWDS does; the content band (before, content, after) sits between two
+     * margin columns that cap it at --jinks-page-max-width, gutters inside
+     * the cap, so its edges line up with the header and footer content. The
+     * margins resolve against the grid's own width, which never includes a
+     * vertical scrollbar.
      */
-    box-sizing: border-box;
-    max-width: var(--jinks-page-max-width);
-    padding-inline: var(--jinks-page-gutter, 2rem);
-    margin-inline: auto;
+    --jinks-page-margin: max(
+        var(--jinks-page-gutter, 2rem),
+        calc((100% - var(--jinks-page-max-width)) / 2 + var(--jinks-page-gutter, 2rem))
+    );
+    grid-template-columns:
+        [full-start] var(--jinks-page-margin)
+        [band-start] 0.001fr 1fr 0.001fr [band-end]
+        var(--jinks-page-margin) [full-end];
+    grid-template-areas:
+        "header header     header      header    header"
+        ".      before-top content-top after-top ."
+        ".      before     content     after     ."
+        "footer footer     footer      footer    footer";
+    position: relative;
+    /* A size container, so 100cqw anywhere inside is the visible page width. */
+    container-type: inline-size;
 }
 
 /*
- * ...  which the header and footer then break out of again: their bands are
- * full-bleed, and only their contents are boxed (by .grid-container inside
- * them). The classic centred-container escape -- 50% resolves against this
- * capped grid, 50vw against the viewport. Safe because USWDS sets
- * overflow-x: hidden on body, so 100vw cannot introduce a scrollbar.
+ * The content band's width, for sizing sidebars against it. Declared on
+ * :root so other custom properties declared there (the layout widths) can
+ * use it; the cqw resolves where the value is used, against the grid.
  */
-.sticky-layout > .page-header,
-.sticky-layout > footer {
-    width: 100vw;
-    margin-inline: calc(50% - 50vw);
+:root {
+    --jinks-page-band-width: calc(
+        min(100cqw, var(--jinks-page-max-width)) - 2 * var(--jinks-page-gutter, 2rem)
+    );
 }
 
 .sticky-layout > .page-header {
@@ -554,7 +547,7 @@
     }
 
     .sticky-layout > .before {
-        width: 100vw;
+        width: var(--jinks-page-band-width);
         max-width: unset;
     }
 }
