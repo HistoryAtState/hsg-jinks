@@ -27,7 +27,7 @@
   } ],
   "profiles" : [ "base10", "landing-page", "docker", "profile-theme-uswds" ],
   "label" : "hsg-jinks",
-  "version" : "1.9.1",
+  "version" : "1.4.0",
   "id" : "https://e-editiones.org/apps/hsg-jinks",
   "_update" : true,
   "styles" : [ "https://cdn.jsdelivr.net/npm/theme-toggles@4.10.1/css/classic.min.css", "resources/css/layout.css", "resources/css/jinks-variables.css", "resources/css/components.css", "resources/css/hsg-theme.css", "resources/css/frus-renditions.css" ],
