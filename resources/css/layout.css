@@ -386,9 +386,13 @@
 }
 
 /*
- * The content band's width, for sizing sidebars against it. Declared on
- * :root so other custom properties declared there (the layout widths) can
- * use it; the cqw resolves where the value is used, against the grid.
+ * The content band's width (before, content and after together), for
+ * layout widths that are a share of it: theme.layout.before/after.width is
+ * a length set on :root, where "%" has nothing to resolve against, so a
+ * sidebar that should take e.g. a quarter of the band uses
+ * calc(var(--jinks-page-band-width) / 4). Declared on :root so those layout
+ * widths can use it; the cqw resolves where the value is used, against the
+ * grid.
  */
 :root {
     --jinks-page-band-width: calc(
@@ -546,8 +550,30 @@
         display: block;
     }
 
-    .sticky-layout > .before {
-        width: var(--jinks-page-band-width);
+    /*
+     * Phones stack the band: one column, every sidebar in a row of its own
+     * above or below the content, spanning the band. A sidebar hidden on
+     * mobile (.hidden-mobile below) leaves an empty, zero-height row.
+     */
+    .sticky-layout {
+        grid-template-rows: auto auto auto auto 1fr auto auto auto;
+        grid-template-columns:
+            [full-start] var(--jinks-page-margin)
+            [band-start] minmax(0, 1fr) [band-end]
+            var(--jinks-page-margin) [full-end];
+        grid-template-areas:
+            "header      header      header"
+            ".           content-top ."
+            ".           before-top  ."
+            ".           before      ."
+            ".           content     ."
+            ".           after-top   ."
+            ".           after       ."
+            "footer      footer      footer";
+    }
+
+    .sticky-layout > :is(.before-top, .before, .after-top, .after) {
+        width: auto;
         max-width: unset;
     }
 }
