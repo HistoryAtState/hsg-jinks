@@ -21,10 +21,11 @@ jobs:
       # The baseline is the image the app goes live with: eXist 7 with the
       # libraries, the HistoryAtState data packages and frus-data-jinks (with
       # its vector index) baked into the database. Port 8080 is what
-      # .devcontainer/init.sh and cypress.config.cjs expect.
+      # .devcontainer/init.sh and cypress.config.cjs expect. Pinned to the
+      # same digest as .devcontainer/Dockerfile.dev.
       - name: Start the baseline image
         run: |
-          docker run -d --name exist -p 8080:8080 joewiz/hsg-project:v2
+          docker run -d --name exist -p 8080:8080 joewiz/hsg-project:v2@sha256:99cbf7e1bb1c37d28f4a0e815e3cc2614ad2c3b519312982134c450a68345930
           for i in $(seq 1 60); do
             code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/exist/rest/db || true)
             echo "attempt $i: HTTP $code"

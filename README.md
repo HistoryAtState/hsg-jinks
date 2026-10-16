@@ -74,7 +74,7 @@ USWDS ships ~2600). Remove when Jinks fixes it.
 
 ### Baseline image
 
-`Dockerfile.dev` builds on **`joewiz/hsg-project:v2`**, the image this app goes
+`Dockerfile.dev` builds on **`joewiz/hsg-project:v2`**, pinned to a digest, the image this app goes
 live with. It is a vector-capable eXist 7 (`all-MiniLM-L6-v2` under
 `/exist/onnx-models`) whose database is baked in:
 
@@ -90,9 +90,12 @@ rather than against a set of versions pinned here. `Dockerfile.dev` only
 adds what development needs on top: ant, git and node for building, the
 jinks generator (built from `main`) and the USWDS theme baseline xar.
 
-The tag is tracked, not pinned. Docker's cache keeps using the image it
-already pulled; to pick up a newer `v2`, rebuild with
-`docker compose -f .devcontainer/docker-compose.yml build --pull`. After a
+The image is pinned by digest (`v2@sha256:99cbf7e1bb1c…`, the v2 of 2026-10-15) in
+`Dockerfile.dev` and in the CI workflow; keep both the same. The v2
+republished on 2026-10-16 is ~8 GB compressed and no longer fits the disk of
+a standard GitHub runner. To move to a newer image, replace the digest in
+both files (`docker buildx imagetools inspect joewiz/hsg-project:v2` shows
+the current one), rebuild the container and run the full suite. After a
 rebuild, `xst package list --versions` shows what the image brought —
 `xst package install` has been seen reporting `updated to X@<new>` while the
 deployed collection stayed on the old version.
