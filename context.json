@@ -528,5 +528,10 @@
     "prefix" : "opdsapi",
     "id" : "http://teipublisher.com/api/opds",
     "path" : "opds-catalog-api.xql"
+  }, {
+    "spec" : "disabled-api.json",
+    "prefix" : "disabledapi",
+    "id" : "https://history.state.gov/api/disabled",
+    "path" : "disabled-api.xql"
   } ]
 }

@@ -1,0 +1,84 @@
+// Routes of the generated API that this app does not serve
+// (modules/disabled-api.json): each answers like an unknown path, whoever
+// asks. The other methods of the same paths still reach their handlers.
+
+const disabled = [
+    ["GET", "api/parts/disabled-test.xml/json"],
+    ["PUT", "api/document/disabled-test.xml"],
+    ["POST", "api/convert"],
+    ["POST", "api/preview"],
+    ["GET", "api/apps/download"],
+    ["GET", "api/nlp/entities/disabled-test.xml"],
+    ["GET", "api/nlp/patterns/disabled-test.xml"],
+    ["GET", "api/nlp/strings/disabled-test"],
+    ["POST", "api/nlp/strings"],
+    ["GET", "api/nlp/text/disabled-test.xml"],
+    ["GET", "api/nlp/status"],
+    ["GET", "api/nlp/status/models"],
+    ["GET", "api/nlp/train/disabled-test"],
+    ["GET", "api/nlp/log/1"],
+    ["GET", "api/nlp/data/disabled-test"],
+    ["POST", "api/register/person/disabled-test"],
+    ["PUT", "api/register"],
+    ["DELETE", "api/register/disabled-test"],
+    ["PUT", "api/register/disabled-test"],
+    ["GET", "api/forms/template/person-default"],
+];
+
+const send = ([method, url]) =>
+    cy.api({
+        method,
+        url,
+        body: ["PUT", "POST"].includes(method) ? "<TEI/>" : undefined,
+        headers: { "Content-Type": "application/xml" },
+        failOnStatusCode: false,
+    });
+
+const expectNotFoundPage = (r) => {
+    expect(r.status).to.eq(404);
+    expect(r.headers["content-type"]).to.contain("text/html");
+    expect(r.body).to.contain("Page not found");
+};
+
+describe("disabled generator routes", () => {
+    it("an unknown path answers with the 404 page", () => {
+        send(["GET", "api/does-not-exist"]).then(expectNotFoundPage);
+    });
+
+    disabled.forEach((route) => {
+        it(`${route[0]} /${route[1]} answers like an unknown path`, () => {
+            send(route).then(expectNotFoundPage);
+        });
+    });
+
+    it("stay disabled for a logged-in user", () => {
+        cy.login();
+        disabled.forEach((route) => {
+            send(route).then(expectNotFoundPage);
+        });
+    });
+});
+
+describe("other methods on the disabled paths", () => {
+    it("GET /api/register/{id} still reaches the register handler", () => {
+        send(["GET", "api/register/disabled-test"]).its("status").should("eq", 200);
+    });
+
+    it("GET /api/register/{type}/{id} still reaches the register handler", () => {
+        send(["GET", "api/register/person/disabled-test"]).then((r) => {
+            expect(r.status).to.eq(404);
+            expect(r.headers["content-type"]).to.contain("application/json");
+        });
+    });
+
+    it("GET /api/document/{id} still reaches the document handler", () => {
+        send(["GET", "api/document/disabled-test.xml"]).then((r) => {
+            expect(r.status).to.eq(404);
+            expect(r.headers["content-type"]).to.contain("application/json");
+        });
+    });
+
+    it("DELETE /api/document/{id} still requires a login", () => {
+        send(["DELETE", "api/document/disabled-test.xml"]).its("status").should("eq", 401);
+    });
+});
