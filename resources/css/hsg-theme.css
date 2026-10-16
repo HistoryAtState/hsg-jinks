@@ -303,36 +303,6 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     }
 }
 
-/* Government banner (OP#1412) sits on this theme's dark navy fill
-   (.usa-banner { background-color: #0b4778 } in components.css), but the
-   USWDS defaults for its contents assume the stock light gray fill instead:
-   .usa-banner__header text (#274863) and .usa-banner__button (background
-   #2e2e2e from the shared .usa-accordion__button rule, text #274863) end up
-   dark text on a dark ground, unreadable. Re-declared here with an extra
-   .usa-banner ancestor selector so these win over components.css regardless
-   of load order; the button's own hover/focus states already use a light
-   #e6e6e6 background with dark text and are unaffected. */
-.usa-banner .usa-banner__header,
-.usa-banner .usa-banner__header-action {
-    color: var(--uswds-color-white);
-}
-
-.usa-banner .usa-banner__button {
-    background-color: transparent;
-    color: var(--uswds-color-white);
-}
-
-/* The expanded accordion panel (.usa-banner__content) has no background of
-   its own in components.css -- it's transparent, so its dark ink text
-   (#274863, correct for a normal page background) inherited the same navy
-   fill as the header bar above it once that fill was set, and went
-   dark-on-dark just like the header text did. Stock USWDS keeps this panel
-   on a plain white background even when the header bar is themed; do the
-   same here rather than overriding every nested heading/paragraph color. */
-.usa-banner .usa-banner__content {
-    background-color: var(--uswds-color-white);
-}
-
 /* No flag in the banner, as on state.gov: the flag is part of the office
    logo right below it. */
 .usa-banner .usa-banner__header-flag {
