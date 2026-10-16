@@ -132,7 +132,10 @@ describe("sidebar table of contents", () => {
     it("every link resolves", () => {
         // the TOC links into #519's retained URL space
         cy.visit(`${VOLUME}/ch1`);
-        cy.get("nav.toc ul.usa-sidenav a").each(($a) => {
+        // The back-matter index is linked but not requested: rendering it is
+        // slow (OP#1470), and volume-front-back-matter.cy.js renders it once.
+        cy.get('nav.toc ul.usa-sidenav a[href$="/index"]').should("have.length", 1);
+        cy.get("nav.toc ul.usa-sidenav a:not([href$='/index'])").each(($a) => {
             // resolve the root-relative href against the server origin: passing it
             // to cy.request raw prefixes the full baseUrl (which already carries
             // the context path), doubling it -- masked while error pages served

@@ -188,18 +188,34 @@ describe("footer on a phone", () => {
         cy.visit(`${VOLUME}/ch1`);
     });
 
-    it("keeps every text and icon at least 16px from the screen edges", () => {
-        cy.get(
-            "footer.usa-footer :is(a, p, button, img, .usa-footer__primary-link)"
-        ).each(($el) => {
-            const el = $el[0];
-            if (!el.getClientRects().length) return; // collapsed list
-            const range = el.ownerDocument.createRange();
-            range.selectNodeContents(el);
-            const box = el.tagName === "IMG" ? el.getBoundingClientRect() : range.getBoundingClientRect();
-            if (!box.width) return;
-            expect(box.left, el.textContent.trim() || el.alt).to.be.at.least(16);
-            expect(box.right, el.textContent.trim() || el.alt).to.be.at.most(390 - 16);
+    // Once with the platform's scrollbar (overlay on macOS), once with a
+    // classic, space-taking one as on Windows, Linux and CI runners: a band
+    // sized with 100vw counts it and shifts the footer half a scrollbar left.
+    [false, true].forEach((classicScrollbar) => {
+        const label = classicScrollbar ? " (classic scrollbar)" : "";
+        it(`keeps every text and icon at least 16px from the screen edges${label}`, () => {
+            if (classicScrollbar) {
+                cy.document().then((doc) => {
+                    const style = doc.createElement("style");
+                    style.textContent =
+                        "::-webkit-scrollbar { width: 15px; } ::-webkit-scrollbar-thumb { background: #888; }";
+                    doc.head.appendChild(style);
+                });
+                cy.document().its("documentElement.clientWidth").should("be.lessThan", 390);
+            }
+            cy.get(
+                "footer.usa-footer :is(a, p, button, img, .usa-footer__primary-link)"
+            ).each(($el) => {
+                const el = $el[0];
+                if (!el.getClientRects().length) return; // collapsed list
+                const range = el.ownerDocument.createRange();
+                range.selectNodeContents(el);
+                const box = el.tagName === "IMG" ? el.getBoundingClientRect() : range.getBoundingClientRect();
+                if (!box.width) return;
+                const page = el.ownerDocument.documentElement.clientWidth;
+                expect(box.left, el.textContent.trim() || el.alt).to.be.at.least(16);
+                expect(box.right, el.textContent.trim() || el.alt).to.be.at.most(page - 16);
+            });
         });
     });
 

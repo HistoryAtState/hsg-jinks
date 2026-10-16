@@ -48,18 +48,9 @@ describe("page-width alignment", () => {
             // own 32px (2rem) padding-inline, so its content edge -- where
             // the logo sits -- is the actual page box left edge to compare
             // against.
-            // Tolerance is half a classic scrollbar (8px), not 1px: the
-            // header band escapes the capped grid via width: 100vw +
-            // margin-inline: calc(50% - 50vw) (layout.css), and 100vw
-            // includes the vertical scrollbar, so with classic scrollbars
-            // (Cypress' Electron; Windows) the whole header sits
-            // scrollbar/2 left of the layout. Overlay scrollbars
-            // (production macOS) show no offset. A real fix needs a
-            // scrollbar-width compensation in the jinks-managed layout,
-            // upstream.
             left(".usa-logo").then((logoLeft) => {
                 left('nav[aria-label="breadcrumb"]').should((crumbLeft) => {
-                    expect(crumbLeft).to.be.closeTo(logoLeft, 8);
+                    expect(crumbLeft).to.be.closeTo(logoLeft, 1);
                 });
             });
         });
@@ -102,12 +93,16 @@ describe("page-width alignment", () => {
                         .then(($el) => $el[0].getBoundingClientRect().left)
                         .should("be.closeTo", pageLeft, 2);
                     // ... and the band ends where the header's content ends.
-                    // Interior pages carry a populated right sidebar (the
-                    // division asides, PR #32 review), so the band's right
-                    // edge is .after's; main itself stops at the sidebar.
-                    cy.get(".after")
-                        .then(($el) => $el[0].getBoundingClientRect().right)
-                        .should("be.closeTo", pageRight, 2);
+                    // Document pages carry a populated right sidebar (the
+                    // Persons and Terms lists), so their band ends with
+                    // .after. Compilation and chapter pages have none (the
+                    // lists are hidden on listings), .after is not rendered
+                    // and main spans its column, so their band ends with
+                    // main.
+                    cy.get("main, .after").should(($els) => {
+                        const right = Math.max(...[...$els].map((el) => el.getBoundingClientRect().right));
+                        expect(right).to.be.closeTo(pageRight, 2);
+                    });
                 });
             });
         });

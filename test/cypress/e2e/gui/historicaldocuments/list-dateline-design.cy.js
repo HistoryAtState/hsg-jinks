@@ -37,15 +37,12 @@ describe("FRUS dateline (upstream design)", () => {
 });
 
 describe("FRUS index divisions (upstream design)", () => {
+    // The same check on the back-matter index lives in
+    // volume-front-back-matter.cy.js, the one test that renders that slow
+    // page (OP#1470).
     it("renders register entries as their own blocks, never divs inside a ul", () => {
         cy.visit(`${VOLUME}/persons`);
         cy.get("main div.list", { timeout: 15000 }).should("have.length.at.least", 50);
-        cy.get("main ul > div").should("not.exist");
-    });
-
-    it("same for the back-matter index", () => {
-        cy.visit(`${VOLUME}/index`);
-        cy.get("main div.list", { timeout: 15000 }).should("have.length.at.least", 100);
         cy.get("main ul > div").should("not.exist");
     });
 });
