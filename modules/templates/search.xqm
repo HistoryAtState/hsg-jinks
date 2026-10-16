@@ -160,7 +160,9 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
     return map {
         "fields": map { "fields": ("hsg-date-min", "hsg-fulltext", "hsg-url") },
         "facets": map { "facets": $facets },
-        "query-string": $queryString
+        "query-string": $queryString,
+        (: the date clause on its own, for the vector leg's filter-query :)
+        "date-query": $dateQuery
     }
 };
 
@@ -240,14 +242,24 @@ declare %private function srch:scored-vector-hits($nodes as element()*) as map(*
  : merged by score, and the pool is cut to VECTOR_K. That keeps a later
  : collection from being dropped because an earlier one filled the pool,
  : and it keeps the nearest hit when it is not among the first VECTOR_K
- : nodes in document order. :)
+ : nodes in document order.
+ : A date range is passed as filter-query, which Lucene applies inside the
+ : KNN search, so the VECTOR_K nearest hits are all within the range. Left
+ : out, the vector leg ignored the range: a 1985-only search returned 50
+ : nearest hits from any year. Collections without the frus-search-date
+ : fields then contribute nothing, as on the keyword leg. :)
 declare %private function srch:query-vector-sections($queryConf as map(*), $q as xs:string) as element()* {
     if (normalize-space($q) eq "") then
         ()
     else
         try {
             let $vec := vector:embed($q, $srch:EMBED_MODEL)
-            let $opts := map:merge(($srch:ft-query-options, $queryConf?facets))
+            let $dateFilter := $queryConf?("date-query")
+            let $opts := map:merge((
+                $srch:ft-query-options,
+                $queryConf?facets,
+                if (exists($dateFilter)) then map { "filter-query": $dateFilter } else ()
+            ))
             let $scored := (
                 try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
@@ -274,20 +286,21 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
         }
 };
 
-(:~ Reciprocal Rank Fusion of two hit sequences (Lucene + vector). :)
+(:~ Reciprocal Rank Fusion of two hit sequences (Lucene + vector). Both
+ : must already be in relevance order: a hit's rank is its position. Ranks
+ : and nodes are looked up in maps built once per call; the earlier version
+ : rescanned both sequences for every hit, which took 13.9 s for 6,221
+ : keyword hits (51 ms this way, same order). :)
 declare %private function srch:fuse-rrf($lucene as element()*, $vector as element()*) as element()* {
-    let $lIds := $lucene ! generate-id(.)
-    let $vIds := $vector ! generate-id(.)
-    let $ids := distinct-values(($lIds, $vIds))
-    for $id in $ids
-    let $lRank := index-of($lIds, $id)[1]
-    let $vRank := index-of($vIds, $id)[1]
+    let $lRank := map:merge(for $hit at $i in $lucene return map:entry(generate-id($hit), $i), map { "duplicates": "use-first" })
+    let $vRank := map:merge(for $hit at $i in $vector return map:entry(generate-id($hit), $i), map { "duplicates": "use-first" })
+    let $nodes := map:merge(for $hit in ($lucene, $vector) return map:entry(generate-id($hit), $hit), map { "duplicates": "use-first" })
+    for $id in distinct-values(($lucene, $vector) ! generate-id(.))
     let $score :=
-        (if (exists($lRank)) then 1 div ($srch:RRF_K + $lRank) else 0)
-        + (if (exists($vRank)) then 1 div ($srch:RRF_K + $vRank) else 0)
-    let $node := ($lucene[generate-id(.) eq $id], $vector[generate-id(.) eq $id])[1]
+        (if (map:contains($lRank, $id)) then 1 div ($srch:RRF_K + $lRank($id)) else 0)
+        + (if (map:contains($vRank, $id)) then 1 div ($srch:RRF_K + $vRank($id)) else 0)
     order by $score descending
-    return $node
+    return $nodes($id)
 };
 
 (: ============== cached hit computation ============== :)
@@ -361,9 +374,13 @@ declare %private function srch:results($context as map(*)) as map(*) {
                     srch:query-vector-sections($queryConf, $p?q)
                 else
                     ()
+            (: RRF ranks the keyword leg by position, so it goes in by
+               ft:score. srch:query-sections returns hits collection by
+               collection in document order: unsorted, the best keyword
+               match for "famine relief" sat at position 199 of 465. :)
             let $fused :=
                 if (exists($vectorHits)) then
-                    srch:fuse-rrf($luceneHits, $vectorHits)
+                    srch:fuse-rrf(srch:sort($luceneHits, "relevance"), $vectorHits)
                 else
                     $luceneHits
             (: Relevance for hybrid is the RRF order. Re-sorting by ft:score
