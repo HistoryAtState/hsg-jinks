@@ -53,6 +53,16 @@ declare variable $srch:FRUS_COL as xs:string := "/db/apps/frus-data-jinks";
  : keeps the filters and sort, and Apply filters keeps the keyword. :)
 declare variable $srch:FORM_ID as xs:string := "hsg-search";
 
+(:~ The cache of recent searches' results, one entry per search, each dropped
+ : five minutes after it was last read. cache:create leaves a cache that
+ : already exists as it is, so pre-install.xql destroys this one: the first
+ : search after each install creates it with $srch:CACHE_CONFIG. :)
+declare variable $srch:CACHE as xs:string := "hsg-search";
+declare variable $srch:CACHE_CONFIG as map(*) := map {
+    "expireAfterAccess": 300000,
+    "maximumSize": 1000
+};
+
 (:~ Hybrid / vector search (FRUS pilot). Local ONNX model shipped with
  : duncdrum/existdb:experimental. k = KNN pool size before RRF fuse. :)
 declare variable $srch:EMBED_MODEL as xs:string := "all-MiniLM-L6-v2";
@@ -336,15 +346,30 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
 };
 
 (:~
- : Full hit computation, cached ~5 min in-memory keyed by a hash of the
- : normalized parameter set (same technique as hsg-shell). Safe to call from
- : several independent template functions in the same request -- the cache
+ : The hits of a search in the order $sortBy asks for. Relevance for hybrid is
+ : the RRF order: re-sorting by ft:score puts Lucene scores (about 5) ahead of
+ : vector scores (about 1) and the fused order disappears.
+ :)
+declare %private function srch:order($hits as element()*, $sortBy as xs:string, $fused as xs:boolean) as element()* {
+    if ($fused and $sortBy eq "relevance") then
+        $hits
+    else
+        srch:sort($hits, $sortBy)
+};
+
+(:~
+ : Full hit computation, cached in $srch:CACHE under a hash of the normalized
+ : parameter set (same technique as hsg-shell). The sort order is not part of
+ : the key: an entry keeps the hits as the search found them, plus each order
+ : a page has asked for, so changing the sort only sorts again. Safe to call
+ : from several independent template functions in the same request: the cache
  : absorbs repeat lookups after the first.
  :)
 declare %private function srch:results($context as map(*)) as map(*) {
     let $p := srch:read-params($context)
+    let $sortBy := $p?("sort-by")
     let $normalized := string-join(
-        let $params := map { "q": $p?q, "within": $p?within, "volume-id": $p?("volume-id"), "start-date": $p?("start-date"), "end-date": $p?("end-date"), "start-time": $p?("start-time"), "end-time": $p?("end-time"), "sort-by": $p?("sort-by"), "mode": $p?mode }
+        let $params := map { "q": $p?q, "within": $p?within, "volume-id": $p?("volume-id"), "start-date": $p?("start-date"), "end-date": $p?("end-date"), "start-time": $p?("start-time"), "end-time": $p?("end-time"), "mode": $p?mode }
         for $key in map:keys($params)
         let $val := $params($key) ! normalize-space(.)[. ne ""]
         order by $key
@@ -352,12 +377,10 @@ declare %private function srch:results($context as map(*)) as map(*) {
         "&amp;"
     )
     let $queryId := util:hash($normalized, "sha1")
-    let $cacheName := "hsg-search"
-    let $cacheKey := "queries"
-    let $cache := cache:get($cacheName, $cacheKey)
-    let $cache := if ($cache instance of map(*)) then $cache else map { "created": current-dateTime(), "purged": current-dateTime(), "queries": map {} }
-    let $cached := if (map:contains($cache?queries, $queryId)) then map:get($cache?queries, $queryId) else ()
-    let $results :=
+    (: returns false, and changes nothing, once the cache exists :)
+    let $create := cache:create($srch:CACHE, $srch:CACHE_CONFIG)
+    let $cached := cache:get($srch:CACHE, $queryId)
+    let $entry :=
         if (exists($cached)) then
             $cached
         else
@@ -380,40 +403,40 @@ declare %private function srch:results($context as map(*)) as map(*) {
                     srch:fuse-rrf(srch:sort($luceneHits, "relevance"), $vectorHits)
                 else
                     $luceneHits
-            (: Relevance for hybrid is the RRF order. Re-sorting by ft:score
-               puts Lucene scores (about 5) ahead of vector scores (about 1)
-               and the fused order disappears. :)
-            let $sorted :=
-                if ($p?mode eq "hybrid" and $p?("sort-by") eq "relevance" and exists($vectorHits)) then
-                    $fused
-                else
-                    srch:sort($fused, $p?("sort-by"))
             let $volIds :=
                 try { map:keys(ft:facets($luceneHits, "frus-volume-id", ())) }
                 catch * { () }
             (: how long the query itself took, kept with the cached entry so
                a cached page 2 still reports the real cost of the search :)
             let $took := seconds-from-duration(util:system-dateTime() - $started)
-            let $entry := map {
-                "id": $queryId, "hits": $sorted, "results-vol-ids": $volIds, "took": $took,
+            return map {
+                "id": $queryId, "hits": $fused, "fused": exists($vectorHits), "orders": map {},
+                "results-vol-ids": $volIds, "took": $took,
                 "range-start": $range?start, "range-end": $range?end, "created": current-dateTime()
             }
-            let $store := cache:put($cacheName, $cacheKey, map { "created": $cache?created, "purged": $cache?purged, "queries": map:put($cache?queries, $queryId, $entry) })
-            return $entry
-    let $purgeAge := xs:dayTimeDuration("PT5M")
-    let $purge := if (current-dateTime() - $cache?purged gt $purgeAge) then cache:clear($cacheName) else ()
-    let $hitCount := count($results?hits)
-    let $window := subsequence($results?hits, $p?start, $p?("per-page"))
+    let $sorted :=
+        if (map:contains($entry?orders, $sortBy)) then
+            $entry?orders($sortBy)
+        else
+            srch:order($entry?hits, $sortBy, $entry?fused)
+    (: store the search, or the order it gained, for the next request :)
+    let $store :=
+        if (map:contains($entry?orders, $sortBy)) then
+            ()
+        else
+            cache:put($srch:CACHE, $queryId, map:put($entry, "orders", map:put($entry?orders, $sortBy, $sorted)))
+    let $hitCount := count($sorted)
+    let $window := subsequence($sorted, $p?start, $p?("per-page"))
     return map:merge((
         $p,
         map {
             "hits": $window,
             "hit-count": $hitCount,
             "end": $p?start + count($window) - 1,
-            "results-vol-ids": $results?results-vol-ids,
-            "took": $results?took,
-            "range-start": $results?("range-start"),
-            "range-end": $results?("range-end")
+            "results-vol-ids": $entry?results-vol-ids,
+            "took": $entry?took,
+            "range-start": $entry?("range-start"),
+            "range-end": $entry?("range-end")
         }
     ))
 };
