@@ -102,18 +102,31 @@ describe("footer content", () => {
             );
     });
 
-    it("sets the policy links off in the headings' colour, under a rule of it", () => {
+    it("sets the policy links off in the headings' colour", () => {
         cy.get("footer.usa-footer .usa-footer__primary-link")
             .first()
             .then(($h) => {
                 const heading = $h.css("color");
-                cy.get("footer.usa-footer .usa-footer__secondary-section")
-                    .should("have.css", "border-top-color", heading)
-                    .and("have.css", "border-top-style", "solid");
                 cy.get("footer.usa-footer .usa-footer__required-links a").each(($a) =>
                     expect($a.css("color")).to.equal(heading)
                 );
             });
+    });
+
+    it("draws the policy row's rule like the one above the header's navigation", () => {
+        cy.viewport(1440, 900);
+        cy.get(".usa-header--extended .usa-nav").then(($nav) => {
+            const navBox = $nav[0].getBoundingClientRect();
+            cy.get("footer.usa-footer .usa-footer__secondary-section").should(($s) => {
+                const s = $s[0];
+                const box = s.getBoundingClientRect();
+                expect($s.css("border-top-style")).to.equal("solid");
+                expect($s.css("border-top-width")).to.equal($nav.css("border-top-width"));
+                expect($s.css("border-top-color")).to.equal($nav.css("border-top-color"));
+                expect(box.left).to.be.closeTo(navBox.left, 1);
+                expect(box.right).to.be.closeTo(navBox.right, 1);
+            });
+        });
     });
 
     it("links every topic within this app, department policies to state.gov", () => {

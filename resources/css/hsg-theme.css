@@ -224,9 +224,10 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 /* Closing band: the office wordmark left, its place in the department right. */
 /* The secondary section holds the policy row (layout "side-by-side"), set
-   off by a rule in the headings' light blue. */
+   off by a rule like the one above the header's navigation: full width, in
+   primary-dark (Figma footer 4319:43786, "USAGov" border). */
 .hsg-footer .usa-footer__secondary-section {
-    border-top: 1px solid var(--hsg-footer-heading);
+    border-top: 1px solid var(--uswds-color-primary-dark);
     margin-top: 0;
     padding-top: var(--uswds-space-3);
 }
