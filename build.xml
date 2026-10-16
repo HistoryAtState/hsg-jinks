@@ -27,6 +27,11 @@
     <target name="check-release" depends="release.true, release.false">
     </target>
 
+    <!-- ant -Dproduction=true (the production image) -->
+    <condition property="is-production">
+        <istrue value="${production}"/>
+    </condition>
+
 
     <target name="all" depends="clean,prepare,xar" description="main target, create xar file in build folder"/>
 
@@ -104,7 +109,26 @@
         </copy>
     </target>
 
-    <target name="xar" depends="git.revision,prepare" description="create XAR file of folder ${app.build.dir}">
+    <!-- The production build routes every API request through modules/lib/api.xql, so
+         modules/disabled-api.json also covers the paths the generated controller.xql sends to
+         api-odd.xql, api-actions.xql and api-dba.xql. Fails if that dispatch changes shape. -->
+    <target name="production-controller" if="is-production" depends="prepare">
+        <replaceregexp file="${app.build.dir}/controller.xql" flags="s"
+            match="let \$main :=\s*if \(matches\(\$exist:path, .*?else\s*&quot;api\.xql&quot;"
+            replace="let $main := &quot;api.xql&quot;"/>
+        <loadfile property="production.controller" srcFile="${app.build.dir}/controller.xql"/>
+        <fail message="controller.xql still dispatches to a dedicated API entry point; update the production-controller target">
+            <condition>
+                <or>
+                    <contains string="${production.controller}" substring="api-odd.xql"/>
+                    <contains string="${production.controller}" substring="api-actions.xql"/>
+                    <contains string="${production.controller}" substring="api-dba.xql"/>
+                </or>
+            </condition>
+        </fail>
+    </target>
+
+    <target name="xar" depends="git.revision,prepare,production-controller" description="create XAR file of folder ${app.build.dir}">
         <zip basedir="${app.build.dir}" destfile="${build.dir}/${project.app}-${project.version}.xar"/>
     </target>
 

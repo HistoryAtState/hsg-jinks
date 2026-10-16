@@ -355,6 +355,15 @@ and `frus-data-jinks`. The USWDS theme is **not** needed at runtime — it's a
 generation-time profile whose output is already committed here and packed
 into the app xar.
 
+The image builds the app with `ant -Dproduction=true`. That build rewrites
+the generated `controller.xql` so every API request goes through
+`modules/lib/api.xql`, which lets `modules/disabled-api.json` also switch off
+the ODD, lint, fix-odds and LaTeX routes that the generated controller sends
+to dedicated entry points. Plain `ant` (devcontainer, `init.sh`) keeps them,
+so the ODD editor and `jinks run hsg-jinks fix-odds` work in development. The
+production build fails if the generated controller's dispatch block changes
+shape; see the `production-controller` target in `build.xml`.
+
 `frus-data-jinks` comes from the private, release-less `hsg-jinks-data` repo,
 so it must be staged at the repo root before building (the `COPY` fails
 loudly if it's missing; the xar is gitignored and excluded from the app xar

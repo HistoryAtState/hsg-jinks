@@ -2,7 +2,7 @@
     "openapi": "3.0.3",
     "info": {
         "title": "Disabled generator routes",
-        "description": "Routes of the generated API (modules/lib/api.json) that this app does not serve: document editing, conversion and preview, app download, NLP, register editing and form templates. Listed ahead of lib/api.json, each answers 404 like an unknown path. A path declared here replaces lib/api.json's whole path item, so the other methods of these paths are repeated unchanged.",
+        "description": "Routes of the generated API (modules/lib/api.json) that this app does not serve: document editing, conversion and preview, app download, NLP, register editing and form templates. In the production build also the ODD, lint, fix-odds and LaTeX routes. Listed ahead of lib/api.json, each answers 404 like an unknown path. A path declared here replaces lib/api.json's whole path item, so the other methods of these paths are repeated unchanged.",
         "version": "1.0.0"
     },
     "servers": [
@@ -743,6 +743,240 @@
                         "schema": {
                             "type": "string",
                             "example": "person-template"
+                        }
+                    }
+                ],
+                "x-error-handler": "hsg-errors:handle",
+                "responses": {
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/odd": {
+            "get": {
+                "summary": "Not served by this app",
+                "description": "Reached only in the production build (ant -Dproduction=true); the generated controller.xql sends this path to a dedicated entry point.",
+                "operationId": "disabledapi:not-found",
+                "parameters": [],
+                "x-error-handler": "hsg-errors:handle",
+                "responses": {
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Not served by this app",
+                "description": "Reached only in the production build (ant -Dproduction=true); the generated controller.xql sends this path to a dedicated entry point.",
+                "operationId": "disabledapi:not-found",
+                "parameters": [],
+                "x-error-handler": "hsg-errors:handle",
+                "responses": {
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/odd/{odd}": {
+            "get": {
+                "summary": "Not served by this app",
+                "description": "Reached only in the production build (ant -Dproduction=true); the generated controller.xql sends this path to a dedicated entry point.",
+                "operationId": "disabledapi:not-found",
+                "parameters": [
+                    {
+                        "name": "odd",
+                        "in": "path",
+                        "description": "Filename of the ODD including suffix (.odd)",
+                        "schema": {
+                            "type": "string",
+                            "example": "docbook.odd"
+                        },
+                        "required": true
+                    }
+                ],
+                "x-error-handler": "hsg-errors:handle",
+                "responses": {
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Not served by this app",
+                "description": "Reached only in the production build (ant -Dproduction=true); the generated controller.xql sends this path to a dedicated entry point.",
+                "operationId": "disabledapi:not-found",
+                "parameters": [
+                    {
+                        "name": "odd",
+                        "in": "path",
+                        "schema": {
+                            "type": "string",
+                            "example": "testodd.odd"
+                        },
+                        "description": "Filename of the ODD including suffix (.odd)",
+                        "required": true
+                    }
+                ],
+                "x-error-handler": "hsg-errors:handle",
+                "responses": {
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Not served by this app",
+                "description": "Reached only in the production build (ant -Dproduction=true); the generated controller.xql sends this path to a dedicated entry point.",
+                "operationId": "disabledapi:not-found",
+                "parameters": [
+                    {
+                        "name": "odd",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filename of the ODD without suffix (.odd)",
+                        "required": true
+                    }
+                ],
+                "x-error-handler": "hsg-errors:handle",
+                "responses": {
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Not served by this app",
+                "description": "Reached only in the production build (ant -Dproduction=true); the generated controller.xql sends this path to a dedicated entry point.",
+                "operationId": "disabledapi:not-found",
+                "parameters": [
+                    {
+                        "name": "odd",
+                        "in": "path",
+                        "schema": {
+                            "type": "string",
+                            "example": "testodd.odd"
+                        },
+                        "description": "Filename of the ODD with the suffix (.odd)",
+                        "required": true
+                    }
+                ],
+                "x-error-handler": "hsg-errors:handle",
+                "responses": {
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/lint": {
+            "post": {
+                "summary": "Not served by this app",
+                "description": "Reached only in the production build (ant -Dproduction=true); the generated controller.xql sends this path to a dedicated entry point.",
+                "operationId": "disabledapi:not-found",
+                "parameters": [],
+                "x-error-handler": "hsg-errors:handle",
+                "responses": {
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/actions/fix-odds": {
+            "post": {
+                "summary": "Not served by this app",
+                "description": "Reached only in the production build (ant -Dproduction=true); the generated controller.xql sends this path to a dedicated entry point.",
+                "operationId": "disabledapi:not-found",
+                "parameters": [],
+                "x-error-handler": "hsg-errors:handle",
+                "responses": {
+                    "404": {
+                        "description": "Not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/document/{id}/tex": {
+            "get": {
+                "summary": "Not served by this app",
+                "description": "Reached only in the production build (ant -Dproduction=true); the generated controller.xql sends this path to a dedicated entry point.",
+                "operationId": "disabledapi:not-found",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "test/F-rom.xml"
                         }
                     }
                 ],

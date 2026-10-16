@@ -57,6 +57,24 @@ jobs:
       - name: Run Cypress
         run: npx cypress run --config video=false
 
+      # The production image builds with -Dproduction=true, which routes more
+      # API paths through modules/disabled-api.json (README "Production
+      # Docker image"). Reinstall that build and check its routes.
+      - name: Install the production build of the app
+        env:
+          EXISTDB_SERVER: http://localhost:8080/exist
+          EXISTDB_USER: admin
+          EXISTDB_PASS: ""
+        run: |
+          ant -Dproduction=true
+          xst package install --force build/*.xar
+
+      - name: Run the disabled-routes spec against the production build
+        run: >-
+          npx cypress run --config video=false
+          --spec test/cypress/e2e/api/disabled-routes.cy.js
+          --env PRODUCTION_BUILD=true
+
       - name: Upload screenshots
         if: failure()
         uses: actions/upload-artifact@v4
