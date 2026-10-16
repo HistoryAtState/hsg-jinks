@@ -113,13 +113,30 @@ instance: `CYPRESS_BASE_URL=$(worktree port) npx cypress run --spec <path>`.
 For one-off measurements (not a permanent regression test), write a throwaway
 spec under `test/cypress/e2e/gui/`, run it, read the result, then delete it.
 
-**`xst`'s own config can silently point at 8080.** `xst` reads `~/.xstrc` (a
-personal, machine-wide file, separate from this repo's `.existdb.json`) for its
-default host/port, and it may default to 8080. Do not edit `~/.xstrc` — it's
-outside this repo and may be shared by other projects/checkouts. Instead keep a
-repo-local `.xstrc` here (already gitignored) pointing at the correct devcontainer
-port, and invoke deploys as `xst --config .xstrc package install ...` rather than
-bare `xst package install ...`.
+**Point `xst` at the right instance explicitly.** Without a usable config,
+`xst` takes its connection from environment variables, then from the first
+`.env` it finds walking up from the current directory, then from its built-in
+default, `https://localhost:8443` as `guest` (see the "Configuration" section
+of `xst`'s README). Inside a worktree that `.env` happens to name the right
+port, so a missing or unreadable config goes unnoticed until `xst` runs from
+somewhere else. Invoke every call as `xst --config .xstrc ...` rather than bare
+`xst ...`. `tools/new-worktree.sh` writes the repo-local `.xstrc` (gitignored)
+for the worktree's port; for an older worktree or the main clone, write it by
+hand.
+
+The file must use the `connectionOptions` shape of `xst`'s documented example
+`.xstrc`; JSON in any other shape (a `{"server": ...}` file, say) is **silently
+ignored** and the fallback chain runs anyway:
+
+```json
+{"connectionOptions":{"host":"127.0.0.1","port":"8092","protocol":"http:","basic_auth":{"user":"admin","pass":""}}}
+```
+
+(`--config` also accepts a file ending in `.env`, or one named `.existdb.json`;
+any other JSON is passed through as-is, so only the shape above works for a
+`.xstrc`.) Verify a new config with `xst --config .xstrc info` from a directory
+that has no `.env` above it, and check that the build line comes from the port
+you meant.
 
 ## Prefer XQuery over Python for one-off scripting
 
