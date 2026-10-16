@@ -1500,6 +1500,14 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     border-radius: 0 4px 4px 0;
 }
 
+/* Search mode checkbox (OP#1473), under the search field: on the page's
+   background, not USWDS's white checkbox box. The results header keeps its
+   own space above. */
+.hsg-search-mode {
+    background-color: transparent;
+    margin-top: var(--uswds-space-1);
+}
+
 /* Results heading and its Sort by select. */
 .hsg-results-header {
     display: flex;

@@ -666,27 +666,18 @@ declare function srch:pagination($context as map(*)) as element(nav)? {
                 </nav>
 };
 
-(:~ Keyword vs Hybrid mode radios; preserves selection across landing/results. :)
-declare function srch:mode-toggle($context as map(*)) as element(fieldset) {
-    let $mode :=
-        let $raw := normalize-space(page:parameter($context, "mode", "keyword"))
-        return if ($raw eq "hybrid") then "hybrid" else "keyword"
+(:~ The search mode, one checkbox (OP#1473): ticked submits mode=hybrid,
+ : unticked submits no mode, the keyword default. Keeps the choice across
+ : landing and results. :)
+declare function srch:mode-toggle($context as map(*)) as element(div) {
+    let $hybrid := normalize-space(page:parameter($context, "mode", "keyword")) eq "hybrid"
     return
-        <fieldset class="usa-fieldset">
-            <legend class="usa-legend">Search mode</legend>
-            <div class="usa-radio">
-                <input class="usa-radio__input" id="mode-keyword" type="radio" name="mode" value="keyword" form="hsg-search">
-                { if ($mode eq "keyword") then attribute checked { "checked" } else () }
-                </input>
-                <label class="usa-radio__label" for="mode-keyword">Keyword (default)</label>
-            </div>
-            <div class="usa-radio">
-                <input class="usa-radio__input" id="mode-hybrid" type="radio" name="mode" value="hybrid" form="hsg-search">
-                { if ($mode eq "hybrid") then attribute checked { "checked" } else () }
-                </input>
-                <label class="usa-radio__label" for="mode-hybrid">Hybrid (keyword + semantic; FRUS pilot)</label>
-            </div>
-        </fieldset>
+        <div class="usa-checkbox hsg-search-mode">
+            <input class="usa-checkbox__input" id="mode-hybrid" type="checkbox" name="mode" value="hybrid" form="hsg-search">
+            { if ($hybrid) then attribute checked { "checked" } else () }
+            </input>
+            <label class="usa-checkbox__label" for="mode-hybrid">Use the new hybrid mode with semantic search</label>
+        </div>
 };
 
 (:~ The section checkboxes of the sidebar, on the landing and the results
