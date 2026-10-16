@@ -4,9 +4,10 @@
 # packages and the runtime libraries (tei-publisher-lib, jinks-templates,
 # roaster, jwt, crypto, carousel). Worktree containers test new versions of
 # hsg-jinks against it: init.sh replaces the baked-in app with the worktree's
-# build. The tag is tracked, not pinned: `docker compose build --pull` picks up
-# a newer v2.
-FROM joewiz/hsg-project:v2
+# build. Pinned to a digest (the v2 of 2026-10-15): the v2 republished on
+# 2026-10-16 is ~8 GB compressed and no longer fits a CI runner's disk. Keep
+# this digest and the one in .github/workflows/cypress.yml the same.
+FROM joewiz/hsg-project:v2@sha256:99cbf7e1bb1c37d28f4a0e815e3cc2614ad2c3b519312982134c450a68345930
 
 ARG HTTP_PORT=8080
 ARG HTTPS_PORT=8443
