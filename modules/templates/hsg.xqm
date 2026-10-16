@@ -472,6 +472,47 @@ declare function hsg:administration($admin-id as xs:string) as element(tei:categ
 };
 
 (:~
+ : The recent administrations of the Administrations panel, with the panel's
+ : short labels, newest last. Kept here because the taxonomy has neither the
+ : short labels nor a notion of "recent" (OP#1475).
+ :)
+declare variable $hsg:recent-administrations := (
+    ["kennedy", "Kennedy Administration"],
+    ["johnson", "Johnson Administration"],
+    ["nixon-ford", "Nixon-Ford Administrations"],
+    ["carter", "Carter Administration"],
+    ["reagan", "Reagan Administration"],
+    ["bush-ghw", "G.H.W. Bush Administration"],
+    ["clinton", "Clinton Administration"],
+    ["bush-gw", "G.W. Bush Administration"]
+);
+
+(:~
+ : The Administrations panel of the Historical Documents sidebar (OP#1467),
+ : as on the reference: an intro, the recent administrations, a link to all
+ : of them. An administration missing from the taxonomy has no page and is
+ : left out (G.W. Bush, for now).
+ :)
+declare function hsg:administrations-panel($context as map(*)) as element()+ {
+    <h2 class="usa-in-page-nav__heading">Administrations</h2>,
+    <p>Browse official documents from the <em>Foreign Relations of the United States</em> series.</p>,
+    <h3 class="usa-in-page-nav__heading">Recent Administrations</h3>,
+    <ul class="usa-in-page-nav__list">
+    {
+        for $admin in $hsg:recent-administrations
+        where exists(hsg:administration($admin?1))
+        return
+            <li class="usa-in-page-nav__item usa-in-page-nav__item--primary">
+                <a href="{$context?context-path}/historicaldocuments/{$admin?1}">{$admin?2}</a>
+            </li>
+    }
+        <li class="usa-in-page-nav__item usa-in-page-nav__item--primary">
+            <a href="{$context?context-path}/historicaldocuments">All Administrations</a>
+        </li>
+    </ul>
+};
+
+(:~
  : Every volume root TEI classified under the given administration.
  :
  : Membership lives in each volume's own header (keywords scheme

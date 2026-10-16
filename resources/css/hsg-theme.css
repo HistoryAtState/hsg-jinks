@@ -318,31 +318,14 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--uswds-color-error-darker);
 }
 
-/* Department History monograph section pages (#1096/#1135, PR review) render
-   an explicit <h1> from the division's own <head> text (dh:monograph-
-   section-content) rather than relying on the ODD's own heading level for
-   it, which tracks the division's absolute nesting depth in the source
-   document and is inconsistent between a chapter and a subchapter. The ODD
-   still renders that same head as part of the division's normal content
-   (see dh:monograph-section-content's own docstring for why it can't be
-   suppressed at the ODD level); hidden here instead. Scoped to only the
-   entry-point division's own *first* child so nested subchapter heads,
-   rendered inline when viewing their parent chapter, stay visible -- not
-   scoped by tag name, since a division's own base-ODD "behaviour" (and so
-   its wrapper tag) depends on its structural position: a top-level chapter
-   (direct child of tei:body) renders as <section class="tei-div ...">, a
-   nested subchapter as <div class="tei-div ...">, same class either way.
-
-   Excludes .conf-content (#1099 PR review): conferences fixes the exact same
-   duplicate-heading problem differently, by renumbering headings in XQuery
-   (conf:shift-headings, modules/templates/conferences.xqm) rather than
-   emitting a second explicit heading to hide -- there is no duplicate to
-   suppress there, and this selector doesn't check tag name, so without the
-   exclusion it would hide conferences' now-correct (and only) heading
-   outright. Confirmed live during the same PR review: it was doing exactly
-   that to the document view's "Program"/"Vietnam Photo Gallery"/
-   "Post-Conference Reviews" headings before this exclusion was added. */
-.usa-prose:not(.conf-content) > .tei-div > :first-child.tei-head {
+/* Monograph section pages (about:monograph-section-content and the like)
+   render the division's head as an explicit <h1> and the transform renders
+   it again as the division's first child; hide that copy. Only where the
+   prose has its own <h1> before the division: content pages
+   (content-page.html) have none, their division head is the page title
+   (OP#1467). Nested subchapter heads stay visible. Conferences renumber
+   their headings instead (conf:shift-headings) and have no copy to hide. */
+.usa-prose:not(.conf-content) > h1 ~ .tei-div > :first-child.tei-head {
     display: none;
 }
 
