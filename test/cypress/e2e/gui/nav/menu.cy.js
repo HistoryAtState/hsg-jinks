@@ -73,7 +73,7 @@ const CATEGORIES = [
 const href = (url) => (url === "" ? `${PREFIX}/` : `${PREFIX}/${url}`);
 
 describe("primary navigation menu", () => {
-    // pb-i18n resolves labels client-side; wait for one known label before
+    // data-i18n resolves labels client-side; wait for one known label before
     // asserting text so we never read the pre-i18n fallback (the raw item id).
     beforeEach(() => {
         cy.visit("index.html");
@@ -102,6 +102,47 @@ describe("primary navigation menu", () => {
                     "About Us",
                 ]);
             });
+    });
+
+    it("italicizes Foreign Relations in the Historical Documents menu (OP#1457)", () => {
+        cy.get("#submenu-historicaldocuments a").should(($a) => {
+            const italic = [...$a].map((a) => [...a.querySelectorAll("em")].map((em) => em.textContent));
+            expect(italic).to.deep.eq([
+                ["Foreign Relations of the United States"],
+                ["Foreign Relations"],
+                ["Foreign Relations"],
+                ["Foreign Relations"],
+                [],
+                [],
+            ]);
+        });
+    });
+
+    it("translates every submenu label", () => {
+        // The submenu labels use data-i18n, which shows a missing key as is:
+        // every menu item needs its menu.{id} entry in en.json.
+        cy.get(".usa-nav__submenu a").each(($a) => {
+            expect($a.text().trim()).not.to.match(/^menu\./);
+        });
+    });
+
+    it("keeps the top-level chevrons white", () => {
+        // The top-level labels stay pb-i18n: the theme draws the chevron on
+        // the label's ::after, and on a span it falls back to USWDS's
+        // ButtonText (black).
+        cy.get(".usa-nav__primary > .usa-nav__primary-item > button").each(($b) => {
+            const label = $b[0].firstElementChild;
+            expect(label.tagName).to.eq("PB-I18N");
+            expect(getComputedStyle(label, "::after").backgroundColor).to.eq("rgb(255, 255, 255)");
+        });
+    });
+
+    it("italicizes Foreign Relations in the breadcrumb, too", () => {
+        cy.visit("historicaldocuments/about-frus");
+        cy.get('nav[aria-label="breadcrumb"] ul:not(:empty) li')
+            .last()
+            .find("em", { timeout: 15000 })
+            .should("have.text", "Foreign Relations");
     });
 
     it("renders no Admin or Download submenu (absent from hsg-shell's nav)", () => {

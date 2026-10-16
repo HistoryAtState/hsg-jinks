@@ -28,7 +28,7 @@
                         <ul>
                             [% for $subitem in $item?subitems?* %]
                             <li>
-                                <a href="[[ $context-path ]]/[[ $subitem?url ]]"><pb-i18n key="menu.[[ $subitem?id ]]">[[ $subitem?id ]]</pb-i18n></a>
+                                <a href="[[ $context-path ]]/[[ $subitem?url ]]"><span data-i18n="menu.[[ $subitem?id ]]">[[ $subitem?id ]]</span></a>
                             </li>
                             [% endfor %]
                         </ul>

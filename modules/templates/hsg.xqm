@@ -100,10 +100,30 @@ declare function hsg:crumb($label as item()*, $href as xs:string?) as map(*) {
 };
 
 (:~
- : A crumb whose label is a translatable pb-i18n with an English fallback.
+ : The app's English translations, for hsg:crumb-i18n.
+ :)
+declare variable $hsg:i18n := json-doc($config:app-root || "/resources/i18n/app/en.json");
+
+(:~
+ : A crumb whose label is translated from an i18n key, with an English
+ : fallback. A key the app translates becomes data-i18n, which pb-page
+ : inserts as HTML, so the translation may carry markup (the italic Foreign
+ : Relations; pb-i18n renders text only, tei-publisher-components#406).
+ : data-i18n has no fallback, it shows a missing key as is, so any other key
+ : stays pb-i18n, which shows the English label.
  :)
 declare function hsg:crumb-i18n($key as xs:string, $label as xs:string?, $href as xs:string?) as map(*) {
-    hsg:crumb(<pb-i18n key="{$key}">{$label}</pb-i18n>, $href)
+    let $translation := fold-left(tokenize($key, '\.'), $hsg:i18n, function($entry, $step) {
+        if ($entry instance of map(*)) then $entry($step) else ()
+    })
+    return
+        hsg:crumb(
+            if ($translation instance of xs:string) then
+                <span data-i18n="{$key}">{$label}</span>
+            else
+                <pb-i18n key="{$key}">{$label}</pb-i18n>,
+            $href
+        )
 };
 
 (:~
