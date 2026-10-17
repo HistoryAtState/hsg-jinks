@@ -36,7 +36,6 @@ xquery version "3.1";
  :)
 module namespace srch = "https://history.state.gov/ns/templates/search";
 
-import module namespace kwic = "http://exist-db.org/xquery/kwic";
 import module namespace cache = "http://exist-db.org/xquery/cache" at "java:org.exist.xquery.modules.cache.CacheModule";
 import module namespace page = "http://teipublisher.com/ns/templates/page" at "page.xqm";
 import module namespace fd = "http://history.state.gov/ns/site/hsg/frus-dates" at "../frus-dates.xqm";
@@ -448,11 +447,82 @@ declare %private function srch:meta-row($label as xs:string, $value as item()*) 
     <dd>{$value}</dd>
 };
 
-(:~ The keyword-in-context snippets of a hit, at most five, each wrapped in
- : its own span so the card can hold every match to a single line. :)
-declare %private function srch:snippets($summaries as element()*) as element(span)* {
-    for $summary in subsequence($summaries, 1, 5)
-    return <span class="hsg-snippet">{$summary/*}</span>
+(:~
+ : The keyword-in-context snippets of the matches in $root, at most five,
+ : each wrapped in its own span so the card can hold every match to a single
+ : line. A snippet shows up to $width characters before its first match and
+ : after its last. A match within $width characters of the previous one is
+ : highlighted in the same snippet instead of starting another, so matches
+ : close together ("Star Wars or Hot Wars") don't each repeat the passage.
+ :)
+declare %private function srch:snippets($root as node(), $width as xs:integer) as element(span)* {
+    srch:snippets-from($root, ($root//exist:match)[1], $width, 5)
+};
+
+declare %private function srch:snippets-from($root as node(), $match as element(exist:match)?,
+        $width as xs:integer, $remaining as xs:integer) as element(span)* {
+    if (empty($match) or $remaining le 0) then
+        ()
+    else
+        let $run := srch:snippet-run($root, $match, $width, 0, 0, (), $match)
+        return (
+            <span class="hsg-snippet">{
+                srch:text-before($root, $match, $width, ""),
+                <span class="hi">{string($match)}</span>,
+                $run?content
+            }</span>,
+            srch:snippets-from($root, ($run?last/following::exist:match)[1], $width, $remaining - 1)
+        )
+};
+
+(:~ Up to $width characters of the text before $node within $root, white
+ : space collapsed, starting at a word boundary, with "..." in front when it
+ : doesn't start at $root's. :)
+declare %private function srch:text-before($root as node(), $node as node(), $width as xs:integer,
+        $text as xs:string) as xs:string {
+    let $prev := $node/preceding::text()[1]
+    return
+        if (string-length($text) gt $width) then
+            "..." || replace(substring($text, string-length($text) - $width), "^\S*\s+", "")
+        else if (empty($prev) or empty($prev/ancestor::node()[. is $root])) then
+            replace($text, "^\s+", "")
+        else
+            srch:text-before($root, $prev, $width, srch:spaces($prev || $text))
+};
+
+(:~
+ : The rest of a snippet after $node: up to $width characters of text, and
+ : any match reached within them, which continues the snippet. $chars counts
+ : the text since the last match, $total all of it since the snippet's first
+ : match: past 2 × $width, the snippet ends and the next match starts another.
+ :)
+declare %private function srch:snippet-run($root as node(), $node as node(), $width as xs:integer,
+        $chars as xs:integer, $total as xs:integer, $content as item()*, $last as element(exist:match)) as map(*) {
+    let $next := $node/following::text()[1]
+    let $match := $next/parent::exist:match
+    (: counted with its white space collapsed, as it is shown :)
+    let $piece := srch:spaces($next)
+    return
+        if (empty($next) or empty($next/ancestor::node()[. is $root])) then
+            map { "content": $content, "last": $last }
+        else if (exists($match)) then
+            if ($total le 2 * $width) then
+                srch:snippet-run($root, $match, $width, 0, $total + string-length($piece),
+                    ($content, <span class="hi">{string($match)}</span>), $match)
+            else
+                map { "content": ($content, "..."), "last": $last }
+        else if ($chars + string-length($piece) gt $width) then
+            (: end at a word boundary: drop a word the cut would split :)
+            let $cut := replace(substring($piece, 1, $width - $chars + 1), "\s+\S*$", "")
+            return map { "content": ($content, $cut, "..."), "last": $last }
+        else
+            srch:snippet-run($root, $next, $width, $chars + string-length($piece), $total + string-length($piece),
+                ($content, $piece), $last)
+};
+
+(:~ Runs of white space, such as the source's line breaks and indentation, as one space. :)
+declare %private function srch:spaces($text as xs:string?) as xs:string {
+    replace($text, "\s+", " ")
 };
 
 (:~ Metadata list of a card. :)
@@ -479,11 +549,7 @@ declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
     let $dateString := normalize-space(string-join($date//text()[not(./ancestor::tei:note)]))
     let $placeName := ($doc//tei:placeName)[1]
     let $placeNameString := normalize-space(string-join($placeName//text()[not(./ancestor::tei:note)]))
-    let $highlighted := ft:highlight-field-matches($doc, "hsg-fulltext")
-    let $snippets := srch:snippets(
-        for $hit in subsequence($highlighted//exist:match, 1, 5)
-        return kwic:get-summary($highlighted, $hit, <config width="40"/>)
-    )
+    let $snippets := srch:snippets(ft:highlight-field-matches($doc, "hsg-fulltext"), 40)
     let $score := ft:score($doc)
     return map {
         "tags": if ($historical) then ($placeNameString, $dateString)[. ne ""] else (),
@@ -527,20 +593,20 @@ declare %private function srch:render-hit($hit as element()) as map(*) {
                 else
                     $card(
                         normalize-space(string-join(($hit/tei:head)[1]//text()[not(./ancestor::tei:note)])),
-                        srch:keyword-row(kwic:summarize(util:expand($hit), <config xmlns="" width="60"/>))
+                        srch:keyword-row(util:expand($hit))
                     )
             case element(tei:body) return
                 $card(
                     normalize-space(string-join(($hit/ancestor::tei:TEI//tei:titleStmt/tei:title)[1])),
-                    srch:keyword-row(kwic:summarize(util:expand($hit), <config xmlns="" width="60"/>))
+                    srch:keyword-row(util:expand($hit))
                 )
             default return
                 map { "title": "Untitled result", "href": "#", "tags": (), "summary": () }
 };
 
-(:~ The "Keyword Results" row of the non-FRUS hit types, from kwic:summarize. :)
-declare %private function srch:keyword-row($summaries as element()*) as element()* {
-    let $snippets := srch:snippets($summaries)
+(:~ The "Keyword Results" row of the non-FRUS hit types, from their expanded matches. :)
+declare %private function srch:keyword-row($expanded as element()) as element()* {
+    let $snippets := srch:snippets($expanded, 60)
     return if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else ()
 };
 
