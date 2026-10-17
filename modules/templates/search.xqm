@@ -59,6 +59,9 @@ declare variable $srch:FORM_ID as xs:string := "hsg-search";
  : already exists as it is, so pre-install.xql destroys this one: the first
  : search after each install creates it with $srch:CACHE_CONFIG. :)
 declare variable $srch:CACHE as xs:string := "hsg-search";
+
+(:~ Request attribute with the time the request's first srch:results call took. :)
+declare variable $srch:TOOK_ATTR as xs:string := "hsg-search-took";
 declare variable $srch:CACHE_CONFIG as map(*) := map {
     "expireAfterAccess": 300000,
     "maximumSize": 1000
@@ -367,6 +370,9 @@ declare %private function srch:order($hits as element()*, $sortBy as xs:string, 
  : absorbs repeat lookups after the first.
  :)
 declare %private function srch:results($context as map(*)) as map(*) {
+    (: as in hsg-shell, "took" is the time this request spent getting its
+       results: the whole search, or only the cache lookup and any sort :)
+    let $started := util:system-time()
     let $p := srch:read-params($context)
     let $sortBy := $p?("sort-by")
     let $normalized := string-join(
@@ -385,7 +391,6 @@ declare %private function srch:results($context as map(*)) as map(*) {
         if (exists($cached)) then
             $cached
         else
-            let $started := util:system-dateTime()
             let $range := srch:date-range($p?("start-date"), $p?("end-date"), $p?("start-time"), $p?("end-time"))
             let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), $p?q, $range?start, $range?end)
             let $luceneHits :=
@@ -407,12 +412,9 @@ declare %private function srch:results($context as map(*)) as map(*) {
             let $volIds :=
                 try { map:keys(ft:facets($luceneHits, "frus-volume-id", ())) }
                 catch * { () }
-            (: how long the query itself took, kept with the cached entry so
-               a cached page 2 still reports the real cost of the search :)
-            let $took := seconds-from-duration(util:system-dateTime() - $started)
             return map {
                 "id": $queryId, "hits": $fused, "fused": exists($vectorHits), "orders": map {},
-                "results-vol-ids": $volIds, "took": $took,
+                "results-vol-ids": $volIds,
                 "range-start": $range?start, "range-end": $range?end, "created": current-dateTime()
             }
     let $sorted :=
@@ -428,6 +430,14 @@ declare %private function srch:results($context as map(*)) as map(*) {
             cache:put($srch:CACHE, $queryId, map:put($entry, "orders", map:put($entry?orders, $sortBy, $sorted)))
     let $hitCount := count($sorted)
     let $window := subsequence($sorted, $p?start, $p?("per-page"))
+    (: The page asks for its results several times, and the first call does
+       the work: the sidebar's volume filter is rendered before the summary.
+       So the first call keeps its time for the others to report. :)
+    let $took := (
+        request:get-attribute($srch:TOOK_ATTR),
+        seconds-from-duration(util:system-time() - $started)
+    )[1]
+    let $keep := request:set-attribute($srch:TOOK_ATTR, $took)
     return map:merge((
         $p,
         map {
@@ -435,7 +445,7 @@ declare %private function srch:results($context as map(*)) as map(*) {
             "hit-count": $hitCount,
             "end": $p?start + count($window) - 1,
             "results-vol-ids": $entry?results-vol-ids,
-            "took": $entry?took,
+            "took": $took,
             "range-start": $entry?("range-start"),
             "range-end": $entry?("range-end")
         }
