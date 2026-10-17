@@ -156,6 +156,11 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
         if ($dateCapable and exists($volumeIds)) then map { "frus-volume-id": $volumeIds } else ()
     ))
     return map {
+        (: Resolving FRUS's 390,000 documents takes eXist 2 to 3 seconds, so
+           the keyword and vector legs share one resolution. FRUS indexes
+           every document as "documents", so a search of other sections
+           skips it. :)
+        "frus-docs": if (empty($category) or $category = "documents") then collection($srch:FRUS_COL) else (),
         "fields": map { "fields": ("hsg-date-min", "hsg-fulltext", "hsg-url") },
         "facets": map { "facets": $facets },
         "query-string": $queryString,
@@ -174,7 +179,7 @@ declare %private function srch:query-sections($queryConfig as map(*)) as element
         collection("/db/apps/other-publications")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/conferences")//tei:div[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/hac")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection($srch:FRUS_COL)//tei:div[ft:query(., $queryString, $frusQueryOptions)],
+        $queryConfig?("frus-docs")//tei:div[ft:query(., $queryString, $frusQueryOptions)],
         collection("/db/apps/frus-history/articles")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/frus-history/documents")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/frus-history/monograph")//tei:div[ft:query(., $queryString, $queryOptions)],
@@ -263,7 +268,7 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
                 try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/conferences")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/hac")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($queryConf?("frus-docs")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/frus-history/articles")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/frus-history/documents")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/frus-history/monograph")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
