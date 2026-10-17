@@ -259,8 +259,19 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
                 if (exists($dateFilter)) then map { "filter-query": $dateFilter } else ()
             ))
             let $scored := (
-                try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                (: Over a parent collection whose sub-collections put the vector
+                   field on different elements, ft:query-vector uses only one
+                   sub-collection's configuration, and the other element returns
+                   nothing. other-publications is such a parent (tei:div in some
+                   sub-collections, tei:body in others), so it is queried one
+                   sub-collection at a time. Remove once eXist resolves the
+                   configuration per collection. :)
+                for $sub in xmldb:get-child-collections("/db/apps/other-publications")
+                let $docs := collection("/db/apps/other-publications/" || $sub)
+                return (
+                    try { srch:scored-vector-hits($docs//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                    try { srch:scored-vector-hits($docs//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () }
+                ),
                 try { srch:scored-vector-hits(collection("/db/apps/conferences")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/hac")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
