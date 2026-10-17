@@ -155,7 +155,7 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
         if ($dateCapable and exists($volumeIds)) then map { "frus-volume-id": $volumeIds } else ()
     ))
     return map {
-        "fields": map { "fields": ("hsg-date-min", "hsg-fulltext", "hsg-url") },
+        "fields": map { "fields": ("hsg-date-min", "hsg-url") },
         "facets": map { "facets": $facets },
         "query-string": $queryString,
         (: the date clause on its own, for the vector leg's filter-query :)
@@ -584,30 +584,51 @@ declare %private function srch:render-hit($hit as element()) as map(*) {
             case element(visit) return
                 $card("Visits By Foreign Leaders: " || string-join($hit/visitor, ", "), ())
             case element(trips) return
-                let $expanded := util:expand($hit)
-                let $count := count($expanded//exist:match/ancestor::trip)
-                return $card("Travels: " || string-join($hit/trip[1]/name, ", "), srch:meta-row("Matching Trips", $count))
+                $card("Travels: " || string-join($hit/trip[1]/name, ", "), srch:meta-row("Matching Trips", srch:matching-trips($hit)))
             case element(tei:div) return
                 if (ft:field($hit, "hsg-publication") = "frus" or starts-with(base-uri($hit), $srch:FRUS_COL)) then
                     map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit)))
                 else
                     $card(
                         normalize-space(string-join(($hit/tei:head)[1]//text()[not(./ancestor::tei:note)])),
-                        srch:keyword-row(util:expand($hit))
+                        srch:keyword-row($hit)
                     )
             case element(tei:body) return
                 $card(
                     normalize-space(string-join(($hit/ancestor::tei:TEI//tei:titleStmt/tei:title)[1])),
-                    srch:keyword-row(util:expand($hit))
+                    srch:keyword-row($hit)
                 )
             default return
                 map { "title": "Untitled result", "href": "#", "tags": (), "summary": () }
 };
 
-(:~ The "Keyword Results" row of the non-FRUS hit types, from their expanded matches. :)
-declare %private function srch:keyword-row($expanded as element()) as element()* {
-    let $snippets := srch:snippets($expanded, 60)
+(:~ The "Keyword Results" row of the non-FRUS tei:div and tei:body hits. The
+ : search queries the hsg-fulltext field, so the matches are marked in the
+ : field's stored text, as for FRUS; util:expand finds none. A package that
+ : doesn't store the field has no snippets. :)
+declare %private function srch:keyword-row($hit as element()) as element()* {
+    let $highlighted := ft:highlight-field-matches($hit, "hsg-fulltext")
+    let $snippets := $highlighted[1] ! srch:snippets(., 60)
     return if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else ()
+};
+
+(:~
+ : How many of a travels hit's trips match. The matches are marked in the
+ : stored hsg-fulltext values, one exist:field per value of the field's
+ : expression in travels' index configuration, with no trip around them. The
+ : same expression over the hit gives each value's trip, position by
+ : position. If the counts disagree (the configuration has changed), this
+ : counts matching values instead.
+ :)
+declare %private function srch:matching-trips($hit as element(trips)) as xs:integer {
+    let $values := ft:highlight-field-matches($hit, "hsg-fulltext")
+    let $sources := ($hit/trip/name, $hit/trip/country, $hit/trip/remarks, $hit/trip/locale)
+    let $matching := for $value at $i in $values where $value//exist:match return $i
+    return
+        if (count($values) eq count($sources)) then
+            count(distinct-values(for $i in $matching return generate-id($sources[$i]/parent::trip)))
+        else
+            count($matching)
 };
 
 (: ============== template-facing functions ============== :)
