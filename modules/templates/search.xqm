@@ -417,9 +417,12 @@ declare %private function srch:results($context as map(*)) as map(*) {
                 "results-vol-ids": $volIds,
                 "range-start": $range?start, "range-end": $range?end, "created": current-dateTime()
             }
+    (: The entry comes from the cache, so its maps are read with the lookup
+       operator: calling a cached map as a function ($orders($sortBy)) fails in
+       eXist when another request uses it at the same time. :)
     let $sorted :=
         if (map:contains($entry?orders, $sortBy)) then
-            $entry?orders($sortBy)
+            $entry?orders?($sortBy)
         else
             srch:order($entry?hits, $sortBy, $entry?fused)
     (: store the search, or the order it gained, for the next request :)
