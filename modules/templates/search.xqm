@@ -549,7 +549,7 @@ declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
     let $dateString := normalize-space(string-join($date//text()[not(./ancestor::tei:note)]))
     let $placeName := ($doc//tei:placeName)[1]
     let $placeNameString := normalize-space(string-join($placeName//text()[not(./ancestor::tei:note)]))
-    let $snippets := srch:snippets(ft:highlight-field-matches($doc, "hsg-fulltext"), 40)
+    let $snippets := ft:highlight-field-matches($doc, "hsg-fulltext")[1] ! srch:snippets(., 40)
     let $score := ft:score($doc)
     return map {
         "tags": if ($historical) then ($placeNameString, $dateString)[. ne ""] else (),
