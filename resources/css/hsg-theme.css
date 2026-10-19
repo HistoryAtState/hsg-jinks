@@ -1888,7 +1888,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 .hsg-similar__item {
-    margin-bottom: var(--uswds-space-1);
+    margin-bottom: var(--uswds-space-2);
     line-height: 1.35;
 }
 

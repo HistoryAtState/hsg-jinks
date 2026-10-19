@@ -817,7 +817,9 @@ declare %private function srch:text-row($hit as element(), $match as map(*), $wi
  : thousand characters, so a long division isn't read in full.
  :)
 declare %private function srch:opening($hit as element()) as element(span)? {
-    let $words := tokenize(normalize-space(substring(string($hit), 1, 4000)), " ")
+    (: the heading is already the card's title, and notes aren't prose :)
+    let $text := string-join(subsequence($hit//text()[not(ancestor::tei:head or ancestor::tei:note)], 1, 400))
+    let $words := tokenize(normalize-space(substring($text, 1, 4000)), " ")
     return
         if (exists($words)) then
             <span class="hsg-snippet">{
