@@ -207,7 +207,7 @@ declare %private function tags:taxonomy-entry-html($entry as element(tei:categor
  : hsg-shell's tags:load-tags/tags:list-tags/frus:hide-tags-if-empty trio,
  : collapsed into one function since this templating engine has no
  : %templates:wrap equivalent -- renders nothing (not an empty panel) when
- : the volume carries no tags.
+ : the volume carries no tags the taxonomy defines.
  :
  : Shown in the right sidebar as a USWDS in-page navigation list, with
  : hsg-shell's intro text (Figma node 4298-66246, OP#1478). Same server-side
@@ -215,7 +215,11 @@ declare %private function tags:taxonomy-entry-html($entry as element(tei:categor
  :)
 declare function tags:volume-tags-panel($context as map(*)) as element(nav)? {
     let $doc := $context?doc?content
+    (: Only terms the taxonomy defines: an unknown one has neither a label
+       nor a tag page (lgbtq-rights on frus1981-88v41 is commented out
+       upstream). :)
     let $terms := distinct-values($doc//tei:keywords[@scheme eq $tags:SCHEME]/tei:term)
+        [exists(tags:taxonomy-entry(.))]
     return
         if (empty($terms)) then ()
         else
