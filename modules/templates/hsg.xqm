@@ -1286,7 +1286,8 @@ declare %private function hsg:ebook-link($related as element()*, $type as xs:str
             <li>
                 <a class="usa-button usa-button--outline hsg-frus__download" href="{$href}" title="{$label} ({$size})">
                     <span class="hsg-frus__download-icon" aria-hidden="true"></span>
-                    {$label}<span class="usa-sr-only"> ({$size})</span>
+                    <span class="hsg-frus__download-label">{$label}</span>
+                    <span class="usa-sr-only"> ({$size})</span>
                 </a>
             </li>
 };

@@ -579,14 +579,20 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     width: 100%;
     margin: 0;
     padding-inline: var(--uswds-space-1);
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
+}
+
+/* Trimmed to the capitals, so the label's caps rather than its line box
+   centre against the icon (the line box has more room above them). */
+.hsg-frus__download-label {
+    text-box: trim-both cap alphabetic;
 }
 
 /* The USWDS file_download icon, in the button's own colour. */
 .hsg-frus__download-icon {
     flex: none;
-    width: 0.875rem;
-    height: 0.875rem;
+    width: 1rem;
+    height: 1rem;
     background-color: currentColor;
     mask: url("../images/usa-icons/file_download.svg") center / contain no-repeat;
 }
