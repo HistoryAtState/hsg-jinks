@@ -410,8 +410,12 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
     let $orderBy := page:parameter($context, "order-by", ())
     let $start := xs:integer((page:parameter($context, "start", "1"), "1")[1])
     let $perPage := xs:integer((page:parameter($context, "per-page", "10"), "10")[1])
+    (: a keyword typed while exploring starts a keyword search again :)
+    let $like := normalize-space(page:parameter($context, "like", ()))[. ne ""][not($q)]
+    (: without a keyword there is no relevance to sort by, except in a
+       "similar to" search, where relevance is nearness to the seed :)
     let $sortBy :=
-        if (not($q) and $sortByParam eq "relevance") then "date-asc"
+        if (not($q) and not($like) and $sortByParam eq "relevance") then "date-asc"
         else if ($orderBy eq "date") then "date-asc"
         else if (not($sortByParam)) then "relevance"
         else $sortByParam
@@ -421,8 +425,6 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
         else
             $within
     let $modeParam := normalize-space(page:parameter($context, "mode", "keyword"))
-    (: a keyword typed while exploring starts a keyword search again :)
-    let $like := normalize-space(page:parameter($context, "like", ()))[. ne ""][not($q)]
     let $mode := if ($like) then "similar" else if ($modeParam eq "hybrid") then "hybrid" else "keyword"
     return map {
         "like": $like,
@@ -558,7 +560,7 @@ declare %private function srch:similar-entry($p as map(*), $queryId as xs:string
     let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), (), $range?start, $range?end)
     let $vec := $seed ! srch:like-vector(.)
     let $seedId := $seed ! generate-id(.)
-    let $rows := if (exists($vec)) then srch:vector-neighbors($queryConf, $vec)[not(?id = $seedId)] else ()
+    let $rows := if (exists($vec)) then srch:vector-neighbors($queryConf, $vec)[not(.?id = $seedId)] else ()
     return map {
         "id": $queryId, "hits": $rows ! ?node, "fused": true(), "orders": map {},
         "semantic": srch:semantic-matches((), $rows),
@@ -857,7 +859,7 @@ declare function srch:results-summary($context as map(*)) as element(p) {
                     (: a "similar to" search names the hit it started from :)
                     $r?seed ! (
                         let $seed := srch:render-hit(., map { "keyword": false() })
-                        return (" most similar to ", <a href="{$context?context-path}{$seed?href}">{$seed?title}</a>)
+                        return (" most similar to ", <a href="{$context?context-path}{$seed?href}">{$seed?title}</a>, " ")
                     )
                 }
                 {
@@ -1370,17 +1372,6 @@ declare %private function srch:similar-documents($publicationId as xs:string, $d
                 1, $srch:SIMILAR_COUNT)
             let $store := if (exists($seed)) then cache:put($srch:SIMILAR_CACHE, $key, array { $list }) else ()
             return $list
-};
-
-(:~ A volume's short label, "1977–1980, Volume II, Human Rights and
- : Humanitarian Affairs", from the series statement of its root file. :)
-declare %private function srch:volume-label($publicationId as xs:string) as xs:string {
-    let $uri := $srch:FRUS_COL || "/data/frus-v2-data/" || $publicationId || "/" || $publicationId || ".xml"
-    let $series := if (doc-available($uri)) then doc($uri)/tei:TEI/tei:teiHeader//tei:seriesStmt else ()
-    let $parts := ($series/tei:title[@type = ("sub-series", "volume-number", "volume")]) ! normalize-space(.)
-    return
-        if (exists($parts)) then string-join($parts[. ne ""], ", ")
-        else $publicationId
 };
 
 (:~ The panel GET /api/similar/{publicationId}/{divisionId} returns. :)
