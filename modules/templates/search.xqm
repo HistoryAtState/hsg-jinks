@@ -1320,6 +1320,13 @@ declare variable $srch:SIMILAR_CACHE_CONFIG as map(*) := map {
 (:~ How many similar documents a document page lists. :)
 declare variable $srch:SIMILAR_COUNT as xs:integer := 8;
 
+(:~ How many candidates the panel asks the vector index for, before keeping
+ : the SIMILAR_COUNT nearest. Lucene's HNSW search explores only about k
+ : candidates, so asking for 12 missed better matches: on a FRUS sample, k=5
+ : kept 1 of the true top 5 for 2 of 10 queries, while k=100 cost no
+ : measurable time (6 to 10 ms either way). :)
+declare variable $srch:SIMILAR_CANDIDATES as xs:integer := 100;
+
 (:~
  : The "Similar documents" panel of a FRUS document page, for the sidebar
  : (srch:similar-loader). It loads after the page, through
@@ -1357,7 +1364,7 @@ declare %private function srch:similar-documents($publicationId as xs:string, $d
             let $opts := map { "facets": map { "frus-division-type": "document" } }
             let $hits :=
                 if (exists($vec)) then
-                    try { collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:SIMILAR_COUNT + 4, $opts)] } catch * { () }
+                    try { collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:SIMILAR_CANDIDATES, $opts)] } catch * { () }
                 else
                     ()
             let $list := subsequence(
