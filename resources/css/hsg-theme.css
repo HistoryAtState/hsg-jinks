@@ -1020,6 +1020,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     padding-block: var(--uswds-space-4);
 }
 
+@media (min-width: 40em) {
+    .hsg-historicaldocuments-nav {
+        padding-block: var(--uswds-space-8);
+    }
+}
+
 /* Figma sets this heading at 45.6px in Garamond: USWDS's 2xl heading size
    (40px) with Garamond's normalization (x1.14). This app's heading font is
    Merriweather, so it takes the same token with Merriweather's (x0.975),
@@ -1032,9 +1038,10 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-weight: 400;
     font-size: 1.95rem;
     line-height: 1.2;
-    border-bottom: 1px solid var(--uswds-color-base-lighter);
+    border-bottom: 1px solid var(--uswds-color-primary-lighter);
     padding-bottom: var(--uswds-space-2);
     margin-top: 0;
+    margin-bottom: var(--uswds-space-3);
 }
 
 @media (min-width: 40em) {
@@ -1073,12 +1080,10 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     }
 }
 
-/* align-self: start opts out of this grid's default row-stretch, which
-   (confirmed by DOM experiment) inflated only the first item of an uneven
-   wrapped row regardless of its content. Every card instead sizes from its
-   own min-height (below) rather than depending on stretch. */
-.hsg-historicaldocuments-nav-card {
-    align-self: start;
+/* The grid gap spaces the cards; the list's child selector outweighs
+   USWDS's margin on the last card (.usa-card:last-child, 2rem from tablet
+   width up), which made the last row taller than its cards. */
+.hsg-historicaldocuments-nav-cards > .hsg-historicaldocuments-nav-card {
     margin-bottom: 0;
     max-width: none;
     width: auto;
@@ -1092,24 +1097,39 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    band's text colour above, and covers both the heading link and the
    arrow's currentColor. */
 .hsg-historicaldocuments-nav-card .usa-card__container {
+    min-height: 8rem;
     margin: 0;
     background-color: var(--uswds-color-primary-darkest);
     border: 1px solid color-mix(in srgb, var(--uswds-color-base-lighter) 25%, transparent);
     color: var(--uswds-color-base-lighter);
 }
 
-/* Side by side, every card gets the same height budget (heading padding
-   2rem + the heading's min-height + body padding 2rem + arrow icon; still
-   free to grow for a longer label), since align-self: start opts it out of
-   the row stretch. Stacked on phones, each card keeps its own height. */
-@media (min-width: 30em) {
-    .hsg-historicaldocuments-nav-card .usa-card__container {
-        min-height: 12.5rem;
-    }
+/* Figma's card (4982:65461): 128px high, 24px padding all round, the
+   heading (Merriweather Bold 16px) at the top and the arrow at the bottom.
+   The cards of a row share its height; a longer label grows the row. */
+.hsg-historicaldocuments-nav-card .usa-card__header {
+    padding: var(--uswds-space-3) var(--uswds-space-3) 0;
+}
 
-    .hsg-historicaldocuments-nav-card .usa-card__heading {
-        min-height: 6.5rem;
-    }
+.hsg-historicaldocuments-nav-card .usa-card__heading {
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+.hsg-historicaldocuments-nav-card .usa-card__body {
+    display: flex;
+    align-items: flex-end;
+    padding: var(--uswds-space-2) var(--uswds-space-3) var(--uswds-space-3);
+}
+
+/* Figma's arrow (images/hsg-card-arrow.svg) as a mask, so it takes the
+   card's text colour rather than its own low-contrast blue (OP#1400). */
+.hsg-historicaldocuments-nav-card__arrow {
+    display: block;
+    width: 24.75px;
+    height: 11.05px;
+    background-color: currentColor;
+    mask: url("../images/hsg-card-arrow.svg") no-repeat center / contain;
 }
 
 .hsg-historicaldocuments-nav-card .usa-card__heading a {
@@ -1121,19 +1141,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     text-decoration: underline;
 }
 
-/* No arrow-specific rule needed: the arrow is now the real USWDS icon
-   sprite (.usa-icon, styles.css) rather than a custom glyph, and that
-   class already does fill: currentColor + a 1em square - it inherits the
-   same colour fix as the card's own link text (usa-card__container's
-   color below) instead of needing a second, separate override the way
-   the ticket's original arrow (bound to a stray link-colour token) did. */
-
 /* The highlighted "All Historical Documents" card - a light CTA variant
    among the otherwise dark cards, per the Figma design. */
 .hsg-historicaldocuments-nav-card--highlight .usa-card__container {
-    background-color: var(--uswds-color-base-lighter);
-    border-color: var(--uswds-color-base-lighter);
-    color: var(--uswds-color-primary-dark);
+    background-color: var(--uswds-color-primary-lighter);
+    border-color: var(--uswds-color-primary-lighter);
+    color: var(--uswds-color-ink);
 }
 
 /* ==========================================================================
