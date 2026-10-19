@@ -597,10 +597,24 @@ describe("search landing page layout and shared sidebar (OP#1436)", () => {
 // Hybrid mode: Lucene + eXist vector KNN (FRUS pilot). Default remains
 // keyword; mode=hybrid is opt-in. See .cursor/plans/semantic-search-mvp.md.
 describe("hybrid search mode (semantic MVP)", () => {
-    it("landing form exposes keyword and hybrid mode radios; keyword is default", () => {
+    it("landing form offers hybrid mode as one checkbox, unticked by default (OP#1473)", () => {
         cy.visit("search");
-        cy.get("#mode-keyword").should("exist").and("be.checked");
-        cy.get("#mode-hybrid").should("exist").and("not.be.checked");
+        cy.get("#mode-hybrid").should("have.attr", "type", "checkbox").and("not.be.checked");
+        cy.get("label[for='mode-hybrid']").should("have.text", "Use the new hybrid mode with semantic search");
+        cy.get("input[name='mode']").should("have.length", 1);
+    });
+
+    it("ticking the checkbox searches in hybrid mode, unticking goes back to keyword", () => {
+        cy.visit("search?q=Kissinger&within=documents");
+        // USWDS draws the box on the label and hides the input itself.
+        cy.get("label[for='mode-hybrid']").click();
+        cy.get("#hsg-search button[type='submit']").click();
+        cy.location("search").should("include", "mode=hybrid");
+        cy.get("#mode-hybrid").should("be.checked");
+        cy.get("label[for='mode-hybrid']").click();
+        cy.get("#hsg-search button[type='submit']").click();
+        cy.location("search").should("not.include", "mode=");
+        cy.get("#mode-hybrid").should("not.be.checked");
     });
 
     it("mode=hybrid with FRUS scope returns results and keeps hybrid selected", () => {
@@ -615,7 +629,7 @@ describe("hybrid search mode (semantic MVP)", () => {
         cy.request("search?q=Kissinger&within=documents&mode=not-a-mode")
             .its("status").should("eq", 200);
         cy.visit("search?q=Kissinger&within=documents&mode=not-a-mode");
-        cy.get("#mode-keyword").should("be.checked");
+        cy.get("#mode-hybrid").should("not.be.checked");
         cy.get(".usa-collection__item").should("have.length.at.least", 1);
     });
 
