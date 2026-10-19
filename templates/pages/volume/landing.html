@@ -7,19 +7,28 @@
                 "https://history.state.gov/ns/templates/tags": { "at": "modules/templates/tags.xqm", "prefix": "tags" }
             },
             "extends": "templates/layouts/historicaldocuments-content.html"
+        },
+        "theme": {
+            "layout": {
+                "before": {
+                    "hidden": true
+                }
+            }
         }
     }
     ---
+    [# Figma node 4298-66032 (OP#1478): the volume on a white card, and one
+       right-hand sidebar with ways to explore, tags and administrations; no
+       left sidebar. #]
     [[ hsg:volume-landing-content($context) ]]
-
-    [% template before %]
-    [% if exists($context?doc) %]
-    [[ hsg:volume-toc($context) ]]
-    [[ tags:volume-tags-panel($context) ]]
-    [% endif %]
-    [% endtemplate %]
 
     [% template after %]
     [[ hsg:volume-ways-to-explore($context) ]]
+    [% if exists($context?doc) %]
+    [[ tags:volume-tags-panel($context) ]]
+    [% endif %]
+    <nav aria-label="Administrations" class="hsg-frus__administrations">
+        [[ hsg:administrations-panel($context) ]]
+    </nav>
     [% endtemplate %]
 </template>

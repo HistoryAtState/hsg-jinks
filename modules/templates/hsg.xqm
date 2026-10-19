@@ -930,133 +930,219 @@ declare function hsg:volume-landing-content($context as map(*)) {
            each get flex: 1 (resources/css/layout.css, .sticky-layout > main
            > *), so returning these as siblings lays them out as columns
            instead of stacking them -- same pitfall templates/pages/
-           historicaldocuments.html's own comment warns about. :)
+           historicaldocuments.html's own comment warns about.
+
+           Card layout after Figma node 4298-66114 (OP#1478): tags and title,
+           then cover and metadata side by side, then the contents. :)
         return
-            <div class="hsg-frus__landing">
-                <h1>{$title}</h1>
-                {hsg:volume-cover($doc, $volume-id, $title)}
-                <div class="hsg-frus__meta">
-                    {hsg:volume-editors($titleStmt)}
-                    {hsg:volume-published-info($publicationStmt)}
+            <article class="hsg-frus__landing">
+                <header class="hsg-frus__landing-header">
+                    {hsg:volume-administration-tags($doc)}
+                    <h1>{$title}</h1>
+                </header>
+                <div class="hsg-frus__landing-intro">
+                    {hsg:volume-cover($doc, $volume-id, $title)}
+                    <div class="hsg-frus__landing-summary">
+                        <dl class="hsg-frus__meta">
+                            {hsg:volume-editors($titleStmt)}
+                            {hsg:volume-published-info($publicationStmt)}
+                        </dl>
+                        {hsg:volume-open-link($context)}
+                    </div>
                 </div>
                 {hsg:volume-landing-toc($context)}
-            </div>
+            </article>
 };
 
 (:~
- : The volume's cover image, if it has one. Reference parity with hsg-shell
- : (fh:cover-uri): the URL is built from the volume id rather than read from
- : notesStmt's own @target -- matches the data in practice, and is what the
- : reference site does. Gated on the *volume-scoped* jpg relatedItem's
+ : The administrations a volume covers, as USWDS tags above its title. Labels
+ : come from the administrations taxonomy: the combined entry where there is
+ : one ("Richard M. Nixon and Gerald R. Ford Administrations"), else the
+ : single presidency's.
+ :)
+declare %private function hsg:volume-administration-tags($doc as node()) as element(ul)? {
+    let $labels :=
+        for $id in $doc//tei:keywords[@scheme = '#frus-administration-coverage']/tei:term
+        let $category := hsg:administration(normalize-space($id))
+        return normalize-space((
+            $category/tei:catDesc[@n = 'combined'],
+            $category/tei:catDesc
+        )[1]/tei:term)[. ne '']
+    return
+        if (empty($labels)) then ()
+        else
+            <ul class="hsg-frus__tags">
+            {
+                for $label in distinct-values($labels)
+                return <li><span class="usa-tag">{$label}</span></li>
+            }
+            </ul>
+};
+
+(:~
+ : The volume's cover image in its square frame, if it has one. Reference
+ : parity with hsg-shell (fh:cover-uri): the URL is built from the volume id
+ : rather than read from notesStmt's own @target -- matches the data in
+ : practice, and is what the reference site does. Gated on the *volume-scoped* jpg relatedItem's
  : existence (@corresp = "#" || the volume id, as fh:exists-cover-image
  : does; see hsg:volume-ways-to-explore on why the bare @type is not
  : enough), not the constructed URL's reachability, so a volume with no
  : cover renders no <img>, same as hsg-shell.
  :)
-declare %private function hsg:volume-cover($doc as node(), $volume-id as xs:string, $title as xs:string) as element(img)? {
+declare %private function hsg:volume-cover($doc as node(), $volume-id as xs:string, $title as xs:string) as element(div)? {
     if (exists($doc//tei:notesStmt/tei:relatedItem[@type = 'jpg'][@corresp = '#' || $volume-id])) then
-        <img class="hsg-frus__cover"
-            src="https://static.history.state.gov/frus/{$volume-id}/covers/{$volume-id}.jpg"
-            alt="Book Cover of {$title}"/>
+        <div class="hsg-frus__cover-frame">
+            <img class="hsg-frus__cover"
+                src="https://static.history.state.gov/frus/{$volume-id}/covers/{$volume-id}.jpg"
+                alt="Book Cover of {$title}"/>
+        </div>
     else ()
 };
 
 (:~
- : Editor / General Editor bylines. Reference parity with hsg-shell:
- : titleStmt/editor[@role='primary'] labeled "Editor:" ("Editors:" if more
- : than one), editor[@role='general'] labeled "General Editor:". Takes the
- : already-resolved titleStmt from hsg:volume-landing-content rather than
- : re-resolving it.
+ : Editor / General Editor rows of the metadata list. Reference parity with
+ : hsg-shell: titleStmt/editor[@role='primary'] labeled "Editor:"
+ : ("Editors:" if more than one), editor[@role='general'] labeled "General
+ : Editor:", one dd per name. Takes the already-resolved titleStmt from
+ : hsg:volume-landing-content rather than re-resolving it.
  :)
 declare %private function hsg:volume-editors($titleStmt as node()?) {
     let $primary := $titleStmt/tei:editor[@role = 'primary'][normalize-space(.) != '']
     let $general := $titleStmt/tei:editor[@role = 'general'][normalize-space(.) != '']
     return (
         if (exists($primary)) then (
-            <div class="hsg-frus__editor-label">{if (count($primary) gt 1) then 'Editors:' else 'Editor:'}</div>,
-            <ul class="hsg-list-editors">{for $editor in $primary return <li>{normalize-space($editor)}</li>}</ul>
+            <dt>{if (count($primary) gt 1) then 'Editors:' else 'Editor:'}</dt>,
+            for $editor in $primary return <dd>{normalize-space($editor)}</dd>
         ) else (),
         if (exists($general)) then (
-            <div class="hsg-frus__editor-label">General Editor:</div>,
-            <ul class="hsg-list-editors">{for $editor in $general return <li>{normalize-space($editor)}</li>}</ul>
+            <dt>General Editor:</dt>,
+            for $editor in $general return <dd>{normalize-space($editor)}</dd>
         ) else ()
     )
 };
 
 (:~
- : Publisher, place, and publication year. Reference parity with hsg-shell:
- : publicationStmt/publisher, /pubPlace, /date[@type='publication-date'] --
- : not the content-date range, which hsg-shell doesn't show here either.
+ : Publisher (with its place) and publication year rows of the metadata
+ : list. Reference parity with hsg-shell: publicationStmt/publisher,
+ : /pubPlace, /date[@type='publication-date'] -- not the content-date range,
+ : which hsg-shell doesn't show here either.
  :)
 declare %private function hsg:volume-published-info($publicationStmt as node()?) {
     let $publisher := normalize-space($publicationStmt/tei:publisher)
     let $place := normalize-space($publicationStmt/tei:pubPlace)
     let $year := normalize-space($publicationStmt/tei:date[@type = 'publication-date'])
+    return (
+        if ($publisher != '' or $place != '') then (
+            <dt>Publisher:</dt>,
+            <dd class="hsg-frus__publisher">{
+                string-join(($publisher, $place)[. ne ''], ', ')
+            }</dd>
+        ) else (),
+        if ($year != '') then (
+            <dt>Publication year:</dt>,
+            <dd class="hsg-frus__pubdate">{$year}</dd>
+        ) else ()
+    )
+};
+
+(:~
+ : The "Open" call to action: the volume's first published division in its
+ : body (the first chapter or compilation), falling back to the first one
+ : anywhere for a volume without a body division. None for a volume with no
+ : published content, which also has no table of contents.
+ :)
+declare %private function hsg:volume-open-link($context as map(*)) as element(a)? {
+    let $doc := $context?doc?content
+    let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
+    let $divisions := hsg:toc-divisions($publication)
+    let $text := $doc/tei:TEI/tei:text
+    let $target := (
+        ($text/tei:body//xi:include, $text//xi:include)
+            [map:contains($divisions, string(@xpointer))]
+            [not(ends-with(normalize-space(($divisions(string(@xpointer))//tei:bibl[@type = 'frus-division-type'])[1]), '-pending'))]
+    )[1]/@xpointer/string()
     return
-        <div class="hsg-frus__published">
-            {if ($publisher != '') then <span class="hsg-frus__publisher">{$publisher}</span> else ()}
-            {if ($place != '') then <span class="hsg-frus__pubplace">{$place}</span> else ()}
-            {if ($year != '') then <span class="hsg-frus__pubdate">{$year}</span> else ()}
-        </div>
+        if (exists($target) and hsg:volume-published($publication)) then
+            <a class="usa-button hsg-frus__open" href="{$context?context-path}/historicaldocuments/{$publication}/{$target}">Open</a>
+        else ()
+};
+
+declare %private function hsg:volume-published($publication as xs:string) as xs:boolean {
+    doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
+        //tei:revisionDesc/@status = ("published", "partially-published")
 };
 
 (:~
  : The volume landing page's own table of contents, in main content rather
- : than the sidebar (#1080): front matter flat, the compilation with its
- : chapters nested beneath (each annotated with its document range,
- : reference parity with hsg-shell), then back matter. Documents are never
- : listed.
+ : than the sidebar (#1080), in two columns (Figma node 4298-66154,
+ : OP#1478): "Content" lists the body, the compilation with its chapters
+ : nested beneath, each annotated with its document range (reference parity
+ : with hsg-shell); "Other links" lists the front and back matter. Documents
+ : are never listed.
  :
  : Reuses hsg:toc-divisions -- the same generic, whole-collection map -- but
  : not hsg:toc-entries: this shape is a plain nested list with document
  : ranges, not a usa-sidenav with a "current page" highlight (every entry is
  : equally "not current" on the landing page).
- :
- : Walks text//xi:include (front, body, and back all live under one <text>),
- : not text/body//xi:include like the ODD model this replaces did -- that
- : hardcoded "body" is why front and back matter never appeared before.
  :)
-declare function hsg:volume-landing-toc($context as map(*)) as element(ul)? {
+declare function hsg:volume-landing-toc($context as map(*)) as element(div)? {
     let $doc := $context?doc?content
     return
     if (not(exists($doc))) then ()
     else
         let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
+        let $divisions := hsg:toc-divisions($publication)
+        let $text := $doc/tei:TEI/tei:text
         (: A volume with no published content at all ('being-cleared' etc.)
            gets no TOC: the reference suppresses it wholesale and the
            interior URLs 404 (OP#1337). Partially-published volumes list
            everything, pending divisions marked (see the entry builder). :)
-        let $published := doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
-            //tei:revisionDesc/@status = ("published", "partially-published")
-        let $entries :=
+        let $published := hsg:volume-published($publication)
+        let $content :=
             if ($published) then
-                hsg:landing-toc-entries($doc/tei:TEI, hsg:toc-divisions($publication), $publication, $context)
+                hsg:landing-toc-entries($text/tei:body//xi:include, $divisions, $publication, $context)
+            else ()
+        let $other :=
+            if ($published) then
+                hsg:landing-toc-entries($text/(tei:front | tei:back)//xi:include, $divisions, $publication, $context)
             else ()
         return
-            (: emit no ul at all rather than an empty one :)
-            if (exists($entries)) then
-                <ul class="hsg-frus__toc">{$entries}</ul>
+            (: emit no list at all rather than an empty one :)
+            if (exists(($content, $other))) then
+                <div class="hsg-frus__landing-contents">
+                    {hsg:landing-toc-column('hsg-frus-toc-content', 'Content', $content)}
+                    {hsg:landing-toc-column('hsg-frus-toc-other', 'Other links', $other)}
+                </div>
             else ()
 };
 
-declare %private function hsg:landing-toc-entries($division as element(tei:TEI)?, $divisions as map(*),
-        $publication as xs:string, $context as map(*)) {
-    for $include in $division//tei:text//xi:include
+declare %private function hsg:landing-toc-column($id as xs:string, $heading as xs:string, $entries as element(li)*) as element(section)? {
+    if (empty($entries)) then ()
+    else
+        <section class="hsg-frus__landing-toc" aria-labelledby="{$id}">
+            <h2 class="hsg-frus__label" id="{$id}">{$heading}</h2>
+            <ul class="hsg-frus__toc">{$entries}</ul>
+        </section>
+};
+
+declare %private function hsg:landing-toc-entries($includes as element(xi:include)*, $divisions as map(*),
+        $publication as xs:string, $context as map(*)) as element(li)* {
+    for $include in $includes
     let $id := $include/@xpointer/string()
     where map:contains($divisions, $id)
     let $included := $divisions($id)
     (: hsg-shell inserts a <br/> between date-range title and subtitle here
        too; shared logic in hsg:split-title (OP#1085). :)
     let $title := hsg:split-title($included//tei:fileDesc//tei:titleStmt/tei:title)
-    let $range-label := hsg:document-range-label(hsg:document-range($included))
+    let $range := hsg:document-range-text(hsg:document-range($included))
     (: Unpublished division: listed but marked; same reasoning as
        hsg:toc-entries (OP#1337). :)
     let $is-pending := ends-with(normalize-space(($included//tei:bibl[@type='frus-division-type'])[1]), '-pending')
-    let $children := hsg:landing-toc-entries($included, $divisions, $publication, $context)
+    let $children := hsg:landing-toc-entries($included//tei:text//xi:include, $divisions, $publication, $context)
     return
         <li class="{if ($is-pending) then 'pending' else ''}">
             <a href="{$context?context-path}/historicaldocuments/{$publication}/{$id}">{$title}</a>
-            {$range-label}
+            {if (exists($range)) then (' ', <span class="hsg-frus__doc-range">{$range}</span>) else ()}
             {if (exists($children)) then <ul>{$children}</ul> else ()}
         </li>
 };
@@ -1113,20 +1199,21 @@ declare %private function hsg:leading-document-number($include as element(xi:inc
 };
 
 declare %private function hsg:document-range-label($range as xs:string*) as xs:string? {
+    hsg:document-range-text($range) ! (' (' || . || ')')
+};
+
+declare %private function hsg:document-range-text($range as xs:string*) as xs:string? {
     if (count($range) != 2 or $range[1] = '' or $range[2] = '') then ()
-    else if ($range[1] = $range[2]) then ' (Document ' || $range[1] || ')'
-    else ' (Documents ' || $range[1] || '–' || $range[2] || ')'
+    else if ($range[1] = $range[2]) then 'Document ' || $range[1]
+    else 'Documents ' || $range[1] || '–' || $range[2]
 };
 
 (:~
  : The volume landing page's "Ways to Explore" sidebar panel, rendered into
  : the layout's `after` (right-hand) block by templates/pages/volume/
- : landing.html: search-within-volume, ebook downloads with sizes, and the
- : GPO bookstore link. Reference parity with hsg-shell.
- :
- : Points at /search (#1102, not yet merged as of writing) -- the route
- : won't resolve until that PR lands, the normal state for a route built
- : ahead of a dependency in this repo's parallel-PR workflow.
+ : landing.html: search within the volume and ebook downloads as outline
+ : buttons (Figma node 4298-66234, OP#1478). The search lands on the
+ : documents results filtered to this volume.
  :
  : Each ebook link is independently gated on its own relatedItem's
  : existence (fh:exists-epub/-mobi/-pdf in hsg-shell), so a volume missing
@@ -1148,40 +1235,43 @@ declare function hsg:volume-ways-to-explore($context as map(*)) {
            Without the gate the ebook links below select all 562 and die
            with a cardinality error. :)
         let $related := $doc//tei:notesStmt/tei:relatedItem[@corresp = '#' || $volume-id]
+        let $downloads := (
+            hsg:ebook-link($related, 'epub', 'EPUB'),
+            hsg:ebook-link($related, 'mobi', 'Mobi'),
+            hsg:ebook-link($related, 'pdf', 'PDF')
+        )
         return
-            <div class="hsg-panel hsg-frus__ways-to-explore">
-                <h2 class="hsg-sidebar-title">
+            <div class="hsg-frus__ways-to-explore">
+                <h2 class="hsg-frus__sidebar-title">
                     <pb-i18n key="historicaldocuments.waysToExplore">Ways to Explore</pb-i18n>
                 </h2>
-                <form action="{$context?context-path}/search" method="GET" class="usa-search usa-search--small" role="search">
-                    <label class="usa-sr-only" for="frus-search-q">
-                        <pb-i18n key="search.search">Search</pb-i18n>
+                <div class="hsg-frus__explore-item">
+                    <label class="hsg-frus__label" for="frus-search-q">
+                        <pb-i18n key="historicaldocuments.searchInsideVolume">Search inside this volume</pb-i18n>
                     </label>
-                    <p><pb-i18n key="historicaldocuments.searchInsideVolume">Search inside this volume</pb-i18n></p>
-                    <input id="frus-search-q" class="usa-input" name="q" type="search"/>
-                    <button class="usa-button" type="submit">
-                        <pb-i18n key="search.search">Search</pb-i18n>
-                    </button>
-                    <input name="volume-id" type="hidden" value="{$volume-id}"/>
-                </form>
-                <ul class="hsg-list-group hsg-frus__downloads">
-                    <li>
-                        <pb-i18n key="historicaldocuments.download">Download:</pb-i18n>
-                        <ul class="hsg-ebook-list">
-                            {hsg:ebook-link($related, 'epub', 'EPUB')}
-                            {hsg:ebook-link($related, 'mobi', 'Mobi')}
-                            {hsg:ebook-link($related, 'pdf', 'PDF')}
-                        </ul>
-                    </li>
-                    <li>
-                        <pb-i18n key="historicaldocuments.browseGpoPrefix">Browse the</pb-i18n>
-                        {' '}<a href="https://bookstore.gpo.gov/catalog/foreign-relations-united-states-series-frus">U.S. Government Bookstore (GPO)</a>
-                    </li>
-                </ul>
+                    <form action="{$context?context-path}/search" method="GET" class="usa-search usa-search--small" role="search">
+                        <input id="frus-search-q" class="usa-input" name="q" type="search"/>
+                        <button class="usa-button" type="submit">
+                            <img src="{$context?context-path}/resources/images/usa-icons-bg/search--white.svg" class="usa-search__submit-icon" alt="Search"/>
+                        </button>
+                        <input name="within" type="hidden" value="documents"/>
+                        <input name="volume-id" type="hidden" value="{$volume-id}"/>
+                    </form>
+                </div>
+                {
+                    if (empty($downloads)) then ()
+                    else
+                        <div class="hsg-frus__explore-item">
+                            <h3 class="hsg-frus__label" id="frus-downloads">
+                                <pb-i18n key="historicaldocuments.downloadHeading">Download</pb-i18n>
+                            </h3>
+                            <ul class="hsg-frus__downloads" aria-labelledby="frus-downloads">{$downloads}</ul>
+                        </div>
+                }
             </div>
 };
 
-declare %private function hsg:ebook-link($related as element()*, $type as xs:string, $label as xs:string) {
+declare %private function hsg:ebook-link($related as element()*, $type as xs:string, $label as xs:string) as element(li)? {
     (: [1]: callers pass the volume-scoped relatedItems, so one per type is
        expected; take the first regardless rather than let stray duplicate
        encoding turn a download link into a 500. :)
@@ -1191,9 +1281,13 @@ declare %private function hsg:ebook-link($related as element()*, $type as xs:str
     else
         let $href := ($item//tei:ref/@target/string())[1]
         let $bytes := ($item//tei:measure/@quantity)[1] ! xs:integer(.)
+        let $size := hsg:bytes-to-readable($bytes)
         return
             <li>
-                <a class="hsg-link-button" href="{$href}">{$label} (<span>{hsg:bytes-to-readable($bytes)}</span>)</a>
+                <a class="usa-button usa-button--outline hsg-frus__download" href="{$href}" title="{$label} ({$size})">
+                    <span class="hsg-frus__download-icon" aria-hidden="true"></span>
+                    {$label}<span class="usa-sr-only"> ({$size})</span>
+                </a>
             </li>
 };
 

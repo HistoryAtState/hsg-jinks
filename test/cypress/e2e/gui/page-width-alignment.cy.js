@@ -56,13 +56,15 @@ describe("page-width alignment", () => {
         });
     });
 
-    it("breadcrumb-to-H1 gap matches main's own padding-top (not doubled by the H1's margin)", () => {
+    // The volume landing's first content is its card (OP#1478), which holds
+    // the H1 below the administration tags.
+    it("breadcrumb-to-content gap matches main's own padding-top (not doubled by a margin)", () => {
         cy.visit(VOLUME);
         cy.get("main").then(($main) => {
             const rect = $main[0].getBoundingClientRect();
             const paddingTop = parseFloat(getComputedStyle($main[0]).paddingTop);
             const expectedH1Top = rect.top + paddingTop;
-            cy.get("main h1")
+            cy.get("main .hsg-frus__landing")
                 .then(($h1) => $h1[0].getBoundingClientRect().top)
                 .should("be.closeTo", expectedH1Top, 1);
         });

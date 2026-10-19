@@ -366,48 +366,235 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     display: contents;
 }
 
-/* Volume landing page (#1080): cover image, editor/publisher block, a
-   divider before the table of contents, and the "Ways to Explore" sidebar
-   panel -- reference parity with hsg-shell's _frus.scss. */
-.hsg-frus__cover {
-    display: block;
-    max-width: 220px;
-    height: auto;
-    margin: var(--uswds-space-105) 0;
+/* Volume landing page (#1080, layout after Figma node 4298-66032, OP#1478):
+   the volume on a white card, cover and metadata side by side, then the
+   contents in two columns; one right-hand sidebar without panel chrome.
+   The page is told apart by its card: a layout class set in the page
+   template does not reach pb-page, the parent layout's own class wins. */
+.sticky-layout:has(> main .hsg-frus__landing) > :is(.before, .before-top) {
+    display: none;
 }
 
-/* On wider screens the cover floats left and the editor/publisher metadata
-   flows to its right, reference parity with hsg-shell (_frus.scss: cover
-   float:left, following block to the right, TOC clears). */
-@media (min-width: 30em) {
-    .hsg-frus__cover {
-        float: left;
-        margin: var(--uswds-space-105) var(--uswds-space-4) var(--uswds-space-105) 0;
-    }
+.sticky-layout:has(> main .hsg-frus__landing) > :is(.after, .after-top) {
+    background-color: transparent;
+    border-left: 0;
+    padding: 0 0 var(--uswds-space-6);
+    gap: var(--uswds-space-3);
 }
 
-.hsg-frus__meta {
-    margin-bottom: var(--uswds-space-105);
+.hsg-frus__landing {
+    display: flex;
+    flex-direction: column;
+    gap: var(--uswds-space-5);
+    margin-block-end: var(--uswds-space-6);
+    padding: var(--uswds-space-3);
+    background-color: var(--uswds-color-white);
+    border-radius: var(--uswds-space-1);
+}
+
+.hsg-frus__landing-header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--uswds-space-2);
+}
+
+.hsg-frus__landing h1 {
+    margin: 0;
+    font-family: var(--uswds-font-heading);
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.hsg-frus__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--uswds-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hsg-frus__tags .usa-tag {
+    background-color: var(--uswds-color-body-background);
+    color: var(--uswds-color-primary-dark);
+}
+
+.hsg-frus__landing-intro {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: var(--uswds-space-3);
+}
+
+/* A square frame, the cover centred in it at half its width. */
+.hsg-frus__cover-frame {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    background-color: var(--uswds-color-body-background);
+    border-radius: var(--uswds-space-1);
     overflow: hidden;
 }
 
-.hsg-frus__editor-label {
+.hsg-frus__cover {
+    display: block;
+    width: 50%;
+    height: auto;
+}
+
+.hsg-frus__landing-summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--uswds-space-3);
+}
+
+/* Label/value rows: a fixed label column, every value in the second one. */
+.hsg-frus__meta {
+    display: grid;
+    grid-template-columns: 8.75rem 1fr;
+    gap: var(--uswds-space-05) var(--uswds-space-2);
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.hsg-frus__meta dt {
+    grid-column: 1;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--uswds-color-primary);
+}
+
+.hsg-frus__meta dd {
+    grid-column: 2;
+    margin: 0;
+    line-height: 1.62;
+    color: var(--uswds-color-base-darker);
+}
+
+.hsg-frus__open.usa-button {
+    width: 100%;
+    margin: 0;
+    background-color: var(--uswds-color-primary-darker);
+}
+
+.hsg-frus__open.usa-button:hover {
+    background-color: var(--uswds-color-primary-darkest);
+}
+
+/* Small grey section labels: the contents columns, the sidebar groups. */
+.hsg-frus__label {
+    display: block;
+    margin: 0;
+    font-family: var(--uswds-font-ui);
+    font-size: 0.875rem;
     font-weight: 700;
-    margin-top: var(--uswds-space-1);
-}
-
-.hsg-list-editors {
-    margin: 0 0 var(--uswds-space-1);
-    padding-left: var(--uswds-space-205);
-}
-
-.hsg-frus__published {
-    margin-top: var(--uswds-space-105);
+    line-height: 1.3;
     color: var(--uswds-color-base-dark);
 }
 
-.hsg-frus__published > span {
-    display: block;
+.hsg-frus__landing-contents {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: var(--uswds-space-3) var(--uswds-space-5);
+}
+
+.hsg-frus__landing-toc .hsg-frus__label {
+    padding-bottom: var(--uswds-space-1);
+    border-bottom: 1px solid rgb(0 0 0 / 20%);
+}
+
+.hsg-frus__landing-toc .hsg-frus__toc {
+    clear: none;
+    margin: 0;
+    padding-top: var(--uswds-space-2);
+    border-top: 0;
+    font-size: 0.875rem;
+}
+
+.hsg-frus__landing-toc .hsg-frus__toc li {
+    margin-bottom: var(--uswds-space-1);
+    line-height: 1.62;
+}
+
+.hsg-frus__landing-toc .hsg-frus__toc a {
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.hsg-frus__landing-toc .hsg-frus__toc a:hover {
+    text-decoration: underline;
+}
+
+.hsg-frus__doc-range {
+    margin-left: var(--uswds-space-05);
+    color: var(--uswds-color-base-darker);
+}
+
+/* Sidebar: "Ways to Explore", then the tags and administrations lists. */
+.hsg-frus__ways-to-explore {
+    display: flex;
+    flex-direction: column;
+    gap: var(--uswds-space-105);
+}
+
+.hsg-frus__sidebar-title {
+    margin: 0 0 var(--uswds-space-105);
+    font-family: var(--uswds-font-heading);
+    font-size: 1.225rem;
+    line-height: 1.4;
+}
+
+.hsg-frus__explore-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--uswds-space-1);
+}
+
+.hsg-frus__ways-to-explore .usa-search .usa-input {
+    max-width: none;
+}
+
+.hsg-frus__ways-to-explore .usa-search .usa-button {
+    background-color: var(--uswds-color-primary-darker);
+}
+
+.hsg-frus__downloads {
+    display: flex;
+    gap: var(--uswds-space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hsg-frus__downloads > li {
+    flex: 1;
+}
+
+.hsg-frus__download.usa-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--uswds-space-1);
+    width: 100%;
+    margin: 0;
+    padding-inline: var(--uswds-space-1);
+    font-size: 0.875rem;
+}
+
+/* The USWDS file_download icon, in the button's own colour. */
+.hsg-frus__download-icon {
+    flex: none;
+    width: 0.875rem;
+    height: 0.875rem;
+    background-color: currentColor;
+    mask: url("../images/usa-icons/file_download.svg") center / contain no-repeat;
+}
+
+.after :is(.tags-panel, .hsg-frus__administrations) p {
+    margin: 0 0 var(--uswds-space-105);
+    font-size: 0.875rem;
+    line-height: 1.62;
 }
 
 /* The divider itself: a top border on the TOC that follows the cover/editor
@@ -793,10 +980,6 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-bottom: var(--uswds-space-1);
 }
 
-.hsg-frus__ways-to-explore .hsg-sidebar-title {
-    margin-top: 0;
-}
-
 /* Sidebar panels (FRUS History downloads and resources, ways to explore,
    documents on this page): same quiet chrome as the landing sidebar's
    ways-to-explore panel; consecutive panels get breathing room. */
@@ -826,19 +1009,9 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-top: var(--uswds-space-105);
 }
 
-.hsg-frus__ways-to-explore .usa-search {
-    margin-bottom: var(--uswds-space-105);
-}
-
-.hsg-ebook-list,
-.hsg-frus__downloads {
+.hsg-ebook-list {
     list-style: none;
     padding-left: 0;
-}
-
-.hsg-link-button {
-    display: inline-block;
-    margin: var(--uswds-space-1) 0;
 }
 
 /* Re-anchor USWDS's border-box inside the header's accordion nav. layout.css
