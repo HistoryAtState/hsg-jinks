@@ -75,6 +75,32 @@ if (bannerEnabled) {
             cy.get("#gov-banner-default").should("be.visible")
                 .and("contain.text", "Official websites use .gov");
         });
+
+        // Figma "USA Header" banner (I4336:64988;4159:47550): white text on
+        // blue-70v, "Here's how you know" in #73b3e7. Without the flag (see
+        // hsg-theme.css) the text, and the guidance below it, start at the
+        // logo's edge.
+        it("follows the theme's colours and lines up with the logo", () => {
+            cy.viewport(1440, 900);
+            cy.visit("index.html");
+            cy.get(".usa-banner").should("have.css", "background-color", "rgb(11, 71, 120)");
+            cy.get(".usa-banner__header-text").should("have.css", "color", "rgb(255, 255, 255)");
+            cy.get(".usa-banner__button-text").should("have.css", "color", "rgb(115, 179, 231)");
+            cy.get(".usa-logo").then(($logo) => {
+                const logoLeft = $logo[0].getBoundingClientRect().left;
+                cy.get(".usa-banner__header-text").should(($t) => {
+                    expect($t[0].getBoundingClientRect().left).to.be.closeTo(logoLeft, 1);
+                });
+                cy.get(".usa-banner__button").click();
+                cy.get(".usa-banner__content")
+                    .should("be.visible")
+                    .and("have.css", "color", "rgb(255, 255, 255)")
+                    .and("have.css", "background-color", "rgba(0, 0, 0, 0)");
+                cy.get(".usa-banner__icon").first().should(($i) => {
+                    expect($i[0].getBoundingClientRect().left).to.be.closeTo(logoLeft, 1);
+                });
+            });
+        });
     });
 } else {
     describe("government banner (disabled in config.json)", () => {

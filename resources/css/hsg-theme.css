@@ -224,9 +224,10 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 
 /* Closing band: the office wordmark left, its place in the department right. */
 /* The secondary section holds the policy row (layout "side-by-side"), set
-   off by a rule in the headings' light blue. */
+   off by a rule like the one above the header's navigation: full width, in
+   primary-dark (Figma footer 4319:43786, "USAGov" border). */
 .hsg-footer .usa-footer__secondary-section {
-    border-top: 1px solid var(--hsg-footer-heading);
+    border-top: 1px solid var(--uswds-color-primary-dark);
     margin-top: 0;
     padding-top: var(--uswds-space-3);
 }
@@ -303,36 +304,6 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     }
 }
 
-/* Government banner (OP#1412) sits on this theme's dark navy fill
-   (.usa-banner { background-color: #0b4778 } in components.css), but the
-   USWDS defaults for its contents assume the stock light gray fill instead:
-   .usa-banner__header text (#274863) and .usa-banner__button (background
-   #2e2e2e from the shared .usa-accordion__button rule, text #274863) end up
-   dark text on a dark ground, unreadable. Re-declared here with an extra
-   .usa-banner ancestor selector so these win over components.css regardless
-   of load order; the button's own hover/focus states already use a light
-   #e6e6e6 background with dark text and are unaffected. */
-.usa-banner .usa-banner__header,
-.usa-banner .usa-banner__header-action {
-    color: var(--uswds-color-white);
-}
-
-.usa-banner .usa-banner__button {
-    background-color: transparent;
-    color: var(--uswds-color-white);
-}
-
-/* The expanded accordion panel (.usa-banner__content) has no background of
-   its own in components.css -- it's transparent, so its dark ink text
-   (#274863, correct for a normal page background) inherited the same navy
-   fill as the header bar above it once that fill was set, and went
-   dark-on-dark just like the header text did. Stock USWDS keeps this panel
-   on a plain white background even when the header bar is themed; do the
-   same here rather than overriding every nested heading/paragraph color. */
-.usa-banner .usa-banner__content {
-    background-color: var(--uswds-color-white);
-}
-
 /* No flag in the banner, as on state.gov: the flag is part of the office
    logo right below it. */
 .usa-banner .usa-banner__header-flag {
@@ -347,31 +318,14 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--uswds-color-error-darker);
 }
 
-/* Department History monograph section pages (#1096/#1135, PR review) render
-   an explicit <h1> from the division's own <head> text (dh:monograph-
-   section-content) rather than relying on the ODD's own heading level for
-   it, which tracks the division's absolute nesting depth in the source
-   document and is inconsistent between a chapter and a subchapter. The ODD
-   still renders that same head as part of the division's normal content
-   (see dh:monograph-section-content's own docstring for why it can't be
-   suppressed at the ODD level); hidden here instead. Scoped to only the
-   entry-point division's own *first* child so nested subchapter heads,
-   rendered inline when viewing their parent chapter, stay visible -- not
-   scoped by tag name, since a division's own base-ODD "behaviour" (and so
-   its wrapper tag) depends on its structural position: a top-level chapter
-   (direct child of tei:body) renders as <section class="tei-div ...">, a
-   nested subchapter as <div class="tei-div ...">, same class either way.
-
-   Excludes .conf-content (#1099 PR review): conferences fixes the exact same
-   duplicate-heading problem differently, by renumbering headings in XQuery
-   (conf:shift-headings, modules/templates/conferences.xqm) rather than
-   emitting a second explicit heading to hide -- there is no duplicate to
-   suppress there, and this selector doesn't check tag name, so without the
-   exclusion it would hide conferences' now-correct (and only) heading
-   outright. Confirmed live during the same PR review: it was doing exactly
-   that to the document view's "Program"/"Vietnam Photo Gallery"/
-   "Post-Conference Reviews" headings before this exclusion was added. */
-.usa-prose:not(.conf-content) > .tei-div > :first-child.tei-head {
+/* Monograph section pages (about:monograph-section-content and the like)
+   render the division's head as an explicit <h1> and the transform renders
+   it again as the division's first child; hide that copy. Only where the
+   prose has its own <h1> before the division: content pages
+   (content-page.html) have none, their division head is the page title
+   (OP#1467). Nested subchapter heads stay visible. Conferences renumber
+   their headings instead (conf:shift-headings) and have no copy to hide. */
+.usa-prose:not(.conf-content) > h1 ~ .tei-div > :first-child.tei-head {
     display: none;
 }
 
@@ -1276,16 +1230,6 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    conferences) use usa-pagination and usa-collection too and keep their own
    look.
    ========================================================================== */
-
-/* Filter panel. The layout's sidebar column is the frame's 320px panel plus
-   its 32px gap to the results, so the gap is the panel's right margin. The
-   panel itself has no fill in the design: "Filter by" and the buttons sit on
-   the page background, only the filter groups are white boxes. */
-.hsg-search-filters {
-    margin-right: var(--uswds-space-4);
-    padding: var(--uswds-space-2);
-    color: var(--uswds-color-text);
-}
 
 /* The results take the whole content column (OP#1432): intro paragraph,
    search form, heading row, card list and pagination; so does the landing

@@ -100,10 +100,30 @@ declare function hsg:crumb($label as item()*, $href as xs:string?) as map(*) {
 };
 
 (:~
- : A crumb whose label is a translatable pb-i18n with an English fallback.
+ : The app's English translations, for hsg:crumb-i18n.
+ :)
+declare variable $hsg:i18n := json-doc($config:app-root || "/resources/i18n/app/en.json");
+
+(:~
+ : A crumb whose label is translated from an i18n key, with an English
+ : fallback. A key the app translates becomes data-i18n, which pb-page
+ : inserts as HTML, so the translation may carry markup (the italic Foreign
+ : Relations; pb-i18n renders text only, tei-publisher-components#406).
+ : data-i18n has no fallback, it shows a missing key as is, so any other key
+ : stays pb-i18n, which shows the English label.
  :)
 declare function hsg:crumb-i18n($key as xs:string, $label as xs:string?, $href as xs:string?) as map(*) {
-    hsg:crumb(<pb-i18n key="{$key}">{$label}</pb-i18n>, $href)
+    let $translation := fold-left(tokenize($key, '\.'), $hsg:i18n, function($entry, $step) {
+        if ($entry instance of map(*)) then $entry($step) else ()
+    })
+    return
+        hsg:crumb(
+            if ($translation instance of xs:string) then
+                <span data-i18n="{$key}">{$label}</span>
+            else
+                <pb-i18n key="{$key}">{$label}</pb-i18n>,
+            $href
+        )
 };
 
 (:~
@@ -449,6 +469,47 @@ declare %private function hsg:administrations() as element(tei:taxonomy)? {
 
 declare function hsg:administration($admin-id as xs:string) as element(tei:category)? {
     hsg:administrations()/tei:category[@xml:id = $admin-id]
+};
+
+(:~
+ : The recent administrations of the Administrations panel, with the panel's
+ : short labels, newest last. Kept here because the taxonomy has neither the
+ : short labels nor a notion of "recent" (OP#1475).
+ :)
+declare variable $hsg:recent-administrations := (
+    ["kennedy", "Kennedy Administration"],
+    ["johnson", "Johnson Administration"],
+    ["nixon-ford", "Nixon-Ford Administrations"],
+    ["carter", "Carter Administration"],
+    ["reagan", "Reagan Administration"],
+    ["bush-ghw", "G.H.W. Bush Administration"],
+    ["clinton", "Clinton Administration"],
+    ["bush-gw", "G.W. Bush Administration"]
+);
+
+(:~
+ : The Administrations panel of the Historical Documents sidebar (OP#1467),
+ : as on the reference: an intro, the recent administrations, a link to all
+ : of them. An administration missing from the taxonomy has no page and is
+ : left out (G.W. Bush, for now).
+ :)
+declare function hsg:administrations-panel($context as map(*)) as element()+ {
+    <h2 class="usa-in-page-nav__heading">Administrations</h2>,
+    <p>Browse official documents from the <em>Foreign Relations of the United States</em> series.</p>,
+    <h3 class="usa-in-page-nav__heading">Recent Administrations</h3>,
+    <ul class="usa-in-page-nav__list">
+    {
+        for $admin in $hsg:recent-administrations
+        where exists(hsg:administration($admin?1))
+        return
+            <li class="usa-in-page-nav__item usa-in-page-nav__item--primary">
+                <a href="{$context?context-path}/historicaldocuments/{$admin?1}">{$admin?2}</a>
+            </li>
+    }
+        <li class="usa-in-page-nav__item usa-in-page-nav__item--primary">
+            <a href="{$context?context-path}/historicaldocuments">All Administrations</a>
+        </li>
+    </ul>
 };
 
 (:~

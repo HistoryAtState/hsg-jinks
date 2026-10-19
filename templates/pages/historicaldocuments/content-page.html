@@ -24,6 +24,10 @@
     [[ hsg:breadcrumbs($context, hsg:section-trail("historicaldocuments", hsg:crumb-i18n("menu." || $context?page-id, hsg:content-title($context, $context?page-id), ()))) ]]
     [% endtemplate %]
 
+    [% template after %]
+    [[ hsg:administrations-panel($context) ]]
+    [% endtemplate %]
+
     [# One template for every data-driven static of the section (OP#1313, PR #50
        review): the content lives in data/content/{page-id}.xml, rendered
        through the default ODD; page-id arrives from hsgapi:content-page, and
