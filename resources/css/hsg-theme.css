@@ -385,6 +385,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-frus__landing {
     display: flex;
     flex-direction: column;
+    height: max-content;
     gap: var(--uswds-space-5);
     margin-block-end: var(--uswds-space-6);
     padding: var(--uswds-space-3);
