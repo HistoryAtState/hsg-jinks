@@ -72,6 +72,9 @@ declare variable $srch:EMBED_MODEL as xs:string := "all-MiniLM-L6-v2";
 declare variable $srch:VECTOR_K as xs:integer := 50;
 declare variable $srch:RRF_K as xs:integer := 60;
 
+(:~ Words of a semantic-only hit's opening shown on its card (srch:opening). :)
+declare variable $srch:OPENING_WORDS as xs:integer := 60;
+
 declare variable $srch:ft-query-options as map(*) := map {
     "default-operator": "and",
     "phrase-slop": 0,
@@ -257,8 +260,10 @@ declare %private function srch:scored-vector-hits($nodes as element()*) as map(*
  : KNN search, so the VECTOR_K nearest hits are all within the range. Left
  : out, the vector leg ignored the range: a 1985-only search returned 50
  : nearest hits from any year. Collections without the frus-search-date
- : fields then contribute nothing, as on the keyword leg. :)
-declare %private function srch:query-vector-sections($queryConf as map(*), $q as xs:string) as element()* {
+ : fields then contribute nothing, as on the keyword leg.
+ : Returns the hits as srch:scored-vector-hits rows, nearest first, so the
+ : cards can show each hit's similarity. :)
+declare %private function srch:query-vector-sections($queryConf as map(*), $q as xs:string) as map(*)* {
     if (normalize-space($q) eq "") then
         ()
     else
@@ -289,11 +294,30 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
             let $ranked :=
                 for $row in $scored
                 order by $row?score descending empty least, $row?id
-                return $row?node
+                return $row
             return subsequence($ranked, 1, $srch:VECTOR_K)
         } catch * {
             ()
         }
+};
+
+(:~
+ : What the semantic search found, for the cards: each vector hit's
+ : similarity, and whether the keyword search found it too, keyed by node id.
+ : The keyword copy of a hit found by both is the one RRF keeps, so its card
+ : has keyword matches to highlight; a hit found only by the semantic search
+ : has none, because it matched on one vector for the whole node, not on any
+ : words.
+ :)
+declare %private function srch:semantic-matches($lucene as element()*, $vector as map(*)*) as map(*) {
+    let $both := map:merge(
+        (($vector ! ?node) intersect $lucene) ! map:entry(generate-id(.), true())
+    )
+    return map:merge(
+        for $row in $vector
+        return map:entry($row?id, map { "score": $row?score, "keyword": map:contains($both, $row?id) }),
+        map { "duplicates": "use-first" }
+    )
 };
 
 (:~ Reciprocal Rank Fusion of two hit sequences (Lucene + vector). Both
@@ -405,7 +429,7 @@ declare %private function srch:results($context as map(*)) as map(*) {
                match for "famine relief" sat at position 199 of 465. :)
             let $fused :=
                 if (exists($vectorHits)) then
-                    srch:fuse-rrf(srch:sort($luceneHits, "relevance"), $vectorHits)
+                    srch:fuse-rrf(srch:sort($luceneHits, "relevance"), $vectorHits ! ?node)
                 else
                     $luceneHits
             let $volIds :=
@@ -413,6 +437,7 @@ declare %private function srch:results($context as map(*)) as map(*) {
                 catch * { () }
             return map {
                 "id": $queryId, "hits": $fused, "fused": exists($vectorHits), "orders": map {},
+                "semantic": srch:semantic-matches($luceneHits, $vectorHits),
                 "results-vol-ids": $volIds,
                 "range-start": $range?start, "range-end": $range?end, "created": current-dateTime()
             }
@@ -447,6 +472,7 @@ declare %private function srch:results($context as map(*)) as map(*) {
             "hit-count": $hitCount,
             "end": $p?start + count($window) - 1,
             "results-vol-ids": $entry?results-vol-ids,
+            "semantic": $entry?semantic,
             "took": $took,
             "range-start": $entry?("range-start"),
             "range-end": $entry?("range-end")
@@ -569,11 +595,11 @@ declare %private function srch:meta-list($rows as element()*) as element(dl)? {
 (:~
  : Card content for a FRUS division: the place and date chips and the
  : recorded/encoded date rows (historical documents only), the resource id,
- : and the keyword snippets and score. No facsimile link: search results
- : don't offer one (OP#1432, a business decision; the reference site didn't
- : show it either).
+ : and the snippets and scores. No facsimile link: search results don't
+ : offer one (OP#1432, a business decision; the reference site didn't show
+ : it either).
  :)
-declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
+declare %private function srch:frus-card($doc as element(tei:div), $match as map(*)) as map(*) {
     let $docId := $doc/@xml:id
     let $volId := root($doc)/tei:TEI/@xml:id
     (: the division subtype is a teiHeader bibl in this data model, not an
@@ -585,8 +611,6 @@ declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
     let $dateString := normalize-space(string-join($date//text()[not(./ancestor::tei:note)]))
     let $placeName := ($doc//tei:placeName)[1]
     let $placeNameString := normalize-space(string-join($placeName//text()[not(./ancestor::tei:note)]))
-    let $snippets := ft:highlight-field-matches($doc, "hsg-fulltext")[1] ! srch:snippets(., 40)
-    let $score := ft:score($doc)
     return map {
         "tags": if ($historical) then ($placeNameString, $dateString)[. ne ""] else (),
         "summary": srch:meta-list((
@@ -596,8 +620,10 @@ declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
                 if ($date/@when) then srch:meta-row("Encoded Date", <code>when="{string($date/@when)}"</code>) else ()
             ) else (),
             srch:meta-row("Resource ID", $volId/string() || "/" || $docId/string()),
-            if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else (),
-            if ($score) then srch:meta-row("Keyword Relevance", $score) else ()
+            srch:found-by-row($match),
+            srch:text-row($doc, $match, 40),
+            if ($match?keyword) then ft:score($doc)[boolean(.)] !srch:meta-row("Keyword Relevance", .) else (),
+            srch:similarity-row($match)
         ))
     }
 };
@@ -606,46 +632,110 @@ declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
  : What one hit renders as: title and href for the card heading, plus
  : "tags" (chips above the title) and "summary" (the metadata list), both
  : empty where a hit type has nothing to show. The href trusts the hsg-url Lucene field (module doc
- : above) except for the two element types with no such field.
+ : above) except for the two element types with no such field. $match says
+ : which searches found the hit (see srch:hit-match).
  :)
-declare %private function srch:render-hit($hit as element()) as map(*) {
+declare %private function srch:render-hit($hit as element(), $match as map(*)) as map(*) {
     let $href := ft:field($hit, "hsg-url")
     let $card := function($title as xs:string, $rows as element()*) as map(*) {
-        map { "title": $title, "href": $href, "tags": (), "summary": srch:meta-list($rows) }
+        map { "title": $title, "href": $href, "tags": (), "summary": srch:meta-list(($rows, srch:similarity-row($match))) }
     }
     return
         typeswitch ($hit)
             case element(persName) return
-                $card(string-join(($hit/forename, $hit/surname, $hit/genName), " "), ())
+                $card(string-join(($hit/forename, $hit/surname, $hit/genName), " "), srch:found-by-row($match))
             case element(visit) return
-                $card("Visits By Foreign Leaders: " || string-join($hit/visitor, ", "), ())
+                $card("Visits By Foreign Leaders: " || string-join($hit/visitor, ", "), srch:found-by-row($match))
             case element(trips) return
-                $card("Travels: " || string-join($hit/trip[1]/name, ", "), srch:meta-row("Matching Trips", srch:matching-trips($hit)))
+                $card("Travels: " || string-join($hit/trip[1]/name, ", "), (
+                    srch:found-by-row($match),
+                    if ($match?keyword) then srch:meta-row("Matching Trips", srch:matching-trips($hit)) else ()
+                ))
             case element(tei:div) return
                 if (ft:field($hit, "hsg-publication") = "frus" or starts-with(base-uri($hit), $srch:FRUS_COL)) then
-                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit)))
+                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit, $match)))
                 else
                     $card(
                         normalize-space(string-join(($hit/tei:head)[1]//text()[not(./ancestor::tei:note)])),
-                        srch:keyword-row($hit)
+                        (srch:found-by-row($match), srch:text-row($hit, $match, 60))
                     )
             case element(tei:body) return
                 $card(
                     normalize-space(string-join(($hit/ancestor::tei:TEI//tei:titleStmt/tei:title)[1])),
-                    srch:keyword-row($hit)
+                    (srch:found-by-row($match), srch:text-row($hit, $match, 60))
                 )
             default return
                 map { "title": "Untitled result", "href": "#", "tags": (), "summary": () }
 };
 
-(:~ The "Keyword Results" row of the non-FRUS tei:div and tei:body hits. The
- : search queries the hsg-fulltext field, so the matches are marked in the
- : field's stored text, as for FRUS; util:expand finds none. A package that
- : doesn't store the field has no snippets. :)
-declare %private function srch:keyword-row($hit as element()) as element()* {
-    let $highlighted := ft:highlight-field-matches($hit, "hsg-fulltext")
-    let $snippets := $highlighted[1] ! srch:snippets(., 60)
-    return if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else ()
+(:~
+ : Which searches found a hit: "keyword", and "semantic" with the hit's
+ : similarity when the semantic search found it. "hybrid" says the page ran
+ : both, so the cards say which found each hit. $semantic is the
+ : srch:semantic-matches map of the search, empty for a keyword search.
+ :)
+declare %private function srch:hit-match($hit as element(), $semantic as map(*)?, $hybrid as xs:boolean) as map(*) {
+    let $id := generate-id($hit)
+    (: a cached map: read with the lookup operator, as in srch:results :)
+    let $found := if (exists($semantic) and map:contains($semantic, $id)) then $semantic?($id) else ()
+    return map {
+        "hybrid": $hybrid,
+        "keyword": empty($found) or $found?keyword,
+        "semantic": $found?score
+    }
+};
+
+(:~ The "Found By" row of a hybrid search's cards. :)
+declare %private function srch:found-by-row($match as map(*)) as element()* {
+    if ($match?hybrid) then
+        srch:meta-row("Found By",
+            if (exists($match?semantic) and $match?keyword) then "Keyword and semantic search"
+            else if (exists($match?semantic)) then "Semantic search"
+            else "Keyword search")
+    else
+        ()
+};
+
+(:~ The "Semantic Similarity" row: the cosine similarity of the hit's
+ : embedding to the query's, for a hit the semantic search found. :)
+declare %private function srch:similarity-row($match as map(*)) as element()* {
+    $match?semantic ! srch:meta-row("Semantic Similarity", .)
+};
+
+(:~
+ : The text row of a tei:div or tei:body hit. A keyword match shows its
+ : "Keyword Results" snippets: the search queries the hsg-fulltext field, so
+ : the matches are marked in the field's stored text, as for FRUS;
+ : util:expand finds none. A package that doesn't store the field has no
+ : snippets. A hit only the semantic search found has no matches to show,
+ : so it shows the opening of its text instead (srch:opening).
+ :)
+declare %private function srch:text-row($hit as element(), $match as map(*), $width as xs:integer) as element()* {
+    if ($match?keyword) then
+        let $snippets := ft:highlight-field-matches($hit, "hsg-fulltext")[1] ! srch:snippets(., $width)
+        return if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else ()
+    else
+        srch:opening($hit) ! srch:meta-row("Semantic Match", .)
+};
+
+(:~
+ : The opening of a hit's text, the part its semantic match is based on.
+ : The packages embed each node's whole text with all-MiniLM-L6-v2, which
+ : reads only the first 128 tokens, about 100 words, and ignores the rest.
+ : So a semantic hit matched on its opening, whatever comes later. Shows
+ : $srch:OPENING_WORDS words of it, read from no more than the first few
+ : thousand characters, so a long division isn't read in full.
+ :)
+declare %private function srch:opening($hit as element()) as element(span)? {
+    let $words := tokenize(normalize-space(substring(string($hit), 1, 4000)), " ")
+    return
+        if (exists($words)) then
+            <span class="hsg-snippet">{
+                string-join(subsequence($words, 1, $srch:OPENING_WORDS), " ")
+                || (if (count($words) gt $srch:OPENING_WORDS) then " ..." else ())
+            }</span>
+        else
+            ()
 };
 
 (:~
@@ -701,7 +791,7 @@ declare function srch:results-list($context as map(*)) as element(ul) {
         <ul class="usa-collection hsg-results">
         {
             for $hit in $r?hits
-            let $rendered := srch:render-hit($hit)
+            let $rendered := srch:render-hit($hit, srch:hit-match($hit, $r?semantic, $r?mode eq "hybrid"))
             return
                 <li class="usa-collection__item">
                     <div class="usa-collection__body">
