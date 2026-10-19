@@ -598,9 +598,7 @@ declare function hsg:historicaldocuments-nav-cards($context as map(*)) {
                     </h3>
                 </div>
                 <div class="usa-card__body">
-                    <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
-                        <use href="{$context?context-path}/resources/images/sprite.svg#arrow_forward"/>
-                    </svg>
+                    <span class="hsg-historicaldocuments-nav-card__arrow" aria-hidden="true"></span>
                 </div>
             </div>
         </li>
