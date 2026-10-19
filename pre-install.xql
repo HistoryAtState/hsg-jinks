@@ -30,8 +30,10 @@ declare function local:mkcol($collection, $path) {
 
 (: Drop the cached search results ($srch:CACHE in modules/templates/search.xqm):
    they were computed by the previous version, and the first search after the
-   install creates the cache again with the current settings. :)
+   install creates the cache again with the current settings. The same
+   goes for each document's similar documents ($srch:SIMILAR_CACHE). :)
 cache:destroy("hsg-search"),
+cache:destroy("hsg-similar"),
 
 local:mkcol(repo:get-root(), replace($target, "^.*/([^/]+)$", "$1")),
 sm:chgrp(xs:anyURI($target), "tei"),

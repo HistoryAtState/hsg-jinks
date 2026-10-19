@@ -73,6 +73,17 @@
                         "example": "hybrid"
                     },
                     {
+                        "name": "like",
+                        "in": "query",
+                        "description": "Start a \"similar to\" search from one hit: the hit's file path below /db/apps and, for a division, \"#\" and its @xml:id (for example hac/hac.xml#june-1996), as the results' \"Similar documents\" links write it. Returns the hits whose embeddings are nearest the hit's, filtered by within and the dates. Ignored when q is present. An unknown or unsupported reference finds nothing.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 500
+                        },
+                        "example": "frus-data-jinks/data/frus-v2-data/frus1977-80v02/body/comp1/ch3/d216.xml#d216"
+                    },
+                    {
                         "name": "within",
                         "in": "query",
                         "description": "Section scope filter, repeatable. Known values (mapped to hsg-category/hsg-publication facets in the handler): entire-site, documents, department, countries, conferences, frus-history, about, retired. Deliberately NOT schema-enumerated: hsg-shell answers an unknown value with a normal 200 page and zero results (the value simply matches no facet), and legacy URLs must keep that behavior instead of a Roaster validation 400. Absent or entire-site means no scope filter; absent `within` combined with `start-date` or `volume-id` is treated as documents (compatibility with the retired frus-dates search engine).",
@@ -212,6 +223,51 @@
                     },
                     "400": {
                         "description": "The query guard rejected `q`: total length of all q values exceeds 1000 characters, or a value matches a SQL-injection signature (e.g. 'union all select', 'or 1=1', 'waitfor delay', stacked ';select', 'null,null'). Deliberately biased against false positives \u2014 bare 'union select Committee' or 'Nixon -- Kissinger' pass. Also returned by Roaster schema validation for malformed date/time/paging parameters (a documented tightening versus hsg-shell). Body is the site's HTML 400 error page; the handler's error handler must fix the status code the same way hsgapi:handle-error does.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/similar/{publicationId}/{divisionId}": {
+            "get": {
+                "summary": "Similar documents panel of a FRUS document page",
+                "description": "HTML fragment listing the FRUS documents whose hsg-embedding vectors are nearest the given document's, loaded after the page by the document sidebar's pb-load (srch:similar-loader). Empty when the document is unknown or has no neighbors. Results are cached per document (cache hsg-similar).",
+                "operationId": "searchapi:similar",
+                "x-error-handler": "hsg-errors:handle",
+                "tags": [
+                    "search"
+                ],
+                "parameters": [
+                    {
+                        "name": "publicationId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9._-]+$"
+                        },
+                        "example": "frus1977-80v02"
+                    },
+                    {
+                        "name": "divisionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9._-]+$"
+                        },
+                        "example": "d216"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The panel, or nothing",
                         "content": {
                             "text/html": {
                                 "schema": {

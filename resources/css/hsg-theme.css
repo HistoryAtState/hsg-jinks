@@ -1871,6 +1871,37 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--uswds-color-text);
 }
 
+/* "Similar documents" link under a result card (srch:similar-link) */
+.hsg-result__actions {
+    margin: var(--uswds-space-1) 0 0;
+    font-size: var(--uswds-font-size-sans-2xs, 0.875rem);
+}
+
+/* "Similar documents" panel in a FRUS document's sidebar (srch:similar-panel) */
+.hsg-similar {
+    margin-top: var(--uswds-space-4);
+}
+
+.hsg-similar__heading {
+    font-size: var(--uswds-font-size-sans-sm, 1rem);
+    margin: 0 0 var(--uswds-space-1);
+}
+
+.hsg-similar__item {
+    margin-bottom: var(--uswds-space-1);
+    line-height: 1.35;
+}
+
+.hsg-similar__meta {
+    display: block;
+    color: var(--uswds-color-base-dark, #565c65);
+    font-size: var(--uswds-font-size-sans-3xs, 0.8125rem);
+}
+
+.hsg-similar__more {
+    margin: var(--uswds-space-1) 0 0;
+}
+
 .hsg-result__meta code {
     padding: 0 var(--uswds-space-1);
     border-radius: 2px;

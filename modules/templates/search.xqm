@@ -268,7 +268,20 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
         ()
     else
         try {
-            let $vec := vector:embed($q, $srch:EMBED_MODEL)
+            srch:vector-neighbors($queryConf, vector:embed($q, $srch:EMBED_MODEL))
+        } catch * {
+            ()
+        }
+};
+
+(:~
+ : The VECTOR_K nodes nearest to $vec across the searched collections, as
+ : srch:scored-vector-hits rows, nearest first: the vector leg of a hybrid
+ : search ($vec embeds the query) and of a "similar to" search ($vec embeds
+ : a hit, srch:like-vector). See srch:query-vector-sections for the options.
+ :)
+declare %private function srch:vector-neighbors($queryConf as map(*), $vec as array(*)) as map(*)* {
+    try {
             let $dateFilter := $queryConf?("date-query")
             let $opts := map:merge((
                 $srch:ft-query-options,
@@ -299,6 +312,52 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
         } catch * {
             ()
         }
+};
+
+(:~ The collections, below /db/apps, a "similar to" search may start from. :)
+declare variable $srch:LIKE_ROOTS as xs:string+ := (
+    "frus-data-jinks", "other-publications", "conferences", "hac", "frus-history", "rdcr", "wwdai", "milestones"
+);
+
+(:~
+ : The hit a "similar to" search starts from. $like names it as the file's
+ : path below /db/apps and, for a division, its @xml:id after "#", the form
+ : srch:like-ref writes: "hac/hac.xml#june-1996", or
+ : "rdcr/articles/afghanistan.xml" for a tei:body. Only the collections the
+ : search covers ($srch:LIKE_ROOTS) are accepted, and only the tei:div and
+ : tei:body hits whose vector field embeds their whole text.
+ :)
+declare %private function srch:like-seed($like as xs:string?) as element()? {
+    let $path := substring-before($like || "#", "#")
+    let $id := substring-after($like, "#")
+    return
+        if (not(matches($path, "^[A-Za-z0-9._/-]+\.xml$")) or contains($path, "..")
+            or not(some $root in $srch:LIKE_ROOTS satisfies starts-with($path, $root || "/"))) then
+            ()
+        else
+            let $uri := "/db/apps/" || $path
+            let $doc := if (doc-available($uri)) then doc($uri) else ()
+            return
+                if ($id ne "") then $doc//tei:div[@xml:id = $id][1]
+                else ($doc//tei:body)[1]
+};
+
+(:~ The srch:like-seed reference of a tei:div or tei:body hit. :)
+declare function srch:like-ref($hit as element()) as xs:string {
+    substring-after(document-uri(root($hit)), "/db/apps/")
+    || ($hit[self::tei:div]/@xml:id ! ("#" || .))
+};
+
+(:~
+ : The vector a hit was indexed with, computed again: the packages' vector
+ : fields embed the node's text (expression ".", or a guard that returns the
+ : node), and the model is deterministic, so embedding string($hit) gives the
+ : stored vector, short of differences in how the indexer prepares the text.
+ : eXist has no function that reads a stored vector back. The model reads
+ : only the first 128 tokens, so only the opening is passed.
+ :)
+declare %private function srch:like-vector($hit as element()) as array(*)? {
+    try { vector:embed(substring(string($hit), 1, 4000), $srch:EMBED_MODEL) } catch * { () }
 };
 
 (:~
@@ -362,8 +421,11 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
         else
             $within
     let $modeParam := normalize-space(page:parameter($context, "mode", "keyword"))
-    let $mode := if ($modeParam eq "hybrid") then "hybrid" else "keyword"
+    (: a keyword typed while exploring starts a keyword search again :)
+    let $like := normalize-space(page:parameter($context, "like", ()))[. ne ""][not($q)]
+    let $mode := if ($like) then "similar" else if ($modeParam eq "hybrid") then "hybrid" else "keyword"
     return map {
+        "like": $like,
         "q": $q, "within": $section, "volume-id": $volumeId,
         "start-date": $startDate, "end-date": $endDate,
         "start-time": $startTime, "end-time": $endTime,
@@ -399,7 +461,7 @@ declare %private function srch:results($context as map(*)) as map(*) {
     let $p := srch:read-params($context)
     let $sortBy := $p?("sort-by")
     let $normalized := string-join(
-        let $params := map { "q": $p?q, "within": $p?within, "volume-id": $p?("volume-id"), "start-date": $p?("start-date"), "end-date": $p?("end-date"), "start-time": $p?("start-time"), "end-time": $p?("end-time"), "mode": $p?mode }
+        let $params := map { "q": $p?q, "within": $p?within, "volume-id": $p?("volume-id"), "start-date": $p?("start-date"), "end-date": $p?("end-date"), "start-time": $p?("start-time"), "end-time": $p?("end-time"), "mode": $p?mode, "like": $p?like }
         for $key in map:keys($params)
         let $val := $params($key) ! normalize-space(.)[. ne ""]
         order by $key
@@ -413,6 +475,8 @@ declare %private function srch:results($context as map(*)) as map(*) {
     let $entry :=
         if (exists($cached)) then
             $cached
+        else if ($p?mode eq "similar") then
+            srch:similar-entry($p, $queryId)
         else
             let $range := srch:date-range($p?("start-date"), $p?("end-date"), $p?("start-time"), $p?("end-time"))
             let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), $p?q, $range?start, $range?end)
@@ -473,11 +537,35 @@ declare %private function srch:results($context as map(*)) as map(*) {
             "end": $p?start + count($window) - 1,
             "results-vol-ids": $entry?results-vol-ids,
             "semantic": $entry?semantic,
+            "seed": $entry?seed,
             "took": $took,
             "range-start": $entry?("range-start"),
             "range-end": $entry?("range-end")
         }
     ))
+};
+
+(:~
+ : The cache entry of a "similar to" search: the VECTOR_K hits nearest to
+ : the seed hit (srch:like-seed), nearest first, without the seed itself.
+ : There is no keyword leg; the section, volume and date filters apply as in
+ : a hybrid search's vector leg. An unknown or unsupported seed finds
+ : nothing.
+ :)
+declare %private function srch:similar-entry($p as map(*), $queryId as xs:string) as map(*) {
+    let $seed := srch:like-seed($p?like)
+    let $range := srch:date-range($p?("start-date"), $p?("end-date"), $p?("start-time"), $p?("end-time"))
+    let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), (), $range?start, $range?end)
+    let $vec := $seed ! srch:like-vector(.)
+    let $seedId := $seed ! generate-id(.)
+    let $rows := if (exists($vec)) then srch:vector-neighbors($queryConf, $vec)[not(?id = $seedId)] else ()
+    return map {
+        "id": $queryId, "hits": $rows ! ?node, "fused": true(), "orders": map {},
+        "semantic": srch:semantic-matches((), $rows),
+        "seed": $seed,
+        "results-vol-ids": (),
+        "range-start": $range?start, "range-end": $range?end, "created": current-dateTime()
+    }
 };
 
 (: ============== per-type result rendering registry ============== :)
@@ -766,6 +854,13 @@ declare function srch:results-summary($context as map(*)) as element(p) {
             <p class="usa-prose hsg-results-summary">
                 Displaying {$r?start}&#8211;{$r?end} of <span class="search-count">{format-number($r?("hit-count"), "#,###")}</span> results
                 {
+                    (: a "similar to" search names the hit it started from :)
+                    $r?seed ! (
+                        let $seed := srch:render-hit(., map { "keyword": false() })
+                        return (" most similar to ", <a href="{$context?context-path}{$seed?href}">{$seed?title}</a>)
+                    )
+                }
+                {
                     string-join((
                         if (normalize-space($r?q) ne "") then ("for keyword &#8220;" || $r?q || "&#8221;") else (),
                         if ($r?within = "entire-site" or empty($r?within)) then "across the entire Office of the Historian website"
@@ -808,10 +903,33 @@ declare function srch:results-list($context as map(*)) as element(ul) {
                         }
                         <h3 class="usa-collection__heading"><a href="{$context?context-path}{$rendered?href}">{$rendered?title}</a></h3>
                         { $rendered?summary }
+                        { srch:similar-link($context, $r, $hit) }
                     </div>
                 </li>
         }
         </ul>
+};
+
+(:~
+ : A card's "Similar documents" link: a "similar to" search from this hit,
+ : keeping the current search's sections and dates, so a reader can step
+ : from result to result through the semantic index. Only for the tei:div
+ : and tei:body hits srch:like-seed accepts.
+ :)
+declare %private function srch:similar-link($context as map(*), $r as map(*), $hit as element()) as element(p)? {
+    if ($hit[self::tei:div or self::tei:body] and $srch:LIKE_ROOTS = substring-before(substring-after(document-uri(root($hit)), "/db/apps/"), "/")) then
+        let $query := string-join((
+            "like=" || encode-for-uri(srch:like-ref($hit)),
+            $r?within[not(. = ("", "entire-site"))] ! ("within=" || encode-for-uri(.)),
+            $r?("start-date")[. ne ""] ! ("start-date=" || .),
+            $r?("end-date")[. ne ""] ! ("end-date=" || .)
+        ), "&amp;")
+        return
+            <p class="hsg-result__actions">
+                <a class="hsg-result__similar" href="{$context?context-path}/search?{$query}">Similar documents</a>
+            </p>
+    else
+        ()
 };
 
 declare %private function srch:pagination-query-string($r as map(*), $start as xs:integer) as xs:string {
@@ -826,7 +944,8 @@ declare %private function srch:pagination-query-string($r as map(*), $start as x
         $r?("start-time")[. ne ""] ! ("start-time=" || .),
         $r?("end-time")[. ne ""] ! ("end-time=" || .),
         "sort-by=" || $r?("sort-by"),
-        if ($r?mode eq "hybrid") then "mode=hybrid" else ()
+        if ($r?mode eq "hybrid") then "mode=hybrid" else (),
+        $r?like ! ("like=" || encode-for-uri(.))
     ), "&amp;")
 };
 
@@ -896,6 +1015,12 @@ declare function srch:mode-toggle($context as map(*)) as element(div) {
             { if ($hybrid) then attribute checked { "checked" } else () }
             </input>
             <label class="usa-checkbox__label" for="mode-hybrid">Use the new hybrid mode with semantic search</label>
+            {
+                (: keeps a "similar to" search when the filters or sort change;
+                   ignored once a keyword is entered (srch:read-params) :)
+                normalize-space(page:parameter($context, "like", ()))[. ne ""] !
+                    <input type="hidden" name="like" value="{.}" form="hsg-search"/>
+            }
         </div>
 };
 
@@ -1175,4 +1300,116 @@ declare %private function srch:filter-volumes($context as map(*), $within as xs:
                     </div>,
                 srch:documents-only($within, "disable")
             )
+};
+
+(: ============== similar documents (FRUS document pages) ============== :)
+
+(:~ Cache of each FRUS document's similar documents, as plain strings: the
+ : list depends only on the index, so it is kept an hour after its last use.
+ : pre-install.xql destroys it, as $srch:CACHE. :)
+declare variable $srch:SIMILAR_CACHE as xs:string := "hsg-similar";
+declare variable $srch:SIMILAR_CACHE_CONFIG as map(*) := map {
+    "expireAfterAccess": 3600000,
+    "maximumSize": 5000
+};
+
+(:~ How many similar documents a document page lists. :)
+declare variable $srch:SIMILAR_COUNT as xs:integer := 8;
+
+(:~
+ : The "Similar documents" panel of a FRUS document page, for the sidebar
+ : (srch:similar-loader). It loads after the page, through
+ : GET /api/similar/{publicationId}/{divisionId}, because finding the
+ : neighbors resolves the FRUS collection, which can take a moment.
+ :)
+declare function srch:similar-loader($context as map(*)) as element()? {
+    let $div := ($context?doc?content//tei:text//tei:div[@xml:id])[1]
+    let $publicationId := replace(document-uri(root($div)), "^.*/frus-v2-data/([^/]+)/.*$", "$1")
+    return
+        if ($div and $publicationId ne document-uri(root($div))
+            and starts-with(normalize-space(($context?doc?content//tei:bibl[@type='frus-division-type'])[1]), "document")) then
+            <pb-load class="hsg-similar-loader" url="api/similar/{$publicationId}/{$div/@xml:id}" auto="auto"/>
+        else
+            ()
+};
+
+(:~
+ : The documents whose embeddings are nearest a FRUS document's, across all
+ : of FRUS: documents only, so title-only chapters and front matter don't
+ : crowd them out. Each is a map of strings (href, title, volume, date,
+ : score), so the cache holds no nodes.
+ :)
+declare %private function srch:similar-documents($publicationId as xs:string, $divisionId as xs:string) as map(*)* {
+    let $key := $publicationId || "/" || $divisionId
+    let $create := cache:create($srch:SIMILAR_CACHE, $srch:SIMILAR_CACHE_CONFIG)
+    let $cached := cache:get($srch:SIMILAR_CACHE, $key)
+    return
+        if (exists($cached)) then
+            (: an empty list is cached as an empty array :)
+            $cached?*
+        else
+            let $seed := collection($srch:FRUS_COL || "/data/frus-v2-data/" || $publicationId)/id($divisionId)[self::tei:div]
+            let $vec := $seed[1] ! srch:like-vector(.)
+            let $opts := map { "facets": map { "frus-division-type": "document" } }
+            let $hits :=
+                if (exists($vec)) then
+                    try { collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:SIMILAR_COUNT + 4, $opts)] } catch * { () }
+                else
+                    ()
+            let $list := subsequence(
+                for $hit in $hits[not(. is $seed[1])]
+                let $score := ft:score($hit)
+                order by $score descending
+                return map {
+                    "href": string(ft:field($hit, "hsg-url")),
+                    "title": srch:frus-title($hit),
+                    "volume": srch:volume-label(replace(document-uri(root($hit)), "^.*/frus-v2-data/([^/]+)/.*$", "$1")),
+                    "date": normalize-space(string-join((($hit//tei:dateline[.//tei:date])[1]//tei:date)[1]//text()[not(ancestor::tei:note)])),
+                    "score": $score
+                },
+                1, $srch:SIMILAR_COUNT)
+            let $store := if (exists($seed)) then cache:put($srch:SIMILAR_CACHE, $key, array { $list }) else ()
+            return $list
+};
+
+(:~ A volume's short label, "1977–1980, Volume II, Human Rights and
+ : Humanitarian Affairs", from the series statement of its root file. :)
+declare %private function srch:volume-label($publicationId as xs:string) as xs:string {
+    let $uri := $srch:FRUS_COL || "/data/frus-v2-data/" || $publicationId || "/" || $publicationId || ".xml"
+    let $series := if (doc-available($uri)) then doc($uri)/tei:TEI/tei:teiHeader//tei:seriesStmt else ()
+    let $parts := ($series/tei:title[@type = ("sub-series", "volume-number", "volume")]) ! normalize-space(.)
+    return
+        if (exists($parts)) then string-join($parts[. ne ""], ", ")
+        else $publicationId
+};
+
+(:~ The panel GET /api/similar/{publicationId}/{divisionId} returns. :)
+declare function srch:similar-panel($contextPath as xs:string, $publicationId as xs:string, $divisionId as xs:string) as element()? {
+    if (not(matches($publicationId, "^[A-Za-z0-9._-]+$") and matches($divisionId, "^[A-Za-z0-9._-]+$"))) then
+        ()
+    else
+        let $similar := srch:similar-documents($publicationId, $divisionId)
+        let $seed := collection($srch:FRUS_COL || "/data/frus-v2-data/" || $publicationId)/id($divisionId)[self::tei:div][1]
+        return
+            if (empty($similar)) then
+                ()
+            else
+                <section class="hsg-similar" aria-labelledby="hsg-similar-heading">
+                    <h2 class="hsg-similar__heading" id="hsg-similar-heading">Similar documents</h2>
+                    <ol class="usa-list usa-list--unstyled hsg-similar__list">
+                    {
+                        for $doc in $similar
+                        return
+                            <li class="hsg-similar__item">
+                                <a href="{$contextPath}{$doc?href}">{$doc?title}</a>
+                                <span class="hsg-similar__meta">{
+                                    string-join(($doc?volume, $doc?date)[. ne ""], " · ")
+                                }</span>
+                            </li>
+                    }
+                    </ol>
+                    {
+                        $seed ! <p class="hsg-similar__more"><a href="{$contextPath}/search?like={encode-for-uri(srch:like-ref(.))}&amp;within=documents">Explore similar documents</a></p>
+                    }
+                </section>
 };

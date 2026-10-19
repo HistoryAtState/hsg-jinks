@@ -6,6 +6,7 @@ import module namespace vapi = "http://teipublisher.com/api/view" at "lib/api/vi
 import module namespace errors = "http://e-editiones.org/roaster/errors";
 import module namespace query-guard = "http://history.state.gov/ns/site/hsg/query-guard" at "query-guard.xqm";
 import module namespace srch = "https://history.state.gov/ns/templates/search" at "templates/search.xqm";
+import module namespace config = "http://www.tei-c.org/tei-simple/config" at "config.xqm";
 
 (:~
  : The key roaster reads the status code from. Rebuilt here rather than
@@ -16,7 +17,7 @@ declare namespace router = "http://e-editiones.org/roaster/router";
 
 (:~
  : GET /search -- single route, two page shapes (OP#1102 / OP#1179). Folds
- : over q/start-date/end-date: if any of the three is non-empty after
+ : over q/start-date/end-date/like: if any of the four is non-empty after
  : normalize-space (a whitespace-only q does NOT count), render the results
  : template, otherwise the landing form. within/volume-id/sort-by alone never
  : trigger the results view.
@@ -30,7 +31,7 @@ declare function searchapi:search($request as map(*)) {
         error($errors:BAD_REQUEST, "malformed search query syntax")
     else
         let $showResults :=
-            some $name in ("q", "start-date", "end-date")
+            some $name in ("q", "start-date", "end-date", "like")
             satisfies normalize-space($request?parameters?($name)) ne ""
         let $file := if ($showResults) then "pages/search/results" else "pages/search/landing"
         return
@@ -70,4 +71,17 @@ declare function searchapi:tips($request as map(*)) {
  :)
 declare function searchapi:not-found($request as map(*)) {
     error($errors:NOT_FOUND, "no route below /search/" || $request?parameters?other)
+};
+
+(:~
+ : GET /api/similar/{publicationId}/{divisionId}: the "Similar documents"
+ : panel of a FRUS document page, as an HTML fragment for the sidebar's
+ : pb-load.
+ :)
+declare function searchapi:similar($request as map(*)) {
+    srch:similar-panel(
+        $config:context-path,
+        $request?parameters?publicationId,
+        $request?parameters?divisionId
+    )
 };
