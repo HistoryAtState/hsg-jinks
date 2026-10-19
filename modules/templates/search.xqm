@@ -468,7 +468,7 @@ declare %private function srch:snippets-from($root as node(), $match as element(
         return (
             <span class="hsg-snippet">{
                 srch:text-before($root, $match, $width, ""),
-                <span class="hi">{string($match)}</span>,
+                <span class="hi">{srch:spaces(string($match))}</span>,
                 $run?content
             }</span>,
             srch:snippets-from($root, ($run?last/following::exist:match)[1], $width, $remaining - 1)
@@ -508,7 +508,7 @@ declare %private function srch:snippet-run($root as node(), $node as node(), $wi
         else if (exists($match)) then
             if ($total le 2 * $width) then
                 srch:snippet-run($root, $match, $width, 0, $total + string-length($piece),
-                    ($content, <span class="hi">{string($match)}</span>), $match)
+                    ($content, <span class="hi">{srch:spaces(string($match))}</span>), $match)
             else
                 map { "content": ($content, "..."), "last": $last }
         else if ($chars + string-length($piece) gt $width) then
