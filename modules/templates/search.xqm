@@ -620,22 +620,6 @@ declare %private function srch:pagination-query-string($r as map(*), $start as x
     ), "&amp;")
 };
 
-(:~
- : The page numbers to show, with "…" standing for a skipped run: USWDS's
- : pagination pattern, which always keeps the first and last page and holds
- : the whole control to at most seven slots however many pages there are.
- :)
-declare %private function srch:page-window($current as xs:integer, $last as xs:integer) as item()* {
-    if ($last le 7) then
-        1 to $last
-    else if ($current le 4) then
-        (1 to 5, "&#8230;", $last)
-    else if ($current ge $last - 3) then
-        (1, "&#8230;", ($last - 4) to $last)
-    else
-        (1, "&#8230;", ($current - 1) to ($current + 1), "&#8230;", $last)
-};
-
 (:~ Previous/next link with its USWDS sprite arrow. :)
 declare %private function srch:pagination-arrow($context as map(*), $r as map(*), $start as xs:integer, $direction as xs:string) as element(li) {
     let $previous := $direction eq "previous"
@@ -666,7 +650,7 @@ declare function srch:pagination($context as map(*)) as element(nav)? {
                     <ul class="usa-pagination__list">
                     {
                         if ($currentPage gt 1) then srch:pagination-arrow($context, $r, ($currentPage - 2) * $perPage + 1, "previous") else (),
-                        for $item in srch:page-window($currentPage, $pageCount)
+                        for $item in hsg:page-window($currentPage, $pageCount)
                         return
                             if ($item instance of xs:string) then
                                 <li class="usa-pagination__item usa-pagination__overflow" role="presentation"><span>{$item}</span></li>

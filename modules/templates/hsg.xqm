@@ -1425,13 +1425,15 @@ declare %private function hsg:register-description($name as element()) as xs:str
 };
 
 (:~
- : A chapter or compilation listing page: the division title, previous/next
- : navigation, and each child as an entry -- documents with their number,
- : title, dateline, source note and (when present) a summary; child divisions
- : (a compilation's chapters) as a titled link with a document range. Replaces
- : the ODD's bare bulleted list of titles, reference parity with hsg-shell's
- : toc:document-list. Rendered by templates/pages/volume/interior.html for a
- : chapter or compilation instead of the volume-interior ODD transform.
+ : A division listing page (chapter, compilation, subchapter; OP#1479, Figma
+ : node 4290-19956): the volume title as an overline linking to the volume,
+ : the division title and notes, then one card per child -- documents with
+ : their source, location, date and (where the data has one) summary, plus a
+ : link to the first page scan; child divisions (a compilation's chapters, a
+ : chapter's subchapters) with their document range. Thirty entries per page,
+ : paged with ?start=N like the reference (#1079). Replaces the ODD's bare
+ : bulleted list of titles, reference parity with hsg-shell's
+ : toc:document-list. Rendered by templates/pages/volume/division-listing.html.
  :)
 declare function hsg:division-listing($context as map(*)) {
     let $doc := $context?doc?content
@@ -1443,22 +1445,29 @@ declare function hsg:division-listing($context as map(*)) {
            (OP#1085). :)
         let $title := hsg:split-title($doc//tei:teiHeader//tei:titleStmt/tei:title)
         let $type := normalize-space(($doc//tei:bibl[@type='frus-division-type'])[1])
+        (: Walk the parent's xi:include order -- that is document order --
+           opening each target file once (as hsg:toc-divisions notes, a
+           chapter has ~18-70 of these, an acceptable cost for a listing
+           page). :)
+        let $targets :=
+            for $inc in $doc//tei:text//xi:include
+            return doc(util:collection-name($inc) || '/' || $inc/@href)/tei:TEI
+        let $start := max((1, xs:integer((page:parameter($context, "start", 1)[. castable as xs:integer], 1)[1])))
+        let $pagination := hsg:listing-pagination($context, $start, count($targets))
         return
             <div class="hsg-frus__division">
+                <p class="hsg-frus__overline">
+                    <a href="{$context?context-path}/historicaldocuments/{$publication}">{hsg:publication-title($publication)}</a>
+                </p>
                 <h1 class="hsg-frus__division-title">{$title}</h1>
-                {hsg:prev-next($context)}
+                {hsg:division-notes($doc, $publication, $context)}
+                {$pagination}
                 {(: A compilation lists its chapters under a "Contents" heading,
                     reference parity with hsg-shell's document-list. :)
                  if ($type = 'compilation') then <h2 class="hsg-frus__contents">Contents</h2> else ()}
-                <div class="hsg-frus__doclist">
+                <ul class="hsg-frus__doclist">
                     {
-                        (: Walk the parent's xi:include order -- that is document
-                           order -- opening each target file once (as
-                           hsg:toc-divisions notes, a chapter has ~18-70 of
-                           these, an acceptable cost for a listing page). :)
-                        for $inc in $doc//tei:text//xi:include
-                        let $target := doc(util:collection-name($inc) || '/' || $inc/@href)/tei:TEI
-                        where exists($target)
+                        for $target in subsequence($targets, $start, $hsg:listing-page-size)
                         let $type := normalize-space(($target//tei:bibl[@type='frus-division-type'])[1])
                         return
                             if (starts-with($type, 'document')) then
@@ -1466,13 +1475,123 @@ declare function hsg:division-listing($context as map(*)) {
                             else
                                 hsg:doclist-division($target, $publication, $type, $context)
                     }
-                </div>
+                </ul>
+                {$pagination}
             </div>
 };
 
-(:~ One document entry in a chapter listing: number-prefixed title link,
- : dateline, summary and source note. An unpublished ('document-pending')
- : document is shown muted and unlinked -- it has no page of its own yet. :)
+declare variable $hsg:listing-page-size := 30;
+
+(:~
+ : A division's own notes, below its title: inline notes in its text (the
+ : "will be published once all documents have been cleared" notice of a
+ : pending chapter) and the footnote its heading points to, where the data
+ : carries the note's text.
+ :)
+declare %private function hsg:division-notes($doc as node(), $publication as xs:string, $context as map(*)) as element(div)? {
+    let $text := $doc//tei:text
+    let $anchors := $text//tei:head//tei:anchor/@xml:id ! ('#' || .)
+    let $notes := (
+        $text//tei:note[not(ancestor::tei:note)],
+        $doc//tei:standOff//tei:note[@corresp = $anchors]
+    )
+    return
+        if (empty($notes)) then ()
+        else
+            <div class="hsg-frus__division-notes">
+            {
+                for $note in $notes
+                return <p>{hsg:note-content($note/node(), $publication, $context)}</p>
+            }
+            </div>
+};
+
+(:~ A note's text with its references kept as links into the volume. :)
+declare %private function hsg:note-content($nodes as node()*, $publication as xs:string, $context as map(*)) as node()* {
+    for $node in $nodes
+    return
+        typeswitch ($node)
+            case element(tei:ref) return
+                let $target := string($node/@target)
+                return
+                    <a href="{if (starts-with($target, '#')) then $context?context-path || '/historicaldocuments/' || $publication || '/' || substring($target, 2) else $target}">{
+                        hsg:note-content($node/node(), $publication, $context)
+                    }</a>
+            case element(tei:p) return hsg:note-content($node/node(), $publication, $context)
+            case element() return hsg:note-content($node/node(), $publication, $context)
+            case text() return text { replace($node, '\s+', ' ') }
+            default return ()
+};
+
+(:~
+ : USWDS pagination for a listing of $total entries shown $hsg:listing-page-size
+ : at a time, the current page being the one holding entry $start. None for
+ : a listing that fits one page.
+ :)
+declare %private function hsg:listing-pagination($context as map(*), $start as xs:integer, $total as xs:integer) as element(nav)? {
+    let $size := $hsg:listing-page-size
+    let $last := xs:integer(ceiling($total div $size))
+    let $current := xs:integer(ceiling($start div $size))
+    return
+        if ($last le 1) then ()
+        else
+            <nav aria-label="Pagination" class="usa-pagination hsg-frus__pagination">
+                <ul class="usa-pagination__list">
+                {
+                    if ($current gt 1) then hsg:pagination-arrow($context, ($current - 2) * $size + 1, 'previous') else (),
+                    for $item in hsg:page-window($current, $last)
+                    return
+                        if ($item instance of xs:string) then
+                            <li class="usa-pagination__item usa-pagination__overflow" role="presentation"><span>{$item}</span></li>
+                        else
+                            <li class="usa-pagination__item usa-pagination__page-no">
+                                <a href="?start={($item - 1) * $size + 1}" class="usa-pagination__button{if ($item eq $current) then ' usa-current' else ''}" aria-label="Page {$item}">
+                                {if ($item eq $current) then attribute aria-current {'page'} else ()}
+                                {$item}
+                                </a>
+                            </li>,
+                    if ($current lt $last) then hsg:pagination-arrow($context, $current * $size + 1, 'next') else ()
+                }
+                </ul>
+            </nav>
+};
+
+declare %private function hsg:pagination-arrow($context as map(*), $start as xs:integer, $direction as xs:string) as element(li) {
+    let $previous := $direction eq 'previous'
+    let $icon :=
+        <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
+            <use href="{$context?context-path}/resources/images/sprite.svg#{if ($previous) then 'navigate_before' else 'navigate_next'}"/>
+        </svg>
+    let $label := <span class="usa-pagination__link-text">{if ($previous) then 'Previous' else 'Next'}</span>
+    return
+        <li class="usa-pagination__item usa-pagination__arrow">
+            <a href="?start={$start}" class="usa-pagination__link usa-pagination__{$direction}-page" aria-label="{if ($previous) then 'Previous' else 'Next'} page">
+                {if ($previous) then ($icon, $label) else ($label, $icon)}
+            </a>
+        </li>
+};
+
+(:~
+ : The page numbers to show, with "…" standing for a skipped run: USWDS's
+ : pagination pattern, which always keeps the first and last page and holds
+ : the whole control to at most seven slots however many pages there are.
+ : Shared with the search results (search.xqm).
+ :)
+declare function hsg:page-window($current as xs:integer, $last as xs:integer) as item()* {
+    if ($last le 7) then
+        1 to $last
+    else if ($current le 4) then
+        (1 to 5, "&#8230;", $last)
+    else if ($current ge $last - 3) then
+        (1, "&#8230;", ($last - 4) to $last)
+    else
+        (1, "&#8230;", ($current - 1) to ($current + 1), "&#8230;", $last)
+};
+
+(:~ One document card in a listing: number-prefixed title link, then source,
+ : location, date and summary rows, and a link to the document's first page
+ : scan. An unpublished ('document-pending') document is shown muted and
+ : unlinked -- it has no page of its own yet. :)
 declare %private function hsg:doclist-document($target as element(tei:TEI), $publication as xs:string,
         $type as xs:string, $context as map(*)) {
     let $number := hsg:document-number($target)
@@ -1481,43 +1600,86 @@ declare %private function hsg:doclist-document($target as element(tei:TEI), $pub
     (: The head already begins with the number ("72. Telegram..."); fall back
        to a synthesised label only for a pending document with no real head. :)
     let $title := if ($head != '') then $head else ('Document ' || $number)
-    let $dateline := normalize-space(($target//tei:text/tei:body//tei:opener/tei:dateline)[1])
+    let $dateline := ($target//tei:text/tei:body//tei:opener/tei:dateline)[1]
+    let $place := normalize-space(($dateline//tei:placeName)[1])
+    let $date := normalize-space(($dateline//tei:date)[1])
     let $summary := normalize-space(($target//tei:standOff//tei:note[@type='summary'])[1])
     let $source := normalize-space(($target//tei:standOff//tei:note[@type='source'])[1])
     let $pending := ends-with($type, '-pending')
+    let $rows := (
+        if ($source != '') then hsg:doclist-row('Source', $source) else (),
+        if ($place != '') then hsg:doclist-row('Location', $place) else (),
+        (: A dateline without a marked-up date still says when: show it whole. :)
+        if ($date != '') then hsg:doclist-row('Date', $date)
+        else if ($place = '' and normalize-space($dateline) != '') then hsg:doclist-row('Date', normalize-space($dateline))
+        else (),
+        if ($summary != '') then hsg:doclist-row('Summary', $summary) else ()
+    )
+    let $page := if ($pending) then () else hsg:first-page-scan($target, $publication)
     return
-        <div class="hsg-frus__doc-entry{if ($pending) then ' pending' else ''}">
-            <h4 class="hsg-frus__doc-title">
+        <li class="hsg-frus__doc-entry{if ($pending) then ' pending' else ''}">
+            <h2 class="hsg-frus__doc-title">
                 {
                     if ($pending or $id = '') then
                         <span>{$title}</span>
                     else
                         <a href="{$context?context-path}/historicaldocuments/{$publication}/{$id}">{$title}</a>
                 }
-            </h4>
-            {if ($dateline != '') then <p class="dateline">{$dateline}</p> else ()}
-            {if ($summary != '') then <p class="summary">{$summary}</p> else ()}
-            {if ($source != '') then <p class="sourcenote">{$source}</p> else ()}
-        </div>
+            </h2>
+            {if (exists($rows)) then <dl class="hsg-frus__doc-meta">{$rows}</dl> else ()}
+            {
+                if (exists($page)) then
+                    <a class="usa-button hsg-frus__facsimile" href="{$context?context-path}/historicaldocuments/{$publication}/pg_{$page}">
+                        <span class="hsg-frus__facsimile-icon" aria-hidden="true"></span>
+                        Facsimile Page
+                    </a>
+                else ()
+            }
+        </li>
 };
 
-(:~ A child division (e.g. a compilation's chapters): a titled link with its
- : document range, muted when unpublished. :)
+declare %private function hsg:doclist-row($label as xs:string, $value as xs:string) as element()+ {
+    <dt>{$label}</dt>,
+    <dd>{$value}</dd>
+};
+
+(:~
+ : The page of a document's first page break in the pg_{n} facsimile view,
+ : when the volume has a scan of it. The page break names its volume page
+ : itself, by @sameAs ("frus:frus1981-88v05/pg1") or its own pg id; a
+ : document numbering its pages on its own (the microfiche supplements'
+ : "eta_d1-1") has no volume page, so no link -- its page number would
+ : resolve to an unrelated page. Same lookup as the view
+ : (hsgapi:view-facsimile), so the link never leads to a 404.
+ :)
+declare %private function hsg:first-page-scan($target as element(tei:TEI), $publication as xs:string) as xs:string? {
+    let $break := ($target//tei:text//tei:pb[@facs])[1]
+    let $id := if ($break/@sameAs) then tokenize($break/@sameAs, '/')[last()] else string($break/@xml:id)
+    let $pb :=
+        if (matches($id, '^pg.')) then
+            (collection($config:data-default || "/" || $publication)/id($id))[self::tei:pb][1]
+        else ()
+    return
+        if (exists($pb) and exists(global:iiif-facs-id((), $pb))) then substring($id, 3) else ()
+};
+
+(:~ A child division (a compilation's chapters, a chapter's subchapters): a
+ : titled link with its document range, muted when unpublished. :)
 declare %private function hsg:doclist-division($target as element(tei:TEI), $publication as xs:string,
         $type as xs:string, $context as map(*)) {
     let $id := normalize-space(($target//tei:bibl[@type='frus-division-id'])[1])
     (: Line break between date-range title and subtitle, reference parity
        (OP#1085). :)
     let $title := hsg:split-title($target//tei:teiHeader//tei:titleStmt/tei:title)
-    let $range := hsg:document-range-label(hsg:document-range($target))
+    let $range := hsg:document-range-text(hsg:document-range($target))
     let $pending := ends-with($type, '-pending')
     return
-        <div class="hsg-frus__doc-entry hsg-frus__division-entry{if ($pending) then ' pending' else ''}">
-            <h4 class="hsg-frus__doc-title">
+        <li class="hsg-frus__doc-entry hsg-frus__division-entry{if ($pending) then ' pending' else ''}">
+            <h2 class="hsg-frus__doc-title">
                 <a href="{$context?context-path}/historicaldocuments/{$publication}/{$id}">{$title}</a>
-                {$range}
-            </h4>
-        </div>
+            </h2>
+            {if (exists($range)) then <p class="hsg-frus__doc-range">{$range}</p> else ()}
+        </li>
 };
 
 (:~

@@ -327,14 +327,28 @@ declare function hsgapi:view-interior($request as map(*)) {
             error($errors:NOT_FOUND, "division " || $divisionId || " of "
                 || $publicationId || " is not yet published")
         else
-            vapi:view(map:put($request, "parameters", map:merge((
-                $request?parameters,
-                map {
-                    "docid": substring-after(document-uri(root($doc)), $config:data-root || '/'),
-                    "template": "pages/volume/interior.html"
-                }
-            ))))
+            (: Divisions that list their children (chapters, compilations,
+               subchapters) get their own template (OP#1479); documents and
+               sections stay on the interior template. The route has no
+               "template" parameter: the handler fixes it. :)
+            let $type := normalize-space((root($doc)//tei:bibl[@type = 'frus-division-type'])[1])
+            let $template :=
+                if ($type = $hsgapi:LISTING-DIVISION-TYPES) then
+                    "pages/volume/division-listing.html"
+                else
+                    "pages/volume/interior.html"
+            return
+                vapi:view(map:put($request, "parameters", map:merge((
+                    $request?parameters,
+                    map {
+                        "docid": substring-after(document-uri(root($doc)), $config:data-root || '/'),
+                        "template": $template
+                    }
+                ))))
 };
+
+(:~ Division types rendered as a listing of their children (OP#1479). :)
+declare variable $hsgapi:LISTING-DIVISION-TYPES := ("chapter", "chapter-pending", "compilation", "subchapter");
 
 (:~
  : Whether a volume is at least partially published: its volume-root
