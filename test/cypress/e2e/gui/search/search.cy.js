@@ -667,3 +667,26 @@ describe("hybrid search mode (semantic MVP)", () => {
         });
     });
 });
+
+// The page's search button, as USWDS's search component: the "Search" text
+// from tablet width up, the magnifier icon on phones.
+describe("search button", () => {
+    ["search", "search?q=nixon"].forEach((url) => {
+        it(`shows the icon on phones on ${url}`, () => {
+            cy.viewport(390, 844);
+            cy.visit(url);
+            cy.get("#hsg-search .usa-search__submit-text").should("not.be.visible");
+            cy.get("#hsg-search .usa-search__submit-icon")
+                .should("be.visible")
+                .and("have.attr", "alt", "Search")
+                .and(($img) => expect($img[0].naturalWidth).to.be.greaterThan(0));
+        });
+
+        it(`shows the text from tablet width up on ${url}`, () => {
+            cy.viewport(1024, 900);
+            cy.visit(url);
+            cy.get("#hsg-search .usa-search__submit-text").should("be.visible").and("have.text", "Search");
+            cy.get("#hsg-search .usa-search__submit-icon").should("not.be.visible");
+        });
+    });
+});
