@@ -35,8 +35,8 @@
             <h2 class="hsg-frus__contents">Contents</h2>
             [% endif %]
             <ul class="hsg-frus__doclist">
-                [# An if block directly in this loop body renders as literal
-                   text (jinks-templates), hence the inline if expression. #]
+                [# An if block in this indented loop body renders as literal
+                   text (jinks-templates#95), hence the inline if expression. #]
                 [% for $entry in $division?entries %]
                 [[ if (starts-with($entry?type, 'document')) then hsg:doclist-document($entry?target, $division?publication, $entry?type, $context) else hsg:doclist-division($entry?target, $division?publication, $entry?type, $context) ]]
                 [% endfor %]
