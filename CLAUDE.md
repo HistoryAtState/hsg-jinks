@@ -185,6 +185,13 @@ below the count observed at write-time. This only applies to counts of
 data-derived content — fixed UI chrome (nav links, static page structure)
 should still assert an exact count.
 
+## Templates
+
+Before writing or changing a page template (`templates/`) or the XQuery it
+calls (`modules/templates/`), read `doc/templating.md`: page markup goes in
+the template, with only `if`, `for` and `let`. Add any new engine limit you
+hit to its list.
+
 ## HTML comments in templates: never use "--" inside them
 
 XML forbids a literal `--` anywhere inside a `<!-- ... -->` comment (only at
