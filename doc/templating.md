@@ -32,9 +32,31 @@ plus `[[ … ]]` for output.
 
 ## The pattern
 
-A page has one function that returns its **data** as a map, bound once with
-`[% let %]`. The template builds the markup from that map and calls
-**fragment functions** for the parts that belong in XQuery.
+A page has one function that returns its **data** as a map. The template
+builds the markup from that map and calls **fragment functions** for the
+parts that belong in XQuery.
+
+### Populate the context before rendering
+
+Where the route handler renders through `vapi:html`, it calls the data
+function and passes the map as `vapi:html`'s second argument (`$extConfig`).
+The template then reads it from the context, e.g. `$context?facsimile`
+(`hsgapi:view-facsimile`). This is the preferred way.
+
+- Use one key per page, named after the page. `vapi:html` merges
+  `context.json` first and keeps the first value of a key, so a key that
+  `context.json` already has (`data`, `type`, `id`, `label`, `theme`, …) is
+  dropped silently.
+- Name the key and the handler that fills it in the template's header
+  comment, since the template no longer shows where its data comes from.
+- Keep an `exists()` guard: a `?template=` parameter can pair the template
+  with a route that does not fill its key.
+
+### Pages rendered through `vapi:view`
+
+Document pages (the volume landing page, the division listings) render
+through jinks' `vapi:view`, which takes no `$extConfig`. Until it does, such
+a template binds its data itself with `[% let %]`:
 
 ```html
 [% let $volume = hsg:volume-landing($context) %]
