@@ -83,9 +83,12 @@ Inside an HTML comment `<!-- … -->` a literal `--` breaks the template
 
 ## Known engine limits
 
-- **`[% if %]` directly inside a `[% for %]` body renders as literal
-  text** instead of being compiled. Use an inline expression instead:
-  `[[ if (…) then … else … ]]`.
+- **`[% if %]` inside a `[% for %]` body renders as literal text** once
+  the body has whitespace around it, as any indented template does; inside
+  a `[% let %]` the whole loop does
+  ([jinks-templates#95](https://github.com/eeditiones/jinks-templates/issues/95)).
+  Use an inline expression instead: `[[ if (…) then … else … ]]`, or wrap
+  the `if` in an element.
 - **`[% include %]` of a partial whose root is a control block**
   (`if`/`for`/`let`) fails with `XPST0003` when the include sits inside
   another block
