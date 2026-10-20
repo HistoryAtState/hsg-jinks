@@ -20,7 +20,29 @@
     [# Figma node 4298-66032 (OP#1478): the volume on a white card, and one
        right-hand sidebar with ways to explore, tags and administrations; no
        left sidebar. #]
-    [[ hsg:volume-landing-content($context) ]]
+    [% let $volume = hsg:volume-landing($context) %]
+    [% if exists($volume) %]
+    [# One root element: the layout's main is a flex row whose children each
+       get flex: 1 (resources/css/layout.css). #]
+    <article class="hsg-frus__landing">
+        <header class="hsg-frus__landing-header">
+            [[ hsg:volume-administration-tags($volume?doc) ]]
+            <h1>[[ $volume?title ]]</h1>
+        </header>
+        <div class="hsg-frus__landing-intro">
+            [[ hsg:volume-cover($volume?doc, $volume?id, $volume?title) ]]
+            <div class="hsg-frus__landing-summary">
+                <dl class="hsg-frus__meta">
+                    [[ hsg:volume-editors($volume?titleStmt) ]]
+                    [[ hsg:volume-published-info($volume?publicationStmt) ]]
+                </dl>
+                [[ hsg:volume-open-link($context) ]]
+            </div>
+        </div>
+        [[ hsg:volume-landing-toc($context) ]]
+    </article>
+    [% endif %]
+    [% endlet %]
 
     [% template after %]
     [[ hsg:volume-ways-to-explore($context) ]]

@@ -906,52 +906,26 @@ declare %private function hsg:division-crumb-label($content as node()) as xs:str
 };
 
 (:~
- : The volume landing page's main content: title, cover, editors, publisher
- : info, and the full table of contents (#1080). Replaces the ODD transform
- : for this page entirely -- app chrome (cover image, download links, byte
- : formatting), not generic TEI rendering, the same reasoning that already
- : keeps hsg:volume-toc/hsg:volume-list/hsg:collection-trail outside
- : the ODD pipeline.
+ : The data the volume landing page's markup (templates/pages/volume/
+ : landing.html) is built from: the volume root, its id and title, and its
+ : titleStmt and publicationStmt, resolved once. None without a volume.
  :)
-declare function hsg:volume-landing-content($context as map(*)) {
+declare function hsg:volume-landing($context as map(*)) as map(*)? {
     let $doc := $context?doc?content
     return
     if (not(exists($doc))) then ()
     else
-        let $volume-id := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
         (: titleStmt/publicationStmt are xincluded from the volume's shared
-           *_includes.xml; see hsg:resolve-include. notesStmt is inline, so
-           hsg:volume-cover and hsg:volume-ways-to-explore don't need it. :)
+           *_includes.xml; see hsg:resolve-include. :)
         let $header := $doc//tei:teiHeader
         let $titleStmt := hsg:resolve-include($header, 'titleStmt')
-        let $publicationStmt := hsg:resolve-include($header, 'publicationStmt')
-        let $title := normalize-space(($titleStmt/tei:title)[1])
-        (: One root element: the layout's main is a flex row whose children
-           each get flex: 1 (resources/css/layout.css, .sticky-layout > main
-           > *), so returning these as siblings lays them out as columns
-           instead of stacking them -- same pitfall templates/pages/
-           historicaldocuments.html's own comment warns about.
-
-           Card layout after Figma node 4298-66114 (OP#1478): tags and title,
-           then cover and metadata side by side, then the contents. :)
-        return
-            <article class="hsg-frus__landing">
-                <header class="hsg-frus__landing-header">
-                    {hsg:volume-administration-tags($doc)}
-                    <h1>{$title}</h1>
-                </header>
-                <div class="hsg-frus__landing-intro">
-                    {hsg:volume-cover($doc, $volume-id, $title)}
-                    <div class="hsg-frus__landing-summary">
-                        <dl class="hsg-frus__meta">
-                            {hsg:volume-editors($titleStmt)}
-                            {hsg:volume-published-info($publicationStmt)}
-                        </dl>
-                        {hsg:volume-open-link($context)}
-                    </div>
-                </div>
-                {hsg:volume-landing-toc($context)}
-            </article>
+        return map {
+            "doc": $doc,
+            "id": config:get-relpath($doc, $config:data-default) => tokenize("/") => head(),
+            "title": normalize-space(($titleStmt/tei:title)[1]),
+            "titleStmt": $titleStmt,
+            "publicationStmt": hsg:resolve-include($header, 'publicationStmt')
+        }
 };
 
 (:~
@@ -960,7 +934,7 @@ declare function hsg:volume-landing-content($context as map(*)) {
  : one ("Richard M. Nixon and Gerald R. Ford Administrations"), else the
  : single presidency's.
  :)
-declare %private function hsg:volume-administration-tags($doc as node()) as element(ul)? {
+declare function hsg:volume-administration-tags($doc as node()) as element(ul)? {
     let $labels :=
         for $id in $doc//tei:keywords[@scheme = '#frus-administration-coverage']/tei:term
         let $category := hsg:administration(normalize-space($id))
@@ -989,7 +963,7 @@ declare %private function hsg:volume-administration-tags($doc as node()) as elem
  : enough), not the constructed URL's reachability, so a volume with no
  : cover renders no <img>, same as hsg-shell.
  :)
-declare %private function hsg:volume-cover($doc as node(), $volume-id as xs:string, $title as xs:string) as element(div)? {
+declare function hsg:volume-cover($doc as node(), $volume-id as xs:string, $title as xs:string) as element(div)? {
     if (exists($doc//tei:notesStmt/tei:relatedItem[@type = 'jpg'][@corresp = '#' || $volume-id])) then
         <div class="hsg-frus__cover-frame">
             <img class="hsg-frus__cover"
@@ -1003,10 +977,10 @@ declare %private function hsg:volume-cover($doc as node(), $volume-id as xs:stri
  : Editor / General Editor rows of the metadata list. Reference parity with
  : hsg-shell: titleStmt/editor[@role='primary'] labeled "Editor:"
  : ("Editors:" if more than one), editor[@role='general'] labeled "General
- : Editor:", one dd per name. Takes the already-resolved titleStmt from
- : hsg:volume-landing-content rather than re-resolving it.
+ : Editor:", one dd per name. Takes the titleStmt hsg:volume-landing
+ : resolved.
  :)
-declare %private function hsg:volume-editors($titleStmt as node()?) {
+declare function hsg:volume-editors($titleStmt as node()?) {
     let $primary := $titleStmt/tei:editor[@role = 'primary'][normalize-space(.) != '']
     let $general := $titleStmt/tei:editor[@role = 'general'][normalize-space(.) != '']
     return (
@@ -1027,7 +1001,7 @@ declare %private function hsg:volume-editors($titleStmt as node()?) {
  : /pubPlace, /date[@type='publication-date'] -- not the content-date range,
  : which hsg-shell doesn't show here either.
  :)
-declare %private function hsg:volume-published-info($publicationStmt as node()?) {
+declare function hsg:volume-published-info($publicationStmt as node()?) {
     let $publisher := normalize-space($publicationStmt/tei:publisher)
     let $place := normalize-space($publicationStmt/tei:pubPlace)
     let $year := normalize-space($publicationStmt/tei:date[@type = 'publication-date'])
@@ -1051,7 +1025,7 @@ declare %private function hsg:volume-published-info($publicationStmt as node()?)
  : anywhere for a volume without a body division. None for a volume with no
  : published content, which also has no table of contents.
  :)
-declare %private function hsg:volume-open-link($context as map(*)) as element(a)? {
+declare function hsg:volume-open-link($context as map(*)) as element(a)? {
     let $doc := $context?doc?content
     let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
     let $divisions := hsg:toc-divisions($publication)
@@ -1425,59 +1399,37 @@ declare %private function hsg:register-description($name as element()) as xs:str
 };
 
 (:~
- : A division listing page (chapter, compilation, subchapter; OP#1479, Figma
- : node 4290-19956): the volume title as an overline linking to the volume,
- : the division title and notes, then one card per child -- documents with
- : their source, location, date and (where the data has one) summary, plus a
- : link to the first page scan; child divisions (a compilation's chapters, a
- : chapter's subchapters) with their document range. Thirty entries per page,
- : paged with ?start=N like the reference (#1079). Replaces the ODD's bare
- : bulleted list of titles, reference parity with hsg-shell's
- : toc:document-list. Rendered by templates/pages/volume/division-listing.html.
+ : The data a division listing page's markup (templates/pages/volume/
+ : division-listing.html) is built from: the division, its volume id, title
+ : and type, the ?start=N offset and child count for the pagination (#1079),
+ : and the children on the current page with their division types, in
+ : document order. None without a division.
  :)
-declare function hsg:division-listing($context as map(*)) {
+declare function hsg:division-listing($context as map(*)) as map(*)? {
     let $doc := $context?doc?content
     return
     if (not(exists($doc))) then ()
     else
-        let $publication := ($doc//tei:bibl[@type='frus-volume-id'])[1]/string()
-        (: Line break between date-range title and subtitle, reference parity
-           (OP#1085). :)
-        let $title := hsg:split-title($doc//tei:teiHeader//tei:titleStmt/tei:title)
-        let $type := normalize-space(($doc//tei:bibl[@type='frus-division-type'])[1])
-        (: Walk the parent's xi:include order -- that is document order --
-           opening each target file once (as hsg:toc-divisions notes, a
-           chapter has ~18-70 of these, an acceptable cost for a listing
-           page). :)
-        let $targets :=
-            for $inc in $doc//tei:text//xi:include
-            return doc(util:collection-name($inc) || '/' || $inc/@href)/tei:TEI
+        let $includes := $doc//tei:text//xi:include
         let $start := max((1, xs:integer((page:parameter($context, "start", 1)[. castable as xs:integer], 1)[1])))
-        let $pagination := hsg:listing-pagination($context, $start, count($targets))
-        return
-            <div class="hsg-frus__division">
-                <p class="hsg-frus__overline">
-                    <a href="{$context?context-path}/historicaldocuments/{$publication}">{hsg:publication-title($publication)}</a>
-                </p>
-                <h1 class="hsg-frus__division-title">{$title}</h1>
-                {hsg:division-notes($doc, $publication, $context)}
-                {$pagination}
-                {(: A compilation lists its chapters under a "Contents" heading,
-                    reference parity with hsg-shell's document-list. :)
-                 if ($type = 'compilation') then <h2 class="hsg-frus__contents">Contents</h2> else ()}
-                <ul class="hsg-frus__doclist">
-                    {
-                        for $target in subsequence($targets, $start, $hsg:listing-page-size)
-                        let $type := normalize-space(($target//tei:bibl[@type='frus-division-type'])[1])
-                        return
-                            if (starts-with($type, 'document')) then
-                                hsg:doclist-document($target, $publication, $type, $context)
-                            else
-                                hsg:doclist-division($target, $publication, $type, $context)
-                    }
-                </ul>
-                {$pagination}
-            </div>
+        return map {
+            "doc": $doc,
+            "publication": ($doc//tei:bibl[@type='frus-volume-id'])[1]/string(),
+            (: Line break between date-range title and subtitle, reference
+               parity (OP#1085). :)
+            "title": hsg:split-title($doc//tei:teiHeader//tei:titleStmt/tei:title),
+            "type": normalize-space(($doc//tei:bibl[@type='frus-division-type'])[1]),
+            "start": $start,
+            "total": count($includes),
+            (: Only the current page's targets are opened. :)
+            "entries":
+                for $inc in subsequence($includes, $start, $hsg:listing-page-size)
+                let $target := doc(util:collection-name($inc) || '/' || $inc/@href)/tei:TEI
+                return map {
+                    "target": $target,
+                    "type": normalize-space(($target//tei:bibl[@type='frus-division-type'])[1])
+                }
+        }
 };
 
 declare variable $hsg:listing-page-size := 30;
@@ -1488,7 +1440,7 @@ declare variable $hsg:listing-page-size := 30;
  : pending chapter) and the footnote its heading points to, where the data
  : carries the note's text.
  :)
-declare %private function hsg:division-notes($doc as node(), $publication as xs:string, $context as map(*)) as element(div)? {
+declare function hsg:division-notes($doc as node(), $publication as xs:string, $context as map(*)) as element(div)? {
     let $text := $doc//tei:text
     let $anchors := $text//tei:head//tei:anchor/@xml:id ! ('#' || .)
     let $notes := (
@@ -1528,7 +1480,7 @@ declare %private function hsg:note-content($nodes as node()*, $publication as xs
  : at a time, the current page being the one holding entry $start. None for
  : a listing that fits one page.
  :)
-declare %private function hsg:listing-pagination($context as map(*), $start as xs:integer, $total as xs:integer) as element(nav)? {
+declare function hsg:listing-pagination($context as map(*), $start as xs:integer, $total as xs:integer) as element(nav)? {
     let $size := $hsg:listing-page-size
     let $last := xs:integer(ceiling($total div $size))
     let $current := xs:integer(ceiling($start div $size))
@@ -1592,7 +1544,7 @@ declare function hsg:page-window($current as xs:integer, $last as xs:integer) as
  : location, date and summary rows, and a link to the document's first page
  : scan. An unpublished ('document-pending') document is shown muted and
  : unlinked -- it has no page of its own yet. :)
-declare %private function hsg:doclist-document($target as element(tei:TEI), $publication as xs:string,
+declare function hsg:doclist-document($target as element(tei:TEI), $publication as xs:string,
         $type as xs:string, $context as map(*)) {
     let $number := hsg:document-number($target)
     let $id := normalize-space(($target//tei:bibl[@type='frus-division-id'])[1])
@@ -1665,7 +1617,7 @@ declare %private function hsg:first-page-scan($target as element(tei:TEI), $publ
 
 (:~ A child division (a compilation's chapters, a chapter's subchapters): a
  : titled link with its document range, muted when unpublished. :)
-declare %private function hsg:doclist-division($target as element(tei:TEI), $publication as xs:string,
+declare function hsg:doclist-division($target as element(tei:TEI), $publication as xs:string,
         $type as xs:string, $context as map(*)) {
     let $id := normalize-space(($target//tei:bibl[@type='frus-division-id'])[1])
     (: Line break between date-range title and subtitle, reference parity

@@ -24,15 +24,13 @@
              as a direct child it would pick up the "usa-prose" heading rules
              and read as loudly as the division's own title. -->
         <div class="hsg-frus__prose usa-prose">
-            [# Chapters, compilations and subchapters have their own template,
-               division-listing.html (OP#1479). #]
             [% if starts-with(normalize-space(($doc?content//tei:bibl[@type='frus-division-type'])[1]), 'document') %]
                 [[ page:transform($doc?content, map { "mode": "document-view" }) ]]
-                [[ hsg:prev-next($context) ]]
             [% else %]
+                [# sections: front and back matter #]
                 [[ page:transform($doc?content, map { "mode": "division" }) ]]
-                [[ hsg:prev-next($context) ]]
             [% endif %]
+            [[ hsg:prev-next($context) ]]
         </div>
     </div>
 

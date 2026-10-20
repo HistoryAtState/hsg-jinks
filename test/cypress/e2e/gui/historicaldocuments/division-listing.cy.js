@@ -1,6 +1,6 @@
 // Division listing pages (OP#1479, Figma node 4290-19925): chapters,
-// compilations and subchapters, rendered by hsg:division-listing() in
-// modules/templates/hsg.xqm through templates/pages/volume/division-listing.html.
+// compilations and subchapters, rendered by templates/pages/volume/
+// division-listing.html from hsg:division-listing() (modules/templates/hsg.xqm).
 // The volume title as an overline, the division title and notes, pagination
 // above and below, one card per entry, and no right-hand sidebar.
 

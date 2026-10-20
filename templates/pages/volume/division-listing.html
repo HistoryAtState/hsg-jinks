@@ -22,6 +22,28 @@
        right-hand sidebar. One root element: the layout's main is a flex row
        whose children each get flex: 1 (resources/css/layout.css). #]
     <div class="hsg-frus__interior hsg-frus__listing">
-        [[ hsg:division-listing($context) ]]
+        [% let $division = hsg:division-listing($context) %]
+        [% if exists($division) %]
+        <div class="hsg-frus__division">
+            <p class="hsg-frus__overline">
+                <a href="[[ $context?context-path ]]/historicaldocuments/[[ $division?publication ]]">[[ hsg:publication-title($division?publication) ]]</a>
+            </p>
+            <h1 class="hsg-frus__division-title">[[ $division?title ]]</h1>
+            [[ hsg:division-notes($division?doc, $division?publication, $context) ]]
+            [[ hsg:listing-pagination($context, $division?start, $division?total) ]]
+            [% if $division?type = 'compilation' %]
+            <h2 class="hsg-frus__contents">Contents</h2>
+            [% endif %]
+            <ul class="hsg-frus__doclist">
+                [# An if block directly in this loop body renders as literal
+                   text (jinks-templates), hence the inline if expression. #]
+                [% for $entry in $division?entries %]
+                [[ if (starts-with($entry?type, 'document')) then hsg:doclist-document($entry?target, $division?publication, $entry?type, $context) else hsg:doclist-division($entry?target, $division?publication, $entry?type, $context) ]]
+                [% endfor %]
+            </ul>
+            [[ hsg:listing-pagination($context, $division?start, $division?total) ]]
+        </div>
+        [% endif %]
+        [% endlet %]
     </div>
 </template>
