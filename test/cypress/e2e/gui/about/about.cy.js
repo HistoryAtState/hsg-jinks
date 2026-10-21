@@ -64,6 +64,50 @@ describe("FAQ: accordion landing, section, prev/next, exact-division guard", () 
         cy.get("#faq-state-records").should("not.be.visible");
     });
 
+    it("marks each question with a plus, or a minus when open", () => {
+        cy.visit("about/faq");
+        const icon = ($button) => {
+            const before = getComputedStyle($button[0], "::before");
+            return { content: before.content, width: before.width, mask: before.maskImage || before.webkitMaskImage };
+        };
+        cy.get(".hsg-faq .usa-accordion__button").first().then(($open) => {
+            const { content, width, mask } = icon($open);
+            expect(content).to.equal('""');
+            expect(width).to.equal("24px");
+            expect(mask).to.contain("remove.svg");
+        });
+        cy.contains(".hsg-faq .usa-accordion__button", "Foreign Relations of the United States").then(($closed) => {
+            expect(icon($closed).mask).to.contain("add.svg");
+        });
+    });
+
+    it("does not flash closed answers open while USWDS loads", () => {
+        // Hold back uswds.min.js, and look at the answers as soon as they are
+        // parsed: USWDS has not run yet.
+        cy.intercept("**/resources/js/uswds.min.js", (req) => {
+            req.on("response", (res) => res.setDelay(3000));
+        });
+        const seen = {};
+        cy.visit("about/faq", {
+            timeout: 20000,
+            onBeforeLoad(win) {
+                const poll = win.setInterval(() => {
+                    const open = win.document.getElementById("faq-state-records");
+                    const closed = win.document.getElementById("faq-what-is-frus");
+                    if (open && closed) {
+                        win.clearInterval(poll);
+                        seen.loading = win.document.documentElement.classList.contains("usa-js-loading");
+                        seen.open = win.getComputedStyle(open).display;
+                        seen.closed = win.getComputedStyle(closed).display;
+                    }
+                }, 20);
+            },
+        });
+        cy.wrap(seen).should("deep.equal", { loading: true, open: "block", closed: "none" });
+        cy.get("#faq-what-is-frus").should("not.be.visible");
+        cy.get("#faq-state-records").should("be.visible");
+    });
+
     it("shows the answer without repeating the question as a heading inside it", () => {
         cy.visit("about/faq");
         cy.get("#faq-state-records").within(() => {
