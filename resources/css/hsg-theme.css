@@ -1682,6 +1682,14 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--uswds-color-base-dark);
 }
 
+/* A collapsed accordion's panel stays hidden until USWDS has set it up, so
+   it does not flash open on load. uswds-init.min.js sets the class in <head>
+   and removes it once uswds.min.js has run (or after 8s); without JavaScript
+   it is never set and the panel shows. */
+.usa-js-loading .usa-accordion__heading:has(> .usa-accordion__button[aria-expanded="false"]) + .usa-accordion__content {
+    display: none;
+}
+
 /* OP#1416: About Us > Frequently Asked Questions as a USWDS accordion, from
    the Figma design (node 4950-57987). Every item is its own white card on
    the page band; the open one flips to a solid navy header with white text
@@ -1695,6 +1703,7 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
    needed to beat the palette's own .usa-accordion__button rules (gray fill,
    ink text, hover fill) whatever the stylesheet load order. */
 .hsg-faq .usa-accordion__heading .usa-accordion__button {
+    position: relative;
     box-sizing: border-box;
     width: 100%;
     padding: var(--uswds-space-2) var(--uswds-space-6) var(--uswds-space-2) var(--uswds-space-3);
@@ -1717,7 +1726,14 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--uswds-color-white);
 }
 
+/* USWDS generates this pseudo-element only in forced-colors mode. */
 .hsg-faq .usa-accordion__heading .usa-accordion__button::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    inset-inline: auto var(--uswds-space-2);
+    width: 1.5rem;
+    height: 100%;
     background: currentColor;
     -webkit-mask: url("../images/usa-icons/remove.svg") center / 1.5rem 1.5rem no-repeat;
     mask: url("../images/usa-icons/remove.svg") center / 1.5rem 1.5rem no-repeat;
