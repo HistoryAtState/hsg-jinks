@@ -703,16 +703,6 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin: 0;
 }
 
-/* Above the list the pagination sits on the right; below it keeps the
-   USWDS centring. */
-.hsg-frus__division > .hsg-frus__pagination:first-of-type {
-    justify-content: flex-end;
-}
-
-.hsg-frus__division > .hsg-frus__pagination:last-of-type {
-    justify-content: center;
-}
-
 .hsg-frus__listing .hsg-frus__contents {
     margin: 0;
 }
@@ -1890,17 +1880,18 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     font-size: 0.6875rem;
 }
 
-/* Numbered squares, the current page filled navy, Next / Previous as text. */
+/* Numbered squares, the current page filled navy, Next / Previous as text,
+   centred: search results and division listings alike. */
 .hsg-search-pagination {
     margin-top: var(--uswds-space-3);
     background: none;
 }
 
-.hsg-search-pagination .usa-pagination__list {
+:is(.hsg-search-pagination, .hsg-frus__pagination) .usa-pagination__list {
     justify-content: center;
 }
 
-.hsg-search-pagination .usa-pagination__button {
+:is(.hsg-search-pagination, .hsg-frus__pagination) .usa-pagination__button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1915,19 +1906,19 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     text-decoration: none;
 }
 
-.hsg-search-pagination .usa-pagination__button.usa-current {
+:is(.hsg-search-pagination, .hsg-frus__pagination) .usa-pagination__button.usa-current {
     background-color: var(--uswds-color-primary-darker);
     color: var(--uswds-color-white);
 }
 
-.hsg-search-pagination .usa-pagination__link {
+:is(.hsg-search-pagination, .hsg-frus__pagination) .usa-pagination__link {
     color: var(--uswds-color-primary-dark);
     font-family: var(--uswds-font-sans);
     font-weight: 700;
     text-decoration: none;
 }
 
-.hsg-search-pagination .usa-pagination__overflow {
+:is(.hsg-search-pagination, .hsg-frus__pagination) .usa-pagination__overflow {
     color: var(--uswds-color-base-dark);
 }
 

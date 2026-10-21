@@ -27,8 +27,29 @@ describe("division listing page", () => {
             cy.get(".usa-pagination__button.usa-current").should("have.text", "1").and("have.attr", "aria-current", "page");
             cy.get(".usa-pagination__next-page").should("have.attr", "href", "?start=31");
         });
-        cy.get(".hsg-frus__pagination").first().should("have.css", "justify-content", "flex-end");
-        cy.get(".hsg-frus__pagination").last().should("have.css", "justify-content", "center");
+        // Both centred within the listing.
+        cy.get(".hsg-frus__pagination").each(($nav) => {
+            const nav = $nav[0].getBoundingClientRect();
+            const list = $nav.find(".usa-pagination__list")[0].getBoundingClientRect();
+            expect(list.left - nav.left).to.be.closeTo(nav.right - list.right, 2);
+        });
+    });
+
+    it("colours the pagination like the search results' pagination", () => {
+        const PROPS = ["color", "background-color"];
+        const SELECTORS = [".usa-pagination__button.usa-current", ".usa-pagination__button:not(.usa-current)", ".usa-pagination__link"];
+        const styles = ($nav) => SELECTORS.map((sel) => {
+            const style = getComputedStyle($nav.find(sel)[0]);
+            return PROPS.map((prop) => style.getPropertyValue(prop));
+        });
+        cy.visit("search?q=salt");
+        cy.get(".hsg-search-pagination").then(($search) => {
+            const expected = styles($search);
+            cy.visit(CHAPTER);
+            cy.get(".hsg-frus__pagination").first().then(($nav) => {
+                expect(styles($nav)).to.deep.equal(expected);
+            });
+        });
     });
 
     it("gives each document a card with its title, source, location and date", () => {
