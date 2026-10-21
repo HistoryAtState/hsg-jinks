@@ -24,7 +24,13 @@ export EXISTDB_SERVER=http://localhost:8080/exist EXISTDB_USER=admin EXISTDB_PAS
 # content instead of failing loudly).
 xst run 'sm:add-group-member("tei","admin")' >/dev/null
 
-ant
+# PRODUCTION=true (CI) builds what the production image ships; see README
+# "Production Docker image".
+if [ "$PRODUCTION" = "true" ]; then
+    ant -Dproduction=true
+else
+    ant
+fi
 
 # Replaces any installed hsg-jinks, including the one the base image ships.
 # --force: the version number stays 1.0.0 between builds. xst undeploys and
