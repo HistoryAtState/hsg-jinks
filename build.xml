@@ -160,7 +160,25 @@
         </fail>
     </target>
 
-    <target name="xar" depends="git.revision,prepare,app-routes,production-controller" description="create XAR file of folder ${app.build.dir}">
+    <!-- The production build empties the CORS origin whitelist in modules/config.xqm, so no
+         origin gets Access-Control-Allow-Credentials; every response carries
+         Access-Control-Allow-Origin: * instead. Development keeps the localhost entries.
+         Fails if that declaration changes shape. -->
+    <target name="production-cors" if="is-production" depends="prepare">
+        <replaceregexp file="${app.build.dir}/modules/config.xqm" flags="s"
+            match="declare variable \$config:origin-whitelist := \(.*?\n\);"
+            replace="declare variable $config:origin-whitelist := ();"/>
+        <loadfile property="production.config" srcFile="${app.build.dir}/modules/config.xqm"/>
+        <fail message="modules/config.xqm still has a CORS origin whitelist; update the production-cors target">
+            <condition>
+                <not>
+                    <contains string="${production.config}" substring="declare variable $config:origin-whitelist := ();"/>
+                </not>
+            </condition>
+        </fail>
+    </target>
+
+    <target name="xar" depends="git.revision,prepare,app-routes,production-controller,production-cors" description="create XAR file of folder ${app.build.dir}">
         <zip basedir="${app.build.dir}" destfile="${build.dir}/${project.app}-${project.version}.xar"/>
     </target>
 

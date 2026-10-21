@@ -97,3 +97,36 @@ if (!productionBuild) {
         });
     });
 }
+
+// The production build empties the CORS origin whitelist (build.xml, target
+// production-cors); development keeps the localhost entries.
+describe("CORS", () => {
+    const withOrigin = (origin, url) =>
+        cy.request({ url, headers: { Origin: origin }, failOnStatusCode: false });
+
+    ["about", "resources/css/styles.css"].forEach((url) => {
+        it(`/${url} never allows credentials for another site`, () => {
+            withOrigin("https://example.org", url).then((r) => {
+                expect(r.headers["access-control-allow-origin"]).to.eq("*");
+                expect(r.headers).not.to.have.property("access-control-allow-credentials");
+            });
+        });
+
+        it(
+            productionBuild
+                ? `/${url} never allows credentials for localhost`
+                : `/${url} allows credentials for localhost in development`,
+            () => {
+                withOrigin("http://localhost:3000", url).then((r) => {
+                    if (productionBuild) {
+                        expect(r.headers["access-control-allow-origin"]).to.eq("*");
+                        expect(r.headers).not.to.have.property("access-control-allow-credentials");
+                    } else {
+                        expect(r.headers["access-control-allow-origin"]).to.eq("http://localhost:3000");
+                        expect(r.headers["access-control-allow-credentials"]).to.eq("true");
+                    }
+                });
+            },
+        );
+    });
+});

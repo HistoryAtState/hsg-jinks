@@ -374,9 +374,13 @@ path.
 
 The image builds the app with `ant -Dproduction=true`. That build also
 rewrites the generated `controller.xql` so those requests go through
-`api.xql` as well, where they answer 404. Both rewrites fail the build if the
-generated file changes shape; see the `app-routes` and
-`production-controller` targets in `build.xml`.
+`api.xql` as well, where they answer 404. It also empties the CORS origin
+whitelist (`$config:origin-whitelist` in `modules/config.xqm`), so no origin
+gets `Access-Control-Allow-Credentials`; every response carries
+`Access-Control-Allow-Origin: *`. Development keeps the localhost entries.
+All these rewrites fail the build if the generated file changes shape; see
+the `app-routes`, `production-controller` and `production-cors` targets in
+`build.xml`.
 
 `frus-data-jinks` comes from the private, release-less `hsg-jinks-data` repo,
 so it must be staged at the repo root before building (the `COPY` fails
