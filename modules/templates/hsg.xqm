@@ -256,22 +256,15 @@ declare function hsg:navigation-title($context as map(*)) as element(h2)? {
  : with its chapters nested beneath, then the back matter. Documents are never
  : listed. The print table of contents (front/toc.xml) is omitted.
  :
- : Rendered into the layout's `before` block, so it appears on the comp, chapter
- : and document pages (and, via hsg:facsimile-toc, the pg_* page) -- but not on
- : the volume landing, whose TOC belongs in the main content instead (#1080);
- : see the guard below.
- :
- : The same tree is what #1080 needs in main content, so keep this the only
- : traversal.
+ : Rendered into the layout's `before` block, so it appears on the volume
+ : landing and on the comp, chapter and document pages (and, via
+ : hsg:facsimile-toc, the pg_* page): one TOC for the whole volume. Keep this
+ : the only traversal.
  :)
 declare function hsg:volume-toc($context as map(*)) {
     let $doc := $context?doc?content
     let $publication := ($doc//tei:bibl[@type='frus-volume-id'])[1]/string()
     return
-    (: Only a division of a volume gets the sidebar. The volume file itself
-       carries no typed bibl ids at all -- only its divisions do -- so an absent
-       frus-volume-id is what identifies the landing page, which has no sidebar:
-       its table of contents belongs in the main content (#1080). :)
     if (exists($doc) and $publication != '') then
         hsg:volume-toc-nav(
             $publication,
@@ -279,6 +272,16 @@ declare function hsg:volume-toc($context as map(*)) {
             ($doc//tei:bibl[@type='frus-division-type'])[1] = 'document',
             $context
         )
+    else if (exists($doc)) then
+        (: The volume root carries no typed bibl ids; it is {volume}/{volume}.xml
+           in the data collection. Its landing page gets the same TOC, with no
+           current entry, unless the volume is unpublished (OP#1337). :)
+        let $path := tokenize(config:get-relpath($doc, $config:data-default), '/')
+        return
+            if (count($path) eq 2 and $path[2] eq $path[1] || '.xml' and hsg:volume-published($path[1])) then
+                hsg:volume-toc-nav($path[1], (), false(), $context)
+            else
+                ()
     else
         ()
 };
@@ -1044,81 +1047,6 @@ declare function hsg:volume-open-link($context as map(*)) as element(a)? {
 declare %private function hsg:volume-published($publication as xs:string) as xs:boolean {
     doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
         //tei:revisionDesc/@status = ("published", "partially-published")
-};
-
-(:~
- : The volume landing page's own table of contents, in main content rather
- : than the sidebar (#1080), in two columns (Figma node 4298-66154,
- : OP#1478): "Content" lists the body, the compilation with its chapters
- : nested beneath, each annotated with its document range (reference parity
- : with hsg-shell); "Other links" lists the front and back matter. Documents
- : are never listed.
- :
- : Reuses hsg:toc-divisions -- the same generic, whole-collection map -- but
- : not hsg:toc-entries: this shape is a plain nested list with document
- : ranges, not a usa-sidenav with a "current page" highlight (every entry is
- : equally "not current" on the landing page).
- :)
-declare function hsg:volume-landing-toc($context as map(*)) as element(div)? {
-    let $doc := $context?doc?content
-    return
-    if (not(exists($doc))) then ()
-    else
-        let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
-        let $divisions := hsg:toc-divisions($publication)
-        let $text := $doc/tei:TEI/tei:text
-        (: A volume with no published content at all ('being-cleared' etc.)
-           gets no TOC: the reference suppresses it wholesale and the
-           interior URLs 404 (OP#1337). Partially-published volumes list
-           everything, pending divisions marked (see the entry builder). :)
-        let $published := hsg:volume-published($publication)
-        let $content :=
-            if ($published) then
-                hsg:landing-toc-entries($text/tei:body//xi:include, $divisions, $publication, $context)
-            else ()
-        let $other :=
-            if ($published) then
-                hsg:landing-toc-entries($text/(tei:front | tei:back)//xi:include, $divisions, $publication, $context)
-            else ()
-        return
-            (: emit no list at all rather than an empty one :)
-            if (exists(($content, $other))) then
-                <div class="hsg-frus__landing-contents">
-                    {hsg:landing-toc-column('hsg-frus-toc-content', 'Content', $content)}
-                    {hsg:landing-toc-column('hsg-frus-toc-other', 'Other links', $other)}
-                </div>
-            else ()
-};
-
-declare %private function hsg:landing-toc-column($id as xs:string, $heading as xs:string, $entries as element(li)*) as element(section)? {
-    if (empty($entries)) then ()
-    else
-        <section class="hsg-frus__landing-toc" aria-labelledby="{$id}">
-            <h2 class="hsg-frus__label" id="{$id}">{$heading}</h2>
-            <ul class="hsg-frus__toc">{$entries}</ul>
-        </section>
-};
-
-declare %private function hsg:landing-toc-entries($includes as element(xi:include)*, $divisions as map(*),
-        $publication as xs:string, $context as map(*)) as element(li)* {
-    for $include in $includes
-    let $id := $include/@xpointer/string()
-    where map:contains($divisions, $id)
-    let $included := $divisions($id)
-    (: hsg-shell inserts a <br/> between date-range title and subtitle here
-       too; shared logic in hsg:split-title (OP#1085). :)
-    let $title := hsg:split-title($included//tei:fileDesc//tei:titleStmt/tei:title)
-    let $range := hsg:document-range-text(hsg:document-range($included))
-    (: Unpublished division: listed but marked; same reasoning as
-       hsg:toc-entries (OP#1337). :)
-    let $is-pending := ends-with(normalize-space(($included//tei:bibl[@type='frus-division-type'])[1]), '-pending')
-    let $children := hsg:landing-toc-entries($included//tei:text//xi:include, $divisions, $publication, $context)
-    return
-        <li class="{if ($is-pending) then 'pending' else ''}">
-            <a href="{$context?context-path}/historicaldocuments/{$publication}/{$id}">{$title}</a>
-            {if (exists($range)) then (' ', <span class="hsg-frus__doc-range">{$range}</span>) else ()}
-            {if (exists($children)) then <ul>{$children}</ul> else ()}
-        </li>
 };
 
 (:~

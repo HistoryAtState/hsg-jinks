@@ -24,8 +24,8 @@ describe("volume landing shows all relevant data", () => {
 
     it("lists every division in the TOC with its document range", () => {
         // 1 compilation + 6 chapters carry document ranges.
-        cy.get("main .hsg-frus__toc a", { timeout: 15000 }).should("have.length.at.least", 7);
-        cy.get("main .hsg-frus__toc").should("contain.text", "Documents 1–309")
+        cy.get("aside.before .usa-sidenav a", { timeout: 15000 }).should("have.length.at.least", 7);
+        cy.get("aside.before .usa-sidenav").should("contain.text", "Documents 1–309")
             .and("contain.text", "Documents 1–50")
             .and("contain.text", "Documents 267–309");
     });

@@ -1,15 +1,13 @@
 // Sidebar table of contents (#1089): the volume's TOC as a USWDS side
-// navigation, in the layout's left `before` area, on the comp, chapter and
-// document pages.
+// navigation, in the layout's left `before` area, on the volume landing and
+// the comp, chapter and document pages.
 //
 // Shape is reference parity: front matter flat, each compilation as a node with
 // its chapters nested beneath, then the back matter. Documents are never listed
 // and the print table of contents (front/toc.xml, subtype table-of-contents) is
 // omitted.
 //
-// The tree comes from hsg:volume-toc() in modules/templates/hsg.xqm, which is
-// also what #1080 will render in the landing page's main content -- one
-// traversal, two placements.
+// The tree comes from hsg:volume-toc() in modules/templates/hsg.xqm.
 //
 // baseUrl: see the note in document-view.cy.js.
 
@@ -36,21 +34,18 @@ const text = (el) => {
 };
 
 describe("sidebar table of contents", () => {
-    ["comp", "ch1", "d1"].forEach((page) => {
-        it(`${page}: renders the volume TOC as a USWDS side navigation`, () => {
-            cy.visit(`${VOLUME}/${page}`);
+    ["", "/comp", "/ch1", "/d1"].forEach((page) => {
+        it(`${page || "landing"}: renders the volume TOC as a USWDS side navigation`, () => {
+            cy.visit(`${VOLUME}${page}`);
             cy.get("nav.toc ul.usa-sidenav").should("exist");
             cy.get("nav.toc").should("have.attr", "aria-label");
         });
     });
 
-    it("the volume landing has no sidebar TOC", () => {
-        // Its table of contents belongs in the main content instead (#1080).
-        // The volume file carries no typed bibl ids -- only its divisions do --
-        // which is what the helper guards on.
+    it("the volume landing marks no entry current", () => {
         cy.visit(VOLUME);
-        cy.get("main h1").should("be.visible");
-        cy.get("nav.toc").should("not.exist");
+        cy.get("nav.toc ul.usa-sidenav").should("exist");
+        cy.get("nav.toc .usa-current").should("not.exist");
     });
 
     describe("shape", () => {

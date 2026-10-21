@@ -7,19 +7,12 @@
                 "https://history.state.gov/ns/templates/tags": { "at": "modules/templates/tags.xqm", "prefix": "tags" }
             },
             "extends": "templates/layouts/historicaldocuments-content.html"
-        },
-        "theme": {
-            "layout": {
-                "before": {
-                    "hidden": true
-                }
-            }
         }
     }
     ---
-    [# Figma node 4298-66032 (OP#1478): the volume on a white card, and one
-       right-hand sidebar with ways to explore, tags and administrations; no
-       left sidebar. #]
+    [# Figma node 4298-66032 (OP#1478): the volume on a white card, the
+       volume TOC in the left sidebar (the layout's hsg:volume-toc), and ways
+       to explore, tags and administrations on the right. #]
     [% let $volume = hsg:volume-landing($context) %]
     [% if exists($volume) %]
     [# One root element: the layout's main is a flex row whose children each
@@ -39,7 +32,6 @@
                 [[ hsg:volume-open-link($context) ]]
             </div>
         </div>
-        [[ hsg:volume-landing-toc($context) ]]
     </article>
     [% endif %]
     [% endlet %]

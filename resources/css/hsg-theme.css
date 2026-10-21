@@ -367,11 +367,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 }
 
 /* Volume landing page (#1080, layout after Figma node 4298-66032, OP#1478):
-   the volume on a white card, cover and metadata side by side, then the
-   contents in two columns; one right-hand sidebar without panel chrome.
-   The page is told apart by its card: a layout class set in the page
-   template does not reach pb-page, the parent layout's own class wins. */
-.sticky-layout:has(> main .hsg-frus__landing) > :is(.before, .before-top) {
+   the volume on a white card, cover and metadata side by side; the volume
+   TOC in the left sidebar, a right-hand sidebar without panel chrome. The
+   page is told apart by its card: a layout class set in the page template
+   does not reach pb-page, the parent layout's own class wins. An
+   unpublished volume has no TOC, so no left sidebar either. */
+.sticky-layout:has(> main .hsg-frus__landing):not(:has(> .before .toc)) > :is(.before, .before-top) {
     display: none;
 }
 
@@ -494,39 +495,6 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--uswds-color-base-dark);
 }
 
-.hsg-frus__landing-contents {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-    gap: var(--uswds-space-3) var(--uswds-space-5);
-}
-
-.hsg-frus__landing-toc .hsg-frus__label {
-    padding-bottom: var(--uswds-space-1);
-    border-bottom: 1px solid rgb(0 0 0 / 20%);
-}
-
-.hsg-frus__landing-toc .hsg-frus__toc {
-    clear: none;
-    margin: 0;
-    padding-top: var(--uswds-space-2);
-    border-top: 0;
-    font-size: 0.875rem;
-}
-
-.hsg-frus__landing-toc .hsg-frus__toc li {
-    margin-bottom: var(--uswds-space-1);
-    line-height: 1.62;
-}
-
-.hsg-frus__landing-toc .hsg-frus__toc a {
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.hsg-frus__landing-toc .hsg-frus__toc a:hover {
-    text-decoration: underline;
-}
-
 .hsg-frus__doc-range {
     margin-left: var(--uswds-space-05);
     color: var(--uswds-color-base-darker);
@@ -615,28 +583,9 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     padding-left: 0;
 }
 
-/* Unpublished (pending) divisions in the table of contents render muted and
-   italic, in a non-link colour -- reference parity with hsg-shell's li.pending
-   (which the reference site marks on the volume landing page only; the sidebar
-   here carries it too, so the state is visible on interior pages as well).
-
-   Only the landing page takes the colour. Its neighbouring links are blue, so
-   the muted grey is what sets a pending entry apart -- whereas every link in
-   the sidebar already IS this grey: the theme's own
-   `.usa-sidenav :not(.usa-button):not(.uswds-button):not(.usa-current)`
-   (palette-navy.css) colours them #5c5c5c, and out-specifies anything that
-   does not repeat its four classes. Rather than win that with a longer
-   selector to arrive at an indistinguishable grey, the sidebar leaves the
-   colour alone and lets the italic carry the distinction. */
-.hsg-frus__toc li.pending > a {
-    color: var(--uswds-color-base-dark);
-}
-
-.hsg-frus__toc li.pending > a:hover {
-    color: var(--uswds-color-primary-darker);
-}
-
-.hsg-frus__toc li.pending > a,
+/* Unpublished (pending) divisions in the sidebar TOC render italic,
+   reference parity with hsg-shell's li.pending. The sidebar's links are
+   already the theme's grey, so the italic carries the distinction. */
 .usa-sidenav__item.pending > a {
     font-style: italic;
 }

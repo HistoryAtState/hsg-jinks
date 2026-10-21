@@ -3,11 +3,9 @@
 // Rendered by templates/pages/volume/landing.html and hsg:volume-ways-to-explore() in
 // modules/templates/hsg.xqm, after Figma node 4298-66032: a white card with
 // the administration tags, title, cover, the editor/publisher metadata list,
-// the "Open" call to action and the table of contents in two columns
-// (Content: the compilation with nested chapters and document-number ranges;
-// Other links: front and back matter); a right-hand sidebar with "Ways to
-// Explore" (search within the volume, ebook downloads), tags and
-// administrations, and no left sidebar.
+// and the "Open" call to action; the volume TOC in the left sidebar, the same
+// one its child pages show; a right-hand sidebar with "Ways to Explore"
+// (search within the volume, ebook downloads), tags and administrations.
 
 const VOLUME = "historicaldocuments/frus1981-88v05";
 
@@ -20,8 +18,9 @@ describe("volume landing page", () => {
         cy.get(".hsg-frus__landing-header h1").should("contain.text", "Soviet Union, March 1985–October 1986");
     });
 
-    it("has no left sidebar", () => {
-        cy.get("pb-page > aside.before").should("not.be.visible");
+    it("has the volume TOC in the left sidebar and none in the card", () => {
+        cy.get("pb-page > aside.before nav.toc .usa-sidenav").should("be.visible");
+        cy.get("main .hsg-frus__landing").find(".usa-sidenav, .hsg-frus__toc").should("not.exist");
     });
 
     it("shows the cover image in its square frame", () => {
@@ -49,23 +48,25 @@ describe("volume landing page", () => {
         cy.get("a.hsg-frus__open").should("have.text", "Open").and("have.attr", "href").and("match", /\/frus1981-88v05\/comp$/);
     });
 
-    it("lists the compilation with nested chapters and document ranges under Content", () => {
-        cy.contains(".hsg-frus__landing-toc", "Content").within(() => {
-            cy.get(".hsg-frus__toc").should("contain.text", "Documents 1–309");
-            cy.get(".hsg-frus__toc ul li").should("have.length.at.least", 6);
-            cy.get(".hsg-frus__toc ul li a[href$='/ch1']")
-                .parent()
-                .should("contain.text", "Documents 1–50");
+    it("lists the compilation with nested chapters and document ranges in the sidebar TOC", () => {
+        cy.get("pb-page > aside.before .usa-sidenav").within(() => {
+            cy.get("a[href$='/comp']").should("contain.text", "Documents 1–309");
+            cy.get(".usa-sidenav__sublist > li").should("have.length.at.least", 6);
+            cy.get(".usa-sidenav__sublist a[href$='/ch1']").should("contain.text", "Documents 1–50");
+            cy.get(".usa-current").should("not.exist");
         });
     });
 
-    it("lists front and back matter under Other links", () => {
-        cy.contains(".hsg-frus__landing-toc", "Other links").find(".hsg-frus__toc > li > a").then(($as) => {
-            const texts = [...$as].map((el) => el.textContent.trim());
-            expect(texts).to.include.members(["Press Release", "About the Series", "Preface", "Sources",
-                "Abbreviations and Terms", "Persons", "Appendix", "Index"]);
+    it("shows the same TOC as its child pages", () => {
+        const hrefs = ($as) => [...$as].map((el) => el.getAttribute("href"));
+        cy.get("pb-page > aside.before .usa-sidenav a").then(($as) => {
+            const landing = hrefs($as);
+            expect(landing).to.have.length.at.least(10);
+            cy.visit(`${VOLUME}/ch1`);
+            cy.get("pb-page > aside.before .usa-sidenav a").then(($child) => {
+                expect(hrefs($child)).to.deep.equal(landing);
+            });
         });
-        cy.contains(".hsg-frus__landing-toc", "Other links").should("contain.text", "Documents A–C");
     });
 
     it("has a 'Ways to Explore' panel with volume search and ebook downloads", () => {
@@ -96,26 +97,21 @@ describe("volume landing page", () => {
 // error; the volume's own items are identified by @corresp = "#<volume-id>",
 // the same gate hsg-shell's fh:exists-pdf and friends use.
 // Unpublished ("pending") chapters, which the reference site marks with
-// li.pending on this page. The muted colour is the point here: on the landing
-// page the surrounding links are blue, so it is what sets a pending entry
-// apart. Asserted as a computed value because the rule has to survive the
-// theme's own link colours (resources/css/hsg-theme.css explains where it
-// deliberately does not fight them).
+// li.pending on this page: italic in the sidebar TOC.
 describe("volume landing page, unpublished chapters", () => {
     const PARTIAL = "historicaldocuments/frus1977-80v27";
 
     beforeEach(() => cy.visit(PARTIAL));
 
     it("marks chapters with no published documents as pending", () => {
-        cy.get(".hsg-frus__toc li.pending").should("have.length.at.least", 1);
-        cy.get(".hsg-frus__toc li.pending > a")
+        cy.get("pb-page > aside.before .usa-sidenav__item.pending").should("have.length.at.least", 1);
+        cy.get("pb-page > aside.before .usa-sidenav__item.pending > a")
             .first()
-            .should("have.css", "color", "rgb(92, 92, 92)") // --uswds-color-base-dark (OP#1426)
-            .and("have.css", "font-style", "italic");
+            .should("have.css", "font-style", "italic");
     });
 
     it("leaves chapters that do have published documents unmarked", () => {
-        cy.contains(".hsg-frus__toc li", "Canada").should("not.have.class", "pending");
+        cy.contains("pb-page > aside.before .usa-sidenav__item", "Canada").should("not.have.class", "pending");
     });
 });
 

@@ -23,6 +23,7 @@ describe("anticipated FRUS volume (frus1981-88v16)", () => {
         cy.visit(VOLUME);
         cy.get("h1").should("contain.text", "South America");
         cy.get(`a[href*="frus1981-88v16/ch"]`).should("not.exist");
+        cy.get("pb-page > aside.before").should("not.be.visible");
     });
 
     it("chapter routes 404 while the volume is in clearance", function () {
