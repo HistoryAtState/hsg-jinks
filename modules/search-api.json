@@ -73,6 +73,17 @@
                         "example": "hybrid"
                     },
                     {
+                        "name": "stem",
+                        "in": "query",
+                        "description": "Match word forms. yes searches FRUS's stemmed hsg-fulltext-stemmed field (English, Porter), together with the exact field so wildcard terms keep working; other collections are searched exactly until they gain the field. Absent or any other value matches words exactly, the default.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 10
+                        },
+                        "example": "yes"
+                    },
+                    {
                         "name": "within",
                         "in": "query",
                         "description": "Section scope filter, repeatable. Known values (mapped to hsg-category/hsg-publication facets in the handler): entire-site, documents, department, countries, conferences, frus-history, about, retired. Deliberately NOT schema-enumerated: hsg-shell answers an unknown value with a normal 200 page and zero results (the value simply matches no facet), and legacy URLs must keep that behavior instead of a Roaster validation 400. Absent or entire-site means no scope filter; absent `within` combined with `start-date` or `volume-id` is treated as documents (compatibility with the retired frus-dates search engine).",
