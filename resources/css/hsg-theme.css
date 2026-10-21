@@ -420,6 +420,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
 .hsg-frus__tags .usa-tag {
     background-color: var(--uswds-color-body-background);
     color: var(--uswds-color-primary-dark);
+    text-decoration: none;
+}
+
+.hsg-frus__tags .usa-tag:hover {
+    background-color: var(--uswds-color-primary-dark);
+    color: var(--uswds-color-white);
 }
 
 .hsg-frus__landing-intro {

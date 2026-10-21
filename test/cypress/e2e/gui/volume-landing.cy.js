@@ -15,6 +15,7 @@ describe("volume landing page", () => {
     it("puts the volume on a card with its administration tag above the title", () => {
         cy.get("main article.hsg-frus__landing").should("have.css", "background-color", "rgb(255, 255, 255)");
         cy.get(".hsg-frus__tags .usa-tag").should("have.length", 1).and("contain.text", "Ronald Reagan Administration");
+        cy.get(".hsg-frus__tags a.usa-tag").should("have.attr", "href").and("match", /\/historicaldocuments\/reagan$/);
         cy.get(".hsg-frus__landing-header h1").should("contain.text", "Soviet Union, March 1985–October 1986");
     });
 

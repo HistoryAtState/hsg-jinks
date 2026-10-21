@@ -932,28 +932,25 @@ declare function hsg:volume-landing($context as map(*)) as map(*)? {
 };
 
 (:~
- : The administrations a volume covers, as USWDS tags above its title. Labels
- : come from the administrations taxonomy: the combined entry where there is
- : one ("Richard M. Nixon and Gerald R. Ford Administrations"), else the
- : single presidency's.
+ : The administrations a volume covers, as USWDS tags above its title, each
+ : linking to its administration page. Labels come from the administrations
+ : taxonomy: the combined entry where there is one ("Richard M. Nixon and
+ : Gerald R. Ford Administrations"), else the single presidency's.
  :)
-declare function hsg:volume-administration-tags($doc as node()) as element(ul)? {
-    let $labels :=
-        for $id in $doc//tei:keywords[@scheme = '#frus-administration-coverage']/tei:term
-        let $category := hsg:administration(normalize-space($id))
-        return normalize-space((
+declare function hsg:volume-administration-tags($doc as node(), $context as map(*)) as element(ul)? {
+    let $tags :=
+        for $id in distinct-values($doc//tei:keywords[@scheme = '#frus-administration-coverage']/tei:term ! normalize-space(.))
+        let $category := hsg:administration($id)
+        let $label := normalize-space((
             $category/tei:catDesc[@n = 'combined'],
             $category/tei:catDesc
-        )[1]/tei:term)[. ne '']
+        )[1]/tei:term)
+        where $label ne ''
+        return
+            <li><a class="usa-tag" href="{$context?context-path}/historicaldocuments/{$id}">{$label}</a></li>
     return
-        if (empty($labels)) then ()
-        else
-            <ul class="hsg-frus__tags">
-            {
-                for $label in distinct-values($labels)
-                return <li><span class="usa-tag">{$label}</span></li>
-            }
-            </ul>
+        if (empty($tags)) then ()
+        else <ul class="hsg-frus__tags">{$tags}</ul>
 };
 
 (:~
