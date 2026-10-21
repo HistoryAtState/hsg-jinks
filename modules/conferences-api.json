@@ -111,7 +111,8 @@
                         "description": "xml:id of the tei:div to render",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }

@@ -14,12 +14,36 @@ const expectNotFoundPage = (r) => {
 
 // The ids' "pattern" in the route specs, enforced by the schema-constraints
 // middleware (modules/schema-constraints.xqm).
+describe("path parameters", () => {
+    it("declare a pattern in every app route, except the not-found catch-alls", () => {
+        cy.task("findFiles", { pattern: "modules/*-api.json" }).then((files) => {
+            const missing = [];
+            files.forEach((file) => {
+                cy.readFile(file).then((spec) => {
+                    Object.entries(spec.paths || {}).forEach(([path, item]) => {
+                        Object.values(item)
+                            .filter((op) => op.operationId && !/not-found$/.test(op.operationId))
+                            .flatMap((op) => (op.parameters || []).filter((p) => p.in === "path"))
+                            .filter((p) => !p.schema?.pattern)
+                            .forEach((p) => missing.push(`${file} ${path} ${p.name}`));
+                    });
+                });
+            });
+            cy.then(() => expect(missing).to.deep.eq([]));
+        });
+    });
+});
+
 describe("ids that leave their collection", () => {
     [
         "countries",
         "countries/archives",
         "historicaldocuments/frus-history/documents",
         "historicaldocuments/frus-history/research",
+        "historicaldocuments",
+        "historicaldocuments/frus1977-80v27",
+        "departmenthistory/people",
+        "education/modules",
     ].forEach((section) => {
         it(`/${section}/{id} answers 404`, () => {
             get(`${section}/${outsideId}`).then(expectNotFoundPage);

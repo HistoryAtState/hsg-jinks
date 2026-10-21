@@ -328,7 +328,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -395,7 +395,7 @@
                         "required": true,
                         "schema": {
                             "type": "string",
-                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -483,7 +483,8 @@
                         "description": "ID of the monograph division",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -571,7 +572,8 @@
                         "description": "ID of the release announcement, e.g. 2016-q3",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -615,7 +617,8 @@
                         "description": "Relative path to the document",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -659,7 +662,8 @@
                         "description": "Relative path to the document",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     },
@@ -669,7 +673,8 @@
                         "description": "ID of the division",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }

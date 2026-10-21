@@ -70,7 +70,8 @@
                         "description": "ID of the FAQ section",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -136,7 +137,8 @@
                         "description": "ID of the HAC section or meeting subchapter",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
