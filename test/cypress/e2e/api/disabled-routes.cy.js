@@ -1,10 +1,12 @@
 // Routes of the generated API that this app does not serve
 // (modules/disabled-api.json): each answers like an unknown path, whoever
-// asks. The other methods of the same paths still reach their handlers.
+// asks, with every method of these paths.
 
 const disabled = [
     ["GET", "api/parts/disabled-test.xml/json"],
+    ["GET", "api/document/disabled-test.xml"],
     ["PUT", "api/document/disabled-test.xml"],
+    ["DELETE", "api/document/disabled-test.xml"],
     ["POST", "api/convert"],
     ["POST", "api/preview"],
     ["GET", "api/apps/download"],
@@ -18,8 +20,10 @@ const disabled = [
     ["GET", "api/nlp/train/disabled-test"],
     ["GET", "api/nlp/log/1"],
     ["GET", "api/nlp/data/disabled-test"],
+    ["GET", "api/register/person/disabled-test"],
     ["POST", "api/register/person/disabled-test"],
     ["PUT", "api/register"],
+    ["GET", "api/register/disabled-test"],
     ["DELETE", "api/register/disabled-test"],
     ["PUT", "api/register/disabled-test"],
     ["GET", "api/forms/template/person-default"],
@@ -101,27 +105,3 @@ if (productionBuild) {
         });
     });
 }
-
-describe("other methods on the disabled paths", () => {
-    it("GET /api/register/{id} still reaches the register handler", () => {
-        send(["GET", "api/register/disabled-test"]).its("status").should("eq", 200);
-    });
-
-    it("GET /api/register/{type}/{id} still reaches the register handler", () => {
-        send(["GET", "api/register/person/disabled-test"]).then((r) => {
-            expect(r.status).to.eq(404);
-            expect(r.headers["content-type"]).to.contain("application/json");
-        });
-    });
-
-    it("GET /api/document/{id} still reaches the document handler", () => {
-        send(["GET", "api/document/disabled-test.xml"]).then((r) => {
-            expect(r.status).to.eq(404);
-            expect(r.headers["content-type"]).to.contain("application/json");
-        });
-    });
-
-    it("DELETE /api/document/{id} still requires a login", () => {
-        send(["DELETE", "api/document/disabled-test.xml"]).its("status").should("eq", 401);
-    });
-});
