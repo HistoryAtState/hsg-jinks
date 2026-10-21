@@ -1922,6 +1922,11 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--uswds-color-base-dark);
 }
 
+/* A missing Previous / Next keeps its space, so the page buttons stay put. */
+.hsg-pagination__placeholder {
+    visibility: hidden;
+}
+
 /* A collapsed accordion's panel stays hidden until USWDS has set it up, so
    it does not flash open on load. uswds-init.min.js sets the class in <head>
    and removes it once uswds.min.js has run (or after 8s); without JavaScript

@@ -621,19 +621,27 @@ declare %private function srch:pagination-query-string($r as map(*), $start as x
 };
 
 (:~ Previous/next link with its USWDS sprite arrow. :)
-declare %private function srch:pagination-arrow($context as map(*), $r as map(*), $start as xs:integer, $direction as xs:string) as element(li) {
+(:~ The Previous or Next link; without a $start it is hidden but keeps its
+ : space (see hsg:pagination-arrow). :)
+declare %private function srch:pagination-arrow($context as map(*), $r as map(*), $start as xs:integer?, $direction as xs:string) as element(li) {
     let $previous := $direction eq "previous"
     let $icon :=
         <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
             <use href="{$context?context-path}/resources/images/sprite.svg#{if ($previous) then 'navigate_before' else 'navigate_next'}"/>
         </svg>
     let $label := <span class="usa-pagination__link-text"><pb-i18n key="{if ($previous) then 'odd.previous' else 'odd.next'}">{if ($previous) then "Previous" else "Next"}</pb-i18n></span>
+    let $content := if ($previous) then ($icon, $label) else ($label, $icon)
     return
-        <li class="usa-pagination__item usa-pagination__arrow">
-            <a href="?{srch:pagination-query-string($r, $start)}" class="usa-pagination__link usa-pagination__{$direction}-page" aria-label="{if ($previous) then 'Previous' else 'Next'} page">
-                { if ($previous) then ($icon, $label) else ($label, $icon) }
-            </a>
-        </li>
+        if (empty($start)) then
+            <li class="usa-pagination__item usa-pagination__arrow hsg-pagination__placeholder" aria-hidden="true">
+                <span class="usa-pagination__link usa-pagination__{$direction}-page">{$content}</span>
+            </li>
+        else
+            <li class="usa-pagination__item usa-pagination__arrow">
+                <a href="?{srch:pagination-query-string($r, $start)}" class="usa-pagination__link usa-pagination__{$direction}-page" aria-label="{if ($previous) then 'Previous' else 'Next'} page">
+                    {$content}
+                </a>
+            </li>
 };
 
 declare function srch:pagination($context as map(*)) as element(nav)? {
@@ -649,7 +657,7 @@ declare function srch:pagination($context as map(*)) as element(nav)? {
                 <nav aria-label="Search results pagination" class="usa-pagination hsg-search-pagination">
                     <ul class="usa-pagination__list">
                     {
-                        if ($currentPage gt 1) then srch:pagination-arrow($context, $r, ($currentPage - 2) * $perPage + 1, "previous") else (),
+                        srch:pagination-arrow($context, $r, if ($currentPage le 1) then () else ($currentPage - 2) * $perPage + 1, "previous"),
                         for $item in hsg:page-window($currentPage, $pageCount)
                         return
                             if ($item instance of xs:string) then
@@ -661,7 +669,7 @@ declare function srch:pagination($context as map(*)) as element(nav)? {
                                     {$item}
                                     </a>
                                 </li>,
-                        if ($currentPage lt $pageCount) then srch:pagination-arrow($context, $r, $currentPage * $perPage + 1, "next") else ()
+                        srch:pagination-arrow($context, $r, if ($currentPage ge $pageCount) then () else $currentPage * $perPage + 1, "next")
                     }
                     </ul>
                 </nav>

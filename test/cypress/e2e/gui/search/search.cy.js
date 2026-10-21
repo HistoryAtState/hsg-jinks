@@ -306,7 +306,7 @@ describe("results page: filter panel, cards and controls (OP#1420)", () => {
         cy.get(".hsg-search-pagination .usa-pagination__page-no").last().find("a").invoke("text").then((last) => {
             expect(parseInt(last, 10)).to.be.greaterThan(5);
         });
-        cy.get(".hsg-search-pagination .usa-pagination__previous-page").should("not.exist");
+        cy.get(".hsg-search-pagination a.usa-pagination__previous-page").should("not.exist");
         cy.get(".hsg-search-pagination .usa-pagination__next-page").should("exist");
     });
 

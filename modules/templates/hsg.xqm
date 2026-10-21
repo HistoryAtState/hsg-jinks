@@ -1427,7 +1427,7 @@ declare function hsg:listing-pagination($context as map(*), $start as xs:integer
             <nav aria-label="Pagination" class="usa-pagination hsg-frus__pagination">
                 <ul class="usa-pagination__list">
                 {
-                    if ($current le 1) then () else hsg:pagination-arrow($context, ($current - 2) * $size + 1, 'previous'),
+                    hsg:pagination-arrow($context, if ($current le 1) then () else ($current - 2) * $size + 1, 'previous'),
                     for $item in hsg:page-window($current, $last)
                     return
                         if ($item instance of xs:string) then
@@ -1439,25 +1439,36 @@ declare function hsg:listing-pagination($context as map(*), $start as xs:integer
                                 {$item}
                                 </a>
                             </li>,
-                    if ($current ge $last) then () else hsg:pagination-arrow($context, $current * $size + 1, 'next')
+                    hsg:pagination-arrow($context, if ($current ge $last) then () else $current * $size + 1, 'next')
                 }
                 </ul>
             </nav>
 };
 
-declare %private function hsg:pagination-arrow($context as map(*), $start as xs:integer, $direction as xs:string) as element(li) {
+(:~
+ : The Previous or Next link. Without a $start (first or last page) it is
+ : hidden but keeps its space, so the page buttons stay put (USWDS
+ : pagination: "Hide the Previous link on the first page of the set").
+ :)
+declare %private function hsg:pagination-arrow($context as map(*), $start as xs:integer?, $direction as xs:string) as element(li) {
     let $previous := $direction eq 'previous'
     let $icon :=
         <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
             <use href="{$context?context-path}/resources/images/sprite.svg#{if ($previous) then 'navigate_before' else 'navigate_next'}"/>
         </svg>
     let $label := <span class="usa-pagination__link-text">{if ($previous) then 'Previous' else 'Next'}</span>
+    let $content := if ($previous) then ($icon, $label) else ($label, $icon)
     return
-        <li class="usa-pagination__item usa-pagination__arrow">
-            <a href="?start={$start}" class="usa-pagination__link usa-pagination__{$direction}-page" aria-label="{if ($previous) then 'Previous' else 'Next'} page">
-                {if ($previous) then ($icon, $label) else ($label, $icon)}
-            </a>
-        </li>
+        if (empty($start)) then
+            <li class="usa-pagination__item usa-pagination__arrow hsg-pagination__placeholder" aria-hidden="true">
+                <span class="usa-pagination__link usa-pagination__{$direction}-page">{$content}</span>
+            </li>
+        else
+            <li class="usa-pagination__item usa-pagination__arrow">
+                <a href="?start={$start}" class="usa-pagination__link usa-pagination__{$direction}-page" aria-label="{if ($previous) then 'Previous' else 'Next'} page">
+                    {$content}
+                </a>
+            </li>
 };
 
 (:~

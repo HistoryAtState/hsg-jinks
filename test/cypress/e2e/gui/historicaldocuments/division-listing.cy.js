@@ -35,6 +35,20 @@ describe("division listing page", () => {
         });
     });
 
+    it("keeps the page buttons in place when Previous or Next is missing", () => {
+        const positions = () => cy.get(".hsg-frus__pagination").first().find(".usa-pagination__button")
+            .then(($buttons) => [...$buttons].map((button) => Math.round(button.getBoundingClientRect().left)));
+        cy.get(".hsg-frus__pagination").first().find(".hsg-pagination__placeholder")
+            .should("have.attr", "aria-hidden", "true")
+            .and("have.css", "visibility", "hidden")
+            .and("not.have.descendants", "a");
+        positions().then((first) => {
+            cy.visit(`${CHAPTER}?start=31`);
+            cy.get(".hsg-frus__pagination").first().find("a.usa-pagination__next-page").should("not.exist");
+            positions().should("deep.equal", first);
+        });
+    });
+
     it("colours the pagination like the search results' pagination", () => {
         const PROPS = ["color", "background-color"];
         const SELECTORS = [".usa-pagination__button.usa-current", ".usa-pagination__button:not(.usa-current)", ".usa-pagination__link"];
