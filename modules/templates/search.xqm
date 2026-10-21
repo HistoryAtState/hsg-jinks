@@ -754,6 +754,23 @@ declare function srch:match-options($context as map(*)) as element(div)+ {
         </div>
 };
 
+(:~ The search options under the search field, in one disclosure: the
+ : hybrid mode and the three match options. Closed by default, so the search
+ : field stays uncluttered; open whenever an option is on, so a results page
+ : shows what was applied. :)
+declare function srch:search-options($context as map(*)) as element(details) {
+    let $on := ("mode", "stem", "case", "punct") ! normalize-space(page:parameter($context, ., ""))
+    return
+        <details class="hsg-search-options">
+            { if ($on = ("hybrid", "yes")) then attribute open { "open" } else () }
+            <summary class="hsg-search-options__summary">Search options</summary>
+            <fieldset class="usa-fieldset hsg-search-options__group">
+                <legend class="usa-sr-only">Search options</legend>
+                { srch:mode-toggle($context), srch:match-options($context) }
+            </fieldset>
+        </details>
+};
+
 (:~ The results summary's note on the match options, after the keyword. :)
 declare %private function srch:match-phrase($match as map(*)) as xs:string {
     let $parts := (

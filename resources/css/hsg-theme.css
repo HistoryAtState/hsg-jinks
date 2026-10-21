@@ -1722,6 +1722,33 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-top: var(--uswds-space-1);
 }
 
+/* Search options: the mode and match checkboxes in one disclosure under the
+   search field, closed unless an option is on. */
+.hsg-search-options {
+    margin-top: var(--uswds-space-1);
+}
+
+.hsg-search-options__summary {
+    cursor: pointer;
+    color: var(--uswds-color-primary);
+    font-weight: 600;
+    width: fit-content;
+}
+
+.hsg-search-options__summary:hover {
+    text-decoration: underline;
+}
+
+.hsg-search-options__group {
+    margin-top: var(--uswds-space-1);
+    padding-left: var(--uswds-space-2);
+    border-left: 2px solid var(--uswds-color-base-lighter);
+}
+
+.hsg-search-options__group .hsg-search-mode:first-of-type {
+    margin-top: 0;
+}
+
 /* Results heading and its Sort by select. */
 .hsg-results-header {
     display: flex;
