@@ -1,0 +1,49 @@
+<template>
+    ---json
+    {
+        "templating": {
+            "modules": {
+                "https://history.state.gov/ns/templates/hsg": { "at": "modules/templates/hsg.xqm", "prefix": "hsg" }
+            },
+            "extends": "templates/layouts/historicaldocuments-content.html"
+        },
+        "theme": {
+            "layout": {
+                "after": {
+                    "hidden": true
+                }
+            }
+        }
+    }
+    ---
+    [# Division listing pages (OP#1479, Figma node 4290-19925): chapters,
+       compilations and subchapters, routed here by hsgapi:view-interior. The
+       volume table of contents on the left, the listing in main, and no
+       right-hand sidebar. One root element: the layout's main is a flex row
+       whose children each get flex: 1 (resources/css/layout.css). #]
+    <div class="hsg-frus__interior hsg-frus__listing">
+        [% let $division = hsg:division-listing($context) %]
+        [% if exists($division) %]
+        <div class="hsg-frus__division">
+            <p class="hsg-frus__overline">
+                <a href="[[ $context?context-path ]]/historicaldocuments/[[ $division?publication ]]">[[ hsg:publication-title($division?publication) ]]</a>
+            </p>
+            <h1 class="hsg-frus__division-title">[[ $division?title ]]</h1>
+            [[ hsg:division-notes($division?doc, $division?publication, $context) ]]
+            [[ hsg:listing-pagination($context, $division?start, $division?total) ]]
+            [% if $division?type = 'compilation' %]
+            <h2 class="hsg-frus__contents">Contents</h2>
+            [% endif %]
+            <ul class="hsg-frus__doclist">
+                [# An if block in this indented loop body renders as literal
+                   text (jinks-templates#95), hence the inline if expression. #]
+                [% for $entry in $division?entries %]
+                [[ if (starts-with($entry?type, 'document')) then hsg:doclist-document($entry?target, $division?publication, $entry?type, $context) else hsg:doclist-division($entry?target, $division?publication, $entry?type, $context) ]]
+                [% endfor %]
+            </ul>
+            [[ hsg:listing-pagination($context, $division?start, $division?total) ]]
+        </div>
+        [% endif %]
+        [% endlet %]
+    </div>
+</template>

@@ -42,7 +42,7 @@ describe("split chapter titles", () => {
 
     it("breaks the line in the volume landing table of contents", () => {
         cy.visit("historicaldocuments/frus1981-88v05");
-        cy.get(`main a[href$='/${chapter}']`, { timeout: 15000 })
+        cy.get(`aside.before nav.toc a[href$='/${chapter}']`, { timeout: 15000 })
             .first()
             .should("contain.text", datePart)
             .find("br").should("have.length", 1);

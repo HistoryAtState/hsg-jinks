@@ -111,7 +111,8 @@ describe("container pages keep the sidebar minimal", () => {
     it("chapter page has no register lists", () => {
         cy.visit("historicaldocuments/frus1958-60v05mSupp/ch1");
         cy.get(".hsg-frus__registers").should("not.exist");
-        cy.get("main h2.hsg-navigation-title").should("have.text", VOLUME_TITLE);
+        // Division listings show the volume title as a linked overline (OP#1479).
+        cy.get("main .hsg-frus__overline a").should("have.text", VOLUME_TITLE);
     });
 
     it("compilation page has no register lists", () => {

@@ -10,16 +10,39 @@
         }
     }
     ---
-    [[ hsg:volume-landing-content($context) ]]
-
-    [% template before %]
-    [% if exists($context?doc) %]
-    [[ hsg:volume-toc($context) ]]
-    [[ tags:volume-tags-panel($context) ]]
+    [# Figma node 4298-66032 (OP#1478): the volume on a white card, the
+       volume TOC in the left sidebar (the layout's hsg:volume-toc), and ways
+       to explore, tags and administrations on the right. #]
+    [% let $volume = hsg:volume-landing($context) %]
+    [% if exists($volume) %]
+    [# One root element: the layout's main is a flex row whose children each
+       get flex: 1 (resources/css/layout.css). #]
+    <article class="hsg-frus__landing">
+        <header class="hsg-frus__landing-header">
+            [[ hsg:volume-card-tags($volume?doc, $context) ]]
+            <h1>[[ $volume?title ]]</h1>
+        </header>
+        <div class="hsg-frus__landing-intro">
+            [[ hsg:volume-cover($volume?doc, $volume?id, $volume?title) ]]
+            <div class="hsg-frus__landing-summary">
+                <dl class="hsg-frus__meta">
+                    [[ hsg:volume-editors($volume?titleStmt) ]]
+                    [[ hsg:volume-published-info($volume?publicationStmt) ]]
+                </dl>
+                [[ hsg:volume-open-link($context) ]]
+            </div>
+        </div>
+    </article>
     [% endif %]
-    [% endtemplate %]
+    [% endlet %]
 
     [% template after %]
     [[ hsg:volume-ways-to-explore($context) ]]
+    [% if exists($context?doc) %]
+    [[ tags:volume-tags-panel($context) ]]
+    [% endif %]
+    <nav aria-label="Administrations" class="hsg-frus__administrations">
+        [[ hsg:administrations-panel($context) ]]
+    </nav>
     [% endtemplate %]
 </template>

@@ -620,36 +620,28 @@ declare %private function srch:pagination-query-string($r as map(*), $start as x
     ), "&amp;")
 };
 
-(:~
- : The page numbers to show, with "…" standing for a skipped run: USWDS's
- : pagination pattern, which always keeps the first and last page and holds
- : the whole control to at most seven slots however many pages there are.
- :)
-declare %private function srch:page-window($current as xs:integer, $last as xs:integer) as item()* {
-    if ($last le 7) then
-        1 to $last
-    else if ($current le 4) then
-        (1 to 5, "&#8230;", $last)
-    else if ($current ge $last - 3) then
-        (1, "&#8230;", ($last - 4) to $last)
-    else
-        (1, "&#8230;", ($current - 1) to ($current + 1), "&#8230;", $last)
-};
-
 (:~ Previous/next link with its USWDS sprite arrow. :)
-declare %private function srch:pagination-arrow($context as map(*), $r as map(*), $start as xs:integer, $direction as xs:string) as element(li) {
+(:~ The Previous or Next link; without a $start it is hidden but keeps its
+ : space (see hsg:pagination-arrow). :)
+declare %private function srch:pagination-arrow($context as map(*), $r as map(*), $start as xs:integer?, $direction as xs:string) as element(li) {
     let $previous := $direction eq "previous"
     let $icon :=
         <svg class="usa-icon" aria-hidden="true" focusable="false" role="img">
             <use href="{$context?context-path}/resources/images/sprite.svg#{if ($previous) then 'navigate_before' else 'navigate_next'}"/>
         </svg>
     let $label := <span class="usa-pagination__link-text"><pb-i18n key="{if ($previous) then 'odd.previous' else 'odd.next'}">{if ($previous) then "Previous" else "Next"}</pb-i18n></span>
+    let $content := if ($previous) then ($icon, $label) else ($label, $icon)
     return
-        <li class="usa-pagination__item usa-pagination__arrow">
-            <a href="?{srch:pagination-query-string($r, $start)}" class="usa-pagination__link usa-pagination__{$direction}-page" aria-label="{if ($previous) then 'Previous' else 'Next'} page">
-                { if ($previous) then ($icon, $label) else ($label, $icon) }
-            </a>
-        </li>
+        if (empty($start)) then
+            <li class="usa-pagination__item usa-pagination__arrow hsg-pagination__placeholder" aria-hidden="true">
+                <span class="usa-pagination__link usa-pagination__{$direction}-page">{$content}</span>
+            </li>
+        else
+            <li class="usa-pagination__item usa-pagination__arrow">
+                <a href="?{srch:pagination-query-string($r, $start)}" class="usa-pagination__link usa-pagination__{$direction}-page" aria-label="{if ($previous) then 'Previous' else 'Next'} page">
+                    {$content}
+                </a>
+            </li>
 };
 
 declare function srch:pagination($context as map(*)) as element(nav)? {
@@ -665,8 +657,8 @@ declare function srch:pagination($context as map(*)) as element(nav)? {
                 <nav aria-label="Search results pagination" class="usa-pagination hsg-search-pagination">
                     <ul class="usa-pagination__list">
                     {
-                        if ($currentPage gt 1) then srch:pagination-arrow($context, $r, ($currentPage - 2) * $perPage + 1, "previous") else (),
-                        for $item in srch:page-window($currentPage, $pageCount)
+                        srch:pagination-arrow($context, $r, if ($currentPage le 1) then () else ($currentPage - 2) * $perPage + 1, "previous"),
+                        for $item in hsg:page-window($currentPage, $pageCount)
                         return
                             if ($item instance of xs:string) then
                                 <li class="usa-pagination__item usa-pagination__overflow" role="presentation"><span>{$item}</span></li>
@@ -677,7 +669,7 @@ declare function srch:pagination($context as map(*)) as element(nav)? {
                                     {$item}
                                     </a>
                                 </li>,
-                        if ($currentPage lt $pageCount) then srch:pagination-arrow($context, $r, $currentPage * $perPage + 1, "next") else ()
+                        srch:pagination-arrow($context, $r, if ($currentPage ge $pageCount) then () else $currentPage * $perPage + 1, "next")
                     }
                     </ul>
                 </nav>

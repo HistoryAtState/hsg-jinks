@@ -24,10 +24,10 @@ describe("volume landing shows all relevant data", () => {
 
     it("lists every division in the TOC with its document range", () => {
         // 1 compilation + 6 chapters carry document ranges.
-        cy.get("main .hsg-frus__toc a", { timeout: 15000 }).should("have.length.at.least", 7);
-        cy.get("main .hsg-frus__toc").should("contain.text", "(Documents 1–309)")
-            .and("contain.text", "(Documents 1–50)")
-            .and("contain.text", "(Documents 267–309)");
+        cy.get("aside.before .usa-sidenav a", { timeout: 15000 }).should("have.length.at.least", 7);
+        cy.get("aside.before .usa-sidenav").should("contain.text", "Documents 1–309")
+            .and("contain.text", "Documents 1–50")
+            .and("contain.text", "Documents 267–309");
     });
 });
 
@@ -43,16 +43,19 @@ describe("compilation page shows all relevant data", () => {
     it("lists all six chapters with their document ranges", () => {
         cy.get("main .hsg-frus__division-entry", { timeout: 15000 }).should("have.length", 6);
         cy.get("main .hsg-frus__doclist")
-            .should("contain.text", "(Documents 1–50)")
-            .and("contain.text", "(Documents 267–309)");
+            .should("contain.text", "Documents 1–50")
+            .and("contain.text", "Documents 267–309");
     });
 });
 
 describe("chapter page shows all relevant data", () => {
     beforeEach(() => cy.visit(`${volume}/ch1`));
 
-    it("lists all 50 documents", () => {
-        cy.get("main .hsg-frus__doc-entry", { timeout: 15000 }).should("have.length", 50);
+    it("lists all 50 documents, 30 per page (#1079)", () => {
+        cy.get("main .hsg-frus__doc-entry", { timeout: 15000 }).should("have.length", 30);
+        cy.visit(`${volume}/ch1?start=31`);
+        cy.get("main .hsg-frus__doc-entry", { timeout: 15000 }).should("have.length", 20)
+            .first().should("contain.text", "31.");
     });
 
     it("gives each entry number, linked title, dateline and source note", () => {

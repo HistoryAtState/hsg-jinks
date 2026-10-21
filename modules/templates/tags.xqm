@@ -207,23 +207,34 @@ declare %private function tags:taxonomy-entry-html($entry as element(tei:categor
  : hsg-shell's tags:load-tags/tags:list-tags/frus:hide-tags-if-empty trio,
  : collapsed into one function since this templating engine has no
  : %templates:wrap equivalent -- renders nothing (not an empty panel) when
- : the volume carries no tags.
+ : the volume carries no tags the taxonomy defines.
+ :
+ : Shown in the right sidebar as a USWDS in-page navigation list, with
+ : hsg-shell's intro text (Figma node 4298-66246, OP#1478). Same server-side
+ : in-page navigation markup as hsg:division-asides, for the same reasons.
  :)
 declare function tags:volume-tags-panel($context as map(*)) as element(nav)? {
     let $doc := $context?doc?content
+    (: Only terms the taxonomy defines: an unknown one has neither a label
+       nor a tag page (lgbtq-rights on frus1981-88v41 is commented out
+       upstream). :)
     let $terms := distinct-values($doc//tei:keywords[@scheme eq $tags:SCHEME]/tei:term)
+        [exists(tags:taxonomy-entry(.))]
     return
         if (empty($terms)) then ()
         else
-            <nav aria-label="Tags" class="tags-panel">
-                <h5><pb-i18n key="tags.panel-heading">Tags</pb-i18n></h5>
-                <ul class="usa-sidenav">
+            <nav aria-labelledby="volume-tags-heading" class="tags-panel">
+                <h2 class="usa-in-page-nav__heading" id="volume-tags-heading"><pb-i18n key="tags.panel-heading">Tags</pb-i18n></h2>
+                <p>This volume has been tagged with the following entries from the
+                    <a href="{$context?context-path}/tags">Subject Taxonomy of the History of U.S. Foreign Relations</a>.
+                    Follow the links to find more resources on each subject:</p>
+                <ul class="usa-in-page-nav__list">
                     {
                         for $term in $terms
                         let $label := tags:taxonomy-label($term)
                         order by $label
                         return
-                            <li class="usa-sidenav__item">
+                            <li class="usa-in-page-nav__item usa-in-page-nav__item--primary">
                                 <a href="{$context?context-path}/tags/{$term}" title="Resources tagged {$label}">{$label}</a>
                             </li>
                     }
