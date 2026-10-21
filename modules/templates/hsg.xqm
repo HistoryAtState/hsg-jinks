@@ -93,10 +93,10 @@ declare variable $hsg:SECTION-CRUMBS := map {
  : context path. A "class" entry is copied onto the crumb's li.
  :)
 declare function hsg:crumb($label as item()*, $href as xs:string?) as map(*) {
-    map:merge((
-        map { "label": $label },
-        $href ! map { "href": . }
-    ))
+    map {
+        "label": $label,
+        "href": $href
+    }
 };
 
 (:~
@@ -113,17 +113,16 @@ declare variable $hsg:i18n := json-doc($config:app-root || "/resources/i18n/app/
  : stays pb-i18n, which shows the English label.
  :)
 declare function hsg:crumb-i18n($key as xs:string, $label as xs:string?, $href as xs:string?) as map(*) {
-    let $translation := fold-left(tokenize($key, '\.'), $hsg:i18n, function($entry, $step) {
-        if ($entry instance of map(*)) then $entry($step) else ()
+    let $translation := fold-left(tokenize($key, '\.'), $hsg:i18n, function($maybe-translation-map, $next) {
+        if (empty($maybe-translation-map)) then () else $maybe-translation-map?($next)
     })
+    let $element :=
+        if (empty($translation)) then
+            <pb-i18n key="{$key}">{$label}</pb-i18n>
+        else
+            <span data-i18n="{$key}">{$label}</span>
     return
-        hsg:crumb(
-            if ($translation instance of xs:string) then
-                <span data-i18n="{$key}">{$label}</span>
-            else
-                <pb-i18n key="{$key}">{$label}</pb-i18n>,
-            $href
-        )
+        hsg:crumb($element, $href)
 };
 
 (:~
@@ -157,7 +156,7 @@ declare function hsg:section-trail($section as xs:string, $trail as map(*)*) as 
  :)
 declare function hsg:breadcrumbs($context as map(*), $trail as map(*)*) as element(li)? {
     let $crumbs := (
-        if ($hsg:BREADCRUMB-HOME) then hsg:crumb-i18n("breadcrumb.home", "Home", "/") else (),
+        if (not($hsg:BREADCRUMB-HOME)) then () else hsg:crumb-i18n("breadcrumb.home", "Home", "/"),
         $trail
     )
     return
@@ -173,7 +172,8 @@ declare function hsg:breadcrumbs($context as map(*), $trail as map(*)*) as eleme
                             <li typeof="ListItem" property="itemListElement">
                             {
                                 $crumb?class ! attribute class { . },
-                                if ($current) then attribute aria-current { "page" } else (),
+                                if (not($current)) then () else
+                                    attribute aria-current { "page" },
                                 if ($current or empty($crumb?href)) then
                                     $crumb?label
                                 else
@@ -208,17 +208,16 @@ declare function hsg:page-title($page as xs:string?) as xs:string {
  : titles.
  :)
 declare function hsg:frus-page-title($context as map(*)) as xs:string? {
-    if (exists($context?doc) and hsg:volume-title($context?doc?content)[. ne '']) then
-        "Historical Documents"
-    else
-        ()
+    if (empty($context?doc) or empty(hsg:volume-title($context?doc?content)[. ne ''])) then ()
+    else "Historical Documents"
 };
 
 declare function hsg:volume-title($doc as node()?) as xs:string? {
-    if (not(exists($doc))) then ()
-    else
+    if (empty($doc)) then ()
+    else (
         let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
         return hsg:publication-title($publication)
+    )
 };
 
 (:~
@@ -232,7 +231,7 @@ declare function hsg:publication-title($publication as xs:string?) as xs:string?
     else
         let $volume := doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
         let $titleStmt := hsg:resolve-include($volume//tei:teiHeader, 'titleStmt')
-        return normalize-space(($titleStmt/tei:title)[1])
+        return normalize-space(head($titleStmt/tei:title))
 };
 
 (:~
@@ -244,9 +243,8 @@ declare function hsg:publication-title($publication as xs:string?) as xs:string?
 declare function hsg:navigation-title($context as map(*)) as element(h2)? {
     let $title := hsg:volume-title($context?doc?content)
     return
-        if ($title != '') then
+        if (empty($title)) then () else
             <h2 class="hsg-navigation-title" id="navigation-title">{$title}</h2>
-        else ()
 };
 
 (:~
@@ -265,25 +263,22 @@ declare function hsg:volume-toc($context as map(*)) {
     let $doc := $context?doc?content
     let $publication := ($doc//tei:bibl[@type='frus-volume-id'])[1]/string()
     return
-    if (exists($doc) and $publication != '') then
+    if (empty($doc)) then ()
+    else if ($publication != '') then
         hsg:volume-toc-nav(
             $publication,
             ($doc//tei:bibl[@type='frus-division-id'])[1]/string(),
             ($doc//tei:bibl[@type='frus-division-type'])[1] = 'document',
             $context
         )
-    else if (exists($doc)) then
+    else
         (: The volume root carries no typed bibl ids; it is {volume}/{volume}.xml
            in the data collection. Its landing page gets the same TOC, with no
            current entry, unless the volume is unpublished (OP#1337). :)
         let $path := tokenize(config:get-relpath($doc, $config:data-default), '/')
         return
-            if (count($path) eq 2 and $path[2] eq $path[1] || '.xml' and hsg:volume-published($path[1])) then
-                hsg:volume-toc-nav($path[1], (), false(), $context)
-            else
-                ()
-    else
-        ()
+            if (not(count($path) eq 2 and $path[2] eq $path[1] || '.xml' and hsg:volume-published($path[1]))) then ()
+            else hsg:volume-toc-nav($path[1], (), false(), $context)
 };
 
 (:~
@@ -294,14 +289,16 @@ declare function hsg:volume-toc($context as map(*)) {
 declare function hsg:facsimile-toc($context as map(*)) as element(nav)? {
     let $publication := $context?facsimile?publication
     return
-        if ($publication != '') then
+        if (empty($publication)) then () else
             hsg:volume-toc-nav($publication, (), false(), $context)
-        else
-            ()
 };
 
-declare %private function hsg:volume-toc-nav($publication as xs:string, $current as xs:string?,
-        $current-is-document as xs:boolean, $context as map(*)) as element(nav) {
+declare %private function hsg:volume-toc-nav(
+    $publication as xs:string,
+    $current as xs:string?,
+    $current-is-document as xs:boolean,
+    $context as map(*)
+) as element(nav) {
     let $volume := doc($config:data-default || "/" || $publication || "/" || $publication || ".xml")
     let $divisions := hsg:toc-divisions($publication)
     return
@@ -335,12 +332,12 @@ declare %private function hsg:toc-divisions($publication as xs:string) as map(*)
            would give map:entry below an empty key -- exactly what the original
            '!= "document"' comparison excluded implicitly. :)
         for $division in collection($config:data-default || "/" || $publication)/tei:TEI
-        let $division-type := normalize-space(($division/tei:teiHeader//tei:bibl[@type='frus-division-type'])[1])
+        let $division-type := normalize-space(head($division/tei:teiHeader//tei:bibl[@type='frus-division-type']))
         where $division-type != ''
             and not(starts-with($division-type, 'document'))
-            and normalize-space(($division//tei:bibl[@type='frus-division-subtype'])[1]) != 'table-of-contents'
+            and normalize-space(head($division//tei:bibl[@type='frus-division-subtype'])) != 'table-of-contents'
         return
-            map:entry(($division//tei:bibl[@type='frus-division-id'])[1]/string(), $division)
+            map:entry(head($division//tei:bibl[@type='frus-division-id'])/string(), $division)
     )
 };
 
@@ -403,33 +400,40 @@ declare %private function hsg:toc-entries($division as element(tei:TEI)?, $divis
        frus1977-80v27 on the mirror). Fully anticipated volumes never get
        this far: their landing suppresses the TOC wholesale and their
        interior pages 404 on the volume-level gate in hsg-api.xql. :)
-    let $is-pending := ends-with(normalize-space(($included//tei:bibl[@type='frus-division-type'])[1]), '-pending')
+    let $is-pending := ends-with(normalize-space(head($included//tei:bibl[@type='frus-division-type'])), '-pending')
     (: Document range "(Documents N-M)" inside the entry's link, after its
        title, as hsg-shell's sidebar shows it, for divisions that contain
        documents. :)
     let $range-label := hsg:document-range-label(hsg:document-range($included))
     let $children := hsg:toc-entries($included, $divisions, $publication, $current, $current-is-document, $context)
     return
-        <li class="usa-sidenav__item{if ($is-pending) then ' pending' else ''}">
-            {
-                element a {
-                    attribute href {
-                        $context?context-path || "/historicaldocuments/" || $publication || "/" || $id
-                    },
-                    if ($is-current) then (
-                        attribute class {"usa-current"},
-                        attribute aria-current {"page"}
-                    ) else (),
-                    $title,
-                    if (exists($range-label)) then <span class="toc-range">{$range-label}</span> else ()
-                }
+        <li>
+        {
+            attribute class {
+                (
+                    "usa-sidenav__item",
+                    if (not($is-pending)) then () else 'pending'
+                )
+                => string-join(" ")
+            },
+            element a {
+                attribute href {
+                    $context?context-path || "/historicaldocuments/" || $publication || "/" || $id
+                },
+                if (not($is-current)) then () else (
+                    attribute class {"usa-current"},
+                    attribute aria-current {"page"}
+                ),
+                $title,
+                if (empty($range-label)) then () else (
+                    <span class="toc-range">{$range-label}</span>
+                )
             }
-            {
-                if (exists($children)) then
-                    <ul class="usa-sidenav__sublist">{$children}</ul>
-                else
-                    ()
-            }
+        }
+        {
+            if (empty($children)) then () else
+                <ul class="usa-sidenav__sublist">{$children}</ul>
+        }
         </li>
 };
 
@@ -451,7 +455,7 @@ declare function hsg:volume-list($context as map(*)) {
     (: titleStmt lives in a shared *_includes.xml, xincluded rather than
        duplicated inline (frus-unbound-alpha) -- see hsg:resolve-include. :)
     let $titleStmt := hsg:resolve-include(doc($path)//tei:teiHeader, 'titleStmt')
-    let $title := normalize-space(($titleStmt/tei:title)[1])
+    let $title := normalize-space(head($titleStmt/tei:title))
     order by $title
     return
         <li>
@@ -691,7 +695,8 @@ declare %private function hsg:tracks-in-use($roots as element(tei:TEI)*, $admin-
  : paragraph in its administrations.xml.
  :)
 declare function hsg:administration-listing-note($context as map(*)) as element(p)? {
-    if ($context?administration-id = $hsg:pre-administration-subseries-admins) then
+    if (not($context?administration-id = $hsg:pre-administration-subseries-admins)) then ()
+    else
         <p id="pre-administration-based-subseries-note">
             <strong>Note:</strong> The volumes listed
             below contain at least one document from the period of this presidential
@@ -699,8 +704,6 @@ declare function hsg:administration-listing-note($context as map(*)) as element(
             Relations</em> series was organized by year for the volumes covering
             1861–1951, triennially for 1952–1963, and by presidential administration
             for 1964 onward—with some exceptions.</p>
-    else
-        ()
 };
 
 (:~
@@ -733,23 +736,22 @@ declare function hsg:administration-group-info($context as map(*)) as element(p)
     let $admin-id := $context?administration-id
     let $tracks := hsg:tracks-in-use(hsg:volumes-in-administration($admin-id), $admin-id)
     return
-        if ($admin-id != 'pre-truman' and count($tracks) gt 1) then
+        if ($admin-id eq 'pre-truman' or count($tracks) le 1) then ()
+        else
             <p>Volumes are grouped into {
                 for $track at $n in $tracks
                 return (
                     <a href="#{$track}-volumes">{
                         $hsg:production-tracks[?id = $track]?label
                     }</a>,
-                    if ($n lt count($tracks)) then
+                    if ($n eq count($tracks)) then ()
+                    else
                         concat(
-                            if (count($tracks) gt 2) then ', ' else (),
-                            if ($n = count($tracks) - 1) then ' and ' else ()
+                            if (count($tracks) le 2) then () else ', ',
+                            if ($n ne count($tracks) - 1) then () else ' and '
                         )
-                    else ()
                 )
             } categories.</p>
-        else
-            ()
 };
 
 (:~
@@ -877,7 +879,8 @@ declare %private function hsg:volume-availability($root as element(tei:TEI)) as 
  : context document, so the layout default renders no breadcrumb then.
  :)
 declare function hsg:collection-trail($context as map(*)) as map(*)* {
-    if (exists($context?doc)) then
+    if (empty($context?doc)) then ()
+    else
         let $content := $context?doc?content
         let $components := config:get-relpath($content, $config:data-default) => tokenize("/")
         let $publication := $components[1]
@@ -888,7 +891,6 @@ declare function hsg:collection-trail($context as map(*)) as map(*)* {
             if ($is-landing) then ()
             else map:merge((hsg:crumb(hsg:division-crumb-label($content), ()), map { "class": "breadcrumb-current" }))
         ))
-    else ()
 };
 
 (:~
@@ -932,22 +934,26 @@ declare function hsg:volume-landing($context as map(*)) as map(*)? {
 };
 
 (:~
- : The administrations a volume covers, as USWDS tags above its title, each
- : linking to its administration page. Labels come from the administrations
- : taxonomy: the combined entry where there is one ("Richard M. Nixon and
- : Gerald R. Ford Administrations"), else the single presidency's.
+ : The tags above a volume's title: the administrations it covers, as USWDS
+ : tags each linking to its administration page. Labels come from the
+ : administrations taxonomy: the combined entry where there is one ("Richard
+ : M. Nixon and Gerald R. Ford Administrations"), else the single presidency's.
  :)
-declare function hsg:volume-administration-tags($doc as node(), $context as map(*)) as element(ul)? {
+declare function hsg:volume-card-tags($doc as node(), $context as map(*)) as element(ul)? {
+    let $admin-terms := $doc//tei:keywords[@scheme = '#frus-administration-coverage']/tei:term
     let $tags :=
-        for $id in distinct-values($doc//tei:keywords[@scheme = '#frus-administration-coverage']/tei:term ! normalize-space(.))
-        let $category := hsg:administration($id)
-        let $label := normalize-space((
-            $category/tei:catDesc[@n = 'combined'],
-            $category/tei:catDesc
-        )[1]/tei:term)
-        where $label ne ''
+        for $term in $admin-terms
+        let $admin := hsg:administration(string($term))
+        let $id := $admin/@xml:id
+        let $relevantCatDesc := head((
+            $admin/tei:catDesc[@n = 'combined'],
+            $admin/tei:catDesc
+        ))
         return
-            <li><a class="usa-tag" href="{$context?context-path}/historicaldocuments/{$id}">{$label}</a></li>
+            <li><a class="usa-tag" href="{$context?context-path}/historicaldocuments/{$id}">{
+                string($relevantCatDesc/tei:term)
+            }</a></li>
+
     return
         if (empty($tags)) then ()
         else <ul class="hsg-frus__tags">{$tags}</ul>
@@ -964,13 +970,15 @@ declare function hsg:volume-administration-tags($doc as node(), $context as map(
  : cover renders no <img>, same as hsg-shell.
  :)
 declare function hsg:volume-cover($doc as node(), $volume-id as xs:string, $title as xs:string) as element(div)? {
-    if (exists($doc//tei:notesStmt/tei:relatedItem[@type = 'jpg'][@corresp = '#' || $volume-id])) then
+    if (empty($doc//tei:notesStmt/tei:relatedItem[@type = 'jpg'][@corresp = '#' || $volume-id])) then (
+        (: No cover image available :)
+    ) else (
         <div class="hsg-frus__cover-frame">
             <img class="hsg-frus__cover"
                 src="https://static.history.state.gov/frus/{$volume-id}/covers/{$volume-id}.jpg"
                 alt="Book Cover of {$title}"/>
         </div>
-    else ()
+    )
 };
 
 (:~
@@ -980,19 +988,23 @@ declare function hsg:volume-cover($doc as node(), $volume-id as xs:string, $titl
  : Editor:", one dd per name. Takes the titleStmt hsg:volume-landing
  : resolved.
  :)
-declare function hsg:volume-editors($titleStmt as node()?) {
-    let $primary := $titleStmt/tei:editor[@role = 'primary'][normalize-space(.) != '']
-    let $general := $titleStmt/tei:editor[@role = 'general'][normalize-space(.) != '']
+declare function hsg:volume-editors($titleStmt as element(tei:titleStmt)?) {
+    let $primary := $titleStmt/tei:editor[@role = 'primary']
+    let $general := $titleStmt/tei:editor[@role = 'general']
     return (
-        if (exists($primary)) then (
+        if (empty($primary)) then () else (
             <dt>{if (count($primary) gt 1) then 'Editors:' else 'Editor:'}</dt>,
-            for $editor in $primary return <dd>{normalize-space($editor)}</dd>
-        ) else (),
-        if (exists($general)) then (
+            hsg:render-volume-editor($primary)
+        ),
+        if (empty($general)) then () else (
             <dt>General Editor:</dt>,
-            for $editor in $general return <dd>{normalize-space($editor)}</dd>
-        ) else ()
+            hsg:render-volume-editor($general)
+        )
     )
+};
+
+declare %private function hsg:render-volume-editor($editors as element(tei:editor)*) as element(dd)* {
+    $editors ! <dd>{string(.)}</dd>
 };
 
 (:~
@@ -1001,7 +1013,7 @@ declare function hsg:volume-editors($titleStmt as node()?) {
  : /pubPlace, /date[@type='publication-date'] -- not the content-date range,
  : which hsg-shell doesn't show here either.
  :)
-declare function hsg:volume-published-info($publicationStmt as node()?) {
+declare function hsg:volume-published-info($publicationStmt as element(tei:publicationStmt)?) {
     let $publisher := normalize-space($publicationStmt/tei:publisher)
     let $place := normalize-space($publicationStmt/tei:pubPlace)
     let $year := normalize-space($publicationStmt/tei:date[@type = 'publication-date'])
@@ -1035,9 +1047,9 @@ declare function hsg:volume-open-link($context as map(*)) as element(a)? {
         [not(ends-with(normalize-space(($divisions(string(@xpointer))//tei:bibl[@type = 'frus-division-type'])[1]), '-pending'))]
     let $target := head($openable)/@xpointer/string()
     return
-        if (exists($target) and hsg:volume-published($publication)) then
+        if (empty($target) or not(hsg:volume-published($publication))) then ()
+        else
             <a class="usa-button hsg-frus__open" href="{$context?context-path}/historicaldocuments/{$publication}/{$target}">Open</a>
-        else ()
 };
 
 declare %private function hsg:volume-published($publication as xs:string) as xs:boolean {
@@ -1238,7 +1250,7 @@ declare function hsg:division-asides($context as map(*)) {
         let $show-registers := not($type = 'compilation' or starts-with($type, 'chapter') or $subtype = 'index')
         let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
         let $registers :=
-            if ($show-registers) then (
+            if (not($show-registers)) then () else (
                 hsg:register-list($context, $publication,
                     'historicaldocuments.persons', 'Persons', 'persons',
                     $doc//tei:persName/@corresp,
@@ -1247,7 +1259,7 @@ declare function hsg:division-asides($context as map(*)) {
                     'historicaldocuments.terms', 'Abbreviations &amp; Terms', 'terms',
                     $doc//tei:gloss/@target,
                     doc($config:data-default || "/" || $publication || "/front/terms.xml")//tei:term[@sameAs])
-            ) else ()
+            )
         return
             if (empty($registers)) then ()
             else
@@ -1415,7 +1427,7 @@ declare function hsg:listing-pagination($context as map(*), $start as xs:integer
             <nav aria-label="Pagination" class="usa-pagination hsg-frus__pagination">
                 <ul class="usa-pagination__list">
                 {
-                    if ($current gt 1) then hsg:pagination-arrow($context, ($current - 2) * $size + 1, 'previous') else (),
+                    if ($current le 1) then () else hsg:pagination-arrow($context, ($current - 2) * $size + 1, 'previous'),
                     for $item in hsg:page-window($current, $last)
                     return
                         if ($item instance of xs:string) then
@@ -1423,11 +1435,11 @@ declare function hsg:listing-pagination($context as map(*), $start as xs:integer
                         else
                             <li class="usa-pagination__item usa-pagination__page-no">
                                 <a href="?start={($item - 1) * $size + 1}" class="usa-pagination__button{if ($item eq $current) then ' usa-current' else ''}" aria-label="Page {$item}">
-                                {if ($item eq $current) then attribute aria-current {'page'} else ()}
+                                {if ($item ne $current) then () else attribute aria-current {'page'}}
                                 {$item}
                                 </a>
                             </li>,
-                    if ($current lt $last) then hsg:pagination-arrow($context, $current * $size + 1, 'next') else ()
+                    if ($current ge $last) then () else hsg:pagination-arrow($context, $current * $size + 1, 'next')
                 }
                 </ul>
             </nav>
@@ -1484,13 +1496,13 @@ declare function hsg:doclist-document($target as element(tei:TEI), $publication 
     let $source := normalize-space(($target//tei:standOff//tei:note[@type='source'])[1])
     let $pending := ends-with($type, '-pending')
     let $rows := (
-        if ($source != '') then hsg:doclist-row('Source', $source) else (),
-        if ($place != '') then hsg:doclist-row('Location', $place) else (),
+        if ($source eq '') then () else hsg:doclist-row('Source', $source),
+        if ($place eq '') then () else hsg:doclist-row('Location', $place),
         (: A dateline without a marked-up date still says when: show it whole. :)
         if ($date != '') then hsg:doclist-row('Date', $date)
-        else if ($place = '' and normalize-space($dateline) != '') then hsg:doclist-row('Date', normalize-space($dateline))
-        else (),
-        if ($summary != '') then hsg:doclist-row('Summary', $summary) else ()
+        else if ($place ne '' or normalize-space($dateline) eq '') then ()
+        else hsg:doclist-row('Date', normalize-space($dateline)),
+        if ($summary eq '') then () else hsg:doclist-row('Summary', $summary)
     )
     let $page := if ($pending) then () else hsg:first-page-scan($target, $publication)
     return
@@ -1503,14 +1515,13 @@ declare function hsg:doclist-document($target as element(tei:TEI), $publication 
                         <a href="{$context?context-path}/historicaldocuments/{$publication}/{$id}">{$title}</a>
                 }
             </h2>
-            {if (exists($rows)) then <dl class="hsg-frus__doc-meta">{$rows}</dl> else ()}
+            {if (empty($rows)) then () else <dl class="hsg-frus__doc-meta">{$rows}</dl>}
             {
-                if (exists($page)) then
+                if (empty($page)) then () else
                     <a class="usa-button hsg-frus__facsimile" href="{$context?context-path}/historicaldocuments/{$publication}/pg_{$page}">
                         <span class="hsg-frus__facsimile-icon" aria-hidden="true"></span>
                         Facsimile Page
                     </a>
-                else ()
             }
         </li>
 };
@@ -1533,11 +1544,10 @@ declare %private function hsg:first-page-scan($target as element(tei:TEI), $publ
     let $break := ($target//tei:text//tei:pb[@facs])[1]
     let $id := if ($break/@sameAs) then tokenize($break/@sameAs, '/')[last()] else string($break/@xml:id)
     let $pb :=
-        if (matches($id, '^pg.')) then
-            (collection($config:data-default || "/" || $publication)/id($id))[self::tei:pb][1]
-        else ()
+        if (not(matches($id, '^pg.'))) then ()
+        else (collection($config:data-default || "/" || $publication)/id($id))[self::tei:pb][1]
     return
-        if (exists($pb) and exists(global:iiif-facs-id((), $pb))) then substring($id, 3) else ()
+        if (empty($pb) or empty(global:iiif-facs-id((), $pb))) then () else substring($id, 3)
 };
 
 (:~ A child division (a compilation's chapters, a chapter's subchapters): a
@@ -1555,7 +1565,7 @@ declare function hsg:doclist-division($target as element(tei:TEI), $publication 
             <h2 class="hsg-frus__doc-title">
                 <a href="{$context?context-path}/historicaldocuments/{$publication}/{$id}">{$title}</a>
             </h2>
-            {if (exists($range)) then <p class="hsg-frus__doc-range">{$range}</p> else ()}
+            {if (empty($range)) then () else <p class="hsg-frus__doc-range">{$range}</p>}
         </li>
 };
 
@@ -1617,9 +1627,8 @@ declare function hsg:head-meta($context as map(*)) as element()* {
             else if ($division-type ne '' and $volume-title[. ne '']) then
                 string-join(($division-title[. ne ''], $volume-title,
                     "Office of the Historian"), " &#8212; ")
-            else if ($volume-title[. ne '']) then
-                $volume-title || " &#8212; Foreign Relations of the United States, Office of the Historian, U.S. Department of State"
-            else ()
+            else if (empty($volume-title[. ne ''])) then ()
+            else $volume-title || " &#8212; Foreign Relations of the United States, Office of the Historian, U.S. Department of State"
         let $targets := hsg:prev-next-targets($context)
         return (
             $description[. ne ''] ! <meta name="description" content="{.}"/>,
@@ -1699,9 +1708,9 @@ declare %private function hsg:facsimile-viewer() as element() {
 declare function hsg:facsimile-title($context as map(*)) as element(h2)? {
     let $title := hsg:publication-title($context?facsimile?publication)
     return
-        if ($title != '') then
+        if (empty($title)) then () else (
             <h2 class="hsg-navigation-title" id="navigation-title">{$title}</h2>
-        else ()
+        )
 };
 
 (:~
@@ -1730,25 +1739,26 @@ declare function hsg:facsimile-trail($context as map(*)) as map(*)* {
  : like the register panels, this one is dropped entirely instead.
  :)
 declare function hsg:facsimile-docs($context as map(*)) {
-    let $facs := $context?facsimile
-    let $docs := if (exists($facs)) then $facs?docs else ()
-    return
-        if (empty($docs) or array:size($docs) = 0) then ()
-        else
-            <div class="hsg-panel hsg-frus__docs-on-page">
-                <h2 class="hsg-sidebar-title">
-                    <pb-i18n key="historicaldocuments.docs-on-page">Show Documents on this Page</pb-i18n>
-                </h2>
-                <ul class="hsg-list-group">
-                {
-                    for $doc in $docs?*
-                    return
-                        <li>
-                            <a href="{$context?context-path}/historicaldocuments/{$facs?publication}/{$doc?id}">{$doc?label}</a>
-                        </li>
-                }
-                </ul>
-            </div>
+    if (empty($context?facsimile?docs) or array:size($context?facsimile?docs) = 0) then (
+        (: No documents to display :)
+    ) else (
+        <div class="hsg-panel hsg-frus__docs-on-page">
+            <h2 class="hsg-sidebar-title">
+                <pb-i18n key="historicaldocuments.docs-on-page">Show Documents on this Page</pb-i18n>
+            </h2>
+            <ul class="hsg-list-group">
+            {
+                let $publication := $context?facsimile?publication
+                let $path := $context?context-path
+                for $doc in $context?facsimile?docs?*
+                return
+                    <li>
+                        <a href="{$path}/historicaldocuments/{$publication}/{$doc?id}">{$doc?label}</a>
+                    </li>
+            }
+            </ul>
+        </div>
+    )
 };
 
 declare function hsg:facsimile-page($context as map(*)) {
@@ -1762,36 +1772,41 @@ declare function hsg:facsimile-page($context as map(*)) {
                     emit-on-load="emit-on-load">Page {$facs?n}</pb-facs-link>
                 {hsg:facsimile-viewer()}
                 {
-                    if ($facs?png) then
+                    if (empty($facs?png)) then () else (
                         <noscript>
                             <img class="hsg-frus__facsimile-static" src="{$facs?png}"
                                 alt="Scan of page {$facs?n}"/>
                         </noscript>
-                    else ()
+                    )
                 }
                 {
-                    if (exists($facs?prev) or exists($facs?next)) then
+                    if (empty($facs?prev) and empty($facs?next)) then () else (
                         <nav class="hsg-frus__pager" aria-label="Page navigation">
                             {
-                                if (exists($facs?prev)) then
+                                if (empty($facs?prev)) then (
+                                    <span class="hsg-frus__pager-link hsg-frus__pager-empty"/>
+
+                                ) else (
                                     <a class="hsg-frus__pager-link hsg-frus__pager-prev" rel="prev"
                                         href="{$context?context-path}/historicaldocuments/{$facs?publication}/{$facs?prev}">
                                         <span class="hsg-frus__pager-arrow" aria-hidden="true">&#8592;</span>
                                         <span class="hsg-frus__pager-label">Page {$facs?prev-n}</span>
                                     </a>
-                                else <span class="hsg-frus__pager-link hsg-frus__pager-empty"/>
+                                )
                             }
                             {
-                                if (exists($facs?next)) then
+                                if (empty($facs?next)) then (
+                                    <span class="hsg-frus__pager-link hsg-frus__pager-empty"/>
+                                ) else (
                                     <a class="hsg-frus__pager-link hsg-frus__pager-next" rel="next"
                                         href="{$context?context-path}/historicaldocuments/{$facs?publication}/{$facs?next}">
                                         <span class="hsg-frus__pager-label">Page {$facs?next-n}</span>
                                         <span class="hsg-frus__pager-arrow" aria-hidden="true">&#8594;</span>
                                     </a>
-                                else <span class="hsg-frus__pager-link hsg-frus__pager-empty"/>
+                                )
                             }
                         </nav>
-                    else ()
+                    )
                 }
             </section>
 };
@@ -1845,9 +1860,8 @@ declare function hsg:resolve-relative($base as xs:string, $rel as xs:string) as 
  : them.
  :)
 declare function hsg:vietnam-guide($context as map(*)) {
-    page:transform(
-        doc("/db/apps/other-publications/vietnam-guide/guide-to-sources-on-vietnam-1969-1975.xml")
-            //tei:body/*)
+    let $doc := doc("/db/apps/other-publications/vietnam-guide/guide-to-sources-on-vietnam-1969-1975.xml")
+    return page:transform($doc//tei:body/*)
 };
 
 (:~
@@ -1859,7 +1873,8 @@ declare function hsg:vietnam-guide($context as map(*)) {
  : context path by the content-collection ref model in hsg-jinks.odd.
  :)
 declare function hsg:content-page($context as map(*), $page as xs:string) {
-    page:transform(doc($config:app-root || "/data/content/" || $page || ".xml")//tei:body/*)
+    let $doc := doc($config:app-root || "/data/content/" || $page || ".xml")
+    return page:transform($doc//tei:body/*)
 };
 
 (:~
@@ -1868,6 +1883,6 @@ declare function hsg:content-page($context as map(*), $page as xs:string) {
  : review).
  :)
 declare function hsg:content-title($context as map(*), $page as xs:string) as xs:string? {
-    doc($config:app-root || "/data/content/" || $page || ".xml")
-        //tei:titleStmt/tei:title[1] => normalize-space()
+    let $doc := doc($config:app-root || "/data/content/" || $page || ".xml")
+    return normalize-space(head($doc//tei:titleStmt/tei:title))
 };
