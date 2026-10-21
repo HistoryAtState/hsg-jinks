@@ -1006,16 +1006,16 @@ declare function hsg:volume-published-info($publicationStmt as node()?) {
     let $place := normalize-space($publicationStmt/tei:pubPlace)
     let $year := normalize-space($publicationStmt/tei:date[@type = 'publication-date'])
     return (
-        if ($publisher != '' or $place != '') then (
+        if ($publisher eq '' and $place eq '') then () else (
             <dt>Publisher:</dt>,
             <dd class="hsg-frus__publisher">{
                 string-join(($publisher, $place)[. ne ''], ', ')
             }</dd>
-        ) else (),
-        if ($year != '') then (
+        ),
+        if ($year eq '') then () else (
             <dt>Publication year:</dt>,
             <dd class="hsg-frus__pubdate">{$year}</dd>
-        ) else ()
+        )
     )
 };
 
@@ -1030,11 +1030,10 @@ declare function hsg:volume-open-link($context as map(*)) as element(a)? {
     let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
     let $divisions := hsg:toc-divisions($publication)
     let $text := $doc/tei:TEI/tei:text
-    let $target := (
-        ($text/tei:body//xi:include, $text//xi:include)
-            [map:contains($divisions, string(@xpointer))]
-            [not(ends-with(normalize-space(($divisions(string(@xpointer))//tei:bibl[@type = 'frus-division-type'])[1]), '-pending'))]
-    )[1]/@xpointer/string()
+    let $openable := ($text/tei:body//xi:include, $text//xi:include)
+        [map:contains($divisions, string(@xpointer))]
+        [not(ends-with(normalize-space(($divisions(string(@xpointer))//tei:bibl[@type = 'frus-division-type'])[1]), '-pending'))]
+    let $target := head($openable)/@xpointer/string()
     return
         if (exists($target) and hsg:volume-published($publication)) then
             <a class="usa-button hsg-frus__open" href="{$context?context-path}/historicaldocuments/{$publication}/{$target}">Open</a>
@@ -1052,8 +1051,9 @@ declare %private function hsg:volume-published($publication as xs:string) as xs:
  : a frus-division-n too, so callers check the division type first.
  :)
 declare function hsg:document-number($division as node()?) as xs:string? {
-    ($division//tei:bibl[@type = ('frus-division-n', 'frus-document-number')]
-        ! normalize-space(.))[. ne ''][1]
+    let $bibls := $division//tei:bibl[@type = ('frus-division-n', 'frus-document-number')]
+    let $numbers := $bibls ! normalize-space(.)
+    return head($numbers[. ne ''])
 };
 
 (:~
