@@ -371,7 +371,13 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
         "start-time": $startTime, "end-time": $endTime,
         "sort-by": $sortBy, "start": $start, "per-page": $perPage,
         "mode": $mode,
-        "match": map { "stem": $yes("stem") and not($case or $punct), "case": $case, "punct": $punct }
+        "match": map {
+            "stem": $yes("stem") and not($case or $punct), "case": $case, "punct": $punct,
+            (: evaluation only: snippets=compare shows each FRUS card's snippets
+               three ways (kwic, the walker, ft:passages), with their times :)
+            "snippets": normalize-space(page:parameter($context, "snippets", "")),
+            "q": $q
+        }
     }
 };
 
@@ -494,6 +500,122 @@ declare %private function srch:snippets($summaries as element()*) as element(spa
     return <span class="hsg-snippet">{$summary/*}</span>
 };
 
+(: ============== snippet comparison (evaluation only) ============== :)
+
+(:~ The three snippet approaches for one FRUS hit, one row each, with the
+ : milliseconds each took (after the shared ft:highlight-field-matches, which
+ : kwic and the walker both need and ft:passages doesn't): kwic as today, the
+ : walker from fix/kwic-merge-nearby-matches, and ft:passages with the
+ : settings exist-strategy suggested for a results list.
+ : ft:passages finds nothing for a hit whose query had the facets option (a
+ : bug reported to exist-strategy), and the FRUS query always has it, so
+ : ft:passages gets the same hit from the same query run without facets on
+ : this document alone; that requery is timed with it. :)
+declare %private function srch:compare-snippets($doc as element(tei:div), $field as xs:string,
+        $highlighted as element()*, $q as xs:string?) as element()* {
+    let $ms := function($start as xs:time) { (util:system-time() - $start) div xs:dayTimeDuration("PT0.001S") }
+    let $t0 := util:system-time()
+    let $kwic := srch:snippets(
+        for $hit in subsequence($highlighted//exist:match, 1, 5)
+        return kwic:get-summary($highlighted, $hit, <config width="40"/>)
+    )
+    let $kwicMs := $ms($t0)
+    let $t1 := util:system-time()
+    let $walker := $highlighted[1] ! srch:walker-snippets(., 40)
+    let $walkerMs := $ms($t1)
+    let $t2 := util:system-time()
+    let $passages :=
+        try {
+            let $requeried := $doc[ft:query(., $field || ":(" || srch:escape-unsupported-characters($q) || ")", $srch:ft-query-options)]
+            let $found := $requeried ! ft:passages(., $field, map {
+                "max": 2, "order": "document", "length": 200, "max-length": 320,
+                "highlight": function($text) { <span class="hi">{$text}</span> }
+            })
+            return
+                if (empty($found)) then
+                    <span class="hsg-snippet"><em>none: ft:passages returns no passages when called from the app (it does from xst and REST for the same hit); reported to exist-strategy</em></span>
+                else
+                    for $p in $found return <span class="hsg-snippet hsg-snippet--passage">{$p/node()}</span>
+        } catch * {
+            <span class="hsg-snippet">ft:passages: {$err:description}</span>
+        }
+    let $passagesMs := $ms($t2)
+    let $row := function($label, $items, $time) {
+        srch:meta-row($label || " (" || format-number($time, "0.0") || " ms)",
+            if (exists($items)) then $items else <span class="hsg-snippet"><em>none</em></span>)
+    }
+    return (
+        $row("kwic, as today", $kwic, $kwicMs),
+        $row("kwic fix (walker)", $walker, $walkerMs),
+        $row("ft:passages", $passages, $passagesMs)
+    )
+};
+
+(:~
+ : The walker from fix/kwic-merge-nearby-matches (d915f2d), for comparison:
+ : snippets of the matches in $root, at most five. A snippet shows up to
+ : $width characters before its first match and after its last; a match
+ : within $width characters of the previous one is highlighted in the same
+ : snippet instead of starting another.
+ :)
+declare %private function srch:walker-snippets($root as node(), $width as xs:integer) as element(span)* {
+    srch:walker-from($root, ($root//exist:match)[1], $width, 5)
+};
+
+declare %private function srch:walker-from($root as node(), $match as element(exist:match)?,
+        $width as xs:integer, $remaining as xs:integer) as element(span)* {
+    if (empty($match) or $remaining le 0) then
+        ()
+    else
+        let $run := srch:walker-run($root, $match, $width, 0, 0, (), $match)
+        return (
+            <span class="hsg-snippet">{
+                srch:walker-before($root, $match, $width, ""),
+                <span class="hi">{srch:walker-spaces(string($match))}</span>,
+                $run?content
+            }</span>,
+            srch:walker-from($root, ($run?last/following::exist:match)[1], $width, $remaining - 1)
+        )
+};
+
+declare %private function srch:walker-before($root as node(), $node as node(), $width as xs:integer,
+        $text as xs:string) as xs:string {
+    let $prev := $node/preceding::text()[1]
+    return
+        if (string-length($text) gt $width) then
+            "..." || replace(substring($text, string-length($text) - $width), "^\S*\s+", "")
+        else if (empty($prev) or empty($prev/ancestor::node()[. is $root])) then
+            replace($text, "^\s+", "")
+        else
+            srch:walker-before($root, $prev, $width, srch:walker-spaces($prev || $text))
+};
+
+declare %private function srch:walker-run($root as node(), $node as node(), $width as xs:integer,
+        $chars as xs:integer, $total as xs:integer, $content as item()*, $last as element(exist:match)) as map(*) {
+    let $next := $node/following::text()[1]
+    let $match := $next/parent::exist:match
+    let $piece := srch:walker-spaces($next)
+    return
+        if (empty($next) or empty($next/ancestor::node()[. is $root])) then
+            map { "content": $content, "last": $last }
+        else if (exists($match)) then
+            if ($total le 2 * $width) then
+                srch:walker-run($root, $match, $width, 0, $total + string-length($piece),
+                    ($content, <span class="hi">{srch:walker-spaces(string($match))}</span>), $match)
+            else
+                map { "content": ($content, "..."), "last": $last }
+        else if ($chars + string-length($piece) gt $width) then
+            let $cut := replace(substring($piece, 1, $width - $chars + 1), "\s+\S*$", "")
+            return map { "content": ($content, $cut, "..."), "last": $last }
+        else
+            srch:walker-run($root, $next, $width, $chars + string-length($piece), $total + string-length($piece),
+                ($content, $piece), $last)
+};
+
+declare %private function srch:walker-spaces($text as xs:string?) as xs:string {
+    replace($text, "\s+", " ")
+};
+
 (:~ Metadata list of a card. :)
 declare %private function srch:meta-list($rows as element()*) as element(dl)? {
     if (exists($rows)) then <dl class="hsg-result__meta">{$rows}</dl> else ()
@@ -531,6 +653,7 @@ declare %private function srch:frus-card($doc as element(tei:div), $match as map
         for $hit in subsequence($highlighted//exist:match, 1, 5)
         return kwic:get-summary($highlighted, $hit, <config width="40"/>)
     )
+    let $compare := if ($match?snippets eq "compare") then srch:compare-snippets($doc, $field, $highlighted, $match?q) else ()
     let $score := ft:score($doc)
     return map {
         "tags": if ($historical) then ($placeNameString, $dateString)[. ne ""] else (),
@@ -541,7 +664,8 @@ declare %private function srch:frus-card($doc as element(tei:div), $match as map
                 if ($date/@when) then srch:meta-row("Encoded Date", <code>when="{string($date/@when)}"</code>) else ()
             ) else (),
             srch:meta-row("Resource ID", $volId/string() || "/" || $docId/string()),
-            if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else (),
+            if (exists($compare)) then $compare
+            else if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else (),
             if ($score) then srch:meta-row("Keyword Relevance", $score) else ()
         ))
     }
@@ -661,7 +785,8 @@ declare %private function srch:pagination-query-string($r as map(*), $start as x
         $r?("end-time")[. ne ""] ! ("end-time=" || .),
         "sort-by=" || $r?("sort-by"),
         if ($r?mode eq "hybrid") then "mode=hybrid" else (),
-        ("stem", "case", "punct")[$r?match?(.)] ! (. || "=yes")
+        ("stem", "case", "punct")[$r?match?(.)] ! (. || "=yes"),
+        $r?match?snippets[. ne ""] ! ("snippets=" || encode-for-uri(.))
     ), "&amp;")
 };
 
@@ -768,6 +893,11 @@ declare function srch:search-options($context as map(*)) as element(details) {
                 <legend class="usa-sr-only">Search options</legend>
                 { srch:mode-toggle($context), srch:match-options($context) }
             </fieldset>
+            {
+                (: evaluation only: keep snippets=compare across searches :)
+                normalize-space(page:parameter($context, "snippets", ""))[. ne ""] !
+                    <input type="hidden" name="snippets" value="{.}" form="hsg-search"/>
+            }
         </details>
 };
 

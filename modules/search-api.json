@@ -106,6 +106,17 @@
                         "example": "yes"
                     },
                     {
+                        "name": "snippets",
+                        "in": "query",
+                        "description": "Evaluation only (explore/snippet-comparison): compare shows each FRUS result's snippets three ways, kwic, the kwic fix and ft:passages, with the time each took.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 10
+                        },
+                        "example": "compare"
+                    },
+                    {
                         "name": "within",
                         "in": "query",
                         "description": "Section scope filter, repeatable. Known values (mapped to hsg-category/hsg-publication facets in the handler): entire-site, documents, department, countries, conferences, frus-history, about, retired. Deliberately NOT schema-enumerated: hsg-shell answers an unknown value with a normal 200 page and zero results (the value simply matches no facet), and legacy URLs must keep that behavior instead of a Roaster validation 400. Absent or entire-site means no scope filter; absent `within` combined with `start-date` or `volume-id` is treated as documents (compatibility with the retired frus-dates search engine).",
