@@ -375,8 +375,7 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
             "stem": $yes("stem") and not($case or $punct), "case": $case, "punct": $punct,
             (: evaluation only: snippets=compare shows each FRUS card's snippets
                three ways (kwic, the walker, ft:passages), with their times :)
-            "snippets": normalize-space(page:parameter($context, "snippets", "")),
-            "q": $q
+            "snippets": normalize-space(page:parameter($context, "snippets", ""))
         }
     }
 };
@@ -506,13 +505,12 @@ declare %private function srch:snippets($summaries as element()*) as element(spa
  : milliseconds each took (after the shared ft:highlight-field-matches, which
  : kwic and the walker both need and ft:passages doesn't): kwic as today, the
  : walker from fix/kwic-merge-nearby-matches, and ft:passages with the
- : settings exist-strategy suggested for a results list.
- : ft:passages finds nothing for a hit whose query had the facets option (a
- : bug reported to exist-strategy), and the FRUS query always has it, so
- : ft:passages gets the same hit from the same query run without facets on
- : this document alone; that requery is timed with it. :)
+ : settings exist-strategy suggested for a results list, on the search hit
+ : itself (needs eXist feat/ft-passages-fieldtext, which fixed passages for a
+ : hit from a facets query). It uses the field the search matched: with word
+ : forms the stemmed one, or the exact one for a hit only it found. :)
 declare %private function srch:compare-snippets($doc as element(tei:div), $field as xs:string,
-        $highlighted as element()*, $q as xs:string?) as element()* {
+        $highlighted as element()*) as element()* {
     let $ms := function($start as xs:time) { (util:system-time() - $start) div xs:dayTimeDuration("PT0.001S") }
     let $t0 := util:system-time()
     let $kwic := srch:snippets(
@@ -526,16 +524,17 @@ declare %private function srch:compare-snippets($doc as element(tei:div), $field
     let $t2 := util:system-time()
     let $passages :=
         try {
-            let $requeried := $doc[ft:query(., $field || ":(" || srch:escape-unsupported-characters($q) || ")", $srch:ft-query-options)]
-            let $found := $requeried ! ft:passages(., $field, map {
+            let $options := map {
                 "max": 2, "order": "document", "length": 200, "max-length": 320,
                 "highlight": function($text) { <span class="hi">{$text}</span> }
-            })
-            return
-                if (empty($found)) then
-                    <span class="hsg-snippet"><em>none: ft:passages returns no passages when called from the app (it does from xst and REST for the same hit); reported to exist-strategy</em></span>
+            }
+            let $found :=
+                if ($field eq $srch:STEMMED_FIELD) then
+                    (ft:passages($doc, $field, $options), ft:passages($doc, "hsg-fulltext", $options)[empty(ft:passages($doc, $field, $options))])
                 else
-                    for $p in $found return <span class="hsg-snippet hsg-snippet--passage">{$p/node()}</span>
+                    ft:passages($doc, $field, $options)
+            for $p in $found
+            return <span class="hsg-snippet hsg-snippet--passage">{$p/node()}</span>
         } catch * {
             <span class="hsg-snippet">ft:passages: {$err:description}</span>
         }
@@ -653,7 +652,7 @@ declare %private function srch:frus-card($doc as element(tei:div), $match as map
         for $hit in subsequence($highlighted//exist:match, 1, 5)
         return kwic:get-summary($highlighted, $hit, <config width="40"/>)
     )
-    let $compare := if ($match?snippets eq "compare") then srch:compare-snippets($doc, $field, $highlighted, $match?q) else ()
+    let $compare := if ($match?snippets eq "compare") then srch:compare-snippets($doc, $field, $highlighted) else ()
     let $score := ft:score($doc)
     return map {
         "tags": if ($historical) then ($placeNameString, $dateString)[. ne ""] else (),
