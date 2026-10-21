@@ -73,6 +73,24 @@ declare variable $srch:ft-query-options as map(*) := map {
  : contributes its exact matches. :)
 declare variable $srch:STEMMED_FIELD as xs:string := "hsg-fulltext-stemmed";
 
+(:~ The sensitive copies of hsg-fulltext, one per combination of the "match
+ : case" and "match punctuation" options: cased keeps case, punct keeps
+ : punctuation inside words (S/S, F-16), literal keeps both. :)
+declare variable $srch:CASED_FIELD as xs:string := "hsg-fulltext-cased";
+declare variable $srch:PUNCT_FIELD as xs:string := "hsg-fulltext-punct";
+declare variable $srch:LITERAL_FIELD as xs:string := "hsg-fulltext-literal";
+
+(:~ The field one search uses, from its match options. Word forms don't
+ : combine with either sensitivity (stemming lowercases and drops
+ : punctuation), so srch:read-params turns stem off when either is on. :)
+declare function srch:match-field($match as map(*)) as xs:string {
+    if ($match?case and $match?punct) then $srch:LITERAL_FIELD
+    else if ($match?case) then $srch:CASED_FIELD
+    else if ($match?punct) then $srch:PUNCT_FIELD
+    else if ($match?stem) then $srch:STEMMED_FIELD
+    else "hsg-fulltext"
+};
+
 (:~ Lucene chars not exposed as search features -- escaped so they search
  : literally rather than altering the query or raising a parse error. The
  : documented operators (" + - ( ) * ? ~, AND/OR/NOT) are intentionally absent. :)
@@ -137,7 +155,7 @@ declare function srch:query-parses($query as xs:string?) as xs:boolean {
 };
 
 declare %private function srch:prepare-query($sections as xs:string*, $volumeIds as xs:string*,
-        $query as xs:string?, $rangeStart as xs:dateTime?, $rangeEnd as xs:dateTime?, $stem as xs:boolean) as map(*) {
+        $query as xs:string?, $rangeStart as xs:dateTime?, $rangeEnd as xs:dateTime?, $match as map(*)) as map(*) {
     let $category := $sections[not(. = ("", "entire-site"))]
     let $publication :=
         for $section in $category
@@ -147,13 +165,14 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
     (: Word forms: the stemmed field, or the exact one. The exact branch keeps
        wildcard terms working, since a prefix such as negotiat* is not a
        prefix of the stem "negoti", and it can only add exact matches. :)
+    let $field := srch:match-field($match)
     let $fulltextQuery :=
         if (empty($query)) then
             ()
-        else if ($stem) then
+        else if ($field eq $srch:STEMMED_FIELD) then
             "(" || $srch:STEMMED_FIELD || ":(" || $escaped || ") OR hsg-fulltext:(" || $escaped || ")) "
         else
-            "hsg-fulltext:(" || $escaped || ") "
+            $field || ":(" || $escaped || ") "
     (: lower-case: the index analyzer lower-cases the stored date strings
      : (the "T"), and eXist 7 dropped the AnalyzingQueryParser that used to
      : apply the same analysis to range endpoints on the query side; an
@@ -343,13 +362,16 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
             $within
     let $modeParam := normalize-space(page:parameter($context, "mode", "keyword"))
     let $mode := if ($modeParam eq "hybrid") then "hybrid" else "keyword"
-    let $stem := normalize-space(page:parameter($context, "stem", "")) eq "yes"
+    let $yes := function($name) { normalize-space(page:parameter($context, $name, "")) eq "yes" }
+    let $case := $yes("case")
+    let $punct := $yes("punct")
     return map {
         "q": $q, "within": $section, "volume-id": $volumeId,
         "start-date": $startDate, "end-date": $endDate,
         "start-time": $startTime, "end-time": $endTime,
         "sort-by": $sortBy, "start": $start, "per-page": $perPage,
-        "mode": $mode, "stem": $stem
+        "mode": $mode,
+        "match": map { "stem": $yes("stem") and not($case or $punct), "case": $case, "punct": $punct }
     }
 };
 
@@ -362,7 +384,7 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
 declare %private function srch:results($context as map(*)) as map(*) {
     let $p := srch:read-params($context)
     let $normalized := string-join(
-        let $params := map { "q": $p?q, "within": $p?within, "volume-id": $p?("volume-id"), "start-date": $p?("start-date"), "end-date": $p?("end-date"), "start-time": $p?("start-time"), "end-time": $p?("end-time"), "sort-by": $p?("sort-by"), "mode": $p?mode, "stem": if ($p?stem) then "yes" else () }
+        let $params := map { "q": $p?q, "within": $p?within, "volume-id": $p?("volume-id"), "start-date": $p?("start-date"), "end-date": $p?("end-date"), "start-time": $p?("start-time"), "end-time": $p?("end-time"), "sort-by": $p?("sort-by"), "mode": $p?mode, "match": srch:match-field($p?match) }
         for $key in map:keys($params)
         let $val := $params($key) ! normalize-space(.)[. ne ""]
         order by $key
@@ -381,7 +403,7 @@ declare %private function srch:results($context as map(*)) as map(*) {
         else
             let $started := util:system-dateTime()
             let $range := srch:date-range($p?("start-date"), $p?("end-date"), $p?("start-time"), $p?("end-time"))
-            let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), $p?q, $range?start, $range?end, $p?stem)
+            let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), $p?q, $range?start, $range?end, $p?match)
             let $luceneHits :=
                 try { srch:query-sections($queryConf) } catch * { () }
             let $vectorHits :=
@@ -484,7 +506,7 @@ declare %private function srch:meta-list($rows as element()*) as element(dl)? {
  : don't offer one (OP#1432, a business decision; the reference site didn't
  : show it either).
  :)
-declare %private function srch:frus-card($doc as element(tei:div), $stem as xs:boolean) as map(*) {
+declare %private function srch:frus-card($doc as element(tei:div), $match as map(*)) as map(*) {
     let $docId := $doc/@xml:id
     let $volId := root($doc)/tei:TEI/@xml:id
     (: the division subtype is a teiHeader bibl in this data model, not an
@@ -496,13 +518,15 @@ declare %private function srch:frus-card($doc as element(tei:div), $stem as xs:b
     let $dateString := normalize-space(string-join($date//text()[not(./ancestor::tei:note)]))
     let $placeName := ($doc//tei:placeName)[1]
     let $placeNameString := normalize-space(string-join($placeName//text()[not(./ancestor::tei:note)]))
-    (: With word forms, the matches are on the stemmed field, except for a
-       hit that only the exact branch found (a wildcard term). :)
+    (: The matches are on the field the search used. With word forms, that
+       is the stemmed field, except for a hit that only the exact branch
+       found (a wildcard term). :)
+    let $field := srch:match-field($match)
     let $highlighted :=
-        if ($stem) then
-            (ft:highlight-field-matches($doc, $srch:STEMMED_FIELD)[.//exist:match], ft:highlight-field-matches($doc, "hsg-fulltext"))[1]
+        if ($field eq $srch:STEMMED_FIELD) then
+            (ft:highlight-field-matches($doc, $field)[.//exist:match], ft:highlight-field-matches($doc, "hsg-fulltext"))[1]
         else
-            ft:highlight-field-matches($doc, "hsg-fulltext")
+            ft:highlight-field-matches($doc, $field)
     let $snippets := srch:snippets(
         for $hit in subsequence($highlighted//exist:match, 1, 5)
         return kwic:get-summary($highlighted, $hit, <config width="40"/>)
@@ -529,7 +553,7 @@ declare %private function srch:frus-card($doc as element(tei:div), $stem as xs:b
  : empty where a hit type has nothing to show. The href trusts the hsg-url Lucene field (module doc
  : above) except for the two element types with no such field.
  :)
-declare %private function srch:render-hit($hit as element(), $stem as xs:boolean) as map(*) {
+declare %private function srch:render-hit($hit as element(), $match as map(*)) as map(*) {
     let $href := ft:field($hit, "hsg-url")
     let $card := function($title as xs:string, $rows as element()*) as map(*) {
         map { "title": $title, "href": $href, "tags": (), "summary": srch:meta-list($rows) }
@@ -546,7 +570,7 @@ declare %private function srch:render-hit($hit as element(), $stem as xs:boolean
                 return $card("Travels: " || string-join($hit/trip[1]/name, ", "), srch:meta-row("Matching Trips", $count))
             case element(tei:div) return
                 if (ft:field($hit, "hsg-publication") = "frus" or starts-with(base-uri($hit), $srch:FRUS_COL)) then
-                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit, $stem)))
+                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit, $match)))
                 else
                     $card(
                         normalize-space(string-join(($hit/tei:head)[1]//text()[not(./ancestor::tei:note)])),
@@ -577,7 +601,7 @@ declare function srch:results-summary($context as map(*)) as element(p) {
                 Displaying {$r?start}&#8211;{$r?end} of <span class="search-count">{format-number($r?("hit-count"), "#,###")}</span> results
                 {
                     string-join((
-                        if (normalize-space($r?q) ne "") then ("for keyword &#8220;" || $r?q || "&#8221;" || (if ($r?stem) then " and its word forms" else "")) else (),
+                        if (normalize-space($r?q) ne "") then ("for keyword &#8220;" || $r?q || "&#8221;" || srch:match-phrase($r?match)) else (),
                         if ($r?within = "entire-site" or empty($r?within)) then "across the entire Office of the Historian website"
                         else "within " || string-join($r?within, ", "),
                         if (exists($r?("range-start")) and exists($r?("range-end"))) then
@@ -601,7 +625,7 @@ declare function srch:results-list($context as map(*)) as element(ul) {
         <ul class="usa-collection hsg-results">
         {
             for $hit in $r?hits
-            let $rendered := srch:render-hit($hit, $r?stem)
+            let $rendered := srch:render-hit($hit, $r?match)
             return
                 <li class="usa-collection__item">
                     <div class="usa-collection__body">
@@ -637,7 +661,7 @@ declare %private function srch:pagination-query-string($r as map(*), $start as x
         $r?("end-time")[. ne ""] ! ("end-time=" || .),
         "sort-by=" || $r?("sort-by"),
         if ($r?mode eq "hybrid") then "mode=hybrid" else (),
-        if ($r?stem) then "stem=yes" else ()
+        ("stem", "case", "punct")[$r?match?(.)] ! (. || "=yes")
     ), "&amp;")
 };
 
@@ -710,18 +734,37 @@ declare function srch:mode-toggle($context as map(*)) as element(div) {
         </div>
 };
 
-(:~ Word forms, one checkbox: ticked submits stem=yes, so "negotiation"
- : also finds negotiations and negotiating. Unticked, the default, matches
- : words exactly. :)
-declare function srch:stem-toggle($context as map(*)) as element(div) {
-    let $stem := normalize-space(page:parameter($context, "stem", "")) eq "yes"
+(:~ The match options, one checkbox each, ticked submits name=yes:
+ : word forms (stem), case and punctuation. All unticked, the default,
+ : matches words regardless of case and punctuation, exactly as written
+ : otherwise. Word forms give way to either sensitivity (srch:read-params). :)
+declare function srch:match-options($context as map(*)) as element(div)+ {
+    for $option in (
+        map { "name": "stem", "label": "Match word forms (negotiation also finds negotiations, negotiating)" },
+        map { "name": "case", "label": "Match case (Goa, not GOA)" },
+        map { "name": "punct", "label": "Match punctuation (S/S and F-16 as written)" }
+    )
+    let $id := "match-" || $option?name
     return
         <div class="usa-checkbox hsg-search-mode">
-            <input class="usa-checkbox__input" id="stem-yes" type="checkbox" name="stem" value="yes" form="hsg-search">
-            { if ($stem) then attribute checked { "checked" } else () }
+            <input class="usa-checkbox__input" id="{$id}" type="checkbox" name="{$option?name}" value="yes" form="hsg-search">
+            { if (normalize-space(page:parameter($context, $option?name, "")) eq "yes") then attribute checked { "checked" } else () }
             </input>
-            <label class="usa-checkbox__label" for="stem-yes">Match word forms (negotiation also finds negotiations, negotiating)</label>
+            <label class="usa-checkbox__label" for="{$id}">{$option?label}</label>
         </div>
+};
+
+(:~ The results summary's note on the match options, after the keyword. :)
+declare %private function srch:match-phrase($match as map(*)) as xs:string {
+    let $parts := (
+        if ($match?stem) then "its word forms" else (),
+        if ($match?case) then "matching case" else (),
+        if ($match?punct) then "matching punctuation" else ()
+    )
+    return
+        if (empty($parts)) then ""
+        else if ($match?stem) then " and " || string-join($parts, ", ")
+        else ", " || string-join($parts, " and ")
 };
 
 (:~ The section checkboxes of the sidebar, on the landing and the results

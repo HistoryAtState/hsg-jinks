@@ -84,6 +84,28 @@
                         "example": "yes"
                     },
                     {
+                        "name": "case",
+                        "in": "query",
+                        "description": "Match case. yes searches hsg-fulltext-cased (or hsg-fulltext-literal together with punct=yes), so Goa does not find GOA. Turns stem off. Absent or any other value ignores case, the default.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 10
+                        },
+                        "example": "yes"
+                    },
+                    {
+                        "name": "punct",
+                        "in": "query",
+                        "description": "Match punctuation. yes searches hsg-fulltext-punct (or hsg-fulltext-literal together with case=yes), which keeps punctuation inside words, so S/S and F-16 match only as written. Turns stem off. Absent or any other value ignores punctuation, the default.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 10
+                        },
+                        "example": "yes"
+                    },
+                    {
                         "name": "within",
                         "in": "query",
                         "description": "Section scope filter, repeatable. Known values (mapped to hsg-category/hsg-publication facets in the handler): entire-site, documents, department, countries, conferences, frus-history, about, retired. Deliberately NOT schema-enumerated: hsg-shell answers an unknown value with a normal 200 page and zero results (the value simply matches no facet), and legacy URLs must keep that behavior instead of a Roaster validation 400. Absent or entire-site means no scope filter; absent `within` combined with `start-date` or `volume-id` is treated as documents (compatibility with the retired frus-dates search engine).",
