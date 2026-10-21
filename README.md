@@ -357,6 +357,33 @@ and `frus-data-jinks`. The USWDS theme is **not** needed at runtime — it's a
 generation-time profile whose output is already committed here and packed
 into the app xar.
 
+Every build leaves the base profile's `modules/lib/api.json` out of the
+router in the built `modules/lib/api.xql`. The app serves only its own API
+specs (`modules/*-api.json`); any other path answers with the 404 page. To
+serve a base operation, declare its path in an app spec and name the
+operation (e.g. `dapi:table-of-contents`): `api.xql` still imports the base
+modules. The generated controller sends the ODD, lint, fix-odds and LaTeX
+routes to dedicated entry points that load `lib/api.json` themselves, so
+`jinks run hsg-jinks fix-odds` still works in development.
+
+The same build step adds the `modules/schema-constraints.xqm` middleware to
+the router. Roaster itself only casts parameters by `type`; the middleware
+enforces `pattern`, `maxLength`, `minLength` and `enum` on path and query
+parameters (for arrays, on their `items`). A path parameter that fails
+answers 404, a query parameter 400. Declare these constraints in an app spec
+rather than checking an id by hand before it becomes part of a database
+path.
+
+The image builds the app with `ant -Dproduction=true`. That build also
+rewrites the generated `controller.xql` so those requests go through
+`api.xql` as well, where they answer 404. It also empties the CORS origin
+whitelist (`$config:origin-whitelist` in `modules/config.xqm`), so no origin
+gets `Access-Control-Allow-Credentials`; every response carries
+`Access-Control-Allow-Origin: *`. Development keeps the localhost entries.
+All these rewrites fail the build if the generated file changes shape; see
+the `app-routes`, `production-controller` and `production-cors` targets in
+`build.xml`.
+
 `frus-data-jinks` comes from the private, release-less `hsg-jinks-data` repo,
 so it must be staged at the repo root before building (the `COPY` fails
 loudly if it's missing; the xar is gitignored and excluded from the app xar

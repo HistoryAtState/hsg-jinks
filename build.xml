@@ -27,6 +27,11 @@
     <target name="check-release" depends="release.true, release.false">
     </target>
 
+    <!-- ant -Dproduction=true (the production image) -->
+    <condition property="is-production">
+        <istrue value="${production}"/>
+    </condition>
+
 
     <target name="all" depends="clean,prepare,xar" description="main target, create xar file in build folder"/>
 
@@ -104,7 +109,76 @@
         </copy>
     </target>
 
-    <target name="xar" depends="git.revision,prepare" description="create XAR file of folder ${app.build.dir}">
+    <!-- The app serves only its own API specs: the built modules/lib/api.xql no longer routes
+         the base profile's modules/lib/api.json. Its modules stay imported, so app specs can
+         still name their operations. The router also gets the schema-constraints middleware
+         after roaster's standard authorization, which the two-argument roaster:route uses.
+         Fails if the generated route list or call changes shape. -->
+    <target name="app-routes" depends="prepare">
+        <replaceregexp file="${app.build.dir}/modules/lib/api.xql" flags="s"
+            match=",\s*&quot;modules/lib/api\.json&quot;(\s*\)),\s*\$lookup\)"
+            replace="\1, $lookup, (auth:standard-authorization#2, schema-constraints:use#2))"/>
+        <replaceregexp file="${app.build.dir}/modules/lib/api.xql"
+            match="^(import module namespace auth=&quot;http://e-editiones\.org/roaster/auth&quot;;)$"
+            replace="\1${line.separator}import module namespace schema-constraints=&quot;https://history.state.gov/ns/site/hsg/schema-constraints&quot; at &quot;../schema-constraints.xqm&quot;;"
+            flags="m"/>
+        <loadfile property="app.routes" srcFile="${app.build.dir}/modules/lib/api.xql"/>
+        <fail message="modules/lib/api.xql still routes modules/lib/api.json; update the app-routes target">
+            <condition>
+                <contains string="${app.routes}" substring="&quot;modules/lib/api.json&quot;"/>
+            </condition>
+        </fail>
+        <fail message="modules/lib/api.xql does not use the schema-constraints middleware; update the app-routes target">
+            <condition>
+                <not>
+                    <and>
+                        <contains string="${app.routes}" substring="at &quot;../schema-constraints.xqm&quot;"/>
+                        <contains string="${app.routes}" substring="schema-constraints:use#2))"/>
+                    </and>
+                </not>
+            </condition>
+        </fail>
+    </target>
+
+    <!-- The production build also routes the paths the generated controller.xql sends to
+         api-odd.xql, api-actions.xql and api-dba.xql through modules/lib/api.xql, so the ODD,
+         lint, fix-odds and LaTeX routes are dropped there too. Fails if that dispatch changes
+         shape. -->
+    <target name="production-controller" if="is-production" depends="prepare">
+        <replaceregexp file="${app.build.dir}/controller.xql" flags="s"
+            match="let \$main :=\s*if \(matches\(\$exist:path, .*?else\s*&quot;api\.xql&quot;"
+            replace="let $main := &quot;api.xql&quot;"/>
+        <loadfile property="production.controller" srcFile="${app.build.dir}/controller.xql"/>
+        <fail message="controller.xql still dispatches to a dedicated API entry point; update the production-controller target">
+            <condition>
+                <or>
+                    <contains string="${production.controller}" substring="api-odd.xql"/>
+                    <contains string="${production.controller}" substring="api-actions.xql"/>
+                    <contains string="${production.controller}" substring="api-dba.xql"/>
+                </or>
+            </condition>
+        </fail>
+    </target>
+
+    <!-- The production build empties the CORS origin whitelist in modules/config.xqm, so no
+         origin gets Access-Control-Allow-Credentials; every response carries
+         Access-Control-Allow-Origin: * instead. Development keeps the localhost entries.
+         Fails if that declaration changes shape. -->
+    <target name="production-cors" if="is-production" depends="prepare">
+        <replaceregexp file="${app.build.dir}/modules/config.xqm" flags="s"
+            match="declare variable \$config:origin-whitelist := \(.*?\n\);"
+            replace="declare variable $config:origin-whitelist := ();"/>
+        <loadfile property="production.config" srcFile="${app.build.dir}/modules/config.xqm"/>
+        <fail message="modules/config.xqm still has a CORS origin whitelist; update the production-cors target">
+            <condition>
+                <not>
+                    <contains string="${production.config}" substring="declare variable $config:origin-whitelist := ();"/>
+                </not>
+            </condition>
+        </fail>
+    </target>
+
+    <target name="xar" depends="git.revision,prepare,app-routes,production-controller,production-cors" description="create XAR file of folder ${app.build.dir}">
         <zip basedir="${app.build.dir}" destfile="${build.dir}/${project.app}-${project.version}.xar"/>
     </target>
 

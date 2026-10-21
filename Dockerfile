@@ -15,10 +15,10 @@ FROM ghcr.io/eeditiones/builder:latest AS builder
 
 WORKDIR /tmp
 
-# Build app inside container
+# Build app inside container (production build, see README "Production Docker image")
 COPY . hsg-jinks/
 RUN cd hsg-jinks \
-    && ant
+    && ant -Dproduction=true
 
 
 FROM duncdrum/existdb:${EXIST_VERSION} AS build_local
@@ -37,7 +37,8 @@ ARG PUBLISHER_VERSION
 ARG USR=nonroot
 USER ${USR}
 
-# This assumes that a local xar file is present for building production images
+# This assumes that a local xar file is present for building production images,
+# built with `ant -Dproduction=true`
 ONBUILD COPY --chown=${USR} ./build/*.xar /exist/autodeploy/006.xar
 
 FROM build_${BUILD}

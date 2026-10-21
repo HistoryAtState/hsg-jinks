@@ -48,7 +48,7 @@
                         "in": "path",
                         "description": "Module document identifier: the module record's tei-document-name (introduction document filename without .xml)",
                         "required": true,
-                        "schema": { "type": "string" },
+                        "schema": { "type": "string", "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$" },
                         "allowReserved": true
                     }
                 ],

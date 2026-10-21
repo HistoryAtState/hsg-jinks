@@ -103,7 +103,8 @@
                         "description": "xml:id of the tei:div to render (an era's front-matter introduction, xml:id 'foreword', or one of its body-div articles)",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "example": "wwi",
                         "allowReserved": true

@@ -57,6 +57,24 @@ jobs:
       - name: Run Cypress
         run: npx cypress run --config video=false
 
+      # The production image builds with -Dproduction=true, which also drops
+      # the base routes the controller sends to dedicated entry points (README
+      # "Production Docker image"). Reinstall that build and check its routes.
+      - name: Install the production build of the app
+        env:
+          EXISTDB_SERVER: http://localhost:8080/exist
+          EXISTDB_USER: admin
+          EXISTDB_PASS: ""
+        run: |
+          ant -Dproduction=true
+          xst package install --force build/*.xar
+
+      - name: Run the base-routes spec against the production build
+        run: >-
+          npx cypress run --config video=false
+          --spec test/cypress/e2e/api/base-routes.cy.js
+          --env PRODUCTION_BUILD=true
+
       - name: Upload screenshots
         if: failure()
         uses: actions/upload-artifact@v4

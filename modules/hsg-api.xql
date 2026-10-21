@@ -47,6 +47,23 @@ declare function hsgapi:view-section($request as map(*)) {
 };
 
 (:~
+ : Site landing page; "/" redirects here. The base profile's generic
+ : /{file}.html route is not served (build.xml, target app-routes).
+ :)
+declare function hsgapi:index($request as map(*)) {
+    hsgapi:render($request, "index")
+};
+
+(:~
+ : Catch-all /{path}: the least specific route, so it only matches paths no
+ : other route serves. Without it Roaster answers those itself, with a JSON
+ : error, before any x-error-handler runs. This way they get the 404 page.
+ :)
+declare function hsgapi:not-found($request as map(*)) {
+    error($errors:NOT_FOUND, "no page at /" || $request?parameters?path)
+};
+
+(:~
  : Section pages under /historicaldocuments (OP#1291-#1295, #1299-#1305). Their literal
  : routes beat the parameterized /historicaldocuments/{publicationId} volume
  : route by Roaster path specificity; see the note on devapi:not-found in
@@ -252,7 +269,9 @@ declare function hsgapi:view($request as map(*)) {
             vapi:view(map:put($request, "parameters", map:merge((
                 $request?parameters,
                 map {
-                    "docid": $config:frus-volumes || "/" || $publicationId || "/" || $publicationId || ".xml"
+                    "docid": $config:frus-volumes || "/" || $publicationId || "/" || $publicationId || ".xml",
+                    (: fixed here, not a query parameter, so a URL cannot choose the template :)
+                    "template": "pages/volume/landing.html"
                 }
             ))))
 };
@@ -311,7 +330,8 @@ declare function hsgapi:view-interior($request as map(*)) {
             vapi:view(map:put($request, "parameters", map:merge((
                 $request?parameters,
                 map {
-                    "docid": substring-after(document-uri(root($doc)), $config:data-root || '/')
+                    "docid": substring-after(document-uri(root($doc)), $config:data-root || '/'),
+                    "template": "pages/volume/interior.html"
                 }
             ))))
 };

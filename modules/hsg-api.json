@@ -327,7 +327,8 @@
                         "description": "ID of the document",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -393,7 +394,8 @@
                         "description": "ID of the article",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -481,7 +483,8 @@
                         "description": "ID of the monograph division",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -569,7 +572,8 @@
                         "description": "ID of the release announcement, e.g. 2016-q3",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -608,20 +612,13 @@
                 ],
                 "parameters": [
                     {
-                        "name": "template",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "default": "pages/volume/landing.html"
-                        }
-                    },
-                    {
                         "name": "publicationId",
                         "in": "path",
                         "description": "Relative path to the document",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -660,20 +657,13 @@
                 ],
                 "parameters": [
                     {
-                        "name": "template",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "default": "pages/volume/interior.html"
-                        }
-                    },
-                    {
                         "name": "publicationId",
                         "in": "path",
                         "description": "Relative path to the document",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     },
@@ -683,7 +673,8 @@
                         "description": "ID of the division",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -701,6 +692,163 @@
                     },
                     "404": {
                         "description": "The document was not found",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/index.html": {
+            "get": {
+                "summary": "Retrieve the site landing page",
+                "operationId": "hsgapi:index",
+                "x-error-handler": "hsg-errors:handle",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "lang",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HTML of the page",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/{path}": {
+            "get": {
+                "summary": "Catch-all for any path no other route serves",
+                "operationId": "hsgapi:not-found",
+                "x-error-handler": "hsg-errors:handle",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "path",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "No page exists at this path",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Catch-all for any path no other route serves",
+                "operationId": "hsgapi:not-found",
+                "x-error-handler": "hsg-errors:handle",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "path",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "No page exists at this path",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Catch-all for any path no other route serves",
+                "operationId": "hsgapi:not-found",
+                "x-error-handler": "hsg-errors:handle",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "path",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "No page exists at this path",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Catch-all for any path no other route serves",
+                "operationId": "hsgapi:not-found",
+                "x-error-handler": "hsg-errors:handle",
+                "tags": [
+                    "hsg"
+                ],
+                "parameters": [
+                    {
+                        "name": "path",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "allowReserved": true
+                    }
+                ],
+                "responses": {
+                    "404": {
+                        "description": "No page exists at this path",
                         "content": {
                             "text/html": {
                                 "schema": {

@@ -92,7 +92,8 @@ declare function opdsapi:search($request as map(*)) {
  : dhapi:redirect already uses -- producing a uniform
  : {"code": ..., "description": ...} JSON body for every failure, matching
  : this section's OpenAPI spec. "code" is the error QName's own local name
- : (e.g. "NOT_FOUND", "BAD_REQUEST"), not the HTTP status number.
+ : (e.g. "NOT_FOUND", "BAD_REQUEST"), not the HTTP status number. Expected
+ : 4xx responses keep their message; a 500 is deliberately generic.
  :)
 declare function opdsapi:handle-error($error as map(*)) as map(*) {
     (: FORG0001 is not one of roaster's own $errors:* QNames: it's the plain
@@ -108,8 +109,12 @@ declare function opdsapi:handle-error($error as map(*)) as map(*) {
         else if ($error?code eq $errors:BAD_REQUEST or $localName eq "FORG0001") then 400
         else 500
     let $body := map {
-        "code": $localName,
-        "description": $error?description
+        "code": if ($status = 500) then "INTERNAL_SERVER_ERROR" else $localName,
+        "description":
+            if ($status = 500) then
+                "The server could not complete the request"
+            else
+                $error?description
     }
     return
         map {

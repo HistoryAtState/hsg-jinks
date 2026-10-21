@@ -142,7 +142,7 @@
                         "in": "path",
                         "description": "ID of the film (one of the four literal film ids)",
                         "required": true,
-                        "schema": { "type": "string" },
+                        "schema": { "type": "string", "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$" },
                         "allowReserved": true
                     }
                 ],
@@ -184,7 +184,7 @@
                         "in": "path",
                         "description": "ID of the chapter or subchapter",
                         "required": true,
-                        "schema": { "type": "string" },
+                        "schema": { "type": "string", "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$" },
                         "allowReserved": true
                     }
                 ],
@@ -226,7 +226,7 @@
                         "in": "path",
                         "description": "ID of the chapter or subchapter",
                         "required": true,
-                        "schema": { "type": "string" },
+                        "schema": { "type": "string", "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$" },
                         "allowReserved": true
                     }
                 ],
@@ -268,7 +268,7 @@
                         "in": "path",
                         "description": "POCOM person id, or a superseded old-id (302s to the canonical id)",
                         "required": true,
-                        "schema": { "type": "string" },
+                        "schema": { "type": "string", "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$" },
                         "allowReserved": true
                     }
                 ],
@@ -314,7 +314,7 @@
                         "in": "path",
                         "description": "Single lowercase letter",
                         "required": true,
-                        "schema": { "type": "string" },
+                        "schema": { "type": "string", "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$" },
                         "allowReserved": true
                     }
                 ],
@@ -356,7 +356,7 @@
                         "in": "path",
                         "description": "Four-digit year, 1778 to the current year",
                         "required": true,
-                        "schema": { "type": "string" },
+                        "schema": { "type": "string", "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$" },
                         "allowReserved": true
                     }
                 ],
@@ -398,7 +398,7 @@
                         "in": "path",
                         "description": "positions-principals record id",
                         "required": true,
-                        "schema": { "type": "string" },
+                        "schema": { "type": "string", "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$" },
                         "allowReserved": true
                     }
                 ],
@@ -454,7 +454,7 @@
                         "in": "path",
                         "description": "org-mission id, country territory-id, or (redirects) a positions-principals id",
                         "required": true,
-                        "schema": { "type": "string" },
+                        "schema": { "type": "string", "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$" },
                         "allowReserved": true
                     }
                 ],
@@ -514,7 +514,7 @@
                         "in": "path",
                         "description": "presidents.xml id, or a destination country id",
                         "required": true,
-                        "schema": { "type": "string" },
+                        "schema": { "type": "string", "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$" },
                         "allowReserved": true
                     }
                 ],
@@ -542,7 +542,7 @@
                         "in": "path",
                         "description": "POCOM person id (or a superseded old-id, 302s to canonical), or a destination country id",
                         "required": true,
-                        "schema": { "type": "string" },
+                        "schema": { "type": "string", "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$" },
                         "allowReserved": true
                     }
                 ],
@@ -588,7 +588,7 @@
                         "in": "path",
                         "description": "Four-digit year, or a country id",
                         "required": true,
-                        "schema": { "type": "string" },
+                        "schema": { "type": "string", "pattern": "^[\\p{L}\\p{N}_][\\p{L}\\p{N}._-]*$" },
                         "allowReserved": true
                     }
                 ],
