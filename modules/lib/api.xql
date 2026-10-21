@@ -78,10 +78,6 @@ import module namespace opdsapi="http://teipublisher.com/api/opds" at "../opds-c
 
 
 
-import module namespace disabledapi="https://history.state.gov/api/disabled" at "../disabled-api.xql";
-
-
-
 declare option output:indent "no";
 
 let $lookup := function($name as xs:string) {
@@ -93,12 +89,8 @@ let $lookup := function($name as xs:string) {
 }
 let $resp := roaster:route(
     (
-
-
-        "modules/disabled-api.json",
-
-
-
+        
+        
         "modules/opds-catalog-api.json",
         
          

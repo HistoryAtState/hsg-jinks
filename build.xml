@@ -109,9 +109,25 @@
         </copy>
     </target>
 
-    <!-- The production build routes every API request through modules/lib/api.xql, so
-         modules/disabled-api.json also covers the paths the generated controller.xql sends to
-         api-odd.xql, api-actions.xql and api-dba.xql. Fails if that dispatch changes shape. -->
+    <!-- The app serves only its own API specs: the built modules/lib/api.xql no longer routes
+         the base profile's modules/lib/api.json. Its modules stay imported, so app specs can
+         still name their operations. Fails if the generated route list changes shape. -->
+    <target name="app-routes" depends="prepare">
+        <replaceregexp file="${app.build.dir}/modules/lib/api.xql" flags="s"
+            match=",\s*&quot;modules/lib/api\.json&quot;(\s*\),\s*\$lookup\))"
+            replace="\1"/>
+        <loadfile property="app.routes" srcFile="${app.build.dir}/modules/lib/api.xql"/>
+        <fail message="modules/lib/api.xql still routes modules/lib/api.json; update the app-routes target">
+            <condition>
+                <contains string="${app.routes}" substring="&quot;modules/lib/api.json&quot;"/>
+            </condition>
+        </fail>
+    </target>
+
+    <!-- The production build also routes the paths the generated controller.xql sends to
+         api-odd.xql, api-actions.xql and api-dba.xql through modules/lib/api.xql, so the ODD,
+         lint, fix-odds and LaTeX routes are dropped there too. Fails if that dispatch changes
+         shape. -->
     <target name="production-controller" if="is-production" depends="prepare">
         <replaceregexp file="${app.build.dir}/controller.xql" flags="s"
             match="let \$main :=\s*if \(matches\(\$exist:path, .*?else\s*&quot;api\.xql&quot;"
@@ -128,7 +144,7 @@
         </fail>
     </target>
 
-    <target name="xar" depends="git.revision,prepare,production-controller" description="create XAR file of folder ${app.build.dir}">
+    <target name="xar" depends="git.revision,prepare,app-routes,production-controller" description="create XAR file of folder ${app.build.dir}">
         <zip basedir="${app.build.dir}" destfile="${build.dir}/${project.app}-${project.version}.xar"/>
     </target>
 
