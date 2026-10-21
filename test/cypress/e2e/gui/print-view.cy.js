@@ -1,5 +1,5 @@
 // Print view of a document page (OP#1464): under print media only the
-// division's content is shown. Media emulation goes through the Chrome
+// logo and the division's content are shown. Media emulation goes through the Chrome
 // DevTools protocol, so this spec needs a Chromium-based browser (Electron,
 // the default, is one).
 
@@ -10,7 +10,9 @@ const setMedia = (media) =>
     });
 
 const HIDDEN = {
-    "page header": ".page-header",
+    "USA banner": ".page-header .usa-banner",
+    "main navigation": ".page-header .usa-nav",
+    "menu button": ".page-header .usa-menu-btn",
     "left sidebar": "aside.before",
     "right sidebar": "aside.after",
     "page links": "main a.hsg-facs-link",
@@ -33,6 +35,17 @@ describe("print view of a document page", () => {
             cy.get(selector).should("exist").and("not.be.visible");
         });
     }
+
+    it("shows the navy logo", () => {
+        cy.get(".page-header .usa-logo__img")
+            .should("be.visible")
+            .and(($img) => {
+                expect($img[0].getBoundingClientRect().width).to.equal(300);
+                expect(getComputedStyle($img[0]).content).to.contain(
+                    "oh-logo-navy.png",
+                );
+            });
+    });
 
     it("shows the document's content, footnotes included", () => {
         cy.get("main .tei-body").should("be.visible");

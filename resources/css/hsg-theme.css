@@ -1891,11 +1891,11 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--uswds-color-primary-darker);
 }
 
-/* Print view (OP#1464): a printed document page carries only the division's
-   content. Reference parity with hsg-shell's _print.scss, which also hides
-   navigation, sidebars, page links and the footer; the header goes too. */
+/* Print view (OP#1464): a printed document page carries the logo and the
+   division's content. Reference parity with hsg-shell's _print.scss, which
+   also hides navigation, sidebars, page links and the footer. */
 @media print {
-    .page-header,
+    .page-header :is(.usa-banner, .usa-menu-btn, .usa-nav),
     .mobile.menubar,
     .sticky-layout > :is(.before-top, .before, .content-top, .after-top, .after),
     .hsg-facs-link,
@@ -1909,6 +1909,28 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     .sticky-layout {
         display: block;
         min-height: 0;
+    }
+
+    /* The logo prints at 300px, as in hsg-shell. The screen logo has white
+       lettering, so print the navy one. */
+    .page-header,
+    .page-header .usa-header,
+    .page-header .usa-navbar {
+        position: static;
+        background: none;
+        border: 0;
+        padding: 0;
+        margin: 0;
+    }
+
+    .page-header .usa-logo {
+        margin: 0 0 var(--uswds-space-2);
+    }
+
+    .page-header .usa-logo__img {
+        content: url("../images/oh-logo-navy.png");
+        width: 300px;
+        max-height: none;
     }
 
     body {
