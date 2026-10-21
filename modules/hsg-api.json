@@ -327,7 +327,8 @@
                         "description": "ID of the document",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -393,7 +394,8 @@
                         "description": "ID of the article",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
                         },
                         "allowReserved": true
                     }
@@ -608,14 +610,6 @@
                 ],
                 "parameters": [
                     {
-                        "name": "template",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "default": "pages/volume/landing.html"
-                        }
-                    },
-                    {
                         "name": "publicationId",
                         "in": "path",
                         "description": "Relative path to the document",
@@ -659,14 +653,6 @@
                     "hsg"
                 ],
                 "parameters": [
-                    {
-                        "name": "template",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "default": "pages/volume/interior.html"
-                        }
-                    },
                     {
                         "name": "publicationId",
                         "in": "path",

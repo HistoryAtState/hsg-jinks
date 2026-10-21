@@ -73,14 +73,6 @@
                 ],
                 "parameters": [
                     {
-                        "name": "template",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "default": "pages/countries/article.html"
-                        }
-                    },
-                    {
                         "name": "countryId",
                         "in": "path",
                         "description": "Article id (file name without .xml in rdcr/articles)",
@@ -168,14 +160,6 @@
                     "countries"
                 ],
                 "parameters": [
-                    {
-                        "name": "template",
-                        "in": "query",
-                        "schema": {
-                            "type": "string",
-                            "default": "pages/countries/archives/article.html"
-                        }
-                    },
                     {
                         "name": "archiveId",
                         "in": "path",

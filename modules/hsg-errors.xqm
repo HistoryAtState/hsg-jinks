@@ -9,9 +9,8 @@ xquery version "3.1";
  : status mapping and template choice live in one place: 404 for roaster's
  : NOT_FOUND, 400 for BAD_REQUEST (the search query guard, OP#1273), and the
  : friendly generic error page for any other error class (real 500s). The
- : 404/400/500 pages deliberately show no internals, like the reference --
- : the one exception is FORG0001 (see below), which keeps the jinks-owned
- : diagnostic page's rendering on purpose.
+ : 404/400/500 pages deliberately show no internals, like the reference.
+ : Public error responses never include exception details.
  :)
 module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors";
 
@@ -32,9 +31,9 @@ declare function hsg-errors:handle($error as map(*)) {
     (: FORG0001 is roaster's own parameters:cast-value failing on a query
        parameter whose OpenAPI schema declares a numeric type (e.g. a
        non-integer n) -- a client error, but not one of roaster's $errors:*
-       QNames. It gets the 400 status with the diagnostics body (the friendly
-       400 page's invalid-search copy would be wrong for it), the same
-       mapping the per-section handlers carried before delegating here. :)
+       QNames. It gets the 400 status with the generic invalid-request page:
+       the 400 page's invalid-search copy would be wrong for it, and the
+       jinks-owned diagnostics page exposes internals. :)
     let $status :=
         if ($error?code eq $errors:NOT_FOUND) then 404
         else if ($error?code eq $errors:BAD_REQUEST) then 400
@@ -43,10 +42,8 @@ declare function hsg-errors:handle($error as map(*)) {
     return
         if ($error?code = ($errors:NOT_FOUND, $errors:BAD_REQUEST)) then
             hsg-errors:render($error, "error-" || $status || ".html", $status)
-        else if (local-name-from-QName($error?code) eq "FORG0001") then
-            (: the jinks-owned generic page renders the diagnostics; only the
-               status needs correcting (it hardcodes 200) :)
-            map:put(vapi:handle-error($error), xs:QName("router:RESPONSE_CODE"), $status)
+        else if ($status = 400) then
+            hsg-errors:render($error, "error-request.html", $status)
         else
             (: a real 500 (an uncaught dynamic error, a bug elsewhere in the
                app, ...): friendly page, not the diagnostic one -- end users

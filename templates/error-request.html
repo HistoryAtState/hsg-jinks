@@ -1,0 +1,38 @@
+<html>
+    <head>
+        <title>Invalid request - Office of the Historian</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes" />
+        <link rel="shortcut icon" type="image/x-icon" href="[[ $context-path ]]/resources/images/favicon.ico" />
+
+        [% for $path in $styles?* %]
+        [% if matches($path, "(?:^https?://|^/).*$") %]
+        <link rel="stylesheet" href="[[ $path ]]" />
+        [% else %]
+        <link rel="stylesheet" href="[[ $context-path ]]/[[ $path ]]" />
+        [% endif %]
+        [% endfor %]
+
+        <style>
+            .fixed-layout > main {
+                display: block;
+                max-width: var(--jinks-content-max-width);
+                margin: 3rem auto;
+                padding: 0 1rem;
+            }
+        </style>
+    </head>
+    <body>
+    <div class="fixed-layout">
+        [# OP#1412: this page stands alone (no templates/layouts/base.html), so it
+           needs its own copy of the government banner include; base.html's copy in
+           templates/menu.html never runs for it. #]
+        [% include "templates/banner.html" %]
+        <main class="usa-prose">
+            <h1>Invalid request</h1>
+            <p>The request could not be processed. Please check the submitted values and try again.</p>
+            <p><a class="usa-link" href="[[ $context-path ]]/">Return to the home page</a>.</p>
+        </main>
+    </div>
+    </body>
+</html>

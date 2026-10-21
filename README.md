@@ -364,6 +364,14 @@ modules. The generated controller sends the ODD, lint, fix-odds and LaTeX
 routes to dedicated entry points that load `lib/api.json` themselves, so
 `jinks run hsg-jinks fix-odds` still works in development.
 
+The same build step adds the `modules/schema-constraints.xqm` middleware to
+the router. Roaster itself only casts parameters by `type`; the middleware
+enforces `pattern`, `maxLength`, `minLength` and `enum` on path and query
+parameters (for arrays, on their `items`). A path parameter that fails
+answers 404, a query parameter 400. Declare these constraints in an app spec
+rather than checking an id by hand before it becomes part of a database
+path.
+
 The image builds the app with `ant -Dproduction=true`. That build also
 rewrites the generated `controller.xql` so those requests go through
 `api.xql` as well, where they answer 404. Both rewrites fail the build if the

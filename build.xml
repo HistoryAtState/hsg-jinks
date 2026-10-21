@@ -111,15 +111,31 @@
 
     <!-- The app serves only its own API specs: the built modules/lib/api.xql no longer routes
          the base profile's modules/lib/api.json. Its modules stay imported, so app specs can
-         still name their operations. Fails if the generated route list changes shape. -->
+         still name their operations. The router also gets the schema-constraints middleware
+         after roaster's standard authorization, which the two-argument roaster:route uses.
+         Fails if the generated route list or call changes shape. -->
     <target name="app-routes" depends="prepare">
         <replaceregexp file="${app.build.dir}/modules/lib/api.xql" flags="s"
-            match=",\s*&quot;modules/lib/api\.json&quot;(\s*\),\s*\$lookup\))"
-            replace="\1"/>
+            match=",\s*&quot;modules/lib/api\.json&quot;(\s*\)),\s*\$lookup\)"
+            replace="\1, $lookup, (auth:standard-authorization#2, schema-constraints:use#2))"/>
+        <replaceregexp file="${app.build.dir}/modules/lib/api.xql"
+            match="^(import module namespace auth=&quot;http://e-editiones\.org/roaster/auth&quot;;)$"
+            replace="\1${line.separator}import module namespace schema-constraints=&quot;https://history.state.gov/ns/site/hsg/schema-constraints&quot; at &quot;../schema-constraints.xqm&quot;;"
+            flags="m"/>
         <loadfile property="app.routes" srcFile="${app.build.dir}/modules/lib/api.xql"/>
         <fail message="modules/lib/api.xql still routes modules/lib/api.json; update the app-routes target">
             <condition>
                 <contains string="${app.routes}" substring="&quot;modules/lib/api.json&quot;"/>
+            </condition>
+        </fail>
+        <fail message="modules/lib/api.xql does not use the schema-constraints middleware; update the app-routes target">
+            <condition>
+                <not>
+                    <and>
+                        <contains string="${app.routes}" substring="at &quot;../schema-constraints.xqm&quot;"/>
+                        <contains string="${app.routes}" substring="schema-constraints:use#2))"/>
+                    </and>
+                </not>
             </condition>
         </fail>
     </target>

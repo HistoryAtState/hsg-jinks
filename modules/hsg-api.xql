@@ -269,7 +269,9 @@ declare function hsgapi:view($request as map(*)) {
             vapi:view(map:put($request, "parameters", map:merge((
                 $request?parameters,
                 map {
-                    "docid": $config:frus-volumes || "/" || $publicationId || "/" || $publicationId || ".xml"
+                    "docid": $config:frus-volumes || "/" || $publicationId || "/" || $publicationId || ".xml",
+                    (: fixed here, not a query parameter, so a URL cannot choose the template :)
+                    "template": "pages/volume/landing.html"
                 }
             ))))
 };
@@ -328,7 +330,8 @@ declare function hsgapi:view-interior($request as map(*)) {
             vapi:view(map:put($request, "parameters", map:merge((
                 $request?parameters,
                 map {
-                    "docid": substring-after(document-uri(root($doc)), $config:data-root || '/')
+                    "docid": substring-after(document-uri(root($doc)), $config:data-root || '/'),
+                    "template": "pages/volume/interior.html"
                 }
             ))))
 };
