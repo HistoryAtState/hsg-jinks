@@ -68,8 +68,9 @@ declare variable $srch:ft-query-options as map(*) := map {
 };
 
 (:~ The stemmed copy of hsg-fulltext (English, Porter), searched when the
- : reader ticks "match word forms". Only FRUS defines it so far; the other
- : collections are searched exactly either way until their configs add it. :)
+ : reader ticks "match word forms". Every data package defines it beside
+ : hsg-fulltext; a collection whose installed config predates it simply
+ : contributes its exact matches. :)
 declare variable $srch:STEMMED_FIELD as xs:string := "hsg-fulltext-stemmed";
 
 (:~ Lucene chars not exposed as search features -- escaped so they search
@@ -143,15 +144,16 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
         return $srch:SECTIONS?($section)
     let $dateCapable := count($category) eq 1 and $category = "documents"
     let $escaped := srch:escape-unsupported-characters($query)
-    let $fulltextQuery := if (exists($query)) then "hsg-fulltext:(" || $escaped || ") " else ()
     (: Word forms: the stemmed field, or the exact one. The exact branch keeps
        wildcard terms working, since a prefix such as negotiat* is not a
        prefix of the stem "negoti", and it can only add exact matches. :)
-    let $stemmedQuery :=
-        if (exists($query) and $stem) then
+    let $fulltextQuery :=
+        if (empty($query)) then
+            ()
+        else if ($stem) then
             "(" || $srch:STEMMED_FIELD || ":(" || $escaped || ") OR hsg-fulltext:(" || $escaped || ")) "
         else
-            $fulltextQuery
+            "hsg-fulltext:(" || $escaped || ") "
     (: lower-case: the index analyzer lower-cases the stored date strings
      : (the "T"), and eXist 7 dropped the AnalyzingQueryParser that used to
      : apply the same analysis to range endpoints on the query side; an
@@ -164,7 +166,6 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
         else
             ()
     let $queryString := if (exists($fulltextQuery) or exists($dateQuery)) then string-join(($fulltextQuery, $dateQuery), " AND ") else ()
-    let $frusQueryString := if (exists($stemmedQuery) or exists($dateQuery)) then string-join(($stemmedQuery, $dateQuery), " AND ") else ()
     let $facets := map:merge((
         if (exists($category)) then map { "hsg-category": $category } else (),
         if (exists($publication)) then map { "hsg-publication": $publication } else (),
@@ -174,7 +175,6 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
         "fields": map { "fields": ("hsg-date-min", "hsg-fulltext", "hsg-url") },
         "facets": map { "facets": $facets },
         "query-string": $queryString,
-        "frus-query-string": $frusQueryString,
         (: the date clause on its own, for the vector leg's filter-query :)
         "date-query": $dateQuery
     }
@@ -190,7 +190,7 @@ declare %private function srch:query-sections($queryConfig as map(*)) as element
         collection("/db/apps/other-publications")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/conferences")//tei:div[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/hac")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection($srch:FRUS_COL)//tei:div[ft:query(., $queryConfig?("frus-query-string"), $frusQueryOptions)],
+        collection($srch:FRUS_COL)//tei:div[ft:query(., $queryString, $frusQueryOptions)],
         collection("/db/apps/frus-history/articles")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/frus-history/documents")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/frus-history/monograph")//tei:div[ft:query(., $queryString, $queryOptions)],

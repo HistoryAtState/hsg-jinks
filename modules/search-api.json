@@ -75,7 +75,7 @@
                     {
                         "name": "stem",
                         "in": "query",
-                        "description": "Match word forms. yes searches FRUS's stemmed hsg-fulltext-stemmed field (English, Porter), together with the exact field so wildcard terms keep working; other collections are searched exactly until they gain the field. Absent or any other value matches words exactly, the default.",
+                        "description": "Match word forms. yes searches the stemmed hsg-fulltext-stemmed field (English, Porter) that every data package defines beside hsg-fulltext, together with the exact field so wildcard terms keep working. Absent or any other value matches words exactly, the default.",
                         "required": false,
                         "schema": {
                             "type": "string",
