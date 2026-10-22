@@ -824,8 +824,37 @@ declare %private function srch:text-row($hit as element(), $match as map(*), $wi
     if ($match?keyword) then
         let $snippets := ft:highlight-field-matches($hit, "hsg-fulltext")[1] ! srch:snippets(., $width)
         return if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else ()
+    else (
+        (: test/semantic-chunks: the hit's best chunk of the chunked field, next
+           to the opening, to compare them :)
+        srch:best-chunk($hit, $match?("query-vector")) ! srch:meta-row("Semantic Match (best passage)", .),
+        srch:opening($hit) ! srch:meta-row("Semantic Match (opening)", .)
+    )
+};
+
+(:~
+ : The passage of a semantic hit nearest the query: its best chunk in the
+ : chunked field hsg-passages (eXist test/hsg-vector-chunks), from a vector
+ : query on the hit's own document, read with ft:vector-chunks. A FRUS hit
+ : is its division file's tei:TEI, whose document node is its parent, the
+ : context ft:query-field-vector needs.
+ :)
+declare %private function srch:best-chunk($hit as element(), $vec as array(*)?) as element(span)? {
+    if (empty($vec) or not($hit instance of element(tei:TEI))) then
+        ()
     else
-        srch:opening($hit) ! srch:meta-row("Semantic Match", .)
+        try {
+            let $found := root($hit)/ft:query-field-vector("hsg-passages", $vec, 1)
+            let $chunk := ($found ! ft:vector-chunks(.))[1]
+            return
+                normalize-space($chunk?text)[. ne ""] !
+                    <span class="hsg-snippet hsg-snippet--opening">{
+                        "… " || . || " …",
+                        <span class="hsg-chunk-meta"> (chunk {$chunk?chunk}, similarity {format-number($chunk?score, "0.000")})</span>
+                    }</span>
+        } catch * {
+            <span class="hsg-snippet">best passage: {$err:description}</span>
+        }
 };
 
 (:~
@@ -909,8 +938,11 @@ declare function srch:results-list($context as map(*)) as element(ul) {
     return
         <ul class="usa-collection hsg-results">
         {
+            (: test/semantic-chunks: the query's vector, once per page, for the
+               semantic hits' best passages :)
+            let $qvec := if ($r?mode eq "hybrid" and exists($r?q)) then try { vector:embed($r?q, $srch:EMBED_MODEL) } catch * { () } else ()
             for $hit in $r?hits
-            let $rendered := srch:render-hit($hit, srch:hit-match($hit, $r?semantic, $r?mode eq "hybrid"))
+            let $rendered := srch:render-hit($hit, map:merge((srch:hit-match($hit, $r?semantic, $r?mode eq "hybrid"), map { "query-vector": $qvec })))
             return
                 <li class="usa-collection__item">
                     <div class="usa-collection__body">

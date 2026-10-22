@@ -2257,3 +2257,9 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
         break-after: avoid;
     }
 }
+
+/* test/semantic-chunks: which chunk a best passage is, and its similarity */
+.hsg-chunk-meta {
+    color: var(--uswds-color-base-dark);
+    font-size: 0.85em;
+}
