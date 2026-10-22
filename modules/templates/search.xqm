@@ -189,7 +189,11 @@ declare %private function srch:query-sections($queryConfig as map(*)) as element
         collection("/db/apps/other-publications")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/conferences")//tei:div[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/hac")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection($srch:FRUS_COL)//tei:div[ft:query(., $queryString, $frusQueryOptions)],
+        (: FRUS is indexed at each division file's tei:TEI (hsg-jinks-data
+           feat/tei-level-fulltext-index): a hit stands for the file's one
+           division, with its footnotes. A file without a division (a
+           volume's root file) is left out. :)
+        collection($srch:FRUS_COL)//tei:TEI[ft:query(., $queryString, $frusQueryOptions)][tei:text//tei:div],
         collection("/db/apps/frus-history/articles")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/frus-history/documents")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/frus-history/monograph")//tei:div[ft:query(., $queryString, $queryOptions)],
@@ -293,7 +297,7 @@ declare %private function srch:vector-neighbors($queryConf as map(*), $vec as ar
                 try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/conferences")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/hac")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection($srch:FRUS_COL)//tei:TEI[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)][tei:text//tei:div]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/frus-history/articles")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/frus-history/documents")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/frus-history/monograph")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
@@ -319,6 +323,13 @@ declare variable $srch:LIKE_ROOTS as xs:string+ := (
     "frus-data-jinks", "other-publications", "conferences", "hac", "frus-history", "rdcr", "wwdai", "milestones"
 );
 
+(:~ The division a hit stands for: a FRUS hit is its division file's
+ : tei:TEI, whose one division holds the title, dates and text shown;
+ : any other hit is its own division or body. :)
+declare function srch:hit-division($hit as element()) as element() {
+    if ($hit instance of element(tei:TEI)) then ($hit/tei:text//tei:div)[1] else $hit
+};
+
 (:~
  : The hit a "similar to" search starts from. $like names it as the file's
  : path below /db/apps and, for a division, its @xml:id after "#", the form
@@ -338,14 +349,17 @@ declare %private function srch:like-seed($like as xs:string?) as element()? {
             let $uri := "/db/apps/" || $path
             let $doc := if (doc-available($uri)) then doc($uri) else ()
             return
-                if ($id ne "") then $doc//tei:div[@xml:id = $id][1]
+                if ($id ne "") then
+                    (: FRUS indexes the division's file, at its tei:TEI :)
+                    $doc//tei:div[@xml:id = $id][1] ! (if (starts-with($path, "frus-data-jinks/")) then root(.)/tei:TEI else .)
                 else ($doc//tei:body)[1]
 };
 
-(:~ The srch:like-seed reference of a tei:div or tei:body hit. :)
+(:~ The srch:like-seed reference of a tei:div, tei:body or FRUS tei:TEI hit;
+ : a FRUS hit is named by its division, as before. :)
 declare function srch:like-ref($hit as element()) as xs:string {
     substring-after(document-uri(root($hit)), "/db/apps/")
-    || ($hit[self::tei:div]/@xml:id ! ("#" || .))
+    || (srch:hit-division($hit)[self::tei:div]/@xml:id ! ("#" || .))
 };
 
 (:~
@@ -357,7 +371,8 @@ declare function srch:like-ref($hit as element()) as xs:string {
  : only the first 128 tokens, so only the opening is passed.
  :)
 declare %private function srch:like-vector($hit as element()) as array(*)? {
-    try { vector:embed(substring(string($hit), 1, 4000), $srch:EMBED_MODEL) } catch * { () }
+    (: a FRUS hit's vector field embeds its division, not the header :)
+    try { vector:embed(substring(string(srch:hit-division($hit)), 1, 4000), $srch:EMBED_MODEL) } catch * { () }
 };
 
 (:~
@@ -689,7 +704,10 @@ declare %private function srch:meta-list($rows as element()*) as element(dl)? {
  : offer one (OP#1432, a business decision; the reference site didn't show
  : it either).
  :)
-declare %private function srch:frus-card($doc as element(tei:div), $match as map(*)) as map(*) {
+declare %private function srch:frus-card($hit as element(), $match as map(*)) as map(*) {
+    (: the rows come from the division; matches and score belong to the hit,
+       a division file's tei:TEI whose text is the division's and its footnotes :)
+    let $doc := srch:hit-division($hit)
     let $docId := $doc/@xml:id
     let $volId := root($doc)/tei:TEI/@xml:id
     (: the division subtype is a teiHeader bibl in this data model, not an
@@ -711,8 +729,8 @@ declare %private function srch:frus-card($doc as element(tei:div), $match as map
             ) else (),
             srch:meta-row("Resource ID", $volId/string() || "/" || $docId/string()),
             srch:found-by-row($match),
-            srch:text-row($doc, $match, 40),
-            if ($match?keyword) then ft:score($doc)[boolean(.)] !srch:meta-row("Keyword Relevance", .) else (),
+            srch:text-row($hit, $match, 40),
+            if ($match?keyword) then ft:score($hit)[boolean(.)] !srch:meta-row("Keyword Relevance", .) else (),
             srch:similarity-row($match)
         ))
     }
@@ -741,6 +759,8 @@ declare %private function srch:render-hit($hit as element(), $match as map(*)) a
                     srch:found-by-row($match),
                     if ($match?keyword) then srch:meta-row("Matching Trips", srch:matching-trips($hit)) else ()
                 ))
+            case element(tei:TEI) return
+                map:merge((map { "title": srch:frus-title(srch:hit-division($hit)), "href": $href }, srch:frus-card($hit, $match)))
             case element(tei:div) return
                 if (ft:field($hit, "hsg-publication") = "frus" or starts-with(base-uri($hit), $srch:FRUS_COL)) then
                     map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit, $match)))
@@ -818,7 +838,7 @@ declare %private function srch:text-row($hit as element(), $match as map(*), $wi
  :)
 declare %private function srch:opening($hit as element()) as element(span)? {
     (: the heading is already the card's title, and notes aren't prose :)
-    let $text := string-join(subsequence($hit//text()[not(ancestor::tei:head or ancestor::tei:note)], 1, 400))
+    let $text := string-join(subsequence(srch:hit-division($hit)//text()[not(ancestor::tei:head or ancestor::tei:note)], 1, 400))
     let $words := tokenize(normalize-space(substring($text, 1, 4000)), " ")
     return
         if (exists($words)) then
@@ -921,7 +941,7 @@ declare function srch:results-list($context as map(*)) as element(ul) {
  : and tei:body hits srch:like-seed accepts.
  :)
 declare %private function srch:similar-link($context as map(*), $r as map(*), $hit as element()) as element(p)? {
-    if ($hit[self::tei:div or self::tei:body] and $srch:LIKE_ROOTS = substring-before(substring-after(document-uri(root($hit)), "/db/apps/"), "/")) then
+    if ($hit[self::tei:div or self::tei:body or self::tei:TEI] and $srch:LIKE_ROOTS = substring-before(substring-after(document-uri(root($hit)), "/db/apps/"), "/")) then
         let $query := string-join((
             "like=" || encode-for-uri(srch:like-ref($hit)),
             $r?within[not(. = ("", "entire-site"))] ! ("within=" || encode-for-uri(.)),
@@ -1359,23 +1379,25 @@ declare %private function srch:similar-documents($publicationId as xs:string, $d
             (: an empty list is cached as an empty array :)
             $cached?*
         else
-            let $seed := collection($srch:FRUS_COL || "/data/frus-v2-data/" || $publicationId)/id($divisionId)[self::tei:div]
-            let $vec := $seed[1] ! srch:like-vector(.)
+            (: FRUS is indexed at the division file's tei:TEI :)
+            let $seed := collection($srch:FRUS_COL || "/data/frus-v2-data/" || $publicationId)/id($divisionId)[self::tei:div][1] ! root(.)/tei:TEI
+            let $vec := $seed ! srch:like-vector(.)
             let $opts := map { "facets": map { "frus-division-type": "document" } }
             let $hits :=
                 if (exists($vec)) then
-                    try { collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:SIMILAR_CANDIDATES, $opts)] } catch * { () }
+                    try { collection($srch:FRUS_COL)//tei:TEI[ft:query-vector(., $vec, $srch:SIMILAR_CANDIDATES, $opts)][tei:text//tei:div] } catch * { () }
                 else
                     ()
             let $list := subsequence(
-                for $hit in $hits[not(. is $seed[1])]
+                for $hit in $hits[not(. is $seed)]
                 let $score := ft:score($hit)
+                let $div := srch:hit-division($hit)
                 order by $score descending
                 return map {
                     "href": string(ft:field($hit, "hsg-url")),
-                    "title": srch:frus-title($hit),
+                    "title": srch:frus-title($div),
                     "volume": srch:volume-label(replace(document-uri(root($hit)), "^.*/frus-v2-data/([^/]+)/.*$", "$1")),
-                    "date": normalize-space(string-join((($hit//tei:dateline[.//tei:date])[1]//tei:date)[1]//text()[not(ancestor::tei:note)])),
+                    "date": normalize-space(string-join((($div//tei:dateline[.//tei:date])[1]//tei:date)[1]//text()[not(ancestor::tei:note)])),
                     "score": $score
                 },
                 1, $srch:SIMILAR_COUNT)
