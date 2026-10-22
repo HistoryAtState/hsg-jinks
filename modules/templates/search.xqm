@@ -533,8 +533,14 @@ declare %private function srch:compare-snippets($doc as element(tei:div), $field
                     (ft:passages($doc, $field, $options), ft:passages($doc, "hsg-fulltext", $options)[empty(ft:passages($doc, $field, $options))])
                 else
                     ft:passages($doc, $field, $options)
+            (: "…" where max-length cut the passage short of its sentence :)
             for $p in $found
-            return <span class="hsg-snippet hsg-snippet--passage">{$p/node()}</span>
+            return
+                <span class="hsg-snippet hsg-snippet--passage">{
+                    if ($p/@trimmed-start = "true") then "… " else (),
+                    $p/node(),
+                    if ($p/@trimmed-end = "true") then " …" else ()
+                }</span>
         } catch * {
             <span class="hsg-snippet">ft:passages: {$err:description}</span>
         }
