@@ -842,7 +842,7 @@ declare %private function srch:opening($hit as element()) as element(span)? {
     let $words := tokenize(normalize-space(substring($text, 1, 4000)), " ")
     return
         if (exists($words)) then
-            <span class="hsg-snippet">{
+            <span class="hsg-snippet hsg-snippet--opening">{
                 string-join(subsequence($words, 1, $srch:OPENING_WORDS), " ")
                 || (if (count($words) gt $srch:OPENING_WORDS) then " ..." else ())
             }</span>

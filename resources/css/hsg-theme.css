@@ -1866,6 +1866,12 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     white-space: nowrap;
 }
 
+/* A semantic-only hit's opening (srch:opening) is the text its embedding
+   was computed from, about 60 words: it wraps, so all of it shows. */
+.hsg-snippet--opening {
+    white-space: normal;
+}
+
 .hsg-result__meta .hi {
     background-color: var(--uswds-color-warning-lighter);
     color: var(--uswds-color-text);
