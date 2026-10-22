@@ -209,7 +209,11 @@ declare %private function srch:query-sections($queryConfig as map(*)) as element
         collection("/db/apps/other-publications")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/conferences")//tei:div[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/hac")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection($srch:FRUS_COL)//tei:div[ft:query(., $queryString, $frusQueryOptions)],
+        (: FRUS is indexed at each division file's tei:TEI (hsg-jinks-data
+           feat/tei-level-fulltext-index): a hit stands for the file's one
+           division, with its footnotes. A file without a division (a
+           volume's root file) is left out. :)
+        collection($srch:FRUS_COL)//tei:TEI[ft:query(., $queryString, $frusQueryOptions)][tei:text//tei:div],
         collection("/db/apps/frus-history/articles")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/frus-history/documents")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/frus-history/monograph")//tei:div[ft:query(., $queryString, $queryOptions)],
@@ -298,7 +302,7 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
                 try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/conferences")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/hac")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits(collection($srch:FRUS_COL)//tei:TEI[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)][tei:text//tei:div]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/frus-history/articles")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/frus-history/documents")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/frus-history/monograph")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
@@ -500,15 +504,18 @@ declare %private function srch:meta-list($rows as element()*) as element(dl)? {
 };
 
 (:~
- : Card content for a FRUS division: the place and date chips and the
- : recorded/encoded date rows (historical documents only), the resource id,
- : and the keyword snippets and score. No facsimile link: search results
- : don't offer one (OP#1432, a business decision; the reference site didn't
- : show it either).
+ : Card content for a FRUS hit, a division file's tei:TEI: the place and
+ : date chips and the recorded/encoded date rows (historical documents
+ : only), the resource id, and the keyword snippets and score. The rows come
+ : from the file's division; the matches, snippets and score belong to the
+ : hit itself, whose text is the division's followed by its footnotes. No
+ : facsimile link: search results don't offer one (OP#1432, a business
+ : decision; the reference site didn't show it either).
  :)
-declare %private function srch:frus-card($doc as element(tei:div), $match as map(*)) as map(*) {
+declare %private function srch:frus-card($hit as element(tei:TEI), $match as map(*)) as map(*) {
+    let $doc := ($hit/tei:text//tei:div)[1]
     let $docId := $doc/@xml:id
-    let $volId := root($doc)/tei:TEI/@xml:id
+    let $volId := $hit/@xml:id
     (: the division subtype is a teiHeader bibl in this data model, not an
        attribute on the div (see ext:get-division-subtype), so the rows and
        chips reserved for historical documents key off that :)
@@ -524,14 +531,14 @@ declare %private function srch:frus-card($doc as element(tei:div), $match as map
     let $field := srch:match-field($match)
     let $highlighted :=
         if ($field eq $srch:STEMMED_FIELD) then
-            (ft:highlight-field-matches($doc, $field)[.//exist:match], ft:highlight-field-matches($doc, "hsg-fulltext"))[1]
+            (ft:highlight-field-matches($hit, $field)[.//exist:match], ft:highlight-field-matches($hit, "hsg-fulltext"))[1]
         else
-            ft:highlight-field-matches($doc, $field)
+            ft:highlight-field-matches($hit, $field)
     let $snippets := srch:snippets(
-        for $hit in subsequence($highlighted//exist:match, 1, 5)
-        return kwic:get-summary($highlighted, $hit, <config width="40"/>)
+        for $m in subsequence($highlighted//exist:match, 1, 5)
+        return kwic:get-summary($highlighted, $m, <config width="40"/>)
     )
-    let $score := ft:score($doc)
+    let $score := ft:score($hit)
     return map {
         "tags": if ($historical) then ($placeNameString, $dateString)[. ne ""] else (),
         "summary": srch:meta-list((
@@ -568,9 +575,12 @@ declare %private function srch:render-hit($hit as element(), $match as map(*)) a
                 let $expanded := util:expand($hit)
                 let $count := count($expanded//exist:match/ancestor::trip)
                 return $card("Travels: " || string-join($hit/trip[1]/name, ", "), srch:meta-row("Matching Trips", $count))
+            case element(tei:TEI) return
+                (: FRUS: the hit is the division file, its title the division's :)
+                map:merge((map { "title": srch:frus-title(($hit/tei:text//tei:div)[1]), "href": $href }, srch:frus-card($hit, $match)))
             case element(tei:div) return
                 if (ft:field($hit, "hsg-publication") = "frus" or starts-with(base-uri($hit), $srch:FRUS_COL)) then
-                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit, $match)))
+                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card(root($hit)/tei:TEI, $match)))
                 else
                     $card(
                         normalize-space(string-join(($hit/tei:head)[1]//text()[not(./ancestor::tei:note)])),
