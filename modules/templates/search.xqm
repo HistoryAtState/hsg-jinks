@@ -202,8 +202,12 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
 declare %private function srch:query-sections($queryConfig as map(*)) as element()* {
     let $queryString := $queryConfig?query-string
     let $queryOptions := map:merge(($srch:ft-query-options, $queryConfig?fields, $queryConfig?facets))
-    (: frus omits ?fields, same limitation-driven exception hsg-shell carried for large result sets :)
-    let $frusQueryOptions := map:merge(($srch:ft-query-options, $queryConfig?facets))
+    (: frus omits ?fields, same limitation-driven exception hsg-shell carried
+       for large result sets. Its results are the divisions with text of
+       their own (frus-search-role "text"); title-only chapters, subchapters
+       and compilations are rolled up by their titles (srch:title-rollups). :)
+    let $frusQueryOptions := map:merge(($srch:ft-query-options,
+        map { "facets": map:merge(($queryConfig?facets?facets, map { "frus-search-role": "text" })) }))
     return (
         collection("/db/apps/other-publications")//tei:div[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/other-publications")//tei:body[ft:query(., $queryString, $queryOptions)],
@@ -211,9 +215,9 @@ declare %private function srch:query-sections($queryConfig as map(*)) as element
         collection("/db/apps/hac")//tei:div[ft:query(., $queryString, $queryOptions)],
         (: FRUS is indexed at each division file's tei:TEI (hsg-jinks-data
            feat/tei-level-fulltext-index): a hit stands for the file's one
-           division, with its footnotes. A file without a division (a
-           volume's root file) is left out. :)
-        collection($srch:FRUS_COL)//tei:TEI[ft:query(., $queryString, $frusQueryOptions)][tei:text//tei:div],
+           division, with its footnotes. Files without a division have no
+           search role, so the role facet leaves them out. :)
+        collection($srch:FRUS_COL)//tei:TEI[ft:query(., $queryString, $frusQueryOptions)],
         collection("/db/apps/frus-history/articles")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/frus-history/documents")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/frus-history/monograph")//tei:div[ft:query(., $queryString, $queryOptions)],
@@ -438,8 +442,9 @@ declare %private function srch:results($context as map(*)) as map(*) {
             (: how long the query itself took, kept with the cached entry so
                a cached page 2 still reports the real cost of the search :)
             let $took := seconds-from-duration(util:system-dateTime() - $started)
+            let $rollups := try { srch:title-rollups($p, $queryConf) } catch * { map {} }
             let $entry := map {
-                "id": $queryId, "hits": $sorted, "results-vol-ids": $volIds, "took": $took,
+                "id": $queryId, "hits": $sorted, "results-vol-ids": $volIds, "took": $took, "rollups": $rollups,
                 "range-start": $range?start, "range-end": $range?end, "created": current-dateTime()
             }
             let $store := cache:put($cacheName, $cacheKey, map { "created": $cache?created, "purged": $cache?purged, "queries": map:put($cache?queries, $queryId, $entry) })
@@ -456,10 +461,106 @@ declare %private function srch:results($context as map(*)) as map(*) {
             "end": $p?start + count($window) - 1,
             "results-vol-ids": $results?results-vol-ids,
             "took": $results?took,
+            "rollups": $results?rollups,
             "range-start": $results?("range-start"),
             "range-end": $results?("range-end")
         }
     ))
+};
+
+(: ============== title rollups ============== :)
+
+(:~
+ : The FRUS titles a keyword matches, rolled up above the results instead of
+ : listed among them: volumes whose own title matches ("The Far East,
+ : China"), and title-only chapters, subchapters and compilations whose
+ : heading matches, grouped by volume. Only when the search covers Historical
+ : Documents. Volumes are left out when the search is narrowed to volumes;
+ : chapters follow the search's volumes and dates. The title fields have the
+ : default analyzer, so the match options don't change them. Strings only,
+ : so the search cache holds no nodes for them.
+ :)
+declare %private function srch:title-rollups($p as map(*), $queryConf as map(*)) as map(*) {
+    if (empty($p?q) or not($p?within = ("entire-site", "documents"))) then
+        map {}
+    else
+        let $escaped := srch:escape-unsupported-characters($p?q)
+        let $volumes :=
+            if (exists($p?("volume-id"))) then ()
+            else
+                for $tei in collection($srch:FRUS_COL)//tei:TEI[ft:query(., "hsg-volume-title:(" || $escaped || ")", $srch:ft-query-options)]
+                (: the title is in each volume's <id>_includes file :)
+                let $id := substring-before($tei/@xml:id, "_includes")
+                where $id ne ""
+                order by $id
+                return map { "id": $id, "title": (hsg:publication-title($id)[. ne ""], $id)[1], "href": "/historicaldocuments/" || $id }
+        let $facets := map:merge((
+            map { "frus-search-role": "title" },
+            if (exists($p?("volume-id"))) then map { "frus-volume-id": $p?("volume-id") } else ()
+        ))
+        let $query := string-join(("hsg-division-title:(" || $escaped || ")", $queryConf?("date-query")), " AND ")
+        let $chapters :=
+            for $tei in collection($srch:FRUS_COL)//tei:TEI[ft:query(., $query, map:merge(($srch:ft-query-options, map { "facets": $facets })))]
+            let $href := string(ft:field($tei, "hsg-url"))
+            let $div := ($tei/tei:text//tei:div)[1]
+            return map {
+                "volume": tokenize($href, "/")[3],
+                "title": normalize-space(string-join($div/tei:head//text()[not(ancestor::tei:note)])),
+                "href": $href
+            }
+        return map { "volumes": array { $volumes }, "chapters": array { $chapters } }
+};
+
+(:~
+ : The rollup rows above the results, on their first page: "10 volumes with
+ : "china" in the title" and "14 chapter titles with "law of the sea"", each
+ : a disclosure listing them, the chapters grouped by volume.
+ :)
+declare function srch:title-rollups($context as map(*)) as element(div)? {
+    let $r := srch:results($context)
+    let $volumes := $r?rollups?volumes?*
+    let $chapters := $r?rollups?chapters?*
+    let $q := "&#8220;" || $r?q || "&#8221;"
+    let $plural := function($n, $one, $many) { $n || " " || (if ($n eq 1) then $one else $many) }
+    return
+        if ($r?start gt 1 or empty(($volumes, $chapters))) then
+            ()
+        else
+            <div class="hsg-rollups">
+            {
+                if (exists($volumes)) then
+                    <details class="hsg-rollup">
+                        <summary class="hsg-rollup__summary">{$plural(count($volumes), "volume", "volumes")} with {$q} in the title</summary>
+                        <ul class="usa-list usa-list--unstyled hsg-rollup__list">
+                        {
+                            for $v in $volumes
+                            return <li><a href="{$context?context-path}{$v?href}">{$v?title}</a></li>
+                        }
+                        </ul>
+                    </details>
+                else (),
+                if (exists($chapters)) then
+                    <details class="hsg-rollup">
+                        <summary class="hsg-rollup__summary">{$plural(count($chapters), "chapter title", "chapter titles")} with {$q}</summary>
+                        {
+                            for $c in $chapters
+                            group by $vol := $c?volume
+                            order by $vol
+                            return
+                                <div class="hsg-rollup__group">
+                                    <p class="hsg-rollup__volume">{(hsg:publication-title($vol)[. ne ""], $vol)[1]}</p>
+                                    <ul class="usa-list usa-list--unstyled hsg-rollup__list">
+                                    {
+                                        for $one in $c
+                                        return <li><a href="{$context?context-path}{$one?href}">{$one?title}</a></li>
+                                    }
+                                    </ul>
+                                </div>
+                        }
+                    </details>
+                else ()
+            }
+            </div>
 };
 
 (: ============== per-type result rendering registry ============== :)

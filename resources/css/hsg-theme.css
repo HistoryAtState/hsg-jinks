@@ -2247,3 +2247,40 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
         break-after: avoid;
     }
 }
+
+/* Title rollups above the search results (srch:title-rollups): volumes and
+   title-only chapters whose titles match, each one disclosure, so they don't
+   crowd the results. */
+.hsg-rollups {
+    display: grid;
+    gap: var(--uswds-space-1);
+    margin-top: var(--uswds-space-2);
+}
+
+.hsg-rollup {
+    border: 1px solid var(--uswds-color-base-lighter);
+    border-radius: 4px;
+    padding: var(--uswds-space-1) var(--uswds-space-2);
+}
+
+.hsg-rollup__summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--uswds-color-primary);
+}
+
+.hsg-rollup__group {
+    margin-top: var(--uswds-space-1);
+}
+
+.hsg-rollup__volume {
+    margin: 0;
+    font-weight: 600;
+    color: var(--uswds-color-base-dark);
+}
+
+.hsg-rollup__list {
+    margin: var(--uswds-space-05) 0 0;
+    display: grid;
+    gap: var(--uswds-space-05);
+}
