@@ -833,28 +833,24 @@ declare %private function srch:text-row($hit as element(), $match as map(*), $wi
 };
 
 (:~
- : The passage of a semantic hit nearest the query: its best chunk in the
- : chunked field hsg-passages (eXist test/hsg-vector-chunks), from a vector
- : query on the hit's own document, read with ft:vector-chunks. A FRUS hit
- : is its division file's tei:TEI, whose document node is its parent, the
- : context ft:query-field-vector needs.
+ : The passage of a semantic hit nearest the query: the chunk of the chunked
+ : field hsg-passages (eXist test/hsg-vector-chunks) that matched, read with
+ : ft:vector-chunks. hsg-passages is FRUS's first vector field, so the
+ : hybrid search's vector query ranks by it, and a hit it found carries its
+ : best chunk. $vec is unused, kept for the call site.
  :)
 declare %private function srch:best-chunk($hit as element(), $vec as array(*)?) as element(span)? {
-    if (empty($vec) or not($hit instance of element(tei:TEI))) then
-        ()
-    else
-        try {
-            let $found := root($hit)/ft:query-field-vector("hsg-passages", $vec, 1)
-            let $chunk := ($found ! ft:vector-chunks(.))[1]
-            return
-                normalize-space($chunk?text)[. ne ""] !
-                    <span class="hsg-snippet hsg-snippet--opening">{
-                        "… " || . || " …",
-                        <span class="hsg-chunk-meta"> (chunk {$chunk?chunk}, similarity {format-number($chunk?score, "0.000")})</span>
-                    }</span>
-        } catch * {
-            <span class="hsg-snippet">best passage: {$err:description}</span>
-        }
+    try {
+        let $chunk := ft:vector-chunks($hit)[1]
+        return
+            normalize-space($chunk?text)[. ne ""] !
+                <span class="hsg-snippet hsg-snippet--opening">{
+                    "… " || . || " …",
+                    <span class="hsg-chunk-meta"> (chunk {$chunk?chunk}, similarity {format-number($chunk?score, "0.000")})</span>
+                }</span>
+    } catch * {
+        <span class="hsg-snippet">best passage: {$err:description}</span>
+    }
 };
 
 (:~
