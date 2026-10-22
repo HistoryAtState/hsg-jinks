@@ -1893,6 +1893,13 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     white-space: nowrap;
 }
 
+/* An ft:passages passage is a whole sentence, of any length, with its match
+   anywhere in it, so it wraps: held to one line, a long sentence's match
+   could fall past the ellipsis. */
+.hsg-snippet--passage {
+    white-space: normal;
+}
+
 .hsg-result__meta .hi {
     background-color: var(--uswds-color-warning-lighter);
     color: var(--uswds-color-text);
