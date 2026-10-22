@@ -51,8 +51,8 @@ worktrees" below), shared across every `hsg-jinks` worktree no matter where
 - **Reference work packages as `OP#<id>`** in PR titles and descriptions —
   that is the token OpenProject's GitHub integration scans for, and how a PR
   gets linked to its work package. A bare `#1217` means nothing to it (GitHub
-  reads that as an issue in *this* repo), and a work package URL
-  is a link for humans, not a reference. Example title:
+  reads that as an issue in *this* repo), and a work package URL is a link
+  for humans, not a reference. Example title:
 
   ```
   fix: content band on sidebar pages respects the page width (OP#1217)
@@ -144,7 +144,7 @@ shared `~/.config/hsg/` — never in tracked files:
 | `.devcontainer/.env` | `HSG_HTTP_PORT`, `HSG_HTTPS_PORT`, `COMPOSE_PROJECT_NAME` (see `env.template`) |
 | `~/.config/hsg/worktree-ports.tsv` | slug → port registry |
 | `~/.config/hsg/xars/` | frozen baseline profile xar ("USWDS profile baseline" below) |
-| `~/.config/hsg/secrets.env` | `OP_TOKEN` — `source` it before OpenProject curl calls; the token never appears in a repo or a command line |
+| `~/.config/hsg/secrets.env` | `OP_TOKEN` and `OP_BASE_URL` (the OpenProject instance) — `source` it before OpenProject curl calls; the token never appears in a repo or a command line |
 
 Port rules (unchanged in spirit from the old "Remapping ports" section):
 

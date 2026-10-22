@@ -1,11 +1,8 @@
 // Covers OP#1184 "Search the whole site by keyword and refine the results"
 // and OP#1185 "Filter FRUS documents by date via a (legacy) deep link" --
 // the two acceptance-criteria user stories under epic OP#1102 (Render HSG
-// search). Verified against this worktree's own devcontainer, whose data
-// packages were freshly installed for this epic (see
-// doc/epic-1102-search-plan.md) rather than the frozen baseline other
-// worktrees currently run -- counts use the "at least" pattern per
-// CLAUDE.md regardless, since these packages are append-only upstream.
+// search). Counts use the "at least" pattern per CLAUDE.md, since the data
+// packages are append-only upstream.
 //
 // baseUrl is http://localhost:8080/exist/apps/hsg-jinks (cypress.config.cjs).
 // Override for a remapped host port, e.g.
@@ -152,8 +149,7 @@ describe("legacy FRUS date deep link (OP#1185)", () => {
         // Uses dobrynin/June 1985 (this worktree's one-volume sample data,
         // frus1981-88v05) rather than hsg-shell's own doc-example (Cuba,
         // October 1962) -- the full multi-volume FRUS corpus that example
-        // was written against isn't installed here (see
-        // doc/epic-1102-search-plan.md's frus-data-jinks discussion); the
+        // was written against isn't installed here; the
         // legacy-parameter-combination dispatch behavior under test is
         // identical either way.
         cy.visit("search?q=dobrynin&within=documents&start-date=1985-06-12&end-date=1985-06-12&sort-by=date-asc");
@@ -595,7 +591,7 @@ describe("search landing page layout and shared sidebar (OP#1436)", () => {
 });
 
 // Hybrid mode: Lucene + eXist vector KNN (FRUS pilot). Default remains
-// keyword; mode=hybrid is opt-in. See .cursor/plans/semantic-search-mvp.md.
+// keyword; mode=hybrid is opt-in.
 describe("hybrid search mode (semantic MVP)", () => {
     it("landing form offers hybrid mode as one checkbox, unticked by default (OP#1473)", () => {
         cy.visit("search");
@@ -646,7 +642,6 @@ describe("hybrid search mode (semantic MVP)", () => {
         cy.contains("h2", "Hybrid mode").should("exist");
     });
 
-    // pq-01 from doc/semantic_search/semantic-search-paraphrase-eval.md.
     // A swallowed vector leg, or relevance re-sorted by raw ft:score, makes
     // hybrid return the keyword sequence. Exact ranks stay unpinned because
     // FRUS volumes are added over time.

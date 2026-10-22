@@ -161,7 +161,7 @@ So the USWDS xar is built from the local checkout and `COPY`d in from the build
 context. Refresh it with:
 
 ```sh
-cd ~/customers/eeditiones/profile-theme-uswds && ant
+cd <profile-theme-uswds checkout> && ant
 cp build/profile-theme-uswds-*.xar <this repo>/.devcontainer/
 ```
 
@@ -362,9 +362,6 @@ the volume title.
 
 ## Tooling notes
 
-- `xst` was broken under nodejs 24.10.0: the npm global link `@existdb/xst`
-  pointed at `~/projects/existdb/xst`, which is now a **git worktree
-  container** (`main`, `119`, `224`, …). Repointed the symlink to `.../xst/main`.
 - `xst run -f query.xq` — a bare argument is treated as a query *string*, not a
   path. Serialize maps explicitly (`map{"method":"json"}`) or you get no output.
 
