@@ -525,7 +525,8 @@ declare %private function srch:compare-snippets($doc as element(tei:div), $field
     let $passages :=
         try {
             let $options := map {
-                "max": 2, "order": "document", "length": 200, "max-length": 200,
+                (: five, like kwic and the walker, for a fair comparison :)
+                "max": 5, "order": "document", "length": 200, "max-length": 200,
                 "highlight": function($text) { <span class="hi">{$text}</span> }
             }
             let $found :=
