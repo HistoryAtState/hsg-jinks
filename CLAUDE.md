@@ -31,8 +31,9 @@ applies: keep `hsg-shell` intact for comparison, port logic into this repo's
 custom extension points (`modules/`, `api`, `styles`, `templating.modules` in
 `config.json`) rather than overwriting Jinks-managed files.
 
-See `doc/` for in-progress migration/feature planning notes
-(`epic-518-rendering-plan.md`, `uswds-profile-integration.md`).
+`doc/` holds standing articles: `templating.md` (template rules), `OPS.md`
+(operations), `uswds-profile-integration.md` (how the USWDS theme profile is
+wired in).
 
 ## Parallel worktrees & the read-only mirror
 

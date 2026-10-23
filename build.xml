@@ -76,6 +76,9 @@
                 <exclude name=".tool-versions"/>
                 <exclude name="Dockerfile"/>
                 <exclude name="CLAUDE.md"/>
+                <exclude name=".xstrc"/>
+                <exclude name="doc/**"/>
+                <exclude name="tools/**"/>
                 <!-- reference-only copies of the canonical FRUS TEI artifacts
                      (tools/sync-frus-guidelines.sh); no runtime role. The one
                      artifact the app does compile is resources/odd/frus.odd. -->

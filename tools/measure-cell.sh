@@ -1,16 +1,19 @@
 #!/usr/bin/env bash
-# Measure one hybrid-search vector cell on FRUS sample (8091).
-# Usage: measure-cell.sh <model> <dimension> <vector-store>
+# Measure one hybrid-search vector cell (model, dimension, vector store)
+# against this worktree's own container: reindex frus-data-jinks, time five
+# paraphrase queries, append the cell to $RESULTS.
+# Usage: tools/measure-cell.sh <model> <dimension> <vector-store>
+# Needs the frus-data-jinks collection.xconf at $XCONF_SRC.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 MODEL="${1:?model}"
 DIM="${2:?dim}"
 STORE="${3:?store}"  # db|lucene
-C=hsg-jinks--feat-semantic-search-mvp-existdb-1
-XCONF_SRC=/tmp/frus-collection.xconf.xml
+SERVER="$(grep -E '^EXISTDB_SERVER=' .env | cut -d= -f2-)"
+XCONF_SRC="${XCONF_SRC:-/tmp/frus-collection.xconf.xml}"
 XCONF_CELL=/tmp/frus-collection.xconf.cell.xml
-RESULTS="$ROOT/doc/semantic_search/semantic-search-workload-results.json"
+RESULTS="${RESULTS:-$ROOT/build/semantic-search-workload-results.json}"
 
 python3 - <<PY
 from pathlib import Path
@@ -49,7 +52,7 @@ MODEL="$MODEL" python3 - <<'PY'
 from pathlib import Path
 import os, re
 model = os.environ["MODEL"]
-p = Path("~/Documents/Jinntec/History_at_State/feat-semantic-search-mvp/modules/templates/search.xqm")
+p = Path("modules/templates/search.xqm")
 text = p.read_text()
 text2, n = re.subn(
     r'(declare variable \$srch:EMBED_MODEL as xs:string := ")[^"]*(";)',
@@ -67,7 +70,7 @@ xst --config .xstrc upload "$CELL_XQ" /db/apps/hsg-jinks/modules/templates/
 t0=$(date +%s)
 code=$(curl -sS -u 'admin:' --max-time 3600 -o /tmp/reindex-out.xml -w '%{http_code}' \
   -G --data-urlencode '_query=xquery version "3.1"; xmldb:reindex("/db/apps/frus-data-jinks", "all")' \
-  'http://127.0.0.1:8091/exist/rest/db')
+  "$SERVER/rest/db")
 t1=$(date +%s)
 REINDEX_S=$((t1 - t0))
 echo "reindex_http=$code reindex_s=$REINDEX_S"
@@ -78,7 +81,7 @@ fi
 
 # vector.dbx size (still present under store=lucene; note in report)
 VDBX=0
-if VDBX=$(docker exec "$C" wc -c /exist/data/vector.dbx 2>/dev/null | awk '{print $1}'); then
+if VDBX=$(docker compose -f .devcontainer/docker-compose.yml exec -T existdb wc -c /exist/data/vector.dbx 2>/dev/null | awk '{print $1}'); then
   :
 else
   VDBX=0
@@ -87,12 +90,17 @@ VDBX=${VDBX:-0}
 echo "vector_dbx_bytes=$VDBX"
 
 # Smoke 5 paraphrase queries (keyword + hybrid latency)
-python3 - <<'PY'
-import json, re, time, urllib.parse, urllib.request
+SERVER="$SERVER" python3 - <<'PY'
+import json, os, time, urllib.parse, urllib.request
 from pathlib import Path
-text = Path("doc/semantic_search/semantic-search-paraphrase-eval.md").read_text()
-qs = re.findall(r"\*\*Query:\*\* `([^`]+)`", text)[:5]
-base = "http://127.0.0.1:8091/exist/apps/hsg-jinks/search"
+qs = [
+    "meeting between Reagan and Gorbachev in Iceland",
+    "missile defense research program nicknamed Star Wars",
+    "reducing medium-range nuclear weapons in Europe",
+    "Soviet withdrawal from the war in Afghanistan",
+    "discussions of human rights with Moscow",
+]
+base = os.environ["SERVER"] + "/apps/hsg-jinks/search"
 rows = []
 for q in qs:
     for mode in ("keyword", "hybrid"):
@@ -113,7 +121,8 @@ python3 - <<PY
 import json
 from pathlib import Path
 p = Path("$RESULTS")
-data = json.loads(p.read_text())
+p.parent.mkdir(parents=True, exist_ok=True)
+data = json.loads(p.read_text()) if p.exists() else {}
 cell = {
   "model": "$MODEL",
   "dimension": int("$DIM"),

@@ -8,7 +8,7 @@ xquery version "3.1";
  : -- jinks templates call these directly as [[ srch:whatever($context) ]]).
  :
  : FRUS is queried from /db/apps/frus-data-jinks (this app's own, currently
- : one-volume, frozen data baseline -- see doc/epic-1102-search-plan.md §3),
+ : one-volume, frozen data baseline),
  : NOT hsg-shell's full /db/apps/frus/volumes: hsg-jinks's own
  : historicaldocuments routes only ever render frus-data-jinks, so a FRUS hit
  : must point somewhere this app can actually serve. When the real multi-volume
@@ -17,16 +17,14 @@ xquery version "3.1";
  : is a single named constant, not repeated per query site.
  :
  : Known, deliberate simplifications versus hsg-shell (documented rather than
- : silently dropped, matching this repo's established practice -- see
- : doc/epic-1096-departmenthistory-plan.md for the same pattern):
+ : silently dropped):
  :  - tei:div hit TITLES use the division's own head text only, not hsg-shell's
  :    richer "Section Heading (Document Heading)" built from $config:PUBLICATIONS
  :    -- that per-publication select-section/select-document map has no
- :    equivalent in hsg-jinks yet (each section owns its own narrow slice, see
- :    doc/epic-1102-search-plan.md §3's finding on hsg-url).
+ :    equivalent in hsg-jinks yet (each section owns its own narrow slice).
  :  - tei:div/tei:body hit HREFs trust the already-indexed hsg-url Lucene
  :    field directly (confirmed live to already target the current hsg-jinks
- :    URL scheme for every non-FRUS section -- see the coordination doc)
+ :    URL scheme for every non-FRUS section)
  :    instead of hsg-shell's per-publication html-href() call.
  :  - KWIC summaries are not first trimmed to N matches before summarizing
  :    (hsg-shell's search:trim-matches/milestone-chunk) -- a heavily-matched
@@ -205,7 +203,7 @@ declare %private function srch:sort($hits as element()*, $sortBy as xs:string) a
             return $hit
 };
 
-(:~ US Eastern, hard-coded -- see doc/epic-1102-search-plan.md / frus-dates.xqm.
+(:~ US Eastern, hard-coded -- see frus-dates.xqm.
  : A time only narrows a full date (YYYY-MM-DD): appended to a year or a
  : year-month it makes an invalid dateTime and the whole date filter was
  : silently dropped, so it is ignored there (OP#1432). :)
@@ -426,11 +424,10 @@ declare %private function srch:results($context as map(*)) as map(*) {
 (:~ Falls back to the division's own @xml:id when there's no tei:head to
  : extract a title from -- happens for front-matter divs (persons/preface/
  : sources) that the current frus-data-jinks index config includes
- : unconditionally alongside real documents (see doc/epic-1102-search-plan.md
- : Phase 4: the collection.xconf "if" attribute needed to restrict indexing to
- : document-type divs only turned out to silently break field storage
- : entirely -- a confirmed eXist limitation, not a logic bug -- so this is
- : handled defensively here instead). :)
+ : unconditionally alongside real documents (the collection.xconf "if"
+ : attribute needed to restrict indexing to document-type divs only silently
+ : breaks field storage entirely -- an eXist limitation, not a logic bug --
+ : so this is handled defensively here instead). :)
 declare %private function srch:frus-title($doc as element(tei:div)) as xs:string {
     let $heading := ($doc//tei:head)[1]
     let $headingString := if ($heading) then normalize-space(string-join($heading//text()[not(./ancestor::tei:note)])) else ()

@@ -17,7 +17,7 @@ the sibling names matter:
 
 ```
 <workspace>
-├── profile-theme-uswds   USWDS theme profile (private, unreleased) — see "USWDS profile baseline"
+├── profile-theme-uswds   USWDS theme profile (private releases) — see "USWDS profile baseline"
 ├── jinks                 the Jinks generator itself (Mode A) — baked into every devcontainer image
 ├── jinks-templates       companion templates library — also baked in
 ├── hsg-jinks-data        FRUS sample data, deployed as frus-data-jinks — see "Data"
@@ -51,8 +51,8 @@ worktrees" below), shared across every `hsg-jinks` worktree no matter where
 - **Reference work packages as `OP#<id>`** in PR titles and descriptions —
   that is the token OpenProject's GitHub integration scans for, and how a PR
   gets linked to its work package. A bare `#1217` means nothing to it (GitHub
-  reads that as an issue in *this* repo), and a work package URL
-  is a link for humans, not a reference. Example title:
+  reads that as an issue in *this* repo), and a work package URL is a link
+  for humans, not a reference. Example title:
 
   ```
   fix: content band on sidebar pages respects the page width (OP#1217)
@@ -144,7 +144,7 @@ shared `~/.config/hsg/` — never in tracked files:
 | `.devcontainer/.env` | `HSG_HTTP_PORT`, `HSG_HTTPS_PORT`, `COMPOSE_PROJECT_NAME` (see `env.template`) |
 | `~/.config/hsg/worktree-ports.tsv` | slug → port registry |
 | `~/.config/hsg/xars/` | frozen baseline profile xar ("USWDS profile baseline" below) |
-| `~/.config/hsg/secrets.env` | `OP_TOKEN` — `source` it before OpenProject curl calls; the token never appears in a repo or a command line |
+| `~/.config/hsg/secrets.env` | `OP_TOKEN` and `OP_BASE_URL` (the OpenProject instance) — `source` it before OpenProject curl calls; the token never appears in a repo or a command line |
 
 Port rules (unchanged in spirit from the old "Remapping ports" section):
 
@@ -230,7 +230,9 @@ anonymous download in `Dockerfile.dev` can reach its releases, and the base
 image doesn't carry it yet (HistoryAtState/hsg-project#64). The container
 build COPYs whatever xar sits in `.devcontainer/` (gitignored). To keep
 parallel worktrees comparable they all use the same **baseline**: the
-theme's **latest release** (v1.9.1 at the time of writing).
+theme's latest release that the app has picked up (`profile-versions` in
+`context.json`). How the theme plugs into Jinks:
+[`doc/uswds-profile-integration.md`](doc/uswds-profile-integration.md).
 
 - The baseline is stored as `~/.config/hsg/xars/profile-theme-uswds-baseline.xar`
   (`profile-theme-uswds-BASELINE.txt` beside it records release, commit and
@@ -456,6 +458,12 @@ by hand.
   stylesheet is generated, not hand-maintained: re-run the script and commit the
   result whenever the vocabulary changes.
   `xst --config .xstrc run -f tools/generate-frus-renditions.xq > resources/css/frus-renditions.css`
+- `tools/measure-cell.sh <model> <dimension> <db|lucene>` — measure one
+  hybrid-search vector configuration in the worktree's own container: reindex
+  frus-data-jinks, time five paraphrase queries in keyword and hybrid mode, and
+  append the result to `build/semantic-search-workload-results.json`. Starts
+  from the collection.xconf at `$XCONF_SRC` (default
+  `/tmp/frus-collection.xconf.xml`).
 - `test/cypress/e2e/gui/breadcrumb.cy.js` — run against the worktree's own
   container: `dotenv -e .env -- npx cypress run --spec …` (Cypress reads
   `CYPRESS_BASE_URL` from the environment, not from `.env` itself).
