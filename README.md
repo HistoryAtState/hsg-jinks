@@ -17,7 +17,7 @@ the sibling names matter:
 
 ```
 <workspace>
-├── profile-theme-uswds   USWDS theme profile (private, unreleased) — see "USWDS profile baseline"
+├── profile-theme-uswds   USWDS theme profile (private releases) — see "USWDS profile baseline"
 ├── jinks                 the Jinks generator itself (Mode A) — baked into every devcontainer image
 ├── jinks-templates       companion templates library — also baked in
 ├── hsg-jinks-data        FRUS sample data, deployed as frus-data-jinks — see "Data"
@@ -230,7 +230,9 @@ anonymous download in `Dockerfile.dev` can reach its releases, and the base
 image doesn't carry it yet (HistoryAtState/hsg-project#64). The container
 build COPYs whatever xar sits in `.devcontainer/` (gitignored). To keep
 parallel worktrees comparable they all use the same **baseline**: the
-theme's **latest release** (v1.9.1 at the time of writing).
+theme's latest release that the app has picked up (`profile-versions` in
+`context.json`). How the theme plugs into Jinks:
+[`doc/uswds-profile-integration.md`](doc/uswds-profile-integration.md).
 
 - The baseline is stored as `~/.config/hsg/xars/profile-theme-uswds-baseline.xar`
   (`profile-theme-uswds-BASELINE.txt` beside it records release, commit and
