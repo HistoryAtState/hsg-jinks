@@ -187,7 +187,8 @@ on port 8080:
 - adds `admin` to the `tei` group (security-manager state; without it a
   later `jinks sync` writes auth errors as file content instead of failing
   loudly)
-- builds the app xar with `ant` and installs it with
+- builds the app xar with `ant` (with `PRODUCTION=true` in the environment,
+  `ant -Dproduction=true`, as CI does) and installs it with
   `xst package install --force`, which replaces any installed hsg-jinks,
   including the one the base image ships. `xst` undeploys and removes the
   old registration first; `repo:install-and-deploy-from-db` on top of a
@@ -197,7 +198,11 @@ on port 8080:
 
 It exports `EXISTDB_SERVER`/`EXISTDB_USER`/`EXISTDB_PASS` itself: exported
 values win over the worktree's `.env`, which holds the host port. CI runs
-the same script on the runner, where 8080 is the published container port.
+the same script on the runner, where 8080 is the published container port,
+with `PRODUCTION=true`: CI tests only the production build, and the full
+Cypress suite runs with `--env PRODUCTION_BUILD=true`. The development-only
+routes and CORS settings are covered by `api/base-routes.cy.js` when it runs
+without that flag, i.e. locally.
 Never run it on the host here: host port 8080 is the read-only mirror.
 
 It does *not* install `frus-data-jinks` or the USWDS theme: the data is part
