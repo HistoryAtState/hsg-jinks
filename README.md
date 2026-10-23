@@ -456,6 +456,12 @@ by hand.
   stylesheet is generated, not hand-maintained: re-run the script and commit the
   result whenever the vocabulary changes.
   `xst --config .xstrc run -f tools/generate-frus-renditions.xq > resources/css/frus-renditions.css`
+- `tools/measure-cell.sh <model> <dimension> <db|lucene>` — measure one
+  hybrid-search vector configuration in the worktree's own container: reindex
+  frus-data-jinks, time five paraphrase queries in keyword and hybrid mode, and
+  append the result to `build/semantic-search-workload-results.json`. Starts
+  from the collection.xconf at `$XCONF_SRC` (default
+  `/tmp/frus-collection.xconf.xml`).
 - `test/cypress/e2e/gui/breadcrumb.cy.js` — run against the worktree's own
   container: `dotenv -e .env -- npx cypress run --spec …` (Cypress reads
   `CYPRESS_BASE_URL` from the environment, not from `.env` itself).
