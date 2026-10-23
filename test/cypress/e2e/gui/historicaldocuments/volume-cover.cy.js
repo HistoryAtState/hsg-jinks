@@ -21,8 +21,14 @@ describe("volume landing with a cover", () => {
         cy.get("main img.hsg-frus__cover").should("have.attr", "alt", `Book Cover of ${TITLE}`);
     });
 
+    // The h1 sits in the landing header and the cover in its own frame, so
+    // they aren't siblings; what matters is that the title comes first.
     it("puts the volume title in an h1 before the image", () => {
-        cy.get("main img.hsg-frus__cover").prev("h1").should("have.text", TITLE);
+        cy.get("main h1").should("have.text", TITLE).then(($h1) => {
+            cy.get("main img.hsg-frus__cover").should(($img) => {
+                expect($h1[0].compareDocumentPosition($img[0]) & Node.DOCUMENT_POSITION_FOLLOWING).to.be.above(0);
+            });
+        });
     });
 
     it("shows no second heading generated from the TEI", () => {
