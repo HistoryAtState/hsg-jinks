@@ -845,6 +845,15 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-left: var(--uswds-space-3);
 }
 
+/* Below desktop the theme stacks the sidebars below main (layout.css,
+   profile-theme-uswds#57): no columns, so no gutter -- the sidebar spans
+   the band like main. */
+@media (max-width: 1023px) {
+    .sticky-layout > :is(.before-top, .before, .after-top, .after) {
+        margin-inline: 0;
+    }
+}
+
 /* Sidebar width for the USWDS 3 + 6 + 3 layout-grid split: each sidebar a
    quarter of the content band less one gutter, main the remaining half
    (302px | 628px | 302px at 1440px). Set as the theme's
