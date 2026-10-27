@@ -15,7 +15,7 @@
 
     <div class="usa-prose">
         <h1>[[ countries:article-heading($context?doc?content) ]]</h1>
-        [[ page:transform($context?doc?content, map { "mode": "division" }) ]]
+        [[ page:transform($context?doc?content, map { "mode": "division", "heading-offset": 1 }) ]]
     </div>
 
     [% template after %]
