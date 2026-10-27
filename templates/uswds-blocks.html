@@ -5,22 +5,5 @@
     [% template after %]
     <script src="[[ $context-path ]]/resources/js/uswds.min.js"></script>
     [% endtemplate %]
-    [% template! content-top %]
-    <nav class="toolbar">
-        <ul>
-            <li>
-                <nav aria-label="breadcrumb">
-                    <ul></ul>
-                </nav>
-            </li>
-        </ul>
-        <ul>
-            [% block before-document-list %][% endblock %]
-            <li>
-                <pb-paginate id="paginate" per-page="10" range="5" subscribe="search" emit="search"></pb-paginate>
-            </li>
-        </ul>
-    </nav>
-    [% endtemplate %]
     <div></div>
 </div>
