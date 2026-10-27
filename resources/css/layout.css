@@ -549,14 +549,25 @@
     .sticky-layout main {
         display: block;
     }
+}
 
+@media (max-width: 1023px) {
     /*
-     * Phones stack the band: one column, every sidebar in a row of its own
-     * above or below the content, spanning the band. A sidebar hidden on
-     * mobile (.hidden-mobile below) leaves an empty, zero-height row.
+     * Below the desktop breakpoint the band stacks into one column and both
+     * sidebars move below the content, as USWDS places side navigation on
+     * mobile. They stay visible: .hidden-mobile is overridden by the more
+     * specific display: flex above; an empty sidebar is still hidden by the
+     * :has() rule. The before-top/after-top toggle bars stay hidden
+     * (.hidden-mobile), leaving empty, zero-height rows.
+     *
+     * KNOWN WCAG ISSUE: this reorders visually only. In the DOM .before
+     * still precedes main, so reading and focus order no longer follow the
+     * visual order -- a failure of WCAG 2.2 SC 1.3.2 Meaningful Sequence
+     * (F1) and SC 2.4.3 Focus Order (F44). Accepted for now; the fix is
+     * tracked in OP#1493.
      */
     .sticky-layout {
-        grid-template-rows: auto auto auto auto 1fr auto auto auto;
+        grid-template-rows: auto auto 1fr auto auto auto auto auto;
         grid-template-columns:
             [full-start] var(--jinks-page-margin)
             [band-start] minmax(0, 1fr) [band-end]
@@ -564,9 +575,9 @@
         grid-template-areas:
             "header      header      header"
             ".           content-top ."
+            ".           content     ."
             ".           before-top  ."
             ".           before      ."
-            ".           content     ."
             ".           after-top   ."
             ".           after       ."
             "footer      footer      footer";
@@ -575,12 +586,21 @@
     .sticky-layout > :is(.before-top, .before, .after-top, .after) {
         width: auto;
         max-width: unset;
+        border-inline: none;
     }
-}
 
-@media (max-width: 1023px) {
-    .sticky-layout > .before.hidden-mobile,
-    .sticky-layout > .after.hidden-mobile {
-        display: none !important;
+    .sticky-layout > :is(.before, .after) {
+        margin-block-start: var(--s1);
+    }
+
+    /*
+     * base10's mobile footer carries a toggle that opens the .before sidebar
+     * as a fixed-layout overlay. Here the sidebars are always shown below the
+     * content, and the toggle targets .fixed-layout > main, which a
+     * sticky-layout page doesn't have -- it only throws. Its page navigation
+     * is for fixed-layout document views, too.
+     */
+    .sticky-layout > footer.mobile-footer {
+        display: none;
     }
 }
