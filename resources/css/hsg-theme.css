@@ -1871,6 +1871,43 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     color: var(--uswds-color-text);
 }
 
+/* ft:passages' passages as a search engine shows them
+   (srch:flow-passages): one paragraph, held to three lines until "Show
+   more" is opened. */
+.hsg-flow__text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+}
+
+.hsg-flow:has(> .hsg-flow__more[open]) .hsg-flow__text {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: none;
+}
+
+.hsg-flow__more summary {
+    display: inline;
+    cursor: pointer;
+    list-style: none;
+    color: var(--uswds-color-primary);
+    font-size: 0.9em;
+}
+
+.hsg-flow__more summary::-webkit-details-marker {
+    display: none;
+}
+
+.hsg-flow__more summary::after {
+    content: "Show more";
+}
+
+.hsg-flow__more[open] summary::after {
+    content: "Show less";
+}
+
 .hsg-result__meta code {
     padding: 0 var(--uswds-space-1);
     border-radius: 2px;

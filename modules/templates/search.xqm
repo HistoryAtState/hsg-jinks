@@ -525,6 +525,80 @@ declare %private function srch:spaces($text as xs:string?) as xs:string {
     replace($text, "\s+", " ")
 };
 
+(:~ ft:passages, or empty on an eXist that doesn't have it, where the
+ : snippets fall back to srch:snippets. Looked up, not called by name, so
+ : the module still compiles there. :)
+declare variable $srch:PASSAGES as function(*)? := function-lookup(xs:QName("ft:passages"), 3);
+
+(:~
+ : The options srch:keyword-snippets passes ft:passages: the best three
+ : sentences, each held to 200 characters around its matches, with each
+ : match marked as the other snippets' are. The sentence options are util:sentences' opt-in rules for
+ : FRUS text: an initial ("John F. Kennedy"), a quotation that runs on after
+ : its closing mark, and a spaced dash don't end a sentence.
+ :)
+declare variable $srch:PASSAGES_OPTIONS as map(*) := map {
+    "max": 3,
+    "max-length": 200,
+    "merge-initials": true(),
+    "merge-quoted-continuation": true(),
+    "dash-as-space": true(),
+    "highlight": function($text) { <span class="hi">{$text}</span> }
+};
+
+(:~ The characters three lines hold on a result card, past which a passage
+ : row offers "Show more". :)
+declare variable $srch:PASSAGES_LINES_CHARS as xs:integer := 320;
+
+(:~
+ : A hit's keyword snippets: with ft:passages, its best sentences as a
+ : search engine shows them (srch:flow-passages); otherwise, or when
+ : ft:passages finds none, the keyword-in-context snippets of srch:snippets,
+ : $width characters on each side.
+ :)
+declare %private function srch:keyword-snippets($hit as element(), $width as xs:integer) as element()* {
+    let $passages :=
+        if (exists($srch:PASSAGES)) then
+            try { $srch:PASSAGES($hit, "hsg-fulltext", $srch:PASSAGES_OPTIONS) } catch * { () }
+        else
+            ()
+    return
+        if (exists($passages)) then
+            srch:flow-passages($passages)
+        else
+            ft:highlight-field-matches($hit, "hsg-fulltext")[1] ! srch:snippets(., $width)
+};
+
+(:~
+ : ft:passages' passages as a search engine shows them: one paragraph, the
+ : passages in document order joined by "…", the matched words marked, held
+ : to three lines, with a control that shows the rest when there is more
+ : than fits. A passage cut short of its sentence opens or closes with "…" as
+ : well, so no "…" is doubled.
+ :)
+declare %private function srch:flow-passages($passages as element()+) as element(div) {
+    let $parts :=
+        for $p at $i in $passages
+        return (
+            if ($i eq 1 and $p/@trimmed-start = "true") then "… "
+            else if ($i gt 1) then " … " else (),
+            for $node in $p/node()
+            return
+                if ($node instance of element(span)) then <span class="hi">{srch:spaces(string($node))}</span>
+                else text { srch:spaces(string($node)) },
+            if ($i eq count($passages) and $p/@trimmed-end = "true") then " …" else ()
+        )
+    return
+        <div class="hsg-flow">
+            <span class="hsg-flow__text">{$parts}</span>
+            {
+                if (string-length(string-join($parts ! string(.))) gt $srch:PASSAGES_LINES_CHARS) then
+                    <details class="hsg-flow__more"><summary></summary></details>
+                else ()
+            }
+        </div>
+};
+
 (:~ Metadata list of a card. :)
 declare %private function srch:meta-list($rows as element()*) as element(dl)? {
     if (exists($rows)) then <dl class="hsg-result__meta">{$rows}</dl> else ()
@@ -549,7 +623,7 @@ declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
     let $dateString := normalize-space(string-join($date//text()[not(./ancestor::tei:note)]))
     let $placeName := ($doc//tei:placeName)[1]
     let $placeNameString := normalize-space(string-join($placeName//text()[not(./ancestor::tei:note)]))
-    let $snippets := ft:highlight-field-matches($doc, "hsg-fulltext")[1] ! srch:snippets(., 40)
+    let $snippets := srch:keyword-snippets($doc, 40)
     let $score := ft:score($doc)
     return map {
         "tags": if ($historical) then ($placeNameString, $dateString)[. ne ""] else (),
@@ -602,13 +676,13 @@ declare %private function srch:render-hit($hit as element()) as map(*) {
                 map { "title": "Untitled result", "href": "#", "tags": (), "summary": () }
 };
 
-(:~ The "Keyword Results" row of the non-FRUS tei:div and tei:body hits. The
- : search queries the hsg-fulltext field, so the matches are marked in the
- : field's stored text, as for FRUS; util:expand finds none. A package that
- : doesn't store the field has no snippets. :)
+(:~ The "Keyword Results" row of the non-FRUS tei:div and tei:body hits
+ : (srch:keyword-snippets). The search queries the hsg-fulltext field, so
+ : the matches are in the field's text, as for FRUS; util:expand finds none.
+ : Without ft:passages, a package that doesn't store the field has no
+ : snippets. :)
 declare %private function srch:keyword-row($hit as element()) as element()* {
-    let $highlighted := ft:highlight-field-matches($hit, "hsg-fulltext")
-    let $snippets := $highlighted[1] ! srch:snippets(., 60)
+    let $snippets := srch:keyword-snippets($hit, 60)
     return if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else ()
 };
 
