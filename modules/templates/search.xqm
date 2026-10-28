@@ -415,6 +415,8 @@ declare %private function srch:results($context as map(*)) as map(*) {
             return map {
                 "id": $queryId, "hits": $fused, "fused": exists($vectorHits), "orders": map {},
                 "results-vol-ids": $volIds,
+                (: for the timelines (srch:timeline-data), which work from the cache :)
+                "params": $p,
                 "range-start": $range?start, "range-end": $range?end, "created": current-dateTime()
             }
     (: The entry comes from the cache, so its maps are read with the lookup
@@ -444,6 +446,7 @@ declare %private function srch:results($context as map(*)) as map(*) {
     return map:merge((
         $p,
         map {
+            "id": $queryId,
             "hits": $window,
             "hit-count": $hitCount,
             "end": $p?start + count($window) - 1,
@@ -453,6 +456,105 @@ declare %private function srch:results($context as map(*)) as map(*) {
             "range-end": $entry?("range-end")
         }
     ))
+};
+
+(: ============== timelines ============== :)
+
+(:~ How many semantic matches the semantic timeline plots: more than the
+ : hybrid search's vector leg ($srch:VECTOR_K), to show when a topic was
+ : discussed, not only where the best few are. :)
+declare variable $srch:TIMELINE_K as xs:integer := 500;
+
+(:~
+ : The timelines above a Historical Documents search, drawn by TEI
+ : Publisher's pb-timeline from srch:timeline-data: the results by date, and
+ : with hybrid mode the top $srch:TIMELINE_K semantic matches by date. A
+ : selected range searches again with it as the date filter
+ : (resources/scripts/search-timeline.js). Only FRUS divisions are dated, so
+ : the timelines show only when the search is limited to Historical
+ : Documents. Each one's url names the search's cache entry, since
+ : pb-timeline appends its own query string to the url.
+ :)
+declare function srch:timeline($context as map(*)) as element(div)? {
+    let $r := srch:results($context)
+    return
+        if (not($r?within = "documents" and count($r?within) eq 1) or $r?("hit-count") eq 0) then
+            ()
+        else
+            <div class="hsg-timelines">
+            {
+                for $kind in ("results", "semantic"[$r?mode eq "hybrid" and exists($r?q)])
+                return
+                    <div class="hsg-timeline">
+                        <p class="hsg-timeline__label">{
+                            if ($kind eq "results") then "Results by date"
+                            else "When this topic was discussed: the " || $srch:TIMELINE_K || " closest semantic matches by date"
+                        }</p>
+                        <pb-timeline url="{$context?context-path}/api/search/timeline/{$r?id}/{$kind}" subscribe="hsg-timeline-{$kind}"
+                            resettable="resettable" scopes='["D", "M", "Y", "5Y", "10Y"]' max-interval="60">
+                            <span slot="label">Showing:&#160;</span>
+                        </pb-timeline>
+                    </div>
+            }
+            <p class="hsg-timeline__hint">Click a bar, or drag across several, to search within those dates. Undated documents aren't shown.</p>
+            </div>
+};
+
+(:~
+ : The data of one timeline, as pb-timeline reads it: for each date
+ : (YYYY-MM-DD), the count of FRUS divisions and links to the first three.
+ : Undated divisions are left out. $kind "results" counts the search's
+ : result set; "semantic" the $srch:TIMELINE_K nearest FRUS divisions to the
+ : query. Empty when the search is no longer cached.
+ :)
+declare function srch:timeline-data($id as xs:string, $kind as xs:string, $contextPath as xs:string) as map(*) {
+    let $entry := cache:get($srch:CACHE, $id)
+    let $hits :=
+        if (empty($entry?params)) then ()
+        else if ($kind eq "semantic") then srch:timeline-semantic-hits($entry?params)
+        else $entry?hits[self::tei:div][starts-with(base-uri(.), $srch:FRUS_COL)]
+    return map:merge(
+        for $hit in $hits
+        let $date := srch:timeline-date($hit)
+        (: pb-timeline accepts "?" for undated items, but then labels the
+           range "… – undefined", so undated divisions are left out :)
+        where $date ne "?"
+        group by $date
+        return map:entry($date, map {
+            "count": count($hit),
+            "info": array {
+                for $h in subsequence($hit, 1, 3)
+                return serialize(
+                    <a href="{$contextPath}{ft:field($h, 'hsg-url')}" part="tooltip-link">{srch:frus-title($h)}</a>)
+            }
+        })
+    )
+};
+
+(:~ The FRUS divisions nearest the search's query, filtered as its vector leg is. :)
+declare %private function srch:timeline-semantic-hits($p as map(*)) as element()* {
+    let $range := srch:date-range($p?("start-date"), $p?("end-date"), $p?("start-time"), $p?("end-time"))
+    let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), (), $range?start, $range?end)
+    let $opts := map:merge((
+        $srch:ft-query-options,
+        $queryConf?facets,
+        $queryConf?("date-query") ! map { "filter-query": . }
+    ))
+    return
+        try {
+            let $vec := vector:embed($p?q, $srch:EMBED_MODEL)
+            return collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:TIMELINE_K, $opts)]
+        } catch * {
+            ()
+        }
+};
+
+(:~ A FRUS hit's date for the timeline: the day of its hsg-date-min, the
+ : indexed date the date sorts use (idx:frus-date-min, normalized), or "?"
+ : when it has none. :)
+declare %private function srch:timeline-date($hit as element()) as xs:string {
+    let $min := try { ft:binary-field($hit, "hsg-date-min", "xs:dateTime") } catch * { () }
+    return ($min ! substring(string(.), 1, 10), "?")[1]
 };
 
 (: ============== per-type result rendering registry ============== :)

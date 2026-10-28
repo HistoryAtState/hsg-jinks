@@ -2220,3 +2220,31 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
         break-after: avoid;
     }
 }
+
+/* The timelines above a Historical Documents search (srch:timeline, TEI
+   Publisher's pb-timeline), in the site's colors. */
+.hsg-timelines {
+    display: grid;
+    gap: var(--uswds-space-2);
+    margin: var(--uswds-space-2) 0;
+}
+
+.hsg-timeline__label,
+.hsg-timeline__hint {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--uswds-color-base-dark);
+}
+
+.hsg-timeline__label {
+    font-weight: 600;
+}
+
+.hsg-timeline pb-timeline {
+    --pb-timeline-height: 90px;
+    --pb-timeline-color-bin: var(--uswds-color-primary);
+    --pb-timeline-color-highlight: var(--uswds-color-primary-dark);
+    --pb-timeline-color-selected: var(--uswds-color-accent-warm);
+    --pb-timeline-color-light: var(--uswds-color-base-lightest);
+    --pb-timeline-color-dark: var(--uswds-color-base-lighter);
+}

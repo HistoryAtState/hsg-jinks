@@ -223,6 +223,72 @@
                 }
             }
         },
+        "/api/search/timeline/{id}/{kind}": {
+            "get": {
+                "summary": "Timeline data of a search",
+                "description": "Counts of a cached search's FRUS results by date, for pb-timeline (srch:timeline-data): kind 'results' counts the result set, 'semantic' the 500 FRUS divisions nearest the query. Each date maps to its count and links to up to three documents; undated ones are left out. The search is named by its cache id, since pb-timeline appends start and end to the url. Empty when the search is no longer cached.",
+                "operationId": "searchapi:timeline",
+                "x-error-handler": "hsg-errors:handle",
+                "tags": [
+                    "search"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[0-9a-f]{40}$"
+                        }
+                    },
+                    {
+                        "name": "kind",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "results",
+                                "semantic"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "start",
+                        "in": "query",
+                        "required": false,
+                        "description": "Sent by pb-timeline; ignored.",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 40
+                        }
+                    },
+                    {
+                        "name": "end",
+                        "in": "query",
+                        "required": false,
+                        "description": "Sent by pb-timeline; ignored.",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 40
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Counts by date",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/search/tips": {
             "get": {
                 "summary": "Search Tips page",

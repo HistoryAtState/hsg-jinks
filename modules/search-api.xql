@@ -3,6 +3,7 @@ xquery version "3.1";
 module namespace searchapi = "https://history.state.gov/api/search";
 
 import module namespace vapi = "http://teipublisher.com/api/view" at "lib/api/view.xql";
+import module namespace config = "http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace errors = "http://e-editiones.org/roaster/errors";
 import module namespace query-guard = "http://history.state.gov/ns/site/hsg/query-guard" at "query-guard.xqm";
 import module namespace srch = "https://history.state.gov/ns/templates/search" at "templates/search.xqm";
@@ -70,4 +71,12 @@ declare function searchapi:tips($request as map(*)) {
  :)
 declare function searchapi:not-found($request as map(*)) {
     error($errors:NOT_FOUND, "no route below /search/" || $request?parameters?other)
+};
+
+(:~
+ : GET /api/search/timeline/{id}/{kind}: a cached search's FRUS results by
+ : date, for the search page's pb-timeline (srch:timeline).
+ :)
+declare function searchapi:timeline($request as map(*)) {
+    srch:timeline-data($request?parameters?id, $request?parameters?kind, $config:context-path)
 };

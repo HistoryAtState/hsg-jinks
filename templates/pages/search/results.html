@@ -10,7 +10,8 @@
         "script": {
             "custom": [
                 "resources/scripts/search-results.js",
-                "resources/scripts/search-filters.js"
+                "resources/scripts/search-filters.js",
+                "resources/scripts/search-timeline.js"
             ]
         },
         "theme": {
@@ -55,6 +56,7 @@
         </div>
 
         [[ srch:results-summary($context) ]]
+        [[ srch:timeline($context) ]]
         [[ srch:results-list($context) ]]
         [[ srch:pagination($context) ]]
     </div>
