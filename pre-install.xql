@@ -1,6 +1,7 @@
 xquery version "1.0";
 
 import module namespace xdb="http://exist-db.org/xquery/xmldb";
+import module namespace cache="http://exist-db.org/xquery/cache" at "java:org.exist.xquery.modules.cache.CacheModule";
 
 (: The following external variables are set by the repo:deploy function :)
 
@@ -26,6 +27,13 @@ declare function local:mkcol-recursive($collection, $components) {
 declare function local:mkcol($collection, $path) {
     local:mkcol-recursive($collection, tokenize($path, "/"))
 };
+
+(: Drop the cached search results ($srch:CACHE in modules/templates/search.xqm):
+   they were computed by the previous version, and the first search after the
+   install creates the cache again with the current settings. The same
+   goes for each document's similar documents ($srch:SIMILAR_CACHE). :)
+cache:destroy("hsg-search"),
+cache:destroy("hsg-similar"),
 
 local:mkcol(repo:get-root(), replace($target, "^.*/([^/]+)$", "$1")),
 sm:chgrp(xs:anyURI($target), "tei"),

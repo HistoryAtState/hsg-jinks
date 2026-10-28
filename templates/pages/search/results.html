@@ -10,7 +10,8 @@
         "script": {
             "custom": [
                 "resources/scripts/search-results.js",
-                "resources/scripts/search-filters.js"
+                "resources/scripts/search-filters.js",
+                "resources/scripts/search-timeline.js"
             ]
         },
         "theme": {
@@ -47,7 +48,7 @@
                 <img src="[[ $context-path ]]/resources/images/usa-icons-bg/search--white.svg" class="usa-search__submit-icon" alt="Search"/>
             </button>
         </form>
-        [[ srch:mode-toggle($context) ]]
+        [[ srch:search-options($context) ]]
 
         <div class="hsg-results-header">
             <h2 class="hsg-results-header__title">Results</h2>
@@ -55,6 +56,8 @@
         </div>
 
         [[ srch:results-summary($context) ]]
+        [[ srch:timeline($context) ]]
+        [[ srch:title-rollups($context) ]]
         [[ srch:results-list($context) ]]
         [[ srch:pagination($context) ]]
     </div>

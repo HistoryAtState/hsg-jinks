@@ -36,8 +36,9 @@ xquery version "3.1";
  :)
 module namespace srch = "https://history.state.gov/ns/templates/search";
 
-import module namespace kwic = "http://exist-db.org/xquery/kwic";
 import module namespace cache = "http://exist-db.org/xquery/cache" at "java:org.exist.xquery.modules.cache.CacheModule";
+(: only for snippets=compare's "kwic, as today" row :)
+import module namespace kwic = "http://exist-db.org/xquery/kwic";
 import module namespace page = "http://teipublisher.com/ns/templates/page" at "page.xqm";
 import module namespace fd = "http://history.state.gov/ns/site/hsg/frus-dates" at "../frus-dates.xqm";
 import module namespace ext = "http://history.state.gov/ns/frus/odd-ext" at "../frus-ext.xqm";
@@ -54,17 +55,57 @@ declare variable $srch:FRUS_COL as xs:string := "/db/apps/frus-data-jinks";
  : keeps the filters and sort, and Apply filters keeps the keyword. :)
 declare variable $srch:FORM_ID as xs:string := "hsg-search";
 
+(:~ The cache of recent searches' results, one entry per search, each dropped
+ : five minutes after it was last read. cache:create leaves a cache that
+ : already exists as it is, so pre-install.xql destroys this one: the first
+ : search after each install creates it with $srch:CACHE_CONFIG. :)
+declare variable $srch:CACHE as xs:string := "hsg-search";
+
+(:~ Request attribute with the time the request's first srch:results call took. :)
+declare variable $srch:TOOK_ATTR as xs:string := "hsg-search-took";
+declare variable $srch:CACHE_CONFIG as map(*) := map {
+    "expireAfterAccess": 300000,
+    "maximumSize": 1000
+};
+
 (:~ Hybrid / vector search (FRUS pilot). Local ONNX model shipped with
  : duncdrum/existdb:experimental. k = KNN pool size before RRF fuse. :)
 declare variable $srch:EMBED_MODEL as xs:string := "all-MiniLM-L6-v2";
 declare variable $srch:VECTOR_K as xs:integer := 50;
 declare variable $srch:RRF_K as xs:integer := 60;
 
+(:~ Words of a semantic-only hit's opening shown on its card (srch:opening). :)
+declare variable $srch:OPENING_WORDS as xs:integer := 60;
+
 declare variable $srch:ft-query-options as map(*) := map {
     "default-operator": "and",
     "phrase-slop": 0,
     "leading-wildcard": "no",
     "filter-rewrite": "yes"
+};
+
+(:~ The stemmed copy of hsg-fulltext (English, Porter), searched when the
+ : reader ticks "match word forms". Every data package defines it beside
+ : hsg-fulltext; a collection whose installed config predates it simply
+ : contributes its exact matches. :)
+declare variable $srch:STEMMED_FIELD as xs:string := "hsg-fulltext-stemmed";
+
+(:~ The sensitive copies of hsg-fulltext, one per combination of the "match
+ : case" and "match punctuation" options: cased keeps case, punct keeps
+ : punctuation inside words (S/S, F-16), literal keeps both. :)
+declare variable $srch:CASED_FIELD as xs:string := "hsg-fulltext-cased";
+declare variable $srch:PUNCT_FIELD as xs:string := "hsg-fulltext-punct";
+declare variable $srch:LITERAL_FIELD as xs:string := "hsg-fulltext-literal";
+
+(:~ The field one search uses, from its match options. Word forms don't
+ : combine with either sensitivity (stemming lowercases and drops
+ : punctuation), so srch:read-params turns stem off when either is on. :)
+declare function srch:match-field($match as map(*)) as xs:string {
+    if ($match?case and $match?punct) then $srch:LITERAL_FIELD
+    else if ($match?case) then $srch:CASED_FIELD
+    else if ($match?punct) then $srch:PUNCT_FIELD
+    else if ($match?stem) then $srch:STEMMED_FIELD
+    else "hsg-fulltext"
 };
 
 (:~ Lucene chars not exposed as search features -- escaped so they search
@@ -131,13 +172,24 @@ declare function srch:query-parses($query as xs:string?) as xs:boolean {
 };
 
 declare %private function srch:prepare-query($sections as xs:string*, $volumeIds as xs:string*,
-        $query as xs:string?, $rangeStart as xs:dateTime?, $rangeEnd as xs:dateTime?) as map(*) {
+        $query as xs:string?, $rangeStart as xs:dateTime?, $rangeEnd as xs:dateTime?, $match as map(*)) as map(*) {
     let $category := $sections[not(. = ("", "entire-site"))]
     let $publication :=
         for $section in $category
         return $srch:SECTIONS?($section)
     let $dateCapable := count($category) eq 1 and $category = "documents"
-    let $fulltextQuery := if (exists($query)) then "hsg-fulltext:(" || srch:escape-unsupported-characters($query) || ") " else ()
+    let $escaped := srch:escape-unsupported-characters($query)
+    (: Word forms: the stemmed field, or the exact one. The exact branch keeps
+       wildcard terms working, since a prefix such as negotiat* is not a
+       prefix of the stem "negoti", and it can only add exact matches. :)
+    let $field := srch:match-field($match)
+    let $fulltextQuery :=
+        if (empty($query)) then
+            ()
+        else if ($field eq $srch:STEMMED_FIELD) then
+            "(" || $srch:STEMMED_FIELD || ":(" || $escaped || ") OR hsg-fulltext:(" || $escaped || ")) "
+        else
+            $field || ":(" || $escaped || ") "
     (: lower-case: the index analyzer lower-cases the stored date strings
      : (the "T"), and eXist 7 dropped the AnalyzingQueryParser that used to
      : apply the same analysis to range endpoints on the query side; an
@@ -156,7 +208,12 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
         if ($dateCapable and exists($volumeIds)) then map { "frus-volume-id": $volumeIds } else ()
     ))
     return map {
-        "fields": map { "fields": ("hsg-date-min", "hsg-fulltext", "hsg-url") },
+        (: Resolving FRUS's 390,000 documents takes eXist 2 to 3 seconds, so
+           the keyword and vector legs share one resolution. FRUS indexes
+           every document as "documents", so a search of other sections
+           skips it. :)
+        "frus-docs": if (empty($category) or $category = "documents") then collection($srch:FRUS_COL) else (),
+        "fields": map { "fields": ("hsg-date-min", "hsg-url") },
         "facets": map { "facets": $facets },
         "query-string": $queryString,
         (: the date clause on its own, for the vector leg's filter-query :)
@@ -167,14 +224,22 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
 declare %private function srch:query-sections($queryConfig as map(*)) as element()* {
     let $queryString := $queryConfig?query-string
     let $queryOptions := map:merge(($srch:ft-query-options, $queryConfig?fields, $queryConfig?facets))
-    (: frus omits ?fields, same limitation-driven exception hsg-shell carried for large result sets :)
-    let $frusQueryOptions := map:merge(($srch:ft-query-options, $queryConfig?facets))
+    (: frus omits ?fields, same limitation-driven exception hsg-shell carried
+       for large result sets. Its results are the divisions with text of
+       their own (frus-search-role "text"); title-only chapters, subchapters
+       and compilations are rolled up by their titles (srch:title-rollups). :)
+    let $frusQueryOptions := map:merge(($srch:ft-query-options,
+        map { "facets": map:merge(($queryConfig?facets?facets, map { "frus-search-role": "text" })) }))
     return (
         collection("/db/apps/other-publications")//tei:div[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/other-publications")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/conferences")//tei:div[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/hac")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection($srch:FRUS_COL)//tei:div[ft:query(., $queryString, $frusQueryOptions)],
+        (: FRUS is indexed at each division file's tei:TEI (hsg-jinks-data
+           feat/tei-level-fulltext-index): a hit stands for the file's one
+           division, with its footnotes. Files without a division have no
+           search role, so the role facet leaves them out. :)
+        $queryConfig?("frus-docs")//tei:TEI[ft:query(., $queryString, $frusQueryOptions)],
         collection("/db/apps/frus-history/articles")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/frus-history/documents")//tei:body[ft:query(., $queryString, $queryOptions)],
         collection("/db/apps/frus-history/monograph")//tei:div[ft:query(., $queryString, $queryOptions)],
@@ -245,13 +310,90 @@ declare %private function srch:scored-vector-hits($nodes as element()*) as map(*
  : KNN search, so the VECTOR_K nearest hits are all within the range. Left
  : out, the vector leg ignored the range: a 1985-only search returned 50
  : nearest hits from any year. Collections without the frus-search-date
- : fields then contribute nothing, as on the keyword leg. :)
-declare %private function srch:query-vector-sections($queryConf as map(*), $q as xs:string) as element()* {
+ : fields then contribute nothing, as on the keyword leg.
+ : Returns the hits as srch:scored-vector-hits rows, nearest first, so the
+ : cards can show each hit's similarity. :)
+(:~
+ : The vector of a keyword query, for the semantic search: the query's
+ : words without its Lucene syntax. Embedded as typed, famin* or "food aid"
+ : is read with its asterisk or quotes, and famin* finds passages with no
+ : famine in them. Drops operators (AND, OR, NOT, +), excluded terms (-),
+ : quotes, wildcards, fuzzy and boost suffixes, grouping and field
+ : prefixes. Empty when nothing is left.
+ :)
+declare %private function srch:embed-query($q as xs:string?) as array(*)? {
+    let $words := string-join(
+        for $token in tokenize(normalize-space(replace($q, "[""()\[\]{}]", " ")), " ")
+        (: a term the query excludes would pull the vector toward it :)
+        where not($token = ("AND", "OR", "NOT", "&amp;&amp;", "||") or starts-with($token, "-"))
+        let $term := replace($token, "^[+\-]+|^[\w\-]+:|(~|\^)[0-9.]*$", "")
+        return
+            if (matches($term, "[*?]")) then srch:expand-wildcard($term)
+            else $term,
+        " "
+    ) => normalize-space()
+    return
+        if ($words eq "") then () else vector:embed($words, $srch:EMBED_MODEL)
+};
+
+(:~ Most words a wildcard term stands for in the semantic search's prompt. :)
+declare variable $srch:WILDCARD_WORDS as xs:integer := 3;
+
+(:~
+ : The words a wildcard term matches, for the semantic search's prompt: the
+ : hsg-fulltext terms it matches, the $srch:WILDCARD_WORDS in the most
+ : documents, leaving out any in fewer than a twentieth as many documents as
+ : the first. So famin* is "famine famines", not "famin", which the model
+ : can't read. A term whose letters before the first wildcard are fewer than
+ : three is left out, as it matches too much of the index to read.
+ :)
+declare %private function srch:expand-wildcard($term as xs:string) as xs:string* {
+    let $term := lower-case($term)
+    let $prefix := replace($term, "[*?].*$", "")
+    let $pattern := "^" || replace(replace(replace($term, "([.\\+^${}()|\[\]])", "\\$1"), "\*", ".*"), "\?", ".") || "$"
+    return
+        if (string-length($prefix) lt 3) then
+            ()
+        else
+            let $keys :=
+                try {
+                    (: each key's data: occurrences, then documents. The
+                       context names the documents to scan: without one,
+                       ft:index-keys-for-field scans the query's statically
+                       known documents, which in a page request are the
+                       app's, with no hsg-fulltext terms. :)
+                    (: As the last step of a path, it may return strings but
+                       not maps (XPTY0018), so each key comes as "key\tdocs". :)
+                    let $rows := ($srch:LIKE_ROOTS ! collection("/db/apps/" || .))/ft:index-keys-for-field("hsg-fulltext", $prefix, function($key, $data) {
+                        if (matches($key, $pattern)) then $key || "&#9;" || $data[2] else ()
+                    }, 10000)
+                    for $row in $rows
+                    return map { "key": substring-before($row, "&#9;"), "docs": xs:integer(substring-after($row, "&#9;")) }
+                } catch * { () }
+            let $ranked := for $k in $keys order by $k?docs descending return $k
+            let $floor := ($ranked[1]?docs, 0)[1] div 20
+            return subsequence($ranked[?docs ge $floor], 1, $srch:WILDCARD_WORDS) ! ?key
+};
+
+declare %private function srch:query-vector-sections($queryConf as map(*), $q as xs:string) as map(*)* {
     if (normalize-space($q) eq "") then
         ()
     else
         try {
-            let $vec := vector:embed($q, $srch:EMBED_MODEL)
+            srch:embed-query($q) ! srch:vector-neighbors($queryConf, .)
+        } catch * {
+            ()
+        }
+};
+
+(:~
+ : The VECTOR_K nodes nearest to $vec across the searched collections, as
+ : srch:scored-vector-hits rows, nearest first: the vector leg of a hybrid
+ : search ($vec embeds the query) and of a "similar to" search ($vec embeds
+ : a hit, srch:like-vector). See srch:query-vector-sections for the options.
+ :)
+declare %private function srch:vector-neighbors($queryConf as map(*), $vec as array(*)) as map(*)* {
+    try {
             let $dateFilter := $queryConf?("date-query")
             let $opts := map:merge((
                 $srch:ft-query-options,
@@ -259,11 +401,22 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
                 if (exists($dateFilter)) then map { "filter-query": $dateFilter } else ()
             ))
             let $scored := (
-                try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                (: Over a parent collection whose sub-collections put the vector
+                   field on different elements, ft:query-vector uses only one
+                   sub-collection's configuration, and the other element returns
+                   nothing. other-publications is such a parent (tei:div in some
+                   sub-collections, tei:body in others), so it is queried one
+                   sub-collection at a time. Remove once eXist resolves the
+                   configuration per collection. :)
+                for $sub in xmldb:get-child-collections("/db/apps/other-publications")
+                let $docs := collection("/db/apps/other-publications/" || $sub)
+                return (
+                    try { srch:scored-vector-hits($docs//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                    try { srch:scored-vector-hits($docs//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () }
+                ),
                 try { srch:scored-vector-hits(collection("/db/apps/conferences")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/hac")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($queryConf?("frus-docs")//tei:TEI[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)][tei:text//tei:div]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/frus-history/articles")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/frus-history/documents")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
                 try { srch:scored-vector-hits(collection("/db/apps/frus-history/monograph")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
@@ -277,11 +430,87 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
             let $ranked :=
                 for $row in $scored
                 order by $row?score descending empty least, $row?id
-                return $row?node
+                return $row
             return subsequence($ranked, 1, $srch:VECTOR_K)
         } catch * {
             ()
         }
+};
+
+(:~ The collections, below /db/apps, a "similar to" search may start from. :)
+declare variable $srch:LIKE_ROOTS as xs:string+ := (
+    "frus-data-jinks", "other-publications", "conferences", "hac", "frus-history", "rdcr", "wwdai", "milestones"
+);
+
+(:~ The division a hit stands for: a FRUS hit is its division file's
+ : tei:TEI, whose one division holds the title, dates and text shown;
+ : any other hit is its own division or body. :)
+declare function srch:hit-division($hit as element()) as element() {
+    if ($hit instance of element(tei:TEI)) then ($hit/tei:text//tei:div)[1] else $hit
+};
+
+(:~
+ : The hit a "similar to" search starts from. $like names it as the file's
+ : path below /db/apps and, for a division, its @xml:id after "#", the form
+ : srch:like-ref writes: "hac/hac.xml#june-1996", or
+ : "rdcr/articles/afghanistan.xml" for a tei:body. Only the collections the
+ : search covers ($srch:LIKE_ROOTS) are accepted, and only the tei:div and
+ : tei:body hits whose vector field embeds their whole text.
+ :)
+declare %private function srch:like-seed($like as xs:string?) as element()? {
+    let $path := substring-before($like || "#", "#")
+    let $id := substring-after($like, "#")
+    return
+        if (not(matches($path, "^[A-Za-z0-9._/-]+\.xml$")) or contains($path, "..")
+            or not(some $root in $srch:LIKE_ROOTS satisfies starts-with($path, $root || "/"))) then
+            ()
+        else
+            let $uri := "/db/apps/" || $path
+            let $doc := if (doc-available($uri)) then doc($uri) else ()
+            return
+                if ($id ne "") then
+                    (: FRUS indexes the division's file, at its tei:TEI :)
+                    $doc//tei:div[@xml:id = $id][1] ! (if (starts-with($path, "frus-data-jinks/")) then root(.)/tei:TEI else .)
+                else ($doc//tei:body)[1]
+};
+
+(:~ The srch:like-seed reference of a tei:div, tei:body or FRUS tei:TEI hit;
+ : a FRUS hit is named by its division, as before. :)
+declare function srch:like-ref($hit as element()) as xs:string {
+    substring-after(document-uri(root($hit)), "/db/apps/")
+    || (srch:hit-division($hit)[self::tei:div]/@xml:id ! ("#" || .))
+};
+
+(:~
+ : The vector a hit was indexed with, computed again: the packages' vector
+ : fields embed the node's text (expression ".", or a guard that returns the
+ : node), and the model is deterministic, so embedding string($hit) gives the
+ : stored vector, short of differences in how the indexer prepares the text.
+ : eXist has no function that reads a stored vector back. The model reads
+ : only the first 128 tokens, so only the opening is passed.
+ :)
+declare %private function srch:like-vector($hit as element()) as array(*)? {
+    (: a FRUS hit's vector field embeds its division, not the header :)
+    try { vector:embed(substring(string(srch:hit-division($hit)), 1, 4000), $srch:EMBED_MODEL) } catch * { () }
+};
+
+(:~
+ : What the semantic search found, for the cards: each vector hit's
+ : similarity, and whether the keyword search found it too, keyed by node id.
+ : The keyword copy of a hit found by both is the one RRF keeps, so its card
+ : has keyword matches to highlight; a hit found only by the semantic search
+ : has none, because it matched on one vector for the whole node, not on any
+ : words.
+ :)
+declare %private function srch:semantic-matches($lucene as element()*, $vector as map(*)*) as map(*) {
+    let $both := map:merge(
+        (($vector ! ?node) intersect $lucene) ! map:entry(generate-id(.), true())
+    )
+    return map:merge(
+        for $row in $vector
+        return map:entry($row?id, map { "score": $row?score, "keyword": map:contains($both, $row?id) }),
+        map { "duplicates": "use-first" }
+    )
 };
 
 (:~ Reciprocal Rank Fusion of two hit sequences (Lucene + vector). Both
@@ -315,8 +544,12 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
     let $orderBy := page:parameter($context, "order-by", ())
     let $start := xs:integer((page:parameter($context, "start", "1"), "1")[1])
     let $perPage := xs:integer((page:parameter($context, "per-page", "10"), "10")[1])
+    (: a keyword typed while exploring starts a keyword search again :)
+    let $like := normalize-space(page:parameter($context, "like", ()))[. ne ""][not($q)]
+    (: without a keyword there is no relevance to sort by, except in a
+       "similar to" search, where relevance is nearness to the seed :)
     let $sortBy :=
-        if (not($q) and $sortByParam eq "relevance") then "date-asc"
+        if (not($q) and not($like) and $sortByParam eq "relevance") then "date-asc"
         else if ($orderBy eq "date") then "date-asc"
         else if (not($sortByParam)) then "relevance"
         else $sortByParam
@@ -326,26 +559,54 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
         else
             $within
     let $modeParam := normalize-space(page:parameter($context, "mode", "keyword"))
-    let $mode := if ($modeParam eq "hybrid") then "hybrid" else "keyword"
+    let $mode := if ($like) then "similar" else if ($modeParam eq "hybrid") then "hybrid" else "keyword"
+    let $yes := function($name) { normalize-space(page:parameter($context, $name, "")) eq "yes" }
+    let $case := $yes("case")
+    let $punct := $yes("punct")
     return map {
+        "like": $like,
         "q": $q, "within": $section, "volume-id": $volumeId,
         "start-date": $startDate, "end-date": $endDate,
         "start-time": $startTime, "end-time": $endTime,
         "sort-by": $sortBy, "start": $start, "per-page": $perPage,
-        "mode": $mode
+        "mode": $mode,
+        "match": map {
+            "stem": $yes("stem") and not($case or $punct), "case": $case, "punct": $punct,
+            (: evaluation only: snippets=compare shows each FRUS card's snippets
+               three ways (kwic, the walker, ft:passages), with their times :)
+            "snippets": normalize-space(page:parameter($context, "snippets", ""))
+        }
     }
 };
 
 (:~
- : Full hit computation, cached ~5 min in-memory keyed by a hash of the
- : normalized parameter set (same technique as hsg-shell). Safe to call from
- : several independent template functions in the same request -- the cache
+ : The hits of a search in the order $sortBy asks for. Relevance for hybrid is
+ : the RRF order: re-sorting by ft:score puts Lucene scores (about 5) ahead of
+ : vector scores (about 1) and the fused order disappears.
+ :)
+declare %private function srch:order($hits as element()*, $sortBy as xs:string, $fused as xs:boolean) as element()* {
+    if ($fused and $sortBy eq "relevance") then
+        $hits
+    else
+        srch:sort($hits, $sortBy)
+};
+
+(:~
+ : Full hit computation, cached in $srch:CACHE under a hash of the normalized
+ : parameter set (same technique as hsg-shell). The sort order is not part of
+ : the key: an entry keeps the hits as the search found them, plus each order
+ : a page has asked for, so changing the sort only sorts again. Safe to call
+ : from several independent template functions in the same request: the cache
  : absorbs repeat lookups after the first.
  :)
 declare %private function srch:results($context as map(*)) as map(*) {
+    (: as in hsg-shell, "took" is the time this request spent getting its
+       results: the whole search, or only the cache lookup and any sort :)
+    let $started := util:system-time()
     let $p := srch:read-params($context)
+    let $sortBy := $p?("sort-by")
     let $normalized := string-join(
-        let $params := map { "q": $p?q, "within": $p?within, "volume-id": $p?("volume-id"), "start-date": $p?("start-date"), "end-date": $p?("end-date"), "start-time": $p?("start-time"), "end-time": $p?("end-time"), "sort-by": $p?("sort-by"), "mode": $p?mode }
+        let $params := map { "q": $p?q, "within": $p?within, "volume-id": $p?("volume-id"), "start-date": $p?("start-date"), "end-date": $p?("end-date"), "start-time": $p?("start-time"), "end-time": $p?("end-time"), "mode": $p?mode, "like": $p?like, "match": srch:match-field($p?match) }
         for $key in map:keys($params)
         let $val := $params($key) ! normalize-space(.)[. ne ""]
         order by $key
@@ -353,18 +614,17 @@ declare %private function srch:results($context as map(*)) as map(*) {
         "&amp;"
     )
     let $queryId := util:hash($normalized, "sha1")
-    let $cacheName := "hsg-search"
-    let $cacheKey := "queries"
-    let $cache := cache:get($cacheName, $cacheKey)
-    let $cache := if ($cache instance of map(*)) then $cache else map { "created": current-dateTime(), "purged": current-dateTime(), "queries": map {} }
-    let $cached := if (map:contains($cache?queries, $queryId)) then map:get($cache?queries, $queryId) else ()
-    let $results :=
+    (: returns false, and changes nothing, once the cache exists :)
+    let $create := cache:create($srch:CACHE, $srch:CACHE_CONFIG)
+    let $cached := cache:get($srch:CACHE, $queryId)
+    let $entry :=
         if (exists($cached)) then
             $cached
+        else if ($p?mode eq "similar") then
+            srch:similar-entry($p, $queryId)
         else
-            let $started := util:system-dateTime()
             let $range := srch:date-range($p?("start-date"), $p?("end-date"), $p?("start-time"), $p?("end-time"))
-            let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), $p?q, $range?start, $range?end)
+            let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), $p?q, $range?start, $range?end, $p?match)
             let $luceneHits :=
                 try { srch:query-sections($queryConf) } catch * { () }
             let $vectorHits :=
@@ -378,45 +638,278 @@ declare %private function srch:results($context as map(*)) as map(*) {
                match for "famine relief" sat at position 199 of 465. :)
             let $fused :=
                 if (exists($vectorHits)) then
-                    srch:fuse-rrf(srch:sort($luceneHits, "relevance"), $vectorHits)
+                    srch:fuse-rrf(srch:sort($luceneHits, "relevance"), $vectorHits ! ?node)
                 else
                     $luceneHits
-            (: Relevance for hybrid is the RRF order. Re-sorting by ft:score
-               puts Lucene scores (about 5) ahead of vector scores (about 1)
-               and the fused order disappears. :)
-            let $sorted :=
-                if ($p?mode eq "hybrid" and $p?("sort-by") eq "relevance" and exists($vectorHits)) then
-                    $fused
-                else
-                    srch:sort($fused, $p?("sort-by"))
             let $volIds :=
                 try { map:keys(ft:facets($luceneHits, "frus-volume-id", ())) }
                 catch * { () }
-            (: how long the query itself took, kept with the cached entry so
-               a cached page 2 still reports the real cost of the search :)
-            let $took := seconds-from-duration(util:system-dateTime() - $started)
-            let $entry := map {
-                "id": $queryId, "hits": $sorted, "results-vol-ids": $volIds, "took": $took,
+            let $rollups := try { srch:title-rollups($p, $queryConf) } catch * { map {} }
+            return map {
+                "id": $queryId, "hits": $fused, "fused": exists($vectorHits), "orders": map {},
+                "semantic": srch:semantic-matches($luceneHits, $vectorHits),
+                "results-vol-ids": $volIds, "rollups": $rollups,
+                (: for the timelines (srch:timeline-data), which work from the cache :)
+                "params": $p,
                 "range-start": $range?start, "range-end": $range?end, "created": current-dateTime()
             }
-            let $store := cache:put($cacheName, $cacheKey, map { "created": $cache?created, "purged": $cache?purged, "queries": map:put($cache?queries, $queryId, $entry) })
-            return $entry
-    let $purgeAge := xs:dayTimeDuration("PT5M")
-    let $purge := if (current-dateTime() - $cache?purged gt $purgeAge) then cache:clear($cacheName) else ()
-    let $hitCount := count($results?hits)
-    let $window := subsequence($results?hits, $p?start, $p?("per-page"))
+    (: The entry comes from the cache, so its maps are read with the lookup
+       operator: calling a cached map as a function ($orders($sortBy)) fails in
+       eXist when another request uses it at the same time. :)
+    let $sorted :=
+        if (map:contains($entry?orders, $sortBy)) then
+            $entry?orders?($sortBy)
+        else
+            srch:order($entry?hits, $sortBy, $entry?fused)
+    (: store the search, or the order it gained, for the next request :)
+    let $store :=
+        if (map:contains($entry?orders, $sortBy)) then
+            ()
+        else
+            cache:put($srch:CACHE, $queryId, map:put($entry, "orders", map:put($entry?orders, $sortBy, $sorted)))
+    let $hitCount := count($sorted)
+    let $window := subsequence($sorted, $p?start, $p?("per-page"))
+    (: The page asks for its results several times, and the first call does
+       the work: the sidebar's volume filter is rendered before the summary.
+       So the first call keeps its time for the others to report. :)
+    let $took := (
+        request:get-attribute($srch:TOOK_ATTR),
+        seconds-from-duration(util:system-time() - $started)
+    )[1]
+    let $keep := request:set-attribute($srch:TOOK_ATTR, $took)
     return map:merge((
         $p,
         map {
+            "id": $queryId,
             "hits": $window,
             "hit-count": $hitCount,
             "end": $p?start + count($window) - 1,
-            "results-vol-ids": $results?results-vol-ids,
-            "took": $results?took,
-            "range-start": $results?("range-start"),
-            "range-end": $results?("range-end")
+            "results-vol-ids": $entry?results-vol-ids,
+            "semantic": $entry?semantic,
+            "seed": $entry?seed,
+            "rollups": $entry?rollups,
+            "took": $took,
+            "range-start": $entry?("range-start"),
+            "range-end": $entry?("range-end")
         }
     ))
+};
+
+(:~
+ : The cache entry of a "similar to" search: the VECTOR_K hits nearest to
+ : the seed hit (srch:like-seed), nearest first, without the seed itself.
+ : There is no keyword leg; the section, volume and date filters apply as in
+ : a hybrid search's vector leg. An unknown or unsupported seed finds
+ : nothing.
+ :)
+declare %private function srch:similar-entry($p as map(*), $queryId as xs:string) as map(*) {
+    let $seed := srch:like-seed($p?like)
+    let $range := srch:date-range($p?("start-date"), $p?("end-date"), $p?("start-time"), $p?("end-time"))
+    let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), (), $range?start, $range?end, map {})
+    let $vec := $seed ! srch:like-vector(.)
+    let $seedId := $seed ! generate-id(.)
+    let $rows := if (exists($vec)) then srch:vector-neighbors($queryConf, $vec)[not(.?id = $seedId)] else ()
+    return map {
+        "id": $queryId, "hits": $rows ! ?node, "fused": true(), "orders": map {},
+        "semantic": srch:semantic-matches((), $rows),
+        "seed": $seed,
+        "results-vol-ids": (),
+        "range-start": $range?start, "range-end": $range?end, "created": current-dateTime()
+    }
+};
+
+(: ============== title rollups ============== :)
+
+(:~
+ : The FRUS titles a keyword matches, rolled up above the results instead of
+ : listed among them: volumes whose own title matches ("The Far East,
+ : China"), and title-only chapters, subchapters and compilations whose
+ : heading matches, grouped by volume. Only when the search covers Historical
+ : Documents. Volumes are left out when the search is narrowed to volumes;
+ : chapters follow the search's volumes and dates. The title fields have the
+ : default analyzer, so the match options don't change them. Strings only,
+ : so the search cache holds no nodes for them.
+ :)
+declare %private function srch:title-rollups($p as map(*), $queryConf as map(*)) as map(*) {
+    if (empty($p?q) or not($p?within = ("entire-site", "documents"))) then
+        map {}
+    else
+        let $escaped := srch:escape-unsupported-characters($p?q)
+        let $volumes :=
+            if (exists($p?("volume-id"))) then ()
+            else
+                for $tei in collection($srch:FRUS_COL)//tei:TEI[ft:query(., "hsg-volume-title:(" || $escaped || ")", $srch:ft-query-options)]
+                (: the title is in each volume's <id>_includes file :)
+                let $id := substring-before($tei/@xml:id, "_includes")
+                where $id ne ""
+                order by $id
+                return map { "id": $id, "title": (hsg:publication-title($id)[. ne ""], $id)[1], "href": "/historicaldocuments/" || $id }
+        let $facets := map:merge((
+            map { "frus-search-role": "title" },
+            if (exists($p?("volume-id"))) then map { "frus-volume-id": $p?("volume-id") } else ()
+        ))
+        let $query := string-join(("hsg-division-title:(" || $escaped || ")", $queryConf?("date-query")), " AND ")
+        let $chapters :=
+            for $tei in collection($srch:FRUS_COL)//tei:TEI[ft:query(., $query, map:merge(($srch:ft-query-options, map { "facets": $facets })))]
+            let $href := string(ft:field($tei, "hsg-url"))
+            let $div := ($tei/tei:text//tei:div)[1]
+            return map {
+                "volume": tokenize($href, "/")[3],
+                "title": normalize-space(string-join($div/tei:head//text()[not(ancestor::tei:note)])),
+                "href": $href
+            }
+        return map { "volumes": array { $volumes }, "chapters": array { $chapters } }
+};
+
+(:~
+ : The rollup rows above the results, on their first page: "10 volumes with
+ : "china" in the title" and "14 chapter titles with "law of the sea"", each
+ : a disclosure listing them, the chapters grouped by volume.
+ :)
+declare function srch:title-rollups($context as map(*)) as element(div)? {
+    let $r := srch:results($context)
+    let $volumes := $r?rollups?volumes?*
+    let $chapters := $r?rollups?chapters?*
+    let $q := "&#8220;" || $r?q || "&#8221;"
+    let $plural := function($n, $one, $many) { $n || " " || (if ($n eq 1) then $one else $many) }
+    return
+        if ($r?start gt 1 or empty(($volumes, $chapters))) then
+            ()
+        else
+            <div class="hsg-rollups">
+            {
+                if (exists($volumes)) then
+                    <details class="hsg-rollup">
+                        <summary class="hsg-rollup__summary">{$plural(count($volumes), "volume", "volumes")} with {$q} in the title</summary>
+                        <ul class="usa-list usa-list--unstyled hsg-rollup__list">
+                        {
+                            for $v in $volumes
+                            return <li><a href="{$context?context-path}{$v?href}">{$v?title}</a></li>
+                        }
+                        </ul>
+                    </details>
+                else (),
+                if (exists($chapters)) then
+                    <details class="hsg-rollup">
+                        <summary class="hsg-rollup__summary">{$plural(count($chapters), "chapter title", "chapter titles")} with {$q}</summary>
+                        {
+                            for $c in $chapters
+                            group by $vol := $c?volume
+                            order by $vol
+                            return
+                                <div class="hsg-rollup__group">
+                                    <p class="hsg-rollup__volume">{(hsg:publication-title($vol)[. ne ""], $vol)[1]}</p>
+                                    <ul class="usa-list usa-list--unstyled hsg-rollup__list">
+                                    {
+                                        for $one in $c
+                                        return <li><a href="{$context?context-path}{$one?href}">{$one?title}</a></li>
+                                    }
+                                    </ul>
+                                </div>
+                        }
+                    </details>
+                else ()
+            }
+            </div>
+};
+
+(: ============== timelines ============== :)
+
+(:~ How many semantic matches the semantic timeline plots: more than the
+ : hybrid search's vector leg ($srch:VECTOR_K), to show when a topic was
+ : discussed, not only where the best few are. :)
+declare variable $srch:TIMELINE_K as xs:integer := 500;
+
+(:~
+ : The timelines above a Historical Documents search, drawn by TEI
+ : Publisher's pb-timeline from srch:timeline-data: the results by date, and
+ : with hybrid mode the top $srch:TIMELINE_K semantic matches by date. A
+ : selected range searches again with it as the date filter
+ : (resources/scripts/search-timeline.js). Only FRUS divisions are dated, so
+ : the timelines show only when the search is limited to Historical
+ : Documents. Each one's data-hsg-src names the search's cache entry; the
+ : script loads it, because pb-timeline's own loader (iron-ajax) isn't in
+ : the pb-components bundle the site loads, so its url and auto do nothing.
+ :)
+declare function srch:timeline($context as map(*)) as element(div)? {
+    let $r := srch:results($context)
+    return
+        if ($r?within ne "documents" or $r?("hit-count") eq 0 or $r?mode eq "similar") then
+            ()
+        else
+            <div class="hsg-timelines">
+            {
+                for $kind in ("results", "semantic"[$r?mode eq "hybrid" and exists($r?q)])
+                return
+                    <div class="hsg-timeline">
+                        <p class="hsg-timeline__label">{
+                            if ($kind eq "results") then "Results by date"
+                            else "When this topic was discussed: the " || $srch:TIMELINE_K || " closest semantic matches by date"
+                        }</p>
+                        <pb-timeline data-hsg-src="{$context?context-path}/api/search/timeline/{$r?id}/{$kind}"
+                            resettable="resettable" scopes='["D", "M", "Y", "5Y", "10Y"]' max-interval="60">
+                            <span slot="label">Showing:&#160;</span>
+                        </pb-timeline>
+                    </div>
+            }
+            <p class="hsg-timeline__hint">Click a bar, or drag across several, to search within those dates. Undated documents aren't shown.</p>
+            </div>
+};
+
+(:~
+ : The data of one timeline, as pb-timeline reads it: for each date
+ : (YYYY-MM-DD), the count of FRUS divisions and links to the first three.
+ : Undated divisions are left out. $kind "results" counts the search's result set;
+ : "semantic" the $srch:TIMELINE_K nearest FRUS divisions to the query.
+ : Empty when the search is no longer cached.
+ :)
+declare function srch:timeline-data($id as xs:string, $kind as xs:string, $contextPath as xs:string) as map(*) {
+    let $entry := cache:get($srch:CACHE, $id)
+    let $hits :=
+        if (empty($entry?params)) then ()
+        else if ($kind eq "semantic") then srch:timeline-semantic-hits($entry?params)
+        else $entry?hits[self::tei:TEI]
+    return map:merge(
+        for $hit in $hits
+        let $date := srch:timeline-date($hit)
+        (: pb-timeline accepts "?" for undated items, but then labels the
+           range "… – undefined", so undated divisions are left out :)
+        where $date ne "?"
+        group by $date
+        return map:entry($date, map {
+            "count": count($hit),
+            "info": array {
+                for $h in subsequence($hit, 1, 3)
+                let $d := srch:hit-division($h)
+                return serialize(
+                    <a href="{$contextPath}/historicaldocuments/{substring-before($h/@xml:id, '_')}/{$d/@xml:id}" part="tooltip-link">{srch:frus-title($d)}</a>)
+            }
+        })
+    )
+};
+
+(:~ The FRUS divisions nearest the search's query, filtered as its vector leg is. :)
+declare %private function srch:timeline-semantic-hits($p as map(*)) as element()* {
+    let $vec := srch:embed-query($p?q)
+    let $range := srch:date-range($p?("start-date"), $p?("end-date"), $p?("start-time"), $p?("end-time"))
+    let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), (), $range?start, $range?end, map {})
+    let $opts := map:merge((
+        $srch:ft-query-options,
+        $queryConf?facets,
+        $queryConf?("date-query") ! map { "filter-query": . }
+    ))
+    return
+        if (empty($vec)) then ()
+        else $queryConf?("frus-docs")//tei:TEI[ft:query-vector(., $vec, $srch:TIMELINE_K, $opts)][tei:text//tei:div]
+};
+
+(:~ A FRUS hit's date for the timeline: the day of its hsg-date-min, the
+ : indexed date the date sorts use (idx:frus-date-min: the dateline's first
+ : date, its @from, @notBefore or @when, normalized), or "?" when it has
+ : none. :)
+declare %private function srch:timeline-date($hit as element()) as xs:string {
+    let $min := try { ft:binary-field($hit, "hsg-date-min", "xs:dateTime") } catch * { () }
+    return ($min ! substring(string(.), 1, 10), "?")[1]
 };
 
 (: ============== per-type result rendering registry ============== :)
@@ -448,11 +941,248 @@ declare %private function srch:meta-row($label as xs:string, $value as item()*) 
     <dd>{$value}</dd>
 };
 
-(:~ The keyword-in-context snippets of a hit, at most five, each wrapped in
- : its own span so the card can hold every match to a single line. :)
-declare %private function srch:snippets($summaries as element()*) as element(span)* {
-    for $summary in subsequence($summaries, 1, 5)
-    return <span class="hsg-snippet">{$summary/*}</span>
+(:~
+ : The keyword-in-context snippets of the matches in $root, at most five,
+ : each wrapped in its own span so the card can hold every match to a single
+ : line. A snippet shows up to $width characters before its first match and
+ : after its last. A match within $width characters of the previous one is
+ : highlighted in the same snippet instead of starting another, so matches
+ : close together ("Star Wars or Hot Wars") don't each repeat the passage.
+ :)
+declare %private function srch:snippets($root as node(), $width as xs:integer) as element(span)* {
+    srch:snippets-from($root, ($root//exist:match)[1], $width, 5)
+};
+
+declare %private function srch:snippets-from($root as node(), $match as element(exist:match)?,
+        $width as xs:integer, $remaining as xs:integer) as element(span)* {
+    if (empty($match) or $remaining le 0) then
+        ()
+    else
+        let $run := srch:snippet-run($root, $match, $width, 0, 0, (), $match)
+        return (
+            <span class="hsg-snippet">{
+                srch:text-before($root, $match, $width, ""),
+                <span class="hi">{srch:spaces(string($match))}</span>,
+                $run?content
+            }</span>,
+            srch:snippets-from($root, ($run?last/following::exist:match)[1], $width, $remaining - 1)
+        )
+};
+
+(:~ Up to $width characters of the text before $node within $root, white
+ : space collapsed, starting at a word boundary, with "..." in front when it
+ : doesn't start at $root's. :)
+declare %private function srch:text-before($root as node(), $node as node(), $width as xs:integer,
+        $text as xs:string) as xs:string {
+    let $prev := $node/preceding::text()[1]
+    return
+        if (string-length($text) gt $width) then
+            "..." || replace(substring($text, string-length($text) - $width), "^\S*\s+", "")
+        else if (empty($prev) or empty($prev/ancestor::node()[. is $root])) then
+            replace($text, "^\s+", "")
+        else
+            srch:text-before($root, $prev, $width, srch:spaces($prev || $text))
+};
+
+(:~
+ : The rest of a snippet after $node: up to $width characters of text, and
+ : any match reached within them, which continues the snippet. $chars counts
+ : the text since the last match, $total all of it since the snippet's first
+ : match: past 2 × $width, the snippet ends and the next match starts another.
+ :)
+declare %private function srch:snippet-run($root as node(), $node as node(), $width as xs:integer,
+        $chars as xs:integer, $total as xs:integer, $content as item()*, $last as element(exist:match)) as map(*) {
+    let $next := $node/following::text()[1]
+    let $match := $next/parent::exist:match
+    (: counted with its white space collapsed, as it is shown :)
+    let $piece := srch:spaces($next)
+    return
+        if (empty($next) or empty($next/ancestor::node()[. is $root])) then
+            map { "content": $content, "last": $last }
+        else if (exists($match)) then
+            if ($total le 2 * $width) then
+                srch:snippet-run($root, $match, $width, 0, $total + string-length($piece),
+                    ($content, <span class="hi">{srch:spaces(string($match))}</span>), $match)
+            else
+                map { "content": ($content, "..."), "last": $last }
+        else if ($chars + string-length($piece) gt $width) then
+            (: end at a word boundary: drop a word the cut would split :)
+            let $cut := replace(substring($piece, 1, $width - $chars + 1), "\s+\S*$", "")
+            return map { "content": ($content, $cut, "..."), "last": $last }
+        else
+            srch:snippet-run($root, $next, $width, $chars + string-length($piece), $total + string-length($piece),
+                ($content, $piece), $last)
+};
+
+(:~ Runs of white space, such as the source's line breaks and indentation, as one space. :)
+declare %private function srch:spaces($text as xs:string?) as xs:string {
+    replace($text, "\s+", " ")
+};
+
+(: ============== snippet comparison (evaluation only) ============== :)
+
+(:~ The three snippet approaches for one FRUS hit, one row each, with the
+ : milliseconds each took (after the shared ft:highlight-field-matches, which
+ : kwic and the walker both need and ft:passages doesn't): kwic as today, the
+ : walker from fix/kwic-merge-nearby-matches, and ft:passages with the
+ : settings exist-strategy suggested for a results list, on the search hit
+ : itself (needs eXist feat/ft-passages-fieldtext, which fixed passages for a
+ : hit from a facets query). It uses the field the search matched: with word
+ : forms the stemmed one, or the exact one for a hit only it found. :)
+declare %private function srch:compare-snippets($doc as element(), $field as xs:string,
+        $highlighted as element()*) as element()* {
+    let $ms := function($start as xs:time) { (util:system-time() - $start) div xs:dayTimeDuration("PT0.001S") }
+    let $t0 := util:system-time()
+    let $kwic :=
+        for $hit in subsequence($highlighted//exist:match, 1, 5)
+        return <span class="hsg-snippet">{kwic:get-summary($highlighted, $hit, <config width="40"/>)/*}</span>
+    let $kwicMs := $ms($t0)
+    let $t1 := util:system-time()
+    let $walker := $highlighted[1] ! srch:walker-snippets(., 40)
+    let $walkerMs := $ms($t1)
+    let $t2 := util:system-time()
+    let $found :=
+        try {
+            let $options := map {
+                (: five, like kwic and the walker, for a fair comparison :)
+                "max": 5, "order": "document", "length": 200, "max-length": 200,
+                (: eXist test/hsg-stack no longer merges these by default :)
+                "merge-initials": true(), "max-initials": 3,
+                "merge-quoted-continuation": true(), "dash-as-space": true(),
+                "highlight": function($text) { <span class="hi">{$text}</span> }
+            }
+            return
+                if ($field eq $srch:STEMMED_FIELD) then
+                    (ft:passages($doc, $field, $options), ft:passages($doc, "hsg-fulltext", $options)[empty(ft:passages($doc, $field, $options))])
+                else
+                    ft:passages($doc, $field, $options)
+        } catch * {
+            <span class="hsg-snippet hsg-passages-error">ft:passages: {$err:description}</span>
+        }
+    let $passagesMs := $ms($t2)
+    (: "…" where max-length cut the passage short of its sentence :)
+    let $passages :=
+        for $p in $found
+        return
+            if ($p/@class = "hsg-passages-error") then $p
+            else
+                <span class="hsg-snippet hsg-snippet--passage">{
+                    if ($p/@trimmed-start = "true") then "… " else (),
+                    $p/node(),
+                    if ($p/@trimmed-end = "true") then " …" else ()
+                }</span>
+    let $t3 := util:system-time()
+    let $flow := srch:flow-passages($found[not(@class = "hsg-passages-error")])
+    let $flowMs := $passagesMs + $ms($t3)
+    let $row := function($label, $items, $time) {
+        srch:meta-row($label || " (" || format-number($time, "0.0") || " ms)",
+            if (exists($items)) then $items else <span class="hsg-snippet"><em>none</em></span>)
+    }
+    return (
+        $row("kwic, as today", $kwic, $kwicMs),
+        $row("kwic fix (walker)", $walker, $walkerMs),
+        $row("ft:passages", $passages, $passagesMs),
+        $row("ft:passages, Google-style", $flow, $flowMs)
+    )
+};
+
+(:~
+ : ft:passages' passages as a search engine shows them: one paragraph, the
+ : passages in document order joined by "…", the matched words in bold, held
+ : to three lines, with a control that shows the rest when there is more
+ : than fits. A passage cut short of its sentence opens or closes with "…" as
+ : well, so no "…" is doubled.
+ :)
+declare %private function srch:flow-passages($found as element()*) as element(div)? {
+    if (empty($found)) then
+        ()
+    else
+        let $parts :=
+            for $p at $i in $found
+            return (
+                if ($i eq 1 and $p/@trimmed-start = "true") then "… "
+                else if ($i gt 1) then " … " else (),
+                for $node in $p/node()
+                return
+                    if ($node instance of element(span) and $node/@class = "hi") then <strong>{string($node)}</strong>
+                    else text { replace(string($node), "\s+", " ") },
+                if ($i eq count($found) and $p/@trimmed-end = "true") then " …" else ()
+            )
+        return
+            <div class="hsg-flow">
+                <span class="hsg-flow__text">{$parts}</span>
+                {
+                    (: three lines hold about 320 characters on a card :)
+                    if (string-length(string-join($parts ! string(.))) gt 320) then
+                        <details class="hsg-flow__more"><summary></summary></details>
+                    else ()
+                }
+            </div>
+};
+
+(:~
+ : The walker from fix/kwic-merge-nearby-matches (d915f2d), for comparison:
+ : snippets of the matches in $root, at most five. A snippet shows up to
+ : $width characters before its first match and after its last; a match
+ : within $width characters of the previous one is highlighted in the same
+ : snippet instead of starting another.
+ :)
+declare %private function srch:walker-snippets($root as node(), $width as xs:integer) as element(span)* {
+    srch:walker-from($root, ($root//exist:match)[1], $width, 5)
+};
+
+declare %private function srch:walker-from($root as node(), $match as element(exist:match)?,
+        $width as xs:integer, $remaining as xs:integer) as element(span)* {
+    if (empty($match) or $remaining le 0) then
+        ()
+    else
+        let $run := srch:walker-run($root, $match, $width, 0, 0, (), $match)
+        return (
+            <span class="hsg-snippet">{
+                srch:walker-before($root, $match, $width, ""),
+                <span class="hi">{srch:walker-spaces(string($match))}</span>,
+                $run?content
+            }</span>,
+            srch:walker-from($root, ($run?last/following::exist:match)[1], $width, $remaining - 1)
+        )
+};
+
+declare %private function srch:walker-before($root as node(), $node as node(), $width as xs:integer,
+        $text as xs:string) as xs:string {
+    let $prev := $node/preceding::text()[1]
+    return
+        if (string-length($text) gt $width) then
+            "..." || replace(substring($text, string-length($text) - $width), "^\S*\s+", "")
+        else if (empty($prev) or empty($prev/ancestor::node()[. is $root])) then
+            replace($text, "^\s+", "")
+        else
+            srch:walker-before($root, $prev, $width, srch:walker-spaces($prev || $text))
+};
+
+declare %private function srch:walker-run($root as node(), $node as node(), $width as xs:integer,
+        $chars as xs:integer, $total as xs:integer, $content as item()*, $last as element(exist:match)) as map(*) {
+    let $next := $node/following::text()[1]
+    let $match := $next/parent::exist:match
+    let $piece := srch:walker-spaces($next)
+    return
+        if (empty($next) or empty($next/ancestor::node()[. is $root])) then
+            map { "content": $content, "last": $last }
+        else if (exists($match)) then
+            if ($total le 2 * $width) then
+                srch:walker-run($root, $match, $width, 0, $total + string-length($piece),
+                    ($content, <span class="hi">{srch:walker-spaces(string($match))}</span>), $match)
+            else
+                map { "content": ($content, "..."), "last": $last }
+        else if ($chars + string-length($piece) gt $width) then
+            let $cut := replace(substring($piece, 1, $width - $chars + 1), "\s+\S*$", "")
+            return map { "content": ($content, $cut, "..."), "last": $last }
+        else
+            srch:walker-run($root, $next, $width, $chars + string-length($piece), $total + string-length($piece),
+                ($content, $piece), $last)
+};
+
+declare %private function srch:walker-spaces($text as xs:string?) as xs:string {
+    replace($text, "\s+", " ")
 };
 
 (:~ Metadata list of a card. :)
@@ -463,13 +1193,16 @@ declare %private function srch:meta-list($rows as element()*) as element(dl)? {
 (:~
  : Card content for a FRUS division: the place and date chips and the
  : recorded/encoded date rows (historical documents only), the resource id,
- : and the keyword snippets and score. No facsimile link: search results
- : don't offer one (OP#1432, a business decision; the reference site didn't
- : show it either).
+ : and the snippets and scores. No facsimile link: search results don't
+ : offer one (OP#1432, a business decision; the reference site didn't show
+ : it either).
  :)
-declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
+declare %private function srch:frus-card($hit as element(), $match as map(*)) as map(*) {
+    (: the rows come from the division; matches and score belong to the hit,
+       a division file's tei:TEI whose text is the division's and its footnotes :)
+    let $doc := srch:hit-division($hit)
     let $docId := $doc/@xml:id
-    let $volId := root($doc)/tei:TEI/@xml:id
+    let $volId := $hit/@xml:id
     (: the division subtype is a teiHeader bibl in this data model, not an
        attribute on the div (see ext:get-division-subtype), so the rows and
        chips reserved for historical documents key off that :)
@@ -479,12 +1212,6 @@ declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
     let $dateString := normalize-space(string-join($date//text()[not(./ancestor::tei:note)]))
     let $placeName := ($doc//tei:placeName)[1]
     let $placeNameString := normalize-space(string-join($placeName//text()[not(./ancestor::tei:note)]))
-    let $highlighted := ft:highlight-field-matches($doc, "hsg-fulltext")
-    let $snippets := srch:snippets(
-        for $hit in subsequence($highlighted//exist:match, 1, 5)
-        return kwic:get-summary($highlighted, $hit, <config width="40"/>)
-    )
-    let $score := ft:score($doc)
     return map {
         "tags": if ($historical) then ($placeNameString, $dateString)[. ne ""] else (),
         "summary": srch:meta-list((
@@ -494,8 +1221,10 @@ declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
                 if ($date/@when) then srch:meta-row("Encoded Date", <code>when="{string($date/@when)}"</code>) else ()
             ) else (),
             srch:meta-row("Resource ID", $volId/string() || "/" || $docId/string()),
-            if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else (),
-            if ($score) then srch:meta-row("Keyword Relevance", $score) else ()
+            srch:found-by-row($match),
+            srch:text-row($hit, $match, 40),
+            if ($match?keyword) then ft:score($hit)[boolean(.)] !srch:meta-row("Keyword Relevance", .) else (),
+            srch:similarity-row($match)
         ))
     }
 };
@@ -504,44 +1233,242 @@ declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
  : What one hit renders as: title and href for the card heading, plus
  : "tags" (chips above the title) and "summary" (the metadata list), both
  : empty where a hit type has nothing to show. The href trusts the hsg-url Lucene field (module doc
- : above) except for the two element types with no such field.
+ : above) except for the two element types with no such field. $match says
+ : which searches found the hit (see srch:hit-match).
  :)
-declare %private function srch:render-hit($hit as element()) as map(*) {
+declare %private function srch:render-hit($hit as element(), $match as map(*)) as map(*) {
     let $href := ft:field($hit, "hsg-url")
+    (: the page a card's passages link to, as its heading links it :)
+    let $match := map:put($match, "href", string($href)[. ne ""] ! (string($match?("context-path")) || .))
     let $card := function($title as xs:string, $rows as element()*) as map(*) {
-        map { "title": $title, "href": $href, "tags": (), "summary": srch:meta-list($rows) }
+        map { "title": $title, "href": $href, "tags": (), "summary": srch:meta-list(($rows, srch:similarity-row($match))) }
     }
     return
         typeswitch ($hit)
             case element(persName) return
-                $card(string-join(($hit/forename, $hit/surname, $hit/genName), " "), ())
+                $card(string-join(($hit/forename, $hit/surname, $hit/genName), " "), srch:found-by-row($match))
             case element(visit) return
-                $card("Visits By Foreign Leaders: " || string-join($hit/visitor, ", "), ())
+                $card("Visits By Foreign Leaders: " || string-join($hit/visitor, ", "), srch:found-by-row($match))
             case element(trips) return
-                let $expanded := util:expand($hit)
-                let $count := count($expanded//exist:match/ancestor::trip)
-                return $card("Travels: " || string-join($hit/trip[1]/name, ", "), srch:meta-row("Matching Trips", $count))
+                $card("Travels: " || string-join($hit/trip[1]/name, ", "), (
+                    srch:found-by-row($match),
+                    if ($match?keyword) then srch:meta-row("Matching Trips", srch:matching-trips($hit)) else ()
+                ))
+            case element(tei:TEI) return
+                map:merge((map { "title": srch:frus-title(srch:hit-division($hit)), "href": $href }, srch:frus-card($hit, $match)))
             case element(tei:div) return
                 if (ft:field($hit, "hsg-publication") = "frus" or starts-with(base-uri($hit), $srch:FRUS_COL)) then
-                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit)))
+                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card(root($hit)/tei:TEI, $match)))
                 else
                     $card(
                         normalize-space(string-join(($hit/tei:head)[1]//text()[not(./ancestor::tei:note)])),
-                        srch:keyword-row(kwic:summarize(util:expand($hit), <config xmlns="" width="60"/>))
+                        (srch:found-by-row($match), srch:text-row($hit, $match, 60))
                     )
             case element(tei:body) return
                 $card(
                     normalize-space(string-join(($hit/ancestor::tei:TEI//tei:titleStmt/tei:title)[1])),
-                    srch:keyword-row(kwic:summarize(util:expand($hit), <config xmlns="" width="60"/>))
+                    (srch:found-by-row($match), srch:text-row($hit, $match, 60))
                 )
             default return
                 map { "title": "Untitled result", "href": "#", "tags": (), "summary": () }
 };
 
-(:~ The "Keyword Results" row of the non-FRUS hit types, from kwic:summarize. :)
-declare %private function srch:keyword-row($summaries as element()*) as element()* {
-    let $snippets := srch:snippets($summaries)
-    return if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else ()
+(:~
+ : Which searches found a hit: "keyword", and "semantic" with the hit's
+ : similarity when the semantic search found it. "hybrid" says the page ran
+ : both, so the cards say which found each hit. $semantic is the
+ : srch:semantic-matches map of the search, empty for a keyword search.
+ :)
+declare %private function srch:hit-match($hit as element(), $semantic as map(*)?, $hybrid as xs:boolean) as map(*) {
+    let $id := generate-id($hit)
+    (: a cached map: read with the lookup operator, as in srch:results :)
+    let $found := if (exists($semantic) and map:contains($semantic, $id)) then $semantic?($id) else ()
+    return map {
+        "hybrid": $hybrid,
+        "keyword": empty($found) or $found?keyword,
+        "semantic": $found?score
+    }
+};
+
+(:~ The "Found By" row of a hybrid search's cards. :)
+declare %private function srch:found-by-row($match as map(*)) as element()* {
+    if ($match?hybrid) then
+        srch:meta-row("Found By",
+            if (exists($match?semantic) and $match?keyword) then "Keyword and semantic search"
+            else if (exists($match?semantic)) then "Semantic search"
+            else "Keyword search")
+    else
+        ()
+};
+
+(:~ The "Semantic Similarity" row: the cosine similarity of the hit's
+ : embedding to the query's, for a hit the semantic search found. :)
+declare %private function srch:similarity-row($match as map(*)) as element()* {
+    $match?semantic ! srch:meta-row("Semantic Similarity", .)
+};
+
+(:~
+ : The text row of a tei:div or tei:body hit. A keyword match shows its
+ : "Keyword Results" snippets: the search queries the hsg-fulltext field, so
+ : the matches are marked in the field's stored text, as for FRUS;
+ : util:expand finds none. A package that doesn't store the field has no
+ : snippets. With snippets=compare, a FRUS keyword match shows its snippets
+ : three ways instead (srch:compare-snippets).
+ :
+ : A hybrid search's card also shows its best semantic passage
+ : (srch:best-chunk), linked to its place in the document. A hit with no
+ : chunked field, outside FRUS, shows the opening of its text instead, when
+ : only the semantic search found it (srch:opening).
+ :)
+declare %private function srch:text-row($hit as element(), $match as map(*), $width as xs:integer) as element()* {
+    let $keyword :=
+        if ($match?keyword) then
+            (: The matches are on the field the search used. With word forms,
+               that is the stemmed field, except for a hit that only the exact
+               branch found (a wildcard term). :)
+            let $field := srch:match-field(($match?options, map {})[1])
+            let $highlighted :=
+                if ($field eq $srch:STEMMED_FIELD) then
+                    (ft:highlight-field-matches($hit, $field)[.//exist:match], ft:highlight-field-matches($hit, "hsg-fulltext"))[1]
+                else
+                    ft:highlight-field-matches($hit, $field)[1]
+            return
+                if ($match?options?snippets eq "compare" and $hit instance of element(tei:TEI)) then
+                    srch:compare-snippets($hit, $field, $highlighted)
+                else
+                    let $snippets := $highlighted ! srch:snippets(., $width)
+                    return if (exists($snippets)) then srch:meta-row("Keyword Results", $snippets) else ()
+        else
+            ()
+    let $semantic :=
+        if ($match?hybrid) then
+            (: snippets=compare shows the three best, best first :)
+            let $compare := $match?options?snippets eq "compare"
+            let $best := srch:best-chunks($hit, $match, if ($compare) then 3 else 1)
+            return
+                if (exists($best)) then srch:meta-row(if ($compare) then "Top Semantic Matches" else "Best Semantic Match", $best)
+                else if (not($match?keyword)) then srch:opening($hit) ! srch:meta-row("Semantic Match", .)
+                else ()
+        else
+            ()
+    return ($keyword, $semantic)
+};
+
+(:~
+ : The passage of a prose hit nearest the query: its best chunk of the
+ : chunked field hsg-passages, from ft:vector-chunks (eXist test/hsg-stack).
+ : Every prose package defines the field (hsg-jinks-data and the other
+ : packages' test/vector-chunks); a hit without it has no chunks, so no row.
+ : The hit's chunks are scored against the query's vector, so a hit only
+ : the keyword search found has one too, and the query's keywords are
+ : marked in it, with the field the search used: every term or phrase that
+ : occurs, even where the whole query doesn't match. The passage links to
+ : its place in the hit's page (srch:text-fragment). $n is how many of the
+ : best to show, best first.
+ :)
+declare %private function srch:best-chunks($hit as element(), $match as map(*), $n as xs:integer) as element(span)* {
+    if (not($hit instance of element(tei:TEI) or $hit instance of element(tei:div) or $hit instance of element(tei:body))
+        or empty($match?("query-vector"))) then
+        ()
+    else
+        try {
+            let $options := map:merge((
+                map { "field": "hsg-passages", "vector": $match?("query-vector") },
+                $match?q[normalize-space(.) ne ""] ! map {
+                    "highlight": map {
+                        "field": srch:match-field(($match?options, map {})[1]),
+                        "query": srch:escape-unsupported-characters(.),
+                        "options": $srch:ft-query-options
+                    }
+                }
+            ))
+            for $chunk in subsequence(ft:vector-chunks($hit, $options), 1, $n)
+            let $text := normalize-space($chunk?text)[. ne ""]
+            let $fragment := $text ! srch:text-fragment(.)
+            return
+                $text !
+                    <span class="hsg-snippet hsg-snippet--opening">{
+                        "… ",
+                        if (exists($chunk?marked)) then srch:marked-chunk($chunk?marked) else .,
+                        " …",
+                        if (exists($match?href) and exists($fragment)) then
+                            (" ", <a class="hsg-passage-link" href="{$match?href}{$fragment}">Go to passage</a>)
+                        else (),
+                        <span class="hsg-chunk-meta"> (chunk {$chunk?chunk}, similarity {format-number($chunk?score, "0.000")})</span>
+                    }</span>
+        } catch * {
+            <span class="hsg-snippet">best passage: {$err:description}</span>
+        }
+};
+
+(:~ A chunk's text with its keyword matches as the snippets' highlights,
+ : white space collapsed as in the plain text. :)
+declare %private function srch:marked-chunk($marked as element()) as node()* {
+    for $node in $marked/node()
+    return
+        if ($node instance of element(exist:match)) then
+            <span class="hi">{normalize-space($node)}</span>
+        else
+            text { replace(string($node), "\s+", " ") }
+};
+
+(:~
+ : A URL text fragment (#:~:text=start,end) for a passage: the browser
+ : scrolls to it and highlights it, with no ids in the page. A chunk's first
+ : and last words can be cut, so they're left out. The page must show the
+ : passage's text as the chunk has it; where it doesn't (a footnote's text
+ : inside it, say), the link just opens the page.
+ :)
+declare %private function srch:text-fragment($text as xs:string) as xs:string? {
+    let $words := tokenize($text, " ")[position() gt 1][position() lt last()]
+    (: text fragments reserve "-", "," and "&": encode-for-uri leaves "-" :)
+    let $encode := function($w as xs:string*) { replace(encode-for-uri(string-join($w, " ")), "-", "%2D") }
+    let $n := count($words)
+    return
+        if ($n lt 4) then ()
+        else if ($n le 12) then "#:~:text=" || $encode($words)
+        else "#:~:text=" || $encode(subsequence($words, 1, 6)) || "," || $encode(subsequence($words, $n - 5))
+};
+
+(:~
+ : The opening of a hit's text, the part its semantic match is based on.
+ : The packages embed each node's whole text with all-MiniLM-L6-v2, which
+ : reads only the first 128 tokens, about 100 words, and ignores the rest.
+ : So a semantic hit matched on its opening, whatever comes later. Shows
+ : $srch:OPENING_WORDS words of it, read from no more than the first few
+ : thousand characters, so a long division isn't read in full.
+ :)
+declare %private function srch:opening($hit as element()) as element(span)? {
+    (: the heading is already the card's title, and notes aren't prose :)
+    let $text := string-join(subsequence(srch:hit-division($hit)//text()[not(ancestor::tei:head or ancestor::tei:note)], 1, 400))
+    let $words := tokenize(normalize-space(substring($text, 1, 4000)), " ")
+    return
+        if (exists($words)) then
+            <span class="hsg-snippet hsg-snippet--opening">{
+                string-join(subsequence($words, 1, $srch:OPENING_WORDS), " ")
+                || (if (count($words) gt $srch:OPENING_WORDS) then " ..." else ())
+            }</span>
+        else
+            ()
+};
+
+(:~
+ : How many of a travels hit's trips match. The matches are marked in the
+ : stored hsg-fulltext values, one exist:field per value of the field's
+ : expression in travels' index configuration, with no trip around them. The
+ : same expression over the hit gives each value's trip, position by
+ : position. If the counts disagree (the configuration has changed), this
+ : counts matching values instead.
+ :)
+declare %private function srch:matching-trips($hit as element(trips)) as xs:integer {
+    let $values := ft:highlight-field-matches($hit, "hsg-fulltext")
+    let $sources := ($hit/trip/name, $hit/trip/country, $hit/trip/remarks, $hit/trip/locale)
+    let $matching := for $value at $i in $values where $value//exist:match return $i
+    return
+        if (count($values) eq count($sources)) then
+            count(distinct-values(for $i in $matching return generate-id($sources[$i]/parent::trip)))
+        else
+            count($matching)
 };
 
 (: ============== template-facing functions ============== :)
@@ -553,8 +1480,15 @@ declare function srch:results-summary($context as map(*)) as element(p) {
             <p class="usa-prose hsg-results-summary">
                 Displaying {$r?start}&#8211;{$r?end} of <span class="search-count">{format-number($r?("hit-count"), "#,###")}</span> results
                 {
+                    (: a "similar to" search names the hit it started from :)
+                    $r?seed ! (
+                        let $seed := srch:render-hit(., map { "keyword": false() })
+                        return (" most similar to ", <a href="{$context?context-path}{$seed?href}">{$seed?title}</a>, " ")
+                    )
+                }
+                {
                     string-join((
-                        if (normalize-space($r?q) ne "") then ("for keyword &#8220;" || $r?q || "&#8221;") else (),
+                        if (normalize-space($r?q) ne "") then ("for keyword &#8220;" || $r?q || "&#8221;" || srch:match-phrase($r?match)) else (),
                         if ($r?within = "entire-site" or empty($r?within)) then "across the entire Office of the Historian website"
                         else "within " || string-join($r?within, ", "),
                         if (exists($r?("range-start")) and exists($r?("range-end"))) then
@@ -577,8 +1511,11 @@ declare function srch:results-list($context as map(*)) as element(ul) {
     return
         <ul class="usa-collection hsg-results">
         {
+            (: test/semantic-chunks: the query's vector, once per page, for the
+               semantic hits' best passages :)
+            let $qvec := if ($r?mode eq "hybrid" and exists($r?q)) then try { srch:embed-query($r?q) } catch * { () } else ()
             for $hit in $r?hits
-            let $rendered := srch:render-hit($hit)
+            let $rendered := srch:render-hit($hit, map:merge((srch:hit-match($hit, $r?semantic, $r?mode eq "hybrid"), map { "query-vector": $qvec, "q": $r?q, "options": $r?match, "context-path": $context?context-path })))
             return
                 <li class="usa-collection__item">
                     <div class="usa-collection__body">
@@ -595,10 +1532,33 @@ declare function srch:results-list($context as map(*)) as element(ul) {
                         }
                         <h3 class="usa-collection__heading"><a href="{$context?context-path}{$rendered?href}">{$rendered?title}</a></h3>
                         { $rendered?summary }
+                        { srch:similar-link($context, $r, $hit) }
                     </div>
                 </li>
         }
         </ul>
+};
+
+(:~
+ : A card's "Similar documents" link: a "similar to" search from this hit,
+ : keeping the current search's sections and dates, so a reader can step
+ : from result to result through the semantic index. Only for the tei:div
+ : and tei:body hits srch:like-seed accepts.
+ :)
+declare %private function srch:similar-link($context as map(*), $r as map(*), $hit as element()) as element(p)? {
+    if ($hit[self::tei:div or self::tei:body or self::tei:TEI] and $srch:LIKE_ROOTS = substring-before(substring-after(document-uri(root($hit)), "/db/apps/"), "/")) then
+        let $query := string-join((
+            "like=" || encode-for-uri(srch:like-ref($hit)),
+            $r?within[not(. = ("", "entire-site"))] ! ("within=" || encode-for-uri(.)),
+            $r?("start-date")[. ne ""] ! ("start-date=" || .),
+            $r?("end-date")[. ne ""] ! ("end-date=" || .)
+        ), "&amp;")
+        return
+            <p class="hsg-result__actions">
+                <a class="hsg-result__similar" href="{$context?context-path}/search?{$query}">Similar documents</a>
+            </p>
+    else
+        ()
 };
 
 declare %private function srch:pagination-query-string($r as map(*), $start as xs:integer) as xs:string {
@@ -613,7 +1573,10 @@ declare %private function srch:pagination-query-string($r as map(*), $start as x
         $r?("start-time")[. ne ""] ! ("start-time=" || .),
         $r?("end-time")[. ne ""] ! ("end-time=" || .),
         "sort-by=" || $r?("sort-by"),
-        if ($r?mode eq "hybrid") then "mode=hybrid" else ()
+        if ($r?mode eq "hybrid") then "mode=hybrid" else (),
+        $r?like ! ("like=" || encode-for-uri(.)),
+        ("stem", "case", "punct")[$r?match?(.)] ! (. || "=yes"),
+        $r?match?snippets[. ne ""] ! ("snippets=" || encode-for-uri(.))
     ), "&amp;")
 };
 
@@ -683,7 +1646,68 @@ declare function srch:mode-toggle($context as map(*)) as element(div) {
             { if ($hybrid) then attribute checked { "checked" } else () }
             </input>
             <label class="usa-checkbox__label" for="mode-hybrid">Use the new hybrid mode with semantic search</label>
+            {
+                (: keeps a "similar to" search when the filters or sort change;
+                   ignored once a keyword is entered (srch:read-params) :)
+                normalize-space(page:parameter($context, "like", ()))[. ne ""] !
+                    <input type="hidden" name="like" value="{.}" form="hsg-search"/>
+            }
         </div>
+};
+
+(:~ The match options, one checkbox each, ticked submits name=yes:
+ : word forms (stem), case and punctuation. All unticked, the default,
+ : matches words regardless of case and punctuation, exactly as written
+ : otherwise. Word forms give way to either sensitivity (srch:read-params). :)
+declare function srch:match-options($context as map(*)) as element(div)+ {
+    for $option in (
+        map { "name": "stem", "label": "Match word forms (negotiation also finds negotiations, negotiating)" },
+        map { "name": "case", "label": "Match case (Goa, not GOA)" },
+        map { "name": "punct", "label": "Match punctuation (S/S and F-16 as written)" }
+    )
+    let $id := "match-" || $option?name
+    return
+        <div class="usa-checkbox hsg-search-mode">
+            <input class="usa-checkbox__input" id="{$id}" type="checkbox" name="{$option?name}" value="yes" form="hsg-search">
+            { if (normalize-space(page:parameter($context, $option?name, "")) eq "yes") then attribute checked { "checked" } else () }
+            </input>
+            <label class="usa-checkbox__label" for="{$id}">{$option?label}</label>
+        </div>
+};
+
+(:~ The search options under the search field, in one disclosure: the
+ : hybrid mode and the three match options. Closed by default, so the search
+ : field stays uncluttered; open whenever an option is on, so a results page
+ : shows what was applied. :)
+declare function srch:search-options($context as map(*)) as element(details) {
+    let $on := ("mode", "stem", "case", "punct") ! normalize-space(page:parameter($context, ., ""))
+    return
+        <details class="hsg-search-options">
+            { if ($on = ("hybrid", "yes")) then attribute open { "open" } else () }
+            <summary class="hsg-search-options__summary">Search options</summary>
+            <fieldset class="usa-fieldset hsg-search-options__group">
+                <legend class="usa-sr-only">Search options</legend>
+                { srch:mode-toggle($context), srch:match-options($context) }
+            </fieldset>
+            {
+                (: evaluation only: keep snippets=compare across searches :)
+                normalize-space(page:parameter($context, "snippets", ""))[. ne ""] !
+                    <input type="hidden" name="snippets" value="{.}" form="hsg-search"/>
+            }
+        </details>
+};
+
+(:~ The results summary's note on the match options, after the keyword. :)
+declare %private function srch:match-phrase($match as map(*)) as xs:string {
+    let $parts := (
+        if ($match?stem) then "its word forms" else (),
+        if ($match?case) then "matching case" else (),
+        if ($match?punct) then "matching punctuation" else ()
+    )
+    return
+        if (empty($parts)) then ""
+        else if ($match?stem) then " and " || string-join($parts, ", ")
+        else ", " || string-join($parts, " and ")
 };
 
 (:~ The section checkboxes of the sidebar, on the landing and the results
@@ -962,4 +1986,114 @@ declare %private function srch:filter-volumes($context as map(*), $within as xs:
                     </div>,
                 srch:documents-only($within, "disable")
             )
+};
+
+(: ============== similar documents (FRUS document pages) ============== :)
+
+(:~ Cache of each FRUS document's similar documents, as plain strings: the
+ : list depends only on the index, so it is kept an hour after its last use.
+ : pre-install.xql destroys it, as $srch:CACHE. :)
+declare variable $srch:SIMILAR_CACHE as xs:string := "hsg-similar";
+declare variable $srch:SIMILAR_CACHE_CONFIG as map(*) := map {
+    "expireAfterAccess": 3600000,
+    "maximumSize": 5000
+};
+
+(:~ How many similar documents a document page lists. :)
+declare variable $srch:SIMILAR_COUNT as xs:integer := 8;
+
+(:~ How many candidates the panel asks the vector index for, before keeping
+ : the SIMILAR_COUNT nearest. Lucene's HNSW search explores only about k
+ : candidates, so asking for 12 missed better matches: on a FRUS sample, k=5
+ : kept 1 of the true top 5 for 2 of 10 queries, while k=100 cost no
+ : measurable time (6 to 10 ms either way). :)
+declare variable $srch:SIMILAR_CANDIDATES as xs:integer := 100;
+
+(:~
+ : The "Similar documents" panel of a FRUS document page, for the sidebar
+ : (srch:similar-loader). It loads after the page, through
+ : GET /api/similar/{publicationId}/{divisionId}, because finding the
+ : neighbors resolves the FRUS collection, which can take a moment.
+ :)
+declare function srch:similar-loader($context as map(*)) as element()? {
+    let $div := ($context?doc?content//tei:text//tei:div[@xml:id])[1]
+    let $publicationId := replace(document-uri(root($div)), "^.*/frus-v2-data/([^/]+)/.*$", "$1")
+    return
+        if ($div and $publicationId ne document-uri(root($div))
+            and starts-with(normalize-space(($context?doc?content//tei:bibl[@type='frus-division-type'])[1]), "document")) then
+            <pb-load class="hsg-similar-loader" url="api/similar/{$publicationId}/{$div/@xml:id}" auto="auto"/>
+        else
+            ()
+};
+
+(:~
+ : The documents whose embeddings are nearest a FRUS document's, across all
+ : of FRUS: documents only, so title-only chapters and front matter don't
+ : crowd them out. Each is a map of strings (href, title, volume, date,
+ : score), so the cache holds no nodes.
+ :)
+declare %private function srch:similar-documents($publicationId as xs:string, $divisionId as xs:string) as map(*)* {
+    let $key := $publicationId || "/" || $divisionId
+    let $create := cache:create($srch:SIMILAR_CACHE, $srch:SIMILAR_CACHE_CONFIG)
+    let $cached := cache:get($srch:SIMILAR_CACHE, $key)
+    return
+        if (exists($cached)) then
+            (: an empty list is cached as an empty array :)
+            $cached?*
+        else
+            (: FRUS is indexed at the division file's tei:TEI :)
+            let $seed := collection($srch:FRUS_COL || "/data/frus-v2-data/" || $publicationId)/id($divisionId)[self::tei:div][1] ! root(.)/tei:TEI
+            let $vec := $seed ! srch:like-vector(.)
+            let $opts := map { "facets": map { "frus-division-type": "document" } }
+            let $hits :=
+                if (exists($vec)) then
+                    try { collection($srch:FRUS_COL)//tei:TEI[ft:query-vector(., $vec, $srch:SIMILAR_CANDIDATES, $opts)][tei:text//tei:div] } catch * { () }
+                else
+                    ()
+            let $list := subsequence(
+                for $hit in $hits[not(. is $seed)]
+                let $score := ft:score($hit)
+                let $div := srch:hit-division($hit)
+                order by $score descending
+                return map {
+                    "href": string(ft:field($hit, "hsg-url")),
+                    "title": srch:frus-title($div),
+                    "volume": srch:volume-label(replace(document-uri(root($hit)), "^.*/frus-v2-data/([^/]+)/.*$", "$1")),
+                    "date": normalize-space(string-join((($div//tei:dateline[.//tei:date])[1]//tei:date)[1]//text()[not(ancestor::tei:note)])),
+                    "score": $score
+                },
+                1, $srch:SIMILAR_COUNT)
+            let $store := if (exists($seed)) then cache:put($srch:SIMILAR_CACHE, $key, array { $list }) else ()
+            return $list
+};
+
+(:~ The panel GET /api/similar/{publicationId}/{divisionId} returns. :)
+declare function srch:similar-panel($contextPath as xs:string, $publicationId as xs:string, $divisionId as xs:string) as element()? {
+    if (not(matches($publicationId, "^[A-Za-z0-9._-]+$") and matches($divisionId, "^[A-Za-z0-9._-]+$"))) then
+        ()
+    else
+        let $similar := srch:similar-documents($publicationId, $divisionId)
+        let $seed := collection($srch:FRUS_COL || "/data/frus-v2-data/" || $publicationId)/id($divisionId)[self::tei:div][1]
+        return
+            if (empty($similar)) then
+                ()
+            else
+                <section class="hsg-similar" aria-labelledby="hsg-similar-heading">
+                    <h2 class="hsg-similar__heading" id="hsg-similar-heading">Similar documents</h2>
+                    <ol class="usa-list usa-list--unstyled hsg-similar__list">
+                    {
+                        for $doc in $similar
+                        return
+                            <li class="hsg-similar__item">
+                                <a href="{$contextPath}{$doc?href}">{$doc?title}</a>
+                                <span class="hsg-similar__meta">{
+                                    string-join(($doc?volume, $doc?date)[. ne ""], " · ")
+                                }</span>
+                            </li>
+                    }
+                    </ol>
+                    {
+                        $seed ! <p class="hsg-similar__more"><a href="{$contextPath}/search?like={encode-for-uri(srch:like-ref(.))}&amp;within=documents">Explore similar documents</a></p>
+                    }
+                </section>
 };

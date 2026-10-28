@@ -1722,6 +1722,33 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     margin-top: var(--uswds-space-1);
 }
 
+/* Search options: the mode and match checkboxes in one disclosure under the
+   search field, closed unless an option is on. */
+.hsg-search-options {
+    margin-top: var(--uswds-space-1);
+}
+
+.hsg-search-options__summary {
+    cursor: pointer;
+    color: var(--uswds-color-primary);
+    font-weight: 600;
+    width: fit-content;
+}
+
+.hsg-search-options__summary:hover {
+    text-decoration: underline;
+}
+
+.hsg-search-options__group {
+    margin-top: var(--uswds-space-1);
+    padding-left: var(--uswds-space-2);
+    border-left: 2px solid var(--uswds-color-base-lighter);
+}
+
+.hsg-search-options__group .hsg-search-mode:first-of-type {
+    margin-top: 0;
+}
+
 /* Results heading and its Sort by select. */
 .hsg-results-header {
     display: flex;
@@ -1866,9 +1893,49 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     white-space: nowrap;
 }
 
+/* A semantic-only hit's opening (srch:opening) is the text its embedding
+   was computed from, about 60 words, and an ft:passages passage is a whole
+   sentence of any length, with its match anywhere in it: both wrap, so all
+   of it shows. */
+.hsg-snippet--opening,
+.hsg-snippet--passage {
+    white-space: normal;
+}
+
 .hsg-result__meta .hi {
     background-color: var(--uswds-color-warning-lighter);
     color: var(--uswds-color-text);
+}
+
+/* "Similar documents" link under a result card (srch:similar-link) */
+.hsg-result__actions {
+    margin: var(--uswds-space-1) 0 0;
+    font-size: var(--uswds-font-size-sans-2xs, 0.875rem);
+}
+
+/* "Similar documents" panel in a FRUS document's sidebar (srch:similar-panel) */
+.hsg-similar {
+    margin-top: var(--uswds-space-4);
+}
+
+.hsg-similar__heading {
+    font-size: var(--uswds-font-size-sans-sm, 1rem);
+    margin: 0 0 var(--uswds-space-1);
+}
+
+.hsg-similar__item {
+    margin-bottom: var(--uswds-space-2);
+    line-height: 1.35;
+}
+
+.hsg-similar__meta {
+    display: block;
+    color: var(--uswds-color-base-dark, #565c65);
+    font-size: var(--uswds-font-size-sans-3xs, 0.8125rem);
+}
+
+.hsg-similar__more {
+    margin: var(--uswds-space-1) 0 0;
 }
 
 .hsg-result__meta code {
@@ -2219,4 +2286,121 @@ nav[aria-label="breadcrumb"] .breadcrumb-current {
     h1, h2, h3 {
         break-after: avoid;
     }
+}
+
+/* test/semantic-chunks: which chunk a best passage is, and its similarity */
+.hsg-chunk-meta {
+    color: var(--uswds-color-base-dark);
+    font-size: 0.85em;
+}
+
+/* snippets=compare's top semantic matches, one after another */
+.hsg-snippet--opening + .hsg-snippet--opening {
+    margin-top: var(--uswds-space-1);
+}
+
+/* snippets=compare's "ft:passages, Google-style" (srch:flow-passages): the
+   passages as one paragraph, matched words in bold, held to three lines
+   until "Show more" is opened. */
+.hsg-flow__text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+}
+
+.hsg-flow:has(> .hsg-flow__more[open]) .hsg-flow__text {
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: none;
+}
+
+.hsg-flow__text strong {
+    font-weight: 700;
+}
+
+.hsg-flow__more summary {
+    display: inline;
+    cursor: pointer;
+    list-style: none;
+    color: var(--uswds-color-primary);
+    font-size: 0.9em;
+}
+
+.hsg-flow__more summary::-webkit-details-marker {
+    display: none;
+}
+
+.hsg-flow__more summary::after {
+    content: "Show more";
+}
+
+.hsg-flow__more[open] summary::after {
+    content: "Show less";
+}
+
+/* Title rollups above the search results (srch:title-rollups): volumes and
+   title-only chapters whose titles match, each one disclosure, so they don't
+   crowd the results. */
+.hsg-rollups {
+    display: grid;
+    gap: var(--uswds-space-1);
+    margin-top: var(--uswds-space-2);
+}
+
+.hsg-rollup {
+    border: 1px solid var(--uswds-color-base-lighter);
+    border-radius: 4px;
+    padding: var(--uswds-space-1) var(--uswds-space-2);
+}
+
+.hsg-rollup__summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--uswds-color-primary);
+}
+
+.hsg-rollup__group {
+    margin-top: var(--uswds-space-1);
+}
+
+.hsg-rollup__volume {
+    margin: 0;
+    font-weight: 600;
+    color: var(--uswds-color-base-dark);
+}
+
+.hsg-rollup__list {
+    margin: var(--uswds-space-05) 0 0;
+    display: grid;
+    gap: var(--uswds-space-05);
+}
+
+/* The timelines above a Historical Documents search (srch:timeline, TEI
+   Publisher's pb-timeline), in the site's colours. */
+.hsg-timelines {
+    display: grid;
+    gap: var(--uswds-space-2);
+    margin: var(--uswds-space-2) 0;
+}
+
+.hsg-timeline__label,
+.hsg-timeline__hint {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--uswds-color-base-dark);
+}
+
+.hsg-timeline__label {
+    font-weight: 600;
+}
+
+.hsg-timeline pb-timeline {
+    --pb-timeline-height: 90px;
+    --pb-timeline-color-bin: var(--uswds-color-primary);
+    --pb-timeline-color-highlight: var(--uswds-color-primary-dark);
+    --pb-timeline-color-selected: var(--uswds-color-accent-warm);
+    --pb-timeline-color-light: var(--uswds-color-base-lightest);
+    --pb-timeline-color-dark: var(--uswds-color-base-lighter);
 }

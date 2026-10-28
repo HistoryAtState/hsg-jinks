@@ -20,6 +20,11 @@
 //   "1941", a month and year "1941-12", a full date "1941-12-07"; an hour
 //   (with optional minute) gives a 24-hour "HH:MM".
 //
+// Match options: "Match word forms" doesn't combine with "Match case" or
+// "Match punctuation" (stemming lower-cases and drops punctuation), so it is
+// disabled, and so not submitted, while either is ticked. Its own tick stays
+// and comes back with it. The server applies the same rule.
+//
 // Loaded as a classic script at the end of <body> (base10's script.custom),
 // so the block keeps its bindings out of the global scope shared by all
 // classic scripts.
@@ -119,12 +124,23 @@
         }
     };
 
+    const toggleWordForms = () => {
+        const stem = document.querySelector('input[type="checkbox"][name="stem"]');
+        if (stem) {
+            stem.disabled = [...document.querySelectorAll('input[type="checkbox"][name="case"], input[type="checkbox"][name="punct"]')]
+                .some((box) => box.checked);
+        }
+    };
+
     document.addEventListener("change", ({ target }) => {
         if (target.matches('input[type="checkbox"][name="within"], input[data-hsg-entire-site]')) {
             keepExclusive(target);
             toggleDocumentsOnly();
+        } else if (target.matches('input[type="checkbox"][name="case"], input[type="checkbox"][name="punct"]')) {
+            toggleWordForms();
         }
     });
+    toggleWordForms();
     // capture phase: runs before the submit is serialized, for whichever form
     // the filter belongs to (the sidebar joins its form by @form)
     document.addEventListener("submit", combine, true);

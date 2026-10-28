@@ -60,6 +60,6 @@
         [% block below-content %][% endblock %]
     </main>
     [% if exists($context?doc) %]
-    <pb-document id="document1" path="[[ $context?doc?path ]]" odd="[[ $context?doc?odd ]]" view="[[ $context?doc?view ]]" root-path="[[ $config:data-root ]]" source-view="[[ $page:EXIDE ]]"></pb-document>
+    <pb-document id="document1" path="[[ $context?doc?path ]]" odd="[[ $context?doc?odd ]]" view="[[ $context?doc?view ]]" root-path="[[ $config:data-root ]]"></pb-document>
     [% endif %]
 </template>
