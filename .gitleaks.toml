@@ -1,0 +1,9 @@
+# gitleaks config for .github/workflows/gitleaks.yml
+[extend]
+useDefault = true
+
+# .jinks.json maps every generated file to its sha256; the hashes look like
+# API keys to the generic-api-key rule.
+[[allowlists]]
+description = "Jinks checksum manifest"
+paths = ['''(^|/)\.jinks\.json$''']
