@@ -8,7 +8,7 @@
       "preset": "conventionalcommits"
     }],
     ["@semantic-release/exec", {
-      "prepareCmd": "node tools/set-version.cjs ${nextRelease.version} && ant -Dproduction=true"
+      "prepareCmd": "node tools/set-version.cjs ${nextRelease.version} && ant -Dproduction=true -Drelease=true"
     }],
     ["@semantic-release/github", {
       "assets": [
