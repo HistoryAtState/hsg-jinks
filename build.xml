@@ -77,6 +77,8 @@
                 <exclude name="Dockerfile"/>
                 <exclude name="CLAUDE.md"/>
                 <exclude name=".xstrc"/>
+                <exclude name=".releaserc"/>
+                <exclude name="commitlint.config.cjs"/>
                 <exclude name="doc/**"/>
                 <exclude name="tools/**"/>
                 <!-- reference-only copies of the canonical FRUS TEI artifacts

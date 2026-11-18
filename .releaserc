@@ -1,0 +1,23 @@
+{
+  "branches": ["main"],
+  "plugins": [
+    ["@semantic-release/commit-analyzer", {
+      "preset": "conventionalcommits"
+    }],
+    ["@semantic-release/release-notes-generator", {
+      "preset": "conventionalcommits"
+    }],
+    ["@semantic-release/exec", {
+      "prepareCmd": "node tools/set-version.cjs ${nextRelease.version} && ant -Dproduction=true"
+    }],
+    ["@semantic-release/github", {
+      "assets": [
+        {
+          "path": "build/hsg-jinks-${nextRelease.version}.xar",
+          "name": "hsg-jinks-${nextRelease.version}.xar",
+          "label": "Expath package, production build (hsg-jinks-${nextRelease.version}.xar)"
+        }
+      ]
+    }]
+  ]
+}

@@ -44,6 +44,9 @@ const IGNORE_PATTERNS = [
     '.tool-versions',
     'Dockerfile',
     'CLAUDE.md',
+    '.xstrc',
+    '.releaserc',
+    'commitlint.config.cjs',
     'lsp-config.xq',
     '.moderne/**',
     // Cypress runs from the host/container filesystem, not the deployed collection
