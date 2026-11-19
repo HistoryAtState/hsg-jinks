@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   release:
+    name: GitHub
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
     permissions:
