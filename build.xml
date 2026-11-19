@@ -42,6 +42,16 @@
     </target>
 
     <target name="prepare" depends="git.revision" description="create build dir, assembly and filter resources">
+        <!-- repo.xml.tmpl is the jinks-generated repo.xml, filled from git on -Drelease=true;
+             after a jinks update changes repo.xml, copy it over the template again. -->
+        <fail message="repo.xml.tmpl differs from repo.xml; copy repo.xml over it">
+            <condition>
+                <not><filesmatch file1="repo.xml" file2="repo.xml.tmpl" textfile="true"/></not>
+            </condition>
+        </fail>
+        <!-- not a release: empty commit attributes (git.revision sets them otherwise) -->
+        <property name="commit-id" value=""/>
+        <property name="commit-time" value=""/>
         <mkdir dir="${app.build.dir}"/>
         <copy todir="${app.build.dir}">
             <fileset dir="${basedir}">
@@ -77,6 +87,8 @@
                 <exclude name="Dockerfile"/>
                 <exclude name="CLAUDE.md"/>
                 <exclude name=".xstrc"/>
+                <exclude name=".releaserc"/>
+                <exclude name="commitlint.config.cjs"/>
                 <exclude name="doc/**"/>
                 <exclude name="tools/**"/>
                 <!-- reference-only copies of the canonical FRUS TEI artifacts
