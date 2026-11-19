@@ -108,8 +108,10 @@ declare function nav:output-footnotes($footnotes as element()*) {
         let $label := normalize-space(($fn//*[@class = "fn-number"])[1])
         (: Letter/text-critical marks (a, b, c…) before numbered commentary (1, 2, 3…). :)
         let $group := if (matches($label, '^\d+$')) then 1 else 0
+        (: Separate keys per group: one key mixing xs:integer and xs:string raises XPTY0004. :)
         order by $group,
-            if ($group = 1) then xs:integer($label) else $label
+            (if ($group = 1) then xs:integer($label) else ()) empty least,
+            (if ($group = 0) then $label else ()) empty least
         return
             $fn
     return (
