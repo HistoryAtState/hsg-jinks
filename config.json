@@ -325,7 +325,11 @@
     "^test/cypress/e2e/[^/]+\\.cy\\.js$",
     "^templates/footer\\.html",
     "^modules/lib/api\\.json",
-    "^data/content/"
+    "^data/content/",
+    "^\\.claude/",
+    "^AGENTS\\.md$",
+    "^CLAUDE\\.md$",
+    "^setup\\.xql$"
   ],
   "ignore" : [
     "^modules/lib/api\\.xql"
