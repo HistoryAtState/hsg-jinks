@@ -139,7 +139,9 @@ declare function dapi:save ($request as map(*)) {
 declare function dapi:source($request as map(*)) {
     let $doc := xmldb:decode($request?parameters?id)
     return
-        if ($doc) then
+        if (tokenize($doc, "/") = "..") then
+            error($errors:BAD_REQUEST, "Invalid path: " || $doc)
+        else if ($doc) then
             let $path := xmldb:encode-uri($config:data-root || "/" || $doc)
             let $filename := replace($doc, "^.*/([^/]+)$", "$1")
             let $mime := ($request?parameters?type, xmldb:get-mime-type($path))[1]
@@ -496,9 +498,19 @@ declare %private function dapi:work2epub($request as map(*), $id as xs:string, $
     let $oddName := replace($odd, "^([^/\.]+).*$", "$1")
     let $cssDefault := util:binary-to-string(util:binary-doc($config:output-root || "/" || $oddName || ".css"))
     let $cssEpub := util:binary-to-string(util:binary-doc($config:app-root || "/resources/css/epub.css"))
-    let $css := $cssDefault ||
-        "&#10;/* styles imported from epub.css */&#10;" ||
-        $cssEpub
+    (: @namespace must precede all style rules. epub.css starts with one; keep it
+       first so ODD CSS cannot push it into an invalid mid-file position. :)
+    let $css :=
+        if (matches($cssEpub, "^\s*@namespace\s")) then
+            let $ns := replace($cssEpub, "^(\s*@namespace\s[^;]*;).*", "$1", "s")
+            let $rest := replace($cssEpub, "^\s*@namespace\s[^;]*;\s*", "", "s")
+            return
+                $ns || "&#10;" || $cssDefault ||
+                "&#10;/* styles imported from epub.css */&#10;" || $rest
+        else
+            $cssDefault ||
+            "&#10;/* styles imported from epub.css */&#10;" ||
+            $cssEpub
     return
         epub:generate-epub($config, $work/*, $css, $id)
 };
@@ -670,14 +682,29 @@ declare function dapi:get-fragment($request as map(*), $docs as node()*, $path a
             error($errors:NOT_FOUND, "Document " || $path || " not found")
 };
 
+(:~
+ : Narrow $data to the nodes selected by the xpath request parameter.
+ :
+ : The expression is only evaluated if it is white-listed
+ : in $config:allowed-xpath (configured via defaults.allowed-xpath in config.json).
+ : As a special case, an expression of the form /id('some-id') is resolved
+ : directly without evaluation. Anything else is rejected.
+ :)
 declare %private function dapi:apply-xpath($request as map(*), $data as node()) {
-    if ($request?parameters?xpath) then
-        let $namespace := namespace-uri-from-QName(node-name(root($data)/*))
-        let $xquery := "declare default element namespace '" || $namespace || "'; $data" || $request?parameters?xpath
-        return
-            util:eval($xquery)
-    else
-        $data
+    let $xpath := normalize-space($request?parameters?xpath)
+    return
+        if ($xpath = "") then
+            $data
+        else if (matches($xpath, "^/id\('[\i-[:]][\c-[:]]*'\)$")) then
+            $data/id(replace($xpath, "^/id\('(.*)'\)$", "$1"))
+        else if ($xpath = $config:allowed-xpath ! normalize-space(.)) then
+            let $namespace := namespace-uri-from-QName(node-name(root($data)/*))
+            let $xquery := "declare default element namespace '" || $namespace || "'; $data" || $xpath
+            return
+                util:eval($xquery)
+        else
+            error($errors:BAD_REQUEST, "XPath expression not allowed: " || $xpath ||
+                ". Add it to defaults.allowed-xpath in config.json.")
 };
 
 declare function dapi:get-collection($data) {
