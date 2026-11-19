@@ -476,11 +476,8 @@ declare function page:transform($nodes as node()*, $parameters as map(*)?, $odd 
         }
     ))
     return
-        pages:process-content(
-            $mapped,
-            head(($parameters?root, $node)),
-            map { "odd": $odd },
-            $params,
-            ()
-        )
+        (: Kept as the raw ODD transform: this app's templates post-process the
+         : output themselves (heads, footnotes); jinks main wraps it in
+         : pages:process-content, which breaks them. :)
+        $pm-config:web-transform($mapped, $params, $odd)
 };
