@@ -67,7 +67,7 @@ worktrees" below), shared across every `hsg-jinks` worktree no matter where
 Releases are automated with
 [semantic-release](https://semantic-release.org) (`.releaserc`). Every push
 to `main` whose Cypress job passes runs the `release` job in
-`.github/workflows/cypress.yml`:
+`.github/workflows/ci.yml`:
 
 - the next version comes from the
   [Conventional Commits](https://www.conventionalcommits.org) since the last
