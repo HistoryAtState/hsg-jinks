@@ -22,11 +22,14 @@ describe("volume front- and back-matter pages", () => {
 
     it("renders the persons register with its entries", () => {
         cy.visit(`${volume}/persons`);
-        // Single-line phrase: contain.text is whitespace-sensitive and the
-        // TEI's line wrapping splits names.
+        // Compared with whitespace collapsed: contain.text is
+        // whitespace-sensitive, and the TEI's line wrapping splits phrases.
         cy.get("main", { timeout: 15000 })
             .should("contain.text", "Persons")
-            .and("contain.text", "Lieutenant General, USAF");
+            .invoke("text")
+            .should((text) => {
+                expect(text.replace(/\s+/g, " ")).to.contain("Lieutenant General, USAF");
+            });
     });
 
     it("renders the terms register with its entries", () => {
