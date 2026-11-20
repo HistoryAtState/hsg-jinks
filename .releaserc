@@ -13,7 +13,7 @@
     ["@semantic-release/github", {
       "assets": [
         {
-          "path": "build/hsg-jinks-${nextRelease.version}.xar",
+          "path": "build/hsg-jinks-*.xar",
           "name": "hsg-jinks-${nextRelease.version}.xar",
           "label": "Expath package, production build (hsg-jinks-${nextRelease.version}.xar)"
         }
