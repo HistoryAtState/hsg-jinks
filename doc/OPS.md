@@ -8,16 +8,37 @@
 - Embeddings are computed **inside eXist** by a local ONNX model, `all-MiniLM-L6-v2`
   (384 dimensions, cosine similarity). No external service, API key or outbound network is needed at runtime.
 - Vectors are persisted in `vector.dbx` (`vector-store="db"`) and are created by a **reindex**.
-- The application code is already on `main` (PR #74). What production needs is the vector-capable
-  eXist runtime, the model files, the `conf.xml` registry entry, JVM flags, and a reindex.
+- The application code is already on `main` (PR #74). What production needs is an eXist
+  build that includes the `exist-vector` extension, the model files, two `conf.xml` changes, JVM flags,
+  and a reindex.
 
 ## 2. Prerequisites
 
 | Requirement | Detail |
 |---|---|
 | JDK | 21 |
+| eXist | 7, built with the vector extension (see 2.1). Stock release archives and the `existdb/existdb` images do not include the vector extension. |
 | Disk | ~0.7 GiB for `vector.dbx` for the full FRUS corpus (estimate), ~90 MiB for the model, plus space for the pre-change backup and for reindex. |
 | RAM | See 4.3. |
+
+### 2.1 Build eXist with the vector extension
+
+`vector:embed()` comes from the `exist-vector` extension. eXist's distribution includes it only when built
+with the `onnx-model` Maven profile; a build without it starts normally, but every search fails with
+`XPST0017` because `vector:embed` is undefined.
+
+```shell
+mvn -V clean package -DskipTests -Ponnx-model
+```
+
+Check the archive before deploying it. All three jars must be listed:
+
+```shell
+tar tjf exist-distribution/target/exist-distribution-*-unix.tar.bz2 \
+  | grep -E 'lib/(exist-vector|onnxruntime|tokenizers)-'
+```
+
+The profile also downloads the model into the distribution's `onnx-models/` (see 3.1).
 
 ## 3. Files on the host
 
@@ -30,7 +51,10 @@ Paths are relative to `$EXIST_HOME`.
 
 ### 3.1 Install the model
 
-Download (the same source eXist's own `onnx-model` Maven profile uses):
+A distribution built as in 2.1 already contains both files; only verify them.
+Otherwise, install them as follows.
+
+Download (the same source the build in 2.1 uses):
 
 ```shell
 M="$EXIST_HOME/onnx-models/all-MiniLM-L6-v2"
@@ -41,15 +65,6 @@ curl -fL -o "$M/tokenizer.json" \
   https://huggingface.co/onnx-models/all-MiniLM-L6-v2-onnx/resolve/main/tokenizer.json
 ```
 
-Or, for an air-gapped host, extract from the approved image:
-
-```shell
-docker create --name hsg-onnx duncdrum/existdb:experimental
-docker cp hsg-onnx:/exist/onnx-models ./onnx-models
-docker rm hsg-onnx
-# then copy ./onnx-models to $EXIST_HOME/onnx-models
-```
-
 Verify, and make the files readable by the eXist service user.
 
 Only these two files are needed. The Hugging Face pack also ships `config.json`, `vocab.txt` etc.; they are not used, but do not harm either.
@@ -58,8 +73,17 @@ Only these two files are needed. The Hugging Face pack also ships `config.json`,
 
 ### 4.1 `etc/conf.xml`
 
-In the stock file the block is commented out near the end. Uncomment it, or add it as the last child before `</exist>`.
-Keep exactly **one** live `<vector-models>` block.
+#### Register the model
+
+The stock file ends with a live, empty registry, just before `</exist>`:
+
+```xml
+<vector-models enabled="no"/>
+```
+
+**Replace** that element with the block below. eXist reads only the first `<vector-models>` element, so
+a block added after it, or the example in the comment above it uncommented, is ignored without a warning.
+Afterwards the file must contain exactly one `<vector-models>` element outside comments.
 
 ```xml
 <vector-models>
@@ -73,6 +97,30 @@ Keep exactly **one** live `<vector-models>` block.
 - `id` must equal the `model=` value in every `collection.xconf` and `$srch:EMBED_MODEL` in
   `modules/templates/search.xqm` (`all-MiniLM-L6-v2`).
 - `dimension` must equal `dimension="384"` in every `<vector-field>`.
+
+#### Enable the vector module
+
+In `<builtin-modules>`, under the comment "Extension Indexes", the stock file disables the module:
+
+```xml
+<module uri="http://exist-db.org/xquery/vector" class="org.exist.xquery.modules.vector.VectorModule" enabled="no"/>
+```
+
+Remove `enabled="no"`, keeping the element:
+
+```xml
+<module uri="http://exist-db.org/xquery/vector" class="org.exist.xquery.modules.vector.VectorModule"/>
+```
+
+The explicit entry makes a missing extension visible at startup. If the jar is not on the classpath
+(an eXist built without the extension, see 2.1), `exist.log` shows:
+
+```
+ERROR (Configuration.java [lookupModuleClass]) - Configuration problem: class not found for module
+'http://exist-db.org/xquery/vector' (ClassNotFoundException); class:'org.exist.xquery.modules.vector.VectorModule'
+```
+
+eXist still starts, but search fails. After the first start, check `exist.log` for this line.
 
 ### 4.2 JVM options
 
