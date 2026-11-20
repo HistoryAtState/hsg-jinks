@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Measure one hybrid-search vector cell (model, dimension, vector store)
-# against this worktree's own container: reindex frus-data-jinks, time five
+# against this worktree's own container: reindex frus-tei, time five
 # paraphrase queries, append the cell to $RESULTS.
 # Usage: tools/measure-cell.sh <model> <dimension> <vector-store>
-# Needs the frus-data-jinks collection.xconf at $XCONF_SRC.
+# Needs the frus-tei collection.xconf at $XCONF_SRC.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -44,7 +44,7 @@ print([line.strip() for line in text.splitlines() if "vector-store" in line or "
 PY
 
 # Upload xconf (basename must be collection.xconf)
-xst --config .xstrc upload /tmp/collection.xconf /db/system/config/db/apps/frus-data-jinks/
+xst --config .xstrc upload /tmp/collection.xconf /db/system/config/db/apps/frus-tei/
 
 # Patch EMBED_MODEL in a temp copy and upload
 CELL_XQ=/tmp/search.xqm
@@ -69,7 +69,7 @@ xst --config .xstrc upload "$CELL_XQ" /db/apps/hsg-jinks/modules/templates/
 # Reindex all (curl REST — xst clients can hit header timeouts on long reindexes)
 t0=$(date +%s)
 code=$(curl -sS -u 'admin:' --max-time 3600 -o /tmp/reindex-out.xml -w '%{http_code}' \
-  -G --data-urlencode '_query=xquery version "3.1"; xmldb:reindex("/db/apps/frus-data-jinks", "all")' \
+  -G --data-urlencode '_query=xquery version "3.1"; xmldb:reindex("/db/apps/frus-tei", "all")' \
   "$SERVER/rest/db")
 t1=$(date +%s)
 REINDEX_S=$((t1 - t0))

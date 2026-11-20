@@ -6,7 +6,7 @@ xquery version "3.1";
  : Ports hsg-shell's fh:volumes-with-ebooks / fh:frus-ebooks-catalog /
  : fh:frus-history-ebook-entry (modules/frus-html.xqm) plus their app.xqm
  : helpers (app:bytes-to-readable, app:format-date-month-long-day-year) to
- : this repo's jinks templating conventions and the frus-v2-data encoding,
+ : this repo's jinks templating conventions and the frus-tei encoding,
  : where a volume's ebook relatedItems live in the volume root document's
  : teiHeader/notesStmt rather than in a monolithic volume file.
  :)

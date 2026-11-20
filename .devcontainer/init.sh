@@ -19,7 +19,7 @@ cd $(dirname "$0")/..
 # worktree's .env, which holds the host port.
 export EXISTDB_SERVER=http://localhost:8080/exist EXISTDB_USER=admin EXISTDB_PASS=
 
-# Without this, admin can't act on frus-data-jinks/hsg-jinks resources owned
+# Without this, admin can't act on frus-tei/hsg-jinks resources owned
 # by the tei group/user (e.g. a later `jinks sync` writes auth errors as file
 # content instead of failing loudly).
 xst run 'sm:add-group-member("tei","admin")' >/dev/null

@@ -20,7 +20,7 @@ the sibling names matter:
 ├── profile-theme-uswds   USWDS theme profile (private releases) — see "USWDS profile baseline"
 ├── jinks                 the Jinks generator itself (Mode A) — baked into every devcontainer image
 ├── jinks-templates       companion templates library — also baked in
-├── hsg-jinks-data        FRUS sample data, deployed as frus-data-jinks — see "Data"
+├── frus-tei              FRUS TEI data, deployed as frus-tei — see "Data"
 ├── frus-tei-guidelines   canonical FRUS TEI customization (schema, processing model, rendition vocabulary) — see "Tools"
 ├── hsg-project           pre-v10 reference implementation (hsg-shell) — see CLAUDE.md "Reference implementation"
 └── hsg-jinks             this repo: `main` + parallel worktrees — see "Parallel worktrees"
@@ -110,7 +110,8 @@ live with. It is a vector-capable eXist 7 (`all-MiniLM-L6-v2` under
 
 - `hsg-jinks` itself, which every worktree container replaces with its own
   build (see "Container initialization" below)
-- `frus-data-jinks` with its vector index for semantic search
+- the old `frus-data-jinks` FRUS package, which the app no longer reads: the
+  FRUS data, `frus-tei`, autodeploys from a baseline xar (see "Data" below)
 - the runtime libraries: tei-publisher-lib, jinks-templates, roaster, jwt,
   crypto, carousel
 - the HistoryAtState data packages (see "External data packages" below)
@@ -156,11 +157,11 @@ convention above is what makes that folder name double as the branch name,
 so `git worktree list` and `ls ..` stay legible together.
 
 It creates `<parent>/<slug>` as a **flat sibling of the main clone**,
-nested one level under the repos root that also holds `hsg-jinks-data` and
-`hsg-project` — so from inside a worktree, `../../hsg-jinks-data` and
+nested one level under the repos root that also holds `frus-tei` and
+`hsg-project` — so from inside a worktree, `../../frus-tei` and
 `../../hsg-project` are the working relative references. Allocates the next
 free host port pair (8091+/8454+ upward; main keeps 8090/8453), writes the
-per-worktree config, copies in the baseline profile xar, builds + starts the
+per-worktree config, copies in the baseline profile and FRUS data xars, builds + starts the
 container, and seeds data + app.
 
 Machine-specific state lives in two gitignored files per worktree plus the
@@ -233,10 +234,9 @@ routes and CORS settings are covered by `api/base-routes.cy.js` when it runs
 without that flag, i.e. locally.
 Never run it on the host here: host port 8080 is the read-only mirror.
 
-It does *not* install `frus-data-jinks` or the USWDS theme: the data is part
-of the base image's database and the theme autodeploys from the baseline xar
-baked into the image (see "Baseline image" above and "USWDS profile
-baseline" below), so both survive container recreation with no help from
+It does *not* install `frus-tei` or the USWDS theme: both autodeploy from the
+baseline xars baked into the image (see "Data" and "USWDS profile baseline"
+below), so both survive container recreation with no help from
 this script. The app xar it installs replaces the `hsg-jinks` that ships in
 the base image. It also does not run `jinks create` — this is a Mode B
 repo, so config.json's generated output is already committed to git; a plain
@@ -300,29 +300,46 @@ theme's latest release that the app has picked up (`profile-versions` in
 
 ## Data
 
-`hsg-jinks-data` (the legacy FRUS corpus, deployed as `/db/apps/frus-data-jinks`
-with volumes under `data/frus-v2-data/` and guidelines apparatus under
-`data/frus-tei-guidelines-resources/`) comes with the base image
-(`frus-data-jinks` 0.4, with the vector index for semantic search). It is a
-curated multi-volume subset: every volume the landing page links plus
-representative era/structure samples — the authoritative list lives in
-`hsg-jinks-data`'s `build.xml`. The full corpus (694 volumes, ~4.6 GB) is a
-separate infra decision.
+The FRUS data comes from [`HistoryAtState/frus-tei`](https://github.com/HistoryAtState/frus-tei),
+deployed as `/db/apps/frus-tei` with the repository's layout: one collection per
+volume under `data/`, the shared encoding description under `resources/`, and
+`.last-modified/` with each file's last commit date. `frus-tei`'s default build
+is a curated multi-volume subset: every volume the landing page links plus
+representative era and structure samples; the authoritative list lives in its
+`build.xml`. The full corpus (694 volumes, ~5.6 GB) is a separate infra
+decision.
+
+Each division lists the persons and terms it mentions in its header
+(`profileDesc/textClass/keywords` whose `@scheme` ends with `persons` or
+`terms`); `@ref` values resolve through the volume's XML catalog. The
+presidential administrations taxonomy the volumes classify themselves against
+ships with this app, in `data/administrations/`.
+
+### FRUS data baseline
+
+Worktree containers autodeploy `~/.config/hsg/xars/frus-tei-baseline.xar`
+(`new-worktree.sh` copies it in; `frus-tei-BASELINE.txt` next to it records
+its commit and checksum). Refresh it from the sibling checkout:
+
+```sh
+cd ../../frus-tei && ant
+cp build/frus-tei.xar ~/.config/hsg/xars/frus-tei-baseline.xar
+```
 
 To test against a different build of the data, install it into *this
 worktree's own* container (never port 8080):
 
 ```sh
-cd ../../hsg-jinks-data && ant
-xst --config <worktree>/.xstrc package install --force build/frus-data-jinks-*.xar
+cd ../../frus-tei && ant
+xst --config <worktree>/.xstrc package install --force build/frus-tei.xar
 ```
 
-That is runtime-only: eXist's database lives in the container's writable
-layer, so recreating the container brings back the image's data.
+CI and the production image install the latest
+[GitHub release](https://github.com/HistoryAtState/frus-tei/releases) instead.
 
 ### External data packages (GitHub releases)
 
-Beyond `frus-data-jinks` above, running the app also needs 12 data packages —
+Beyond `frus-tei` above, running the app also needs 12 data packages —
 the ones backing `/departmenthistory`, `/countries`, `/conferences`,
 `/about`, `/tags`, `/milestones`, `/api/v1/catalog`, and
 `/historicaldocuments/frus-history` — each maintained in its own repo under
@@ -388,7 +405,7 @@ this checkout plus everything it needs at runtime — the EXPATH libraries
 (roaster, jinks-templates, tei-publisher-lib, pinned to the same versions as
 the devcontainer baseline), `carousel`, all 11 external data packages (each
 fetched from its repo's `/releases/latest/`, same policy as `Dockerfile.dev`),
-and `frus-data-jinks`. The USWDS theme is **not** needed at runtime — it's a
+and `frus-tei`, also from its latest release. The USWDS theme is **not** needed at runtime — it's a
 generation-time profile whose output is already committed here and packed
 into the app xar.
 
@@ -419,13 +436,7 @@ All these rewrites fail the build if the generated file changes shape; see
 the `app-routes`, `production-controller` and `production-cors` targets in
 `build.xml`.
 
-`frus-data-jinks` comes from the private, release-less `hsg-jinks-data` repo,
-so it must be staged at the repo root before building (the `COPY` fails
-loudly if it's missing; the xar is gitignored and excluded from the app xar
-by `build.xml`):
-
 ```sh
-cp ~/.config/hsg/xars/frus-data-jinks-baseline.xar ./frus-data-jinks-0.2.xar
 docker build -t hsg-jinks .
 ```
 
@@ -487,13 +498,13 @@ by hand.
   ```
 - `tools/generate-frus-renditions.xq` — regenerate `resources/css/frus-renditions.css`
   from the FRUS rendition vocabulary (the `tei:rendition` definitions in
-  hsg-jinks-data's `frus-tei-guidelines-resources/frus-encodingDesc.xml`). That
+  frus-tei's `resources/frus-encodingDesc.xml`). That
   stylesheet is generated, not hand-maintained: re-run the script and commit the
   result whenever the vocabulary changes.
   `xst --config .xstrc run -f tools/generate-frus-renditions.xq > resources/css/frus-renditions.css`
 - `tools/measure-cell.sh <model> <dimension> <db|lucene>` — measure one
   hybrid-search vector configuration in the worktree's own container: reindex
-  frus-data-jinks, time five paraphrase queries in keyword and hybrid mode, and
+  frus-tei, time five paraphrase queries in keyword and hybrid mode, and
   append the result to `build/semantic-search-workload-results.json`. Starts
   from the collection.xconf at `$XCONF_SRC` (default
   `/tmp/frus-collection.xconf.xml`).

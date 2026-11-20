@@ -164,7 +164,7 @@ declare function opds:all-feed() as element(atom:feed) {
  : raises BAD_REQUEST before this is ever invoked).
  :
  : The cast has to be guarded: @when is not always a full YYYY-MM-DD. In the
- : frus-v2-data corpus frus1861 carries when="1861" (year only) and
+ : frus-tei corpus frus1861 carries when="1861" (year only) and
  : frus1958-60v05mSupp has no matching tei:change at all, and an unguarded
  : xs:date() on the former aborts the whole feed with a 500. Note eXist
  : misreports that as "xs:date must not have hour, minute or second fields

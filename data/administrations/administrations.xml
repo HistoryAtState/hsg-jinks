@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0" xml:id="administrations">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>Presidential Administrations covered by the Foreign Relations of the United
+                    States series</title>
+            </titleStmt>
+            <publicationStmt>
+                <publisher>Office of the Historian, U.S. Department of State</publisher>
+                <p>Controlled vocabulary for the administration coverage of FRUS volumes. Every
+                    FRUS volume (frus-tei) classifies itself against this taxonomy via
+                    <gi>keywords</gi> with <att>scheme</att>
+                    <val>#frus-administration-coverage</val> in its
+                    <gi>profileDesc</gi>/<gi>textClass</gi>.</p>
+            </publicationStmt>
+            <sourceDesc>
+                <p>Administration identifiers match the term values used in the volume headers of
+                    the FRUS v2 corpus. Display names, term-of-office dates, and portrait images
+                    follow the reference implementation of the Historical Documents landing page
+                    (hsg-shell, pages/historicaldocuments/index.xml).</p>
+                <p>Encoding conventions: one <gi>category</gi> per administration identifier, in
+                    chronological order; one <gi>catDesc</gi> per presidency, so a combined
+                    administration such as <val>nixon-ford</val> carries two entries. Each
+                    <gi>catDesc</gi> holds the display <gi>term</gi>, a coverage
+                    <gi>date</gi> (the year range shown on the landing page, following the
+                    reference implementation), a term-of-office <gi>date</gi> (shown in the
+                    administration page heading), and a portrait <gi>ptr</gi>. The combined
+                    nixon-ford category additionally carries a <gi>catDesc</gi> with
+                    <att>n</att>=<val>combined</val> holding the joint heading label. A category without a portrait
+                    (such as <val>pre-truman</val>, a coverage catch-all rather than a single
+                    administration) is not shown in administration listings.</p>
+            </sourceDesc>
+        </fileDesc>
+        <encodingDesc>
+            <classDecl>
+                <taxonomy xml:id="frus-administration-coverage">
+                    <category xml:id="pre-truman">
+                        <catDesc>
+                            <term>Pre-Truman Administrations</term>
+                            <date type="coverage" from="1861" to="1945">1861–1945</date>
+                        </catDesc>
+                    </category>
+                    <category xml:id="lincoln">
+                        <catDesc>
+                            <term>Abraham Lincoln Administration</term>
+                            <date type="coverage" from="1861" to="1865">1861–1865</date>
+                            <date type="term" from="1861" to="1865">1861–1865</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/alincoln.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="johnson-a">
+                        <catDesc>
+                            <term>Andrew Johnson Administration</term>
+                            <date type="coverage" from="1865" to="1869">1865–1869</date>
+                            <date type="term" from="1865" to="1869">1865–1869</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/ajohnson.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="grant">
+                        <catDesc>
+                            <term>Ulysses S. Grant Administration</term>
+                            <date type="coverage" from="1869" to="1877">1869–1877</date>
+                            <date type="term" from="1869" to="1877">1869–1877</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/usgrant.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="hayes">
+                        <catDesc>
+                            <term>Rutherford B. Hayes Administration</term>
+                            <date type="coverage" from="1877" to="1881">1877–1881</date>
+                            <date type="term" from="1877" to="1881">1877–1881</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/rhayes.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="garfield">
+                        <catDesc>
+                            <term>James A. Garfield Administration</term>
+                            <date type="coverage" from="1881" to="1881">1881</date>
+                            <date type="term" from="1881" to="1881">1881</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/jgarfield.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="arthur">
+                        <catDesc>
+                            <term>Chester A. Arthur Administration</term>
+                            <date type="coverage" from="1881" to="1885">1881–1885</date>
+                            <date type="term" from="1881" to="1885">1881–1885</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/carthur.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="cleveland-22">
+                        <catDesc>
+                            <term>Grover Cleveland Administration</term>
+                            <date type="coverage" from="1885" to="1889">1885–1889</date>
+                            <date type="term" from="1885" to="1889">1885–1889</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/gcleveland.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="harrison">
+                        <catDesc>
+                            <term>Benjamin Harrison Administration</term>
+                            <date type="coverage" from="1889" to="1893">1889–1893</date>
+                            <date type="term" from="1889" to="1893">1889–1893</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/bharrison.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="cleveland-24">
+                        <catDesc>
+                            <term>Grover Cleveland Administration</term>
+                            <date type="coverage" from="1893" to="1897">1893–1897</date>
+                            <date type="term" from="1893" to="1897">1893–1897</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/gcleveland.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="mckinley">
+                        <catDesc>
+                            <term>William McKinley Administration</term>
+                            <date type="coverage" from="1897" to="1901">1897–1901</date>
+                            <date type="term" from="1897" to="1901">1897–1901</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/wmckinley.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="roosevelt-t">
+                        <catDesc>
+                            <term>Theodore Roosevelt Administration</term>
+                            <date type="coverage" from="1901" to="1909">1901–1909</date>
+                            <date type="term" from="1901" to="1909">1901–1909</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/troosevelt.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="taft">
+                        <catDesc>
+                            <term>William H. Taft Administration</term>
+                            <date type="coverage" from="1909" to="1913">1909–1913</date>
+                            <date type="term" from="1909" to="1913">1909–1913</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/whtaft.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="wilson">
+                        <catDesc>
+                            <term>Woodrow Wilson Administration</term>
+                            <date type="coverage" from="1913" to="1921">1913–1921</date>
+                            <date type="term" from="1913" to="1921">1913–1921</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/wwilson.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="harding">
+                        <catDesc>
+                            <term>Warren G. Harding Administration</term>
+                            <date type="coverage" from="1921" to="1923">1921–1923</date>
+                            <date type="term" from="1921" to="1923">1921–1923</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/wharding.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="coolidge">
+                        <catDesc>
+                            <term>Calvin Coolidge Administration</term>
+                            <date type="coverage" from="1923" to="1929">1923–1929</date>
+                            <date type="term" from="1923" to="1929">1923–1929</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/ccoolidge.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="hoover">
+                        <catDesc>
+                            <term>Herbert C. Hoover Administration</term>
+                            <date type="coverage" from="1929" to="1933">1929–1933</date>
+                            <date type="term" from="1929" to="1933">1929–1933</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/hhoover.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="roosevelt-fd">
+                        <catDesc>
+                            <term>Franklin D. Roosevelt Administration</term>
+                            <date type="coverage" from="1933" to="1945">1933–1945</date>
+                            <date type="term" from="1933" to="1945">1933–1945</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/fdroosevelt.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="truman">
+                        <catDesc>
+                            <term>Harry S. Truman Administration</term>
+                            <date type="coverage" from="1945" to="1952">1945–1952</date>
+                            <date type="term" from="1945" to="1953">1945–1953</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/truman.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="eisenhower">
+                        <catDesc>
+                            <term>Dwight D. Eisenhower Administration</term>
+                            <date type="coverage" from="1953" to="1960">1953–1960</date>
+                            <date type="term" from="1953" to="1961">1953–1961</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/eisenhower.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="kennedy">
+                        <catDesc>
+                            <term>John F. Kennedy Administration</term>
+                            <date type="coverage" from="1961" to="1963">1961–1963</date>
+                            <date type="term" from="1961" to="1963">1961–1963</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/jkennedy2.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="johnson">
+                        <catDesc>
+                            <term>Lyndon B. Johnson Administration</term>
+                            <date type="coverage" from="1964" to="1968">1964–1968</date>
+                            <date type="term" from="1963" to="1969">1963–1969</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/ljohnson.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="nixon-ford">
+                        <catDesc n="combined">
+                            <term>Richard M. Nixon and Gerald R. Ford Administrations</term>
+                            <date type="term" from="1969" to="1977">1969–1977</date>
+                        </catDesc>
+                        <catDesc>
+                            <term>Richard M. Nixon Administration</term>
+                            <date type="coverage" from="1969" to="1974">1969–1974</date>
+                            <date type="term" from="1969" to="1974">1969–1974</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/rnixon2.jpg"/>
+                        </catDesc>
+                        <catDesc>
+                            <term>Gerald R. Ford Administration</term>
+                            <date type="coverage" from="1974" to="1976">1974–1976</date>
+                            <date type="term" from="1974" to="1977">1974–1977</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/gford2.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="carter">
+                        <catDesc>
+                            <term>Jimmy Carter Administration</term>
+                            <date type="coverage" from="1977" to="1980">1977–1980</date>
+                            <date type="term" from="1977" to="1981">1977–1981</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/jcarter.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="reagan">
+                        <catDesc>
+                            <term>Ronald Reagan Administration</term>
+                            <date type="coverage" from="1981" to="1988">1981–1988</date>
+                            <date type="term" from="1981" to="1989">1981–1989</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/rreagan.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="bush-ghw">
+                        <catDesc>
+                            <term>George H.W. Bush Administration</term>
+                            <date type="coverage" from="1989" to="1992">1989–1992</date>
+                            <date type="term" from="1989" to="1993">1989–1993</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/ghwbush.jpg"/>
+                        </catDesc>
+                    </category>
+                    <category xml:id="clinton">
+                        <catDesc>
+                            <term>William J. Clinton Administration</term>
+                            <date type="coverage" from="1993" to="2000">1993–2000</date>
+                            <date type="term" from="1993" to="2001">1993–2001</date>
+                            <ptr type="portrait" target="https://static.history.state.gov/images/bclinton.jpg"/>
+                        </catDesc>
+                    </category>
+                </taxonomy>
+            </classDecl>
+        </encodingDesc>
+    </teiHeader>
+    <text>
+        <body>
+            <p>This document's payload is the administration taxonomy in its
+                <gi>encodingDesc</gi>/<gi>classDecl</gi>; see the <gi>sourceDesc</gi> for the
+                encoding conventions.</p>
+        </body>
+    </text>
+</TEI>

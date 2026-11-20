@@ -19,14 +19,14 @@ declare variable $config:sort-default := "category";
 
 
     
-    declare variable $config:data-root := "/db/apps/frus-data-jinks/data";
+    declare variable $config:data-root := "/db/apps/frus-tei";
 
 
-    (: The FRUS volumes collection inside the data directory (PR #32 review):
-       the one place the "frus-v2-data" name is spelled out on the app side --
-       everything else derives from this variable (or from odd-global.xqm's
-       copy of it, for compiled ODD transforms). :)
-    declare variable $config:frus-volumes := "frus-v2-data";
+    (: The FRUS volumes collection inside the frus-tei package (PR #32 review):
+       the one place its name is spelled out on the app side; everything else
+       derives from this variable (or from odd-global.xqm's copy of it, for
+       compiled ODD transforms). :)
+    declare variable $config:frus-volumes := "data";
 
 
     declare variable $config:data-default := $config:data-root || "/" || $config:frus-volumes;

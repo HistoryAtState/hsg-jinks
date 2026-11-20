@@ -30,7 +30,7 @@
 #   resources/frus-tei-guidelines/PROVENANCE.txt instead.
 #
 # frus-encodingDesc.xml is NOT copied here at all: it reaches the app through the
-# frus-data-jinks data package (data/frus-tei-guidelines-resources/), and
+# frus-tei data package (resources/), and
 # tools/generate-frus-renditions.xq derives resources/css/frus-renditions.css
 # from the deployed copy. --check verifies that copy rather than duplicating it.
 #
@@ -59,7 +59,7 @@ repo_root=$(cd "$(dirname "$0")/.." && pwd)
 upstream="${FRUS_GUIDELINES_DIR:-$repo_root/../../frus-tei-guidelines}"
 ref_dir="$repo_root/resources/frus-tei-guidelines"
 # the data package's vendored copy, checked but never written by this script
-data_encoding_desc="$repo_root/../../hsg-jinks-data/data/frus-tei-guidelines-resources/frus-encodingDesc.xml"
+data_encoding_desc="$repo_root/../../frus-tei/resources/frus-encodingDesc.xml"
 
 check_only=0
 allow_dirty=0
@@ -114,18 +114,8 @@ if [ "$check_only" -eq 1 ]; then
     if [ -f "$data_encoding_desc" ]; then
         "$upstream/check-rendition-drift.sh" "$data_encoding_desc" || drift=1
     else
-        echo "  skipped  hsg-jinks-data checkout not found at $data_encoding_desc" >&2
+        echo "  skipped  frus-tei checkout not found at $data_encoding_desc" >&2
     fi
-
-    # Stale copies in the data package are out of scope for this script, but
-    # silence would let them rot unnoticed -- they predate the 2026-08 upstream
-    # consolidation that moved the processing model into frus.odd.
-    for f in frus.odd frus.rnc; do
-        stale="$repo_root/../../hsg-jinks-data/data/frus-tei-guidelines-resources/$f"
-        if [ -f "$stale" ] && ! cmp -s "$upstream/$f" "$stale"; then
-            echo "  note     hsg-jinks-data's $f is stale (not synced by this script)" >&2
-        fi
-    done
 
     # A clean byte match still leaves one question open: has upstream moved on
     # since the sync? Compare the recorded commit against upstream HEAD.
@@ -198,7 +188,7 @@ Reference only (excluded from the app build in build.xml):
                                 FRUS TEI outside the app.
 
 Not vendored here:
-  frus-encodingDesc.xml         reaches the app through the frus-data-jinks data
+  frus-encodingDesc.xml         reaches the app through the frus-tei data
                                 package; see tools/generate-frus-renditions.xq.
 EOF
 echo "  updated    resources/frus-tei-guidelines/PROVENANCE.txt"

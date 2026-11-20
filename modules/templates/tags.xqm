@@ -24,9 +24,8 @@ import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg
  :)
 declare variable $tags:SCHEME := "https://history.state.gov/tags";
 declare variable $tags:TAXONOMY_DOC := "/db/apps/hsg-jinks/data/tags/taxonomy.xml";
-(: The FRUS volumes collection. #1101 was built on main against the old
-   data/Publications layout; this branch renamed it to frus-v2-data, so use
-   the config global (PR #32 review) rather than either literal. :)
+(: The FRUS volumes collection: the config global (PR #32 review), not a
+   literal. :)
 declare variable $tags:FRUS_COL := $config:data-default;
 declare variable $tags:SECRETARY_BIOS_COL := "/db/apps/other-publications/secretary-bios";
 

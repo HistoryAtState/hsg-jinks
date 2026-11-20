@@ -63,7 +63,7 @@
                     {
                         "name": "mode",
                         "in": "query",
-                        "description": "Search ranking mode. keyword (default) runs Lucene only. hybrid fuses Lucene with eXist vector KNN over FRUS (frus-data-jinks) via reciprocal rank fusion; other collections contribute keyword hits only until they gain hsg-embedding. Unknown values are treated as keyword (URL-preservation style, not a 400).",
+                        "description": "Search ranking mode. keyword (default) runs Lucene only. hybrid fuses Lucene with eXist vector KNN over FRUS (frus-tei) via reciprocal rank fusion; other collections contribute keyword hits only until they gain hsg-embedding. Unknown values are treated as keyword (URL-preservation style, not a 400).",
                         "required": false,
                         "schema": {
                             "type": "string",

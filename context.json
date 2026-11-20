@@ -466,7 +466,7 @@
     "data" : {
         "landing" : "/db/apps/hsg-jinks/data/landing/landing.xml"
     },
-    "_lastModified" : "2026-11-19T18:42:21.632Z",
+    "_lastModified" : "2026-11-20T10:54:18.039Z",
     "overwrite" : "default",
     "pkg" : {
         "website" : "http://tei-publisher.org",
@@ -553,7 +553,7 @@
     "defaults" : {
         "language" : "en",
         "language-label" : "label",
-        "data" : "/db/apps/frus-data-jinks/data",
+        "data" : "/db/apps/frus-tei",
         "landing" : "index.html",
         "address-by-id" : false,
         "odd-root" : "resources/odd",
@@ -561,7 +561,7 @@
             "en"
         ],
         "allowed-xpath" : [ ],
-        "data-default" : "frus-v2-data",
+        "data-default" : "data",
         "direction" : "ltr",
         "template" : "volume-landing.html",
         "browse" : "historicaldocuments",

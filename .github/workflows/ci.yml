@@ -22,8 +22,8 @@ jobs:
         uses: actions/checkout@v4
 
       # The baseline is the image the app goes live with: eXist 7 with the
-      # libraries, the HistoryAtState data packages and frus-data-jinks (with
-      # its vector index) baked into the database. Port 8080 is what
+      # libraries and the HistoryAtState data packages baked into the database.
+      # The FRUS data, frus-tei, is installed further down. Port 8080 is what
       # .devcontainer/init.sh and cypress.config.cjs expect. Pinned to the
       # same digest as .devcontainer/Dockerfile.dev.
       - name: Start the baseline image
@@ -48,6 +48,17 @@ jobs:
         run: |
           npm ci
           npm install -g @existdb/xst@4.1.0
+
+      # The latest frus-tei release: the curated volume subset. Its indexes,
+      # including the vector index, are built while the package installs.
+      - name: Install the FRUS data
+        env:
+          EXISTDB_SERVER: http://localhost:8080/exist
+          EXISTDB_USER: admin
+          EXISTDB_PASS: ""
+        run: |
+          curl -fsSL -o frus-tei.xar https://github.com/HistoryAtState/frus-tei/releases/latest/download/frus-tei.xar
+          xst package install frus-tei.xar
 
       # Same seed path as the devcontainer, but with the build the production
       # image ships (ant -Dproduction=true, README "Production Docker image"),

@@ -80,13 +80,9 @@ ADD --chown=${USR:-root} https://github.com/HistoryAtState/travels/releases/late
 ADD --chown=${USR:-root} https://github.com/HistoryAtState/visits/releases/latest/download/visits.xar /exist/autodeploy/visits.xar
 ADD --chown=${USR:-root} https://github.com/HistoryAtState/wwdai/releases/latest/download/wwdai.xar /exist/autodeploy/wwdai.xar
 
-# frus-data-jinks (built from the private hsg-jinks-data repo, which has no
-# GitHub release yet) must be staged at the repo root before building:
-#   cp ~/.config/hsg/xars/frus-data-jinks-baseline.xar ./frus-data-jinks-0.2.xar
-# or build a fresh one: cd ../../hsg-jinks-data && ant && cp build/*.xar <here>.
-# The zzzz- prefix makes it autodeploy last, as in .devcontainer/Dockerfile.dev.
-# Once a release exists, switch this to an ADD like the packages above.
-COPY --chown=${USR:-root} frus-data-jinks-*.xar /exist/autodeploy/zzzz-frus-data-jinks.xar
+# The FRUS data. The zzzz- prefix makes it autodeploy last, as in
+# .devcontainer/Dockerfile.dev.
+ADD --chown=${USR:-root} https://github.com/HistoryAtState/frus-tei/releases/latest/download/frus-tei.xar /exist/autodeploy/zzzz-frus-tei.xar
 
 # ARG ADMIN_PASS=none
 

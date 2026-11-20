@@ -27,7 +27,7 @@ declare namespace xi = "http://www.w3.org/2001/XInclude";
 declare variable $volume external;
 declare variable $id external;
 
-let $base := "/db/apps/frus-data-jinks/data/Publications"
+let $base := "/db/apps/frus-tei/data"
 let $hit :=
     if ($id = $volume)
     then doc($base || "/" || $volume || "/" || $volume || ".xml")/*

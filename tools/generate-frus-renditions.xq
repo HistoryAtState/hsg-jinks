@@ -6,7 +6,7 @@ xquery version "3.1";
  : rules from encodingDesc").
  :
  : The canonical vocabulary is the 42 tei:rendition definitions in
- : hsg-jinks-data's frus-tei-guidelines-resources/frus-encodingDesc.xml. TEI
+ : frus-tei's resources/frus-encodingDesc.xml. TEI
  : Publisher would normally generate the matching CSS at render time, by
  : resolving each @rendition token's definition with id() in the rendered
  : document -- but division files reference the encodingDesc only by its remote
@@ -37,7 +37,7 @@ xquery version "3.1";
 declare namespace tei = "http://www.tei-c.org/ns/1.0";
 
 declare variable $encodingDesc external :=
-    "/db/apps/frus-data-jinks/data/frus-tei-guidelines-resources/frus-encodingDesc.xml";
+    "/db/apps/frus-tei/resources/frus-encodingDesc.xml";
 
 declare variable $refinements :=
     string-join((
@@ -111,7 +111,7 @@ return
         " * for how to run it).",
         " *",
         " * Source vocabulary: the " || count($renditions) || " tei:rendition definitions in",
-        " * hsg-jinks-data's frus-tei-guidelines-resources/frus-encodingDesc.xml, one",
+        " * frus-tei's resources/frus-encodingDesc.xml, one",
         " * &quot;.document_&lt;id&gt;&quot; rule each -- the class name TEI Publisher's",
         " * useSourceRendition emits for @rendition=&quot;#&lt;id&gt;&quot; (css:get-rendition in",
         " * tei-publisher-lib).",

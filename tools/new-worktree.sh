@@ -25,20 +25,21 @@
 #
 # Layout rule: worktrees are FLAT SIBLINGS of the main clone
 # (<parent>/<slug>), nested one level under the repos root that
-# also holds hsg-jinks-data and hsg-project (<repos_root>/hsg-jinks/*). So
-# from inside a worktree, ../../hsg-jinks-data and ../../hsg-project are the
+# also holds frus-tei and hsg-project (<repos_root>/hsg-jinks/*). So
+# from inside a worktree, ../../frus-tei and ../../hsg-project are the
 # working relative references. See README "Parallel worktrees".
 #
 # Shared machine-local state (never in git): ~/.config/hsg/
 #   worktree-ports.tsv                    slug <tab> http <tab> https <tab> path
 #   xars/profile-theme-uswds-baseline.xar frozen theme baseline (see README)
-# The FRUS data comes with the base image (README "Baseline image").
+#   xars/frus-tei-baseline.xar            frozen FRUS data baseline (see README)
 
 set -euo pipefail
 
 CONFIG_DIR="$HOME/.config/hsg"
 REGISTRY="$CONFIG_DIR/worktree-ports.tsv"
 BASELINE_XAR="$CONFIG_DIR/xars/profile-theme-uswds-baseline.xar"
+DATA_XAR="$CONFIG_DIR/xars/frus-tei-baseline.xar"
 BASE_HTTP=8090   # main's ports; worktrees allocate upward from +1
 BASE_HTTPS=8453
 
@@ -84,6 +85,11 @@ http_port=$((BASE_HTTP + n)); https_port=$((BASE_HTTPS + n))
 [ -f "$BASELINE_XAR" ] || {
     echo "error: baseline profile xar missing: $BASELINE_XAR" >&2
     echo "build it from the profile checkout (README 'USWDS profile baseline')" >&2
+    exit 1
+}
+[ -f "$DATA_XAR" ] || {
+    echo "error: baseline FRUS data xar missing: $DATA_XAR" >&2
+    echo "build it from the frus-tei checkout (README 'FRUS data baseline')" >&2
     exit 1
 }
 
@@ -153,6 +159,7 @@ cat > "$wt_path/.existdb.json" <<EOF
 EOF
 
 cp "$BASELINE_XAR" "$wt_path/.devcontainer/profile-theme-uswds-baseline.xar"
+cp "$DATA_XAR" "$wt_path/.devcontainer/frus-tei-baseline.xar"
 
 echo "==> npm ci"
 (cd "$wt_path" && npm ci --no-audit --no-fund)

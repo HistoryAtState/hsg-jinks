@@ -31,7 +31,7 @@ declare variable $volume external;
 declare variable $id external;
 declare variable $mode external;
 
-let $base := "/db/apps/frus-data-jinks/data/Publications"
+let $base := "/db/apps/frus-tei/data"
 let $hit :=
     if ($id = $volume)
     then doc($base || "/" || $volume || "/" || $volume || ".xml")/*
