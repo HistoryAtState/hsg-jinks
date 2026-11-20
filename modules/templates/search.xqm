@@ -7,13 +7,11 @@ xquery version "3.1";
  : template-function style (no eXist html-templating %templates:* annotations
  : -- jinks templates call these directly as [[ srch:whatever($context) ]]).
  :
- : FRUS is queried from /db/apps/frus-data-jinks (this app's own, currently
- : one-volume, frozen data baseline),
+ : FRUS is queried from the frus-tei package's volumes (/db/apps/frus-tei/data),
  : NOT hsg-shell's full /db/apps/frus/volumes: hsg-jinks's own
- : historicaldocuments routes only ever render frus-data-jinks, so a FRUS hit
- : must point somewhere this app can actually serve. When the real multi-volume
- : data replaces the sample baseline (same repo, same frozen-baseline
- : mechanism), search picks it up automatically -- the collection path below
+ : historicaldocuments routes only ever render frus-tei, so a FRUS hit must
+ : point somewhere this app can actually serve. Whatever volumes the installed
+ : frus-tei package carries, search picks them up -- the collection path below
  : is a single named constant, not repeated per query site.
  :
  : Known, deliberate simplifications versus hsg-shell (documented rather than
@@ -47,7 +45,7 @@ declare namespace tei = "http://www.tei-c.org/ns/1.0";
 declare namespace vector = "http://exist-db.org/xquery/vector";
 
 (:~ FRUS data collection this app actually renders -- see module doc above. :)
-declare variable $srch:FRUS_COL as xs:string := "/db/apps/frus-data-jinks";
+declare variable $srch:FRUS_COL as xs:string := "/db/apps/frus-tei/data";
 
 (:~ Id of the one GET form (the keyword box) that the results sidebar's
  : controls and the Sort by select all belong to, so a new keyword search
@@ -423,7 +421,7 @@ declare %private function srch:results($context as map(*)) as map(*) {
 
 (:~ Falls back to the division's own @xml:id when there's no tei:head to
  : extract a title from -- happens for front-matter divs (persons/preface/
- : sources) that the current frus-data-jinks index config includes
+ : sources) that the current frus-tei index config includes
  : unconditionally alongside real documents (the collection.xconf "if"
  : attribute needed to restrict indexing to document-type divs only silently
  : breaks field storage entirely -- an eXist limitation, not a logic bug --

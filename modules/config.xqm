@@ -285,7 +285,7 @@ declare variable $config:data-default := $gen:data-default;
 
 (:~
  : The name of the FRUS volumes collection inside $config:data-root
- : ("frus-v2-data"), as a global any XQuery can use instead of spelling the
+ : ("data"), as a global any XQuery can use instead of spelling the
  : literal out (PR #32 review). $config:data-default above is
  : $config:data-root || "/" || this.
  :)

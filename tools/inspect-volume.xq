@@ -21,7 +21,7 @@ declare namespace xmldb = "http://exist-db.org/xquery/xmldb";
 
 declare variable $volume external;
 
-let $base := "/db/apps/frus-data-jinks/data/Publications/" || $volume
+let $base := "/db/apps/frus-tei/data/" || $volume
 let $doc := doc($base || "/" || $volume || ".xml")
 return
     serialize(

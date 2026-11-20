@@ -1,7 +1,8 @@
 # Baseline: joewiz/hsg-project:v2, the go-live image of this app. It is a
 # vector-capable eXist 7 with the whole database baked in (/exist/data):
-# hsg-jinks, frus-data-jinks with its vector index, the HistoryAtState data
-# packages and the runtime libraries (tei-publisher-lib, jinks-templates,
+# hsg-jinks, the old frus-data-jinks FRUS package (no longer read; the app
+# reads frus-tei, installed below), the HistoryAtState data packages and the
+# runtime libraries (tei-publisher-lib, jinks-templates,
 # roaster, jwt, crypto, carousel). Worktree containers test new versions of
 # hsg-jinks against it: init.sh replaces the baked-in app with the worktree's
 # build. Pinned to a digest (the v2 of 2026-10-15): the v2 republished on
@@ -82,6 +83,12 @@ RUN git clone https://github.com/eeditiones/jinks.git \
 # copies it from ~/.config/hsg/xars/. The xar is gitignored: it is a build
 # artifact, not source.
 COPY profile-theme-uswds-*.xar /usr/local/exist/autodeploy/zzz-profile-theme-uswds.xar
+
+# The FRUS data: frus-tei (HistoryAtState/frus-tei), the curated volume subset
+# its default build packages. new-worktree.sh copies the baseline xar from
+# ~/.config/hsg/xars/, so every worktree tests against the same data. The zzzz-
+# prefix installs it last; its index configuration needs the vector extension.
+COPY frus-tei-*.xar /usr/local/exist/autodeploy/zzzz-frus-tei.xar
 
 
 WORKDIR /usr/local/exist

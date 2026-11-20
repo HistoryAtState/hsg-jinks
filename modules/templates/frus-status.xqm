@@ -9,7 +9,7 @@ xquery version "3.1";
  : with request attributes and templates:if-parameter-set, kept in XQuery
  : here because jinks templates have no equivalent mechanism.
  :
- : v2 data adaptations (frus-v2-data, one collection per volume):
+ : v2 data adaptations (frus-tei, one collection per volume):
  : - revisionDesc and its change entries live inline in the volume root
  :   document (<volid>/<volid>.xml), so the reference's change/@status/@when/
  :   @to/@corresp queries carry over unchanged.

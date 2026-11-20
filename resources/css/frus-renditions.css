@@ -6,7 +6,7 @@
  * for how to run it).
  *
  * Source vocabulary: the 42 tei:rendition definitions in
- * hsg-jinks-data's frus-tei-guidelines-resources/frus-encodingDesc.xml, one
+ * frus-tei's resources/frus-encodingDesc.xml, one
  * ".document_<id>" rule each -- the class name TEI Publisher's
  * useSourceRendition emits for @rendition="#<id>" (css:get-rendition in
  * tei-publisher-lib).

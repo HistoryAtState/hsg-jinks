@@ -47,7 +47,7 @@ declare function ogapi:frus-metadata-page($request as map(*)) {
  : volume collection directly rather than the separate hand-maintained
  : "bibliography" collection the deployed app still reads -- see OP#1197
  : ("Data Transformation"). That collection does not exist in this app's
- : data package (hsg-jinks-data ships volumes as TEI only), so this is the
+ : data package (frus-tei ships volumes as TEI only), so this is the
  : only workable data source here, not just the preferred one.
  :
  : Unlike the ported source, external-location/length are looked up in the

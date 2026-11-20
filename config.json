@@ -135,8 +135,8 @@
   },
   "defaults" : {
     "browse" : "historicaldocuments",
-    "data" : "/db/apps/frus-data-jinks/data",
-    "data-default" : "frus-v2-data",
+    "data" : "/db/apps/frus-tei",
+    "data-default" : "data",
     "odd" : "hsg-jinks.odd",
     "template" : "volume-landing.html",
     "$replace" : [

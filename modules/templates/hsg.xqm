@@ -464,13 +464,14 @@ declare function hsg:volume-list($context as map(*)) {
 };
 
 (:~
- : The administrations taxonomy (frus-data-jinks, OP#1214): one category per
- : administration slug, one catDesc per presidency. Its xml:id is the target
- : the volume headers' keywords scheme "#frus-administration-coverage" point
- : at, so the slugs here and the terms in the volumes are one vocabulary.
+ : The administrations taxonomy (this app's data/administrations, OP#1214):
+ : one category per administration slug, one catDesc per presidency. Its
+ : xml:id is the target the FRUS volume headers' keywords scheme
+ : "#frus-administration-coverage" point at, so the slugs here and the terms
+ : in the volumes are one vocabulary.
  :)
 declare %private function hsg:administrations() as element(tei:taxonomy)? {
-    doc($config:data-root || "/administrations/administrations.xml")
+    doc($config:app-root || "/data/administrations/administrations.xml")
         //tei:taxonomy[@xml:id = 'frus-administration-coverage']
 };
 
@@ -643,7 +644,7 @@ declare %private variable $hsg:pre-administration-subseries-admins := (
 (:~
  : The FRUS production tracks, reference parity with the
  : frus-production-tracks taxonomy in hsg-shell's code table
- : (frus repo, shared/frus-production.xml). frus-data-jinks carries no code
+ : (frus repo, shared/frus-production.xml). frus-tei carries no code
  : table, and the vocabulary is closed and stable (three fixed categories),
  : so the ids and display labels live here. Order is the taxonomy's, which
  : fixes the order of the per-track headings on administration pages.
@@ -1059,7 +1060,7 @@ declare %private function hsg:volume-published($publication as xs:string) as xs:
 
 (:~
  : A document division's printed number, or the empty sequence: its
- : frus-division-n (hsg-jinks-data), else frus-document-number. Chapters carry
+ : frus-division-n (frus-tei), else frus-document-number. Chapters carry
  : a frus-division-n too, so callers check the division type first.
  :)
 declare function hsg:document-number($division as node()?) as xs:string? {
@@ -1227,13 +1228,11 @@ declare %private function hsg:bytes-to-readable($bytes as xs:integer?) as xs:str
  : no link class (the script cancels clicks on those links and scrolls to
  : their fragment instead). The component styles still apply.
  :
- : Reference parity with hsg-shell's fh:facets/fh:view-persons/fh:view-gloss,
- : with one structural difference: shell resolved #p_X / #t_X ids with id()
- : inside the same monolithic volume document, while frus-v2-data keeps the
- : registers in separate front-matter files (front/persons.xml,
- : front/terms.xml) where the entries are marked persName/term
- : @sameAs="#p_X" rather than @xml:id -- so the lookup is a cross-file
- : @sameAs match.
+ : Reference parity with hsg-shell's fh:facets/fh:view-persons/fh:view-gloss.
+ : hsg-shell collected the persName/@corresp and gloss/@target mentions in
+ : the text; frus-tei lists each person or term a division mentions once, in
+ : its header: profileDesc/textClass/keywords whose @scheme ends with
+ : "persons" or "terms", one term/@ref ("frus:{vol}/persons#p_X") each.
  :)
 declare function hsg:division-asides($context as map(*)) {
     let $doc := $context?doc?content
@@ -1243,22 +1242,18 @@ declare function hsg:division-asides($context as map(*)) {
         let $type := normalize-space(($doc//tei:bibl[@type='frus-division-type'])[1])
         let $subtype := normalize-space(($doc//tei:bibl[@type='frus-division-subtype'])[1])
         (: fh:facets parity: no persons/terms panels on container listings
-           (compilation, chapter) or the index. Other divisions collect their
-           references below; the register list pages themselves mark entries
-           with @sameAs, not @corresp/@target, so they naturally list
-           nothing. :)
+           (compilation, chapter) or the index. :)
         let $show-registers := not($type = 'compilation' or starts-with($type, 'chapter') or $subtype = 'index')
         let $publication := config:get-relpath($doc, $config:data-default) => tokenize("/") => head()
+        let $keywords := root($doc)//tei:teiHeader/tei:profileDesc/tei:textClass/tei:keywords
         let $registers :=
             if (not($show-registers)) then () else (
                 hsg:register-list($context, $publication,
                     'historicaldocuments.persons', 'Persons', 'persons',
-                    $doc//tei:persName/@corresp,
-                    doc($config:data-default || "/" || $publication || "/front/persons.xml")//tei:persName[@sameAs]),
+                    $keywords[ends-with(@scheme, 'persons')]/tei:term),
                 hsg:register-list($context, $publication,
                     'historicaldocuments.terms', 'Abbreviations &amp; Terms', 'terms',
-                    $doc//tei:gloss/@target,
-                    doc($config:data-default || "/" || $publication || "/front/terms.xml")//tei:term[@sameAs])
+                    $keywords[ends-with(@scheme, 'terms')]/tei:term)
             )
         return
             if (empty($registers)) then ()
@@ -1272,42 +1267,41 @@ declare function hsg:division-asides($context as map(*)) {
 };
 
 (:~
- : One register list (Persons or Abbreviations &amp; Terms): every distinct
- : reference the division makes, resolved against the volume's register and
- : rendered as a link to the register page, with the entry's description as
- : a USWDS tooltip -- fh:get-persons/fh:get-gloss parity, including the
- : name-sorted order and the hide-if-empty behaviour (a division with no
- : references gets no list).
+ : One register list (Persons or Abbreviations &amp; Terms): every person or
+ : term the division's header lists, resolved against the volume's register
+ : and rendered as a link to its entry on the register page, with the
+ : entry's description as a USWDS tooltip -- fh:get-persons/fh:get-gloss
+ : parity, including the name-sorted order and the hide-if-empty behaviour
+ : (a division with no references gets no list).
  :
- : Both sides are grouped rather than scanned: $idrefs arrives with
- : duplicates (a division names the same person up to 249 times) and the
- : register runs to 441 entries, so one group-by pass over each side turns
- : the pairing into a map lookup.
+ : A @ref is "{register URI}#{entry id}". The volume's XML catalog maps the
+ : register URI to its file (frus:{vol}/persons to front/persons.xml), and
+ : the entry is the element with that xml:id: a standOff listPerson/person
+ : (persName, note) or a list item (term, gloss). References the register
+ : does not resolve are left out.
  :)
 declare %private function hsg:register-list($context as map(*), $publication as xs:string,
         $key as xs:string, $label as xs:string, $page as xs:string,
-        $idrefs as node()*, $register as element()*) {
-    let $byId := map:merge(
-        for $entry in $register
-        group by $id := string($entry/@sameAs)
-        return map:entry($id, head($entry))
-    )
+        $terms as element(tei:term)*) {
     let $href := $context?context-path || "/historicaldocuments/" || $publication || "/" || $page
     let $entries :=
-        for $ref in $idrefs
-        group by $idref := string($ref)
-        let $name := $byId($idref)
-        where exists($name)
-        let $display := normalize-space($name)
-        let $description := hsg:register-description($name)
+        for $term in $terms
+        group by $register-uri := substring-before($term/@ref, '#')
+        let $register := hsg:catalog-resolve($publication, $register-uri)
+        for $ref in distinct-values($term/@ref)
+        let $id := substring-after($ref, '#')
+        let $entry := $register/id($id)
+        where exists($entry)
+        let $display := normalize-space(($entry/(tei:persName | tei:term))[1])
+        let $description := normalize-space(($entry/(tei:note | tei:gloss))[1])
         order by $display
         return
             <li class="usa-in-page-nav__item">{
                 if ($description) then
-                    <a href="{$href}{$idref}" class="usa-tooltip" data-position="top"
+                    <a href="{$href}#{$id}" class="usa-tooltip" data-position="top"
                         title="{$description}">{$display}</a>
                 else
-                    <a href="{$href}{$idref}">{$display}</a>
+                    <a href="{$href}#{$id}">{$display}</a>
             }</li>
     return
         if (empty($entries)) then ()
@@ -1321,18 +1315,17 @@ declare %private function hsg:register-list($context as map(*), $publication as 
 };
 
 (:~
- : A register entry's description: the text following the name -- following
- : siblings of the wrapping hi when the name sits inside one (the usual
- : encoding: item/hi/persName), of the name itself otherwise -- with the
- : leading comma stripped. fh:get-persons/fh:get-gloss parity.
+ : The document a frus: URI names in a volume's XML catalog
+ : ({vol}/{vol}_catalog.xml, uri entries relative to the catalog). Empty if
+ : the catalog has no such entry.
  :)
-declare %private function hsg:register-description($name as element()) as xs:string {
-    let $following :=
-        if ($name/parent::tei:hi) then
-            $name/parent::tei:hi/following-sibling::node()
-        else
-            $name/following-sibling::node()
-    return normalize-space(replace(string-join($following, ''), '^\s*,\s*', ''))
+declare %private function hsg:catalog-resolve($publication as xs:string, $uri as xs:string) as document-node()? {
+    let $volume := $config:data-default || "/" || $publication
+    let $target := doc($volume || "/" || $publication || "_catalog.xml")
+        //*:uri[@name = $uri][1]/@uri
+    return
+        if (empty($target)) then ()
+        else doc($volume || "/" || $target)
 };
 
 (:~

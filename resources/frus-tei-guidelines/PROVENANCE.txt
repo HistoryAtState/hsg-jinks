@@ -25,5 +25,5 @@ Reference only (excluded from the app build in build.xml):
                                 FRUS TEI outside the app.
 
 Not vendored here:
-  frus-encodingDesc.xml         reaches the app through the frus-data-jinks data
+  frus-encodingDesc.xml         reaches the app through the frus-tei data
                                 package; see tools/generate-frus-renditions.xq.
