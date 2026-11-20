@@ -113,7 +113,9 @@ declare function facets:display($config as map(*), $nodes as element()+) {
                 else
                     ft:facets($nodes, $config?dimension, $maxcount)
             )
-    return (
+    return 
+        if ($table//*:tr) then
+        (
         <div class="facet-dimension" data-dimension="facet-{$config?dimension}">
             {
                 if ($config?max != 0) then
@@ -148,7 +150,7 @@ declare function facets:display($config as map(*), $nodes as element()+) {
                     (: use source as URL to API endpoint from which to retrieve possible values :)
                     <pb-combo-box source="{$config?source}" close-after-select=""
                         on-update="pb-search-resubmit" placeholder="{$config?heading}">
-                        <select multiple="">
+                        <select multiple="" name="facet-{$config?dimension}">
                         {
                             for $param in facets:get-parameter("facet-" || $config?dimension)
                             let $label := facets:translate($config, $lang, $param)
@@ -161,7 +163,9 @@ declare function facets:display($config as map(*), $nodes as element()+) {
                     ()
             }
         </div>
-    )
+        )
+        else
+            ()
 };
 
 declare function facets:get-parameter($name as xs:string) {
