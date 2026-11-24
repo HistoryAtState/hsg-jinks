@@ -201,10 +201,17 @@ declare %private function pc:generate($template as xs:string, $params as map(*),
     ), map { "duplicates": "use-last" })
     let $mode := if ($config?plainText) then $tmpl:TEXT_MODE else $tmpl:XML_MODE
     (: tmpl:generate emits a let for each key of the map it is given: first
-       none, to find the variables the code refers to, then those :)
-    let $generate := tmpl:generate($mode, $ast?ast, ?, $modules, $namespaces, $config?resolver, $ast?blocks)
+       none, to find the variables the code refers to, then those.
+       Its blocks only end up in $local:blocks, which dynamic includes are
+       meant to receive, but they select $local:blocks/block from <template>
+       elements and so always get none (jinks-templates 1.4.2, see
+       https://github.com/eeditiones/jinks-templates/issues/100). Without
+       blocks, the declaration and those arguments are left out. :)
+    let $generate := tmpl:generate($mode, $ast?ast, ?, $modules, $namespaces, $config?resolver, ())
     let $variables := pc:variables($generate(map {}))
     let $code := $generate(map:merge($variables ! map:entry(., ())))
+        => replace("declare variable \$local:blocks := <blocks/>;", "")
+        => replace("\$local:blocks/block\)", "())")
     return map {
         "code": $pc:IMPORT || "&#10;" || replace($code, "tmpl:include\(", "pc:include("),
         "variables": array { $variables },
