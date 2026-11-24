@@ -81,6 +81,27 @@ declare variable $srch:SECTIONS as map(*) := map {
     "about": ("hac", "faq")
 };
 
+(:~ The searched collections and the hsg-publication values their indexes
+ : carry (each data package's collection.xconf). A collection none of whose
+ : publications is in scope cannot contribute a hit, so it is not resolved:
+ : collection() over frus-tei's 22k subcollections costs more than the
+ : Lucene lookup itself. :)
+declare variable $srch:COLLECTIONS as map(*) := map {
+    "/db/apps/other-publications": ("buildings", "education", "faq", "people", "short-history", "vietnam-guide", "views-from-the-embassy"),
+    "/db/apps/conferences": "conferences",
+    "/db/apps/hac": "hac",
+    $srch:FRUS_COL: "frus",
+    "/db/apps/frus-history/articles": "frus-history-articles",
+    "/db/apps/frus-history/documents": "frus-history-documents",
+    "/db/apps/frus-history/monograph": "frus-history-monograph",
+    "/db/apps/rdcr": "countries-articles",
+    "/db/apps/wwdai": "archives",
+    "/db/apps/pocom/people": "pocom",
+    "/db/apps/travels": "travels",
+    "/db/apps/visits": "visits",
+    "/db/apps/milestones": "milestones"
+};
+
 (:~ The 7 landing-page / filter-sidebar section checkboxes. :)
 declare function srch:sections() as map(*)* {
     (
@@ -158,30 +179,56 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
         "facets": map { "facets": $facets },
         "query-string": $queryString,
         (: the date clause on its own, for the vector leg's filter-query :)
-        "date-query": $dateQuery
+        "date-query": $dateQuery,
+        (: every collection for the entire site; for a section filter only
+           those indexing one of its publications, none for an unknown one :)
+        "collections":
+            if (empty($category)) then map:keys($srch:COLLECTIONS)
+            else map:keys($srch:COLLECTIONS)[$srch:COLLECTIONS(.) = $publication]
     }
 };
 
-declare %private function srch:query-sections($queryConfig as map(*)) as element()* {
+(:~ Resolves each collection in scope once, for both legs. The legs bind a
+ : value with let before the path: passed as a function parameter, or read
+ : as $docs($uri)//..., ft:query-vector falls back to one KNN search per
+ : document and returns every division. :)
+declare %private function srch:searched-collections($uris as xs:string*) as map(*) {
+    map:merge(for $uri in $uris return map:entry($uri, collection($uri)))
+};
+
+declare %private function srch:query-sections($queryConfig as map(*), $docs as map(*)) as element()* {
     let $queryString := $queryConfig?query-string
     let $queryOptions := map:merge(($srch:ft-query-options, $queryConfig?fields, $queryConfig?facets))
     (: frus omits ?fields, same limitation-driven exception hsg-shell carried for large result sets :)
     let $frusQueryOptions := map:merge(($srch:ft-query-options, $queryConfig?facets))
+    let $otherPublications := $docs("/db/apps/other-publications")
+    let $conferences := $docs("/db/apps/conferences")
+    let $hac := $docs("/db/apps/hac")
+    let $frus := $docs($srch:FRUS_COL)
+    let $frusHistoryArticles := $docs("/db/apps/frus-history/articles")
+    let $frusHistoryDocuments := $docs("/db/apps/frus-history/documents")
+    let $frusHistoryMonograph := $docs("/db/apps/frus-history/monograph")
+    let $rdcr := $docs("/db/apps/rdcr")
+    let $wwdai := $docs("/db/apps/wwdai")
+    let $pocom := $docs("/db/apps/pocom/people")
+    let $travels := $docs("/db/apps/travels")
+    let $visits := $docs("/db/apps/visits")
+    let $milestones := $docs("/db/apps/milestones")
     return (
-        collection("/db/apps/other-publications")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/other-publications")//tei:body[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/conferences")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/hac")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection($srch:FRUS_COL)//tei:div[ft:query(., $queryString, $frusQueryOptions)],
-        collection("/db/apps/frus-history/articles")//tei:body[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/frus-history/documents")//tei:body[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/frus-history/monograph")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/rdcr")//tei:body[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/wwdai")//tei:body[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/pocom/people")//persName[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/travels")//trips[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/visits")//visit[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/milestones")//tei:div[ft:query(., $queryString, $queryOptions)]
+        $otherPublications//tei:div[ft:query(., $queryString, $queryOptions)],
+        $otherPublications//tei:body[ft:query(., $queryString, $queryOptions)],
+        $conferences//tei:div[ft:query(., $queryString, $queryOptions)],
+        $hac//tei:div[ft:query(., $queryString, $queryOptions)],
+        $frus//tei:div[ft:query(., $queryString, $frusQueryOptions)],
+        $frusHistoryArticles//tei:body[ft:query(., $queryString, $queryOptions)],
+        $frusHistoryDocuments//tei:body[ft:query(., $queryString, $queryOptions)],
+        $frusHistoryMonograph//tei:div[ft:query(., $queryString, $queryOptions)],
+        $rdcr//tei:body[ft:query(., $queryString, $queryOptions)],
+        $wwdai//tei:body[ft:query(., $queryString, $queryOptions)],
+        $pocom//persName[ft:query(., $queryString, $queryOptions)],
+        $travels//trips[ft:query(., $queryString, $queryOptions)],
+        $visits//visit[ft:query(., $queryString, $queryOptions)],
+        $milestones//tei:div[ft:query(., $queryString, $queryOptions)]
     )
 };
 
@@ -244,7 +291,7 @@ declare %private function srch:scored-vector-hits($nodes as element()*) as map(*
  : out, the vector leg ignored the range: a 1985-only search returned 50
  : nearest hits from any year. Collections without the frus-search-date
  : fields then contribute nothing, as on the keyword leg. :)
-declare %private function srch:query-vector-sections($queryConf as map(*), $q as xs:string) as element()* {
+declare %private function srch:query-vector-sections($queryConf as map(*), $q as xs:string, $docs as map(*)) as element()* {
     if (normalize-space($q) eq "") then
         ()
     else
@@ -256,21 +303,34 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
                 $queryConf?facets,
                 if (exists($dateFilter)) then map { "filter-query": $dateFilter } else ()
             ))
+            let $otherPublications := $docs("/db/apps/other-publications")
+            let $conferences := $docs("/db/apps/conferences")
+            let $hac := $docs("/db/apps/hac")
+            let $frus := $docs($srch:FRUS_COL)
+            let $frusHistoryArticles := $docs("/db/apps/frus-history/articles")
+            let $frusHistoryDocuments := $docs("/db/apps/frus-history/documents")
+            let $frusHistoryMonograph := $docs("/db/apps/frus-history/monograph")
+            let $rdcr := $docs("/db/apps/rdcr")
+            let $wwdai := $docs("/db/apps/wwdai")
+            let $pocom := $docs("/db/apps/pocom/people")
+            let $travels := $docs("/db/apps/travels")
+            let $visits := $docs("/db/apps/visits")
+            let $milestones := $docs("/db/apps/milestones")
             let $scored := (
-                try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/conferences")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/hac")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/frus-history/articles")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/frus-history/documents")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/frus-history/monograph")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/rdcr")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/wwdai")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/pocom/people")//persName[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/travels")//trips[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/visits")//visit[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/milestones")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () }
+                try { srch:scored-vector-hits($otherPublications//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($otherPublications//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($conferences//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($hac//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($frus//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($frusHistoryArticles//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($frusHistoryDocuments//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($frusHistoryMonograph//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($rdcr//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($wwdai//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($pocom//persName[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($travels//trips[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($visits//visit[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($milestones//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () }
             )
             let $ranked :=
                 for $row in $scored
@@ -363,11 +423,12 @@ declare %private function srch:results($context as map(*)) as map(*) {
             let $started := util:system-dateTime()
             let $range := srch:date-range($p?("start-date"), $p?("end-date"), $p?("start-time"), $p?("end-time"))
             let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), $p?q, $range?start, $range?end)
+            let $docs := srch:searched-collections($queryConf?collections)
             let $luceneHits :=
-                try { srch:query-sections($queryConf) } catch * { () }
+                try { srch:query-sections($queryConf, $docs) } catch * { () }
             let $vectorHits :=
                 if ($p?mode eq "hybrid" and exists($p?q)) then
-                    srch:query-vector-sections($queryConf, $p?q)
+                    srch:query-vector-sections($queryConf, $p?q, $docs)
                 else
                     ()
             (: RRF ranks the keyword leg by position, so it goes in by
