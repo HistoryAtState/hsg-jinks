@@ -20,10 +20,13 @@ xquery version "3.1";
  :
  : A stored module is keyed by the template text and the configuration, so a
  : changed template no longer matches its stored version. It is only used if
- : every top-level key of the context is one tmpl:generate declared (it emits
- : a let per key) and none of the templates it extends changed since. Anything
- : else falls back to tmpl:process. Run pc:compile-all after changing a
- : template, layout or block library.
+ : none of the templates it extends changed since; otherwise pc:process falls
+ : back to tmpl:process. Run pc:compile-all after changing a template, layout
+ : or block library.
+ :
+ : tmpl:generate binds every top-level context key to a variable of the same
+ : name. The stored code binds only the unprefixed variables it refers to,
+ : whatever keys the context has when it runs.
  :)
 module namespace pc = "http://history.state.gov/ns/site/hsg/precompiled-templates";
 
@@ -76,16 +79,8 @@ declare variable $pc:VARIANTS := (
     }
 );
 
-(:~ Top-level context keys the callers add on top of context.json and a
- : template's frontmatter: vapi:load-config-json, vapi:view, the error
- : handlers, and the data documents (context.json and frontmatter "data"). :)
-declare variable $pc:RUNTIME_KEYS := (
-    "languages", "request", "context-path",
-    "doc", "template", "media",
-    "type", "description", "code", "line",
-    (: vapi:html's $extConfig in the route handlers :)
-    "page-id", "facsimile", "section-id", "administration-id", "release-id", "document-id", "article-id"
-);
+(: Variables pc:eval binds itself, see the module doc. :)
+declare variable $pc:BOUND := ("context", "_resolver", "_modules", "_namespaces");
 
 (: ============== shared ============== :)
 
@@ -169,26 +164,31 @@ declare function pc:templates() as xs:string* {
     return substring-after($path, $config:app-root || "/")
 };
 
-declare %private function pc:compile-params($templates as xs:string*) as map(*) {
-    let $context := parse-json(util:binary-to-string(util:binary-doc($config:app-root || "/context.json")))
-    let $dataKeys := (
-        map:keys(($context?data, map {})[1]),
-        for $relPath in $templates
-        let $data := tmpl:frontmatter(pc:resolver($relPath)?content)?data
-        return if ($data instance of map(*)) then map:keys($data) else ()
-    )
-    return
-        map:merge((
-            $context,
-            for $key in distinct-values(($pc:RUNTIME_KEYS, $dataKeys))[not(map:contains($context, .))]
-            return map:entry($key, ())
-        ))
+(: tmpl:to-ast takes templating.use and the template modules from it. :)
+declare %private function pc:compile-params() as map(*) {
+    parse-json(util:binary-to-string(util:binary-doc($config:app-root || "/context.json")))
+};
+
+(:~ The unprefixed variables the code refers to, other than pc:eval's. Names
+ : the code binds itself are included too: a let bound outside is shadowed. :)
+declare %private function pc:variables($code as xs:string) as xs:string* {
+    distinct-values(
+        analyze-string($code, "\$([A-Za-z_][A-Za-z0-9_.\-]*)(:[A-Za-z_][A-Za-z0-9_.\-]*)?")
+            //fn:match[empty(fn:group[@nr = 2])]/fn:group[@nr = 1]/string()
+    )[not(. = $pc:BOUND)]
 };
 
 (:~ tmpl:process up to the generated code, as it runs it; also returns what
  : pc:process needs to run the code without it. :)
 declare %private function pc:generate($template as xs:string, $params as map(*), $config as map(*)) as map(*) {
-    let $ast := tmpl:to-ast($template, $params, $config, ())
+    (: HTML comments are dropped from the template and from what it extends
+       or uses; in text mode they are content :)
+    let $strip := if ($config?plainText) then function($s) { $s } else replace(?, "<!--.*?-->", "", "s")
+    let $config := map:put($config, "resolver", function($path) {
+        let $source := $config?resolver($path)
+        return if (exists($source)) then map:put($source, "content", $strip($source?content)) else ()
+    })
+    let $ast := tmpl:to-ast($strip($template), $params, $config, ())
     let $modules := map:merge((
         $config?modules,
         if (not($config?ignoreImports) and exists($ast?context?templating)) then $ast?context?templating?modules else (),
@@ -200,10 +200,14 @@ declare %private function pc:generate($template as xs:string, $params as map(*),
         if (exists($ast?context?templating)) then $ast?context?templating?namespaces else ()
     ), map { "duplicates": "use-last" })
     let $mode := if ($config?plainText) then $tmpl:TEXT_MODE else $tmpl:XML_MODE
-    let $code := tmpl:generate($mode, $ast?ast, $ast?context, $modules, $namespaces, $config?resolver, $ast?blocks)
+    (: tmpl:generate emits a let for each key of the map it is given: first
+       none, to find the variables the code refers to, then those :)
+    let $generate := tmpl:generate($mode, $ast?ast, ?, $modules, $namespaces, $config?resolver, $ast?blocks)
+    let $variables := pc:variables($generate(map {}))
+    let $code := $generate(map:merge($variables ! map:entry(., ())))
     return map {
         "code": $pc:IMPORT || "&#10;" || replace($code, "tmpl:include\(", "pc:include("),
-        "keys": array { map:keys($ast?context) },
+        "variables": array { $variables },
         "modules": $modules,
         "namespaces": $namespaces
     }
@@ -232,16 +236,20 @@ declare %private function pc:compile($relPath as xs:string, $variant as map(*), 
                its own, where the free variables are undeclared; pc:process
                falls back on static errors instead :)
             return
-                    let $module := xmldb:store($pc:COLLECTION, $key || ".xq", $generated?code, "application/xquery")
-                    let $meta := map {
-                        "template": $relPath,
-                        "keys": $generated?keys,
-                        "frontmatter": array { $chain ! ?frontmatter },
-                        "depends": array { pc:depends($chain, $params) ! map { "path": ., "modified": string(pc:modified(.)) } },
-                        "modules": $generated?modules,
-                        "namespaces": $generated?namespaces
-                    }
-                    let $json := xmldb:store($pc:COLLECTION, $key || ".json", serialize($meta, map { "method": "json" }), "application/json")
+                    let $module := xmldb:store($pc:COLLECTION, $key || ".xq",
+                        "(: __template: " || $relPath || " :)&#10;" || $generated?code, "application/xquery")
+                    let $meta := map:merge((
+                        map { "__template": $relPath },
+                        map {
+                            "variables": $generated?variables,
+                            "frontmatter": array { $chain ! ?frontmatter },
+                            "depends": array { pc:depends($chain, $params) ! map { "path": ., "modified": string(pc:modified(.)) } },
+                            "modules": $generated?modules,
+                            "namespaces": $generated?namespaces
+                        }
+                    ))
+                    let $json := xmldb:store($pc:COLLECTION, $key || ".json",
+                        serialize($meta, map { "method": "json" }), "application/json")
                     return (
                         sm:chmod(xs:anyURI($module), "rwxr-xr-x"),
                         sm:chmod(xs:anyURI($json), "rw-r--r--"),
@@ -265,7 +273,7 @@ declare function pc:compile-all() as map(*) {
         sm:chmod(xs:anyURI($pc:COLLECTION), "rwxr-xr-x")
     )
     let $templates := pc:templates()
-    let $params := pc:compile-params($templates)
+    let $params := pc:compile-params()
     let $results :=
         for $variant in $pc:VARIANTS
         for $relPath in if (exists($variant?files)) then $variant?files[. = $templates] else $templates
@@ -303,12 +311,9 @@ declare function pc:process($template as xs:string, $params as map(*), $config a
     let $context := if (exists($meta)) then pc:context($params, $meta?frontmatter?*) else ()
     let $stale := $meta?depends?*[not(string(pc:modified(?path)) eq ?modified)]
     return
-        (: A context key the compile did not declare only matters if the
-           template uses it as a variable; then the stored module fails with
-           XPST0008 and the catch below falls back. :)
         if (empty($meta) or exists($stale)) then (
             if (exists($meta)) then
-                util:log("info", "pc: " || $meta?template || " falls back to tmpl:process: changed " || string-join($stale?path, ", "))
+                util:log("info", "pc: " || $meta?__template || " falls back to tmpl:process: changed " || string-join($stale?path, ", "))
             else
                 (),
             tmpl:process($template, $params, $config, $blocks)
@@ -318,7 +323,7 @@ declare function pc:process($template as xs:string, $params as map(*), $config a
             } catch err:XPST0008 | err:XPST0017 | err:XPST0081 | err:XQST0059 {
                 (: a static error of the stored module, e.g. a function only the
                    including template's modules provide :)
-                util:log("warn", "pc: " || $meta?template || " falls back to tmpl:process: " || $err:code || " " || $err:description),
+                util:log("warn", "pc: " || $meta?__template || " falls back to tmpl:process: " || $err:code || " " || $err:description),
                 tmpl:process($template, $params, $config, $blocks)
             }
 };
