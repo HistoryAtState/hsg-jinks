@@ -18,6 +18,7 @@ import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace tmpl="http://e-editiones.org/xquery/templates";
+import module namespace pc = "http://history.state.gov/ns/site/hsg/precompiled-templates" at "precompile.xqm";
 import module namespace roaster="http://e-editiones.org/roaster";
 
 (:~
@@ -72,7 +73,7 @@ declare %private function hsg-errors:render($error as map(*), $file as xs:string
         }
     ))
     let $html :=
-        tmpl:process($template, $model, map {
+        pc:process($template, $model, map {
             "plainText": false(),
             "resolver": vapi:resolver#1,
             "modules": map {
