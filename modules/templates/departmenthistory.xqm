@@ -458,23 +458,23 @@ declare %private function dh:territory-label($territoryId as xs:string) as xs:st
 
 (:~
  : Every role a person held, across all three POCOM position collections,
- : in chronological order. Three collection scans per person page -- fine at
- : POCOM's size (83 principal positions + 199 country missions + 16 org
- : missions, none large) but revisit if this page's latency becomes a
- : problem.
+ : in chronological order: one person-id lookup in each of the three
+ : collections.
  :)
 declare function dh:person-roles($personId as xs:string) as map(*)* {
+    (: One person-id lookup per collection, then up to the position. Filtering
+       each position's entries separately ran ~300 range-index lookups per person. :)
     let $principal-roles :=
-        for $position in collection($dh:POCOM_COL || "/positions-principals")/principal-position
-        for $principal in $position/principals/principal[person-id = $personId]
+        for $principal in collection($dh:POCOM_COL || "/positions-principals")/principal-position/principals/principal[person-id = $personId]
+        let $position := $principal/ancestor::principal-position
         return map {
             "title": normalize-space($position/names/singular),
             "start": $principal/started/date/string(),
             "end": $principal/ended/date/string()
         }
     let $country-roles :=
-        for $mission in collection($dh:POCOM_COL || "/missions-countries")/country-mission
-        for $chief in $mission/chiefs/chief[person-id = $personId]
+        for $chief in collection($dh:POCOM_COL || "/missions-countries")/country-mission/chiefs/chief[person-id = $personId]
+        let $mission := $chief/ancestor::country-mission
         let $role-title := collection($dh:POCOM_COL || "/roles-country-chiefs")/role[id = $chief/role-title-id]/names/singular
         return map {
             "title": normalize-space($role-title) || " to " || dh:country-label($mission/territory-id),
@@ -482,8 +482,8 @@ declare function dh:person-roles($personId as xs:string) as map(*)* {
             "end": $chief/ended/date/string()
         }
     let $org-roles :=
-        for $org in collection($dh:POCOM_COL || "/missions-orgs")/org-mission
-        for $chief in $org/chiefs/chief[person-id = $personId]
+        for $chief in collection($dh:POCOM_COL || "/missions-orgs")/org-mission/chiefs/chief[person-id = $personId]
+        let $org := $chief/ancestor::org-mission
         return map {
             "title": normalize-space($org/names/singular),
             "start": $chief/started/date/string(),
@@ -756,8 +756,7 @@ declare %private function dh:role-active-in-year($role as element(), $year as xs
 (:~
  : Every person holding a role -- any of the three POCOM position families
  : -- active during $year. Three full collection scans per request (no
- : index to narrow by date range, see dh:PEOPLE_BY_YEAR_MIN); acceptable for
- : now at POCOM's size, revisit if this page's latency becomes a problem.
+ : index to narrow by date range, see dh:PEOPLE_BY_YEAR_MIN), ~0.15 s.
  :)
 declare function dh:people-active-in-year($year as xs:integer) as element(person)* {
     let $personIds := distinct-values((
@@ -776,9 +775,8 @@ declare function dh:people-active-in-year($year as xs:integer) as element(person
         where dh:role-active-in-year($chief, $year)
         return $chief/person-id
     ))
-    for $id in $personIds
-    let $person := dh:person-doc($id)
-    where exists($person)
+    (: one range-index lookup for all ids instead of one per id :)
+    for $person in collection($dh:POCOM_COL || "/people")/person[id = $personIds]
     order by $person/persName/surname, $person/persName/forename
     return $person
 };
@@ -1444,12 +1442,13 @@ declare function dh:visits-years($context as map(*)) as element(ul) {
  :)
 declare function dh:visits-countries($context as map(*)) as element(ul) {
     let $allFrom := collection($dh:VISITS_COL)/visits/visit/from
-    let $labels := distinct-values($allFrom)
     return
         <ul class="usa-collection">
         {
-            for $label in $labels
-            let $id := normalize-space(($allFrom[. = $label])[1]/@id)
+            (: grouped in one pass; the id is the first occurrence's :)
+            for $from in $allFrom
+            group by $label := string($from)
+            let $id := normalize-space($from[1]/@id)
             order by $label
             return
                 <li class="usa-collection__item">

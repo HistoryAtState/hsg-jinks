@@ -209,8 +209,10 @@ declare function sset:filtered-table($context as map(*)) as element(table) {
                     order by $bibl/tei:date/@when/string()
                     return $bibl
                 for $bibl in $ordered-bibls
-                let $bibl-region := $bibl/tei:term[@type = 'region']/string()
-                let $bibl-subject := $bibl/tei:term[@type = 'subject']/string()
+                (: string(@type): compared directly, eXist answers @type from serial-set's
+                   range index once per row, ~1 ms each; this compares the row's own terms :)
+                let $bibl-region := $bibl/tei:term[string(@type) = 'region']/string()
+                let $bibl-subject := $bibl/tei:term[string(@type) = 'subject']/string()
                 let $date := $bibl/tei:date/@when/string()
                 return
                     <tr>
