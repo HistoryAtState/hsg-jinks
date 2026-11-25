@@ -48,9 +48,11 @@ jobs:
           npm ci
           npm install -g @existdb/xst@4.1.0
 
-      # The frus-tei release is the whole corpus, which takes hours to index.
-      # CI builds frus-tei's default xar instead: the curated volume subset
-      # listed in its build.xml. Only those volumes are checked out.
+      # Images built from Jinntec/hsg-project#32 on carry frus-tei, the whole
+      # corpus, indexed at build time. Older images do not, and installing the
+      # frus-tei release here takes hours to index. For those, CI builds
+      # frus-tei's default xar instead: the curated volume subset listed in
+      # its build.xml. Only those volumes are checked out.
       - name: Check out frus-tei
         uses: actions/checkout@v4
         with:
@@ -66,6 +68,10 @@ jobs:
           EXISTDB_USER: admin
           EXISTDB_PASS: ""
         run: |
+          if xst package list | grep -qx frus-tei; then
+            echo "frus-tei is in the image"
+            exit 0
+          fi
           sed -n 's#.*<include name="\(data/[^/]*\)/\*\*" />.*#\1 .last-modified/\1#p' build.xml > volumes
           [ -s volumes ]
           xargs git sparse-checkout add < volumes
