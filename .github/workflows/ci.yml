@@ -85,9 +85,7 @@ jobs:
           EXISTDB_SERVER: http://localhost:8080/exist
           EXISTDB_USER: admin
           EXISTDB_PASS: ""
-        run: |
-          curl -fsSL -o roaster.xar https://github.com/eeditiones/roaster/releases/download/v1.13.1/roaster-1.13.1.xar
-          xst package install roaster.xar
+        run: xst package install gh roaster v1.13.1 --owner eeditiones
 
       # Same seed path as the devcontainer, but with the build the production
       # image ships (ant -Dproduction=true, README "Production Docker image"),
