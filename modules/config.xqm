@@ -466,20 +466,27 @@ declare function config:document-type($div as element()) {
             "jats"
 };
 
+(: doc() raises FODC0002 for a missing document in eXist 7; callers expect empty :)
+declare %private function config:doc-if-available($path as xs:string) as document-node()? {
+    let $uri := xmldb:encode-uri($path)
+    return
+        if (doc-available($uri)) then doc($uri) else ()
+};
+
 declare function config:get-document($idOrName as xs:string) {
     let $document :=
         if ($config:address-by-id) then
             root(collection($config:data-root)/id($idOrName))
         else if (starts-with($idOrName, '/')) then
-            doc(xmldb:encode-uri($idOrName))
+            config:doc-if-available($idOrName)
         else
-            doc(xmldb:encode-uri($config:data-root || "/" || $idOrName))
+            config:doc-if-available($config:data-root || "/" || $idOrName)
     return 
         if (count($document)) then 
             $document 
         else 
             (: if document not found, try to find it again in any way: by id, or by path in data-root or data-default  :)
-            head((collection($config:data-root)/id($idOrName), doc(xmldb:encode-uri($idOrName)), doc(xmldb:encode-uri($config:data-root || "/" || $idOrName)), doc(xmldb:encode-uri($config:data-default || "/" || $idOrName))))
+            head((collection($config:data-root)/id($idOrName), config:doc-if-available($idOrName), config:doc-if-available($config:data-root || "/" || $idOrName), config:doc-if-available($config:data-default || "/" || $idOrName)))
 };
 
 (:~

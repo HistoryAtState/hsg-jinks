@@ -45,7 +45,7 @@ declare function countryapi:archives-list($request as map(*)) {
 
 (:~
  : docid is an absolute db path into the foreign rdcr collection --
- : config:get-document() resolves absolute paths via plain doc() regardless
+ : config:get-document() resolves absolute paths regardless
  : of which app owns the collection, the same technique used for FRUS
  : volumes (hsgapi:view) but pointed outside this app's own data root.
  : Unknown ids fail that lookup and vapi:view's existing NOT_FOUND path
