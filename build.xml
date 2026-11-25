@@ -155,30 +155,6 @@
         </fail>
     </target>
 
-    <!-- The generated controller.xql builds its two root redirects from the internal request
-         URI, so behind a proxy they point to /exist/apps/hsg-jinks/. Both use
-         $config:context-path instead, like every other link and redirect in the app.
-         Fails if those redirects change shape. -->
-    <target name="context-path-redirects" depends="prepare">
-        <replace file="${app.build.dir}/controller.xql"
-            token="&lt;redirect url=&quot;{request:get-uri()}/&quot;/&gt;"
-            value="&lt;redirect url=&quot;{$config:context-path}/&quot;/&gt;"/>
-        <replace file="${app.build.dir}/controller.xql"
-            token="&lt;redirect url=&quot;{$landingPage}&quot;/&gt;"
-            value="&lt;redirect url=&quot;{$config:context-path}/{$landingPage}&quot;/&gt;"/>
-        <loadfile property="redirect.controller" srcFile="${app.build.dir}/controller.xql"/>
-        <fail message="controller.xql redirects do not use $config:context-path; update the context-path-redirects target">
-            <condition>
-                <not>
-                    <and>
-                        <contains string="${redirect.controller}" substring="&lt;redirect url=&quot;{$config:context-path}/&quot;/&gt;"/>
-                        <contains string="${redirect.controller}" substring="&lt;redirect url=&quot;{$config:context-path}/{$landingPage}&quot;/&gt;"/>
-                    </and>
-                </not>
-            </condition>
-        </fail>
-    </target>
-
     <!-- The production build also routes the paths the generated controller.xql sends to
          api-odd.xql, api-actions.xql and api-dba.xql through modules/lib/api.xql, so the ODD,
          lint, fix-odds and LaTeX routes are dropped there too. Fails if that dispatch changes
@@ -217,7 +193,7 @@
         </fail>
     </target>
 
-    <target name="xar" depends="git.revision,prepare,app-routes,context-path-redirects,production-controller,production-cors" description="create XAR file of folder ${app.build.dir}">
+    <target name="xar" depends="git.revision,prepare,app-routes,production-controller,production-cors" description="create XAR file of folder ${app.build.dir}">
         <zip basedir="${app.build.dir}" destfile="${build.dir}/${project.app}-${project.version}.xar"/>
     </target>
 

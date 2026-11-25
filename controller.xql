@@ -33,13 +33,12 @@ declare function local:checkOriginWhitelist($regexes, $origin) {
 
 if ($exist:path eq '') then
     <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
-        <redirect url="{request:get-uri()}/"/>
+        <redirect url="{$config:context-path}/"/>
     </dispatch>
 
 else if ($exist:path eq "/") then
-    (: forward root path to index.xql :)
     <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
-        <redirect url="{$landingPage}"/>
+        <redirect url="{$config:context-path}/{$landingPage}"/>
     </dispatch>
 
 (: static HTML page for API documentation should be served directly to make sure it is always accessible :)
