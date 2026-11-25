@@ -4,7 +4,7 @@
 
 describe('HSG Landing Page', () => {
   beforeEach(() => {
-    cy.visit('/index.html')
+    cy.visit('/')
     cy.get('body').should('be.visible')
   })
 

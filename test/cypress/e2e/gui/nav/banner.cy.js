@@ -27,7 +27,7 @@ const VOLUME = "historicaldocuments/frus1981-88v05";
 // templates extend templates/layouts/base.html by default, so they inherit
 // the banner automatically; this is a spot check, not the enforcement point.
 const NORMAL_PAGES = [
-    ["landing", "index.html"],
+    ["landing", "/"],
     ["search", "search"],
     ["about", "about"],
     ["volume landing", VOLUME],
@@ -61,7 +61,7 @@ if (bannerEnabled) {
         });
 
         it("renders above the navbar on the landing page", () => {
-            cy.visit("index.html");
+            cy.visit("/");
             cy.get(".usa-banner").then(($b) => {
                 cy.get(".usa-navbar").then(($n) => {
                     expect($b[0].getBoundingClientRect().top).to.be.lessThan($n[0].getBoundingClientRect().top);
@@ -70,7 +70,7 @@ if (bannerEnabled) {
         });
 
         it("expands the guidance accordion", () => {
-            cy.visit("index.html");
+            cy.visit("/");
             cy.get(".usa-banner__button", { timeout: 15000 }).click();
             cy.get("#gov-banner-default").should("be.visible")
                 .and("contain.text", "Official websites use .gov");
@@ -82,7 +82,7 @@ if (bannerEnabled) {
         // logo's edge.
         it("follows the theme's colours and lines up with the logo", () => {
             cy.viewport(1440, 900);
-            cy.visit("index.html");
+            cy.visit("/");
             cy.get(".usa-banner").should("have.css", "background-color", "rgb(11, 71, 120)");
             cy.get(".usa-banner__header-text").should("have.css", "color", "rgb(255, 255, 255)");
             cy.get(".usa-banner__button-text").should("have.css", "color", "rgb(115, 179, 231)");

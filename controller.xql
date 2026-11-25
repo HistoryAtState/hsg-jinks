@@ -8,8 +8,6 @@ declare variable $exist:controller external;
 declare variable $exist:prefix external;
 declare variable $exist:root external;
 
- 
-declare variable $landingPage := "index.html";
 
 declare variable $allowOrigin := local:allowOriginDynamic(request:get-header("Origin"));
 
@@ -33,13 +31,16 @@ declare function local:checkOriginWhitelist($regexes, $origin) {
 
 if ($exist:path eq '') then
     <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
-        <redirect url="{request:get-uri()}/"/>
+        <redirect url="{$config:context-path}/"/>
     </dispatch>
 
-else if ($exist:path eq "/") then
-    (: forward root path to index.xql :)
+(: the landing page lives at / :)
+else if ($exist:path eq "/index.html") then
     <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
-        <redirect url="{$landingPage}"/>
+        <redirect url="{$config:context-path}/{
+            let $query := request:get-query-string()
+            return if ($query) then "?" || $query else ()
+        }"/>
     </dispatch>
 
 (: static HTML page for API documentation should be served directly to make sure it is always accessible :)
