@@ -426,6 +426,11 @@ answers 404, a query parameter 400. Declare these constraints in an app spec
 rather than checking an id by hand before it becomes part of a database
 path.
 
+Every build also points the generated controller's two root redirects
+(the app path without a trailing slash, and `/` to the landing page) at
+`$config:context-path`, so behind a proxy they land on the site root
+instead of `/exist/apps/hsg-jinks/` (`context-path-redirects` target).
+
 The image builds the app with `ant -Dproduction=true`. That build also
 rewrites the generated `controller.xql` so those requests go through
 `api.xql` as well, where they answer 404. It also empties the CORS origin
