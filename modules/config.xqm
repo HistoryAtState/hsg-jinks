@@ -466,7 +466,36 @@ declare function config:document-type($div as element()) {
             "jats"
 };
 
-(: doc() raises FODC0002 for a missing document in eXist 7; callers expect empty :)
+(:~
+ : Collections from which documents may be loaded via config:get-document. Documents
+ : outside these collections are never returned, even if addressed by an absolute path.
+ : Besides the jinks defaults: the landing page data (config.json data.landing) and the
+ : country and archive articles of the rdcr and wwdai packages (countries-api.xql).
+ :)
+declare variable $config:document-roots := distinct-values((
+    $config:data-root, $config:data-default, $config:register-root,
+    $config:app-root || "/data",
+    "/db/apps/rdcr/articles",
+    "/db/apps/wwdai/articles"
+));
+
+(:~
+ : Filter the given documents, keeping only those stored below one of $config:document-roots.
+ :)
+declare function config:in-document-roots($docs as node()*) as node()* {
+    for $doc in $docs
+    let $uri := document-uri(root($doc))
+    where some $root in $config:document-roots satisfies
+        starts-with($uri, replace($root, "/+$", "") || "/")
+    return
+        $doc
+};
+
+(:~
+ : Load the document at $path, or return the empty sequence if there is none.
+ : doc() raises FODC0002 for a missing document on eXist 7, where callers of
+ : config:get-document expect the empty sequence.
+ :)
 declare %private function config:doc-if-available($path as xs:string) as document-node()? {
     let $uri := xmldb:encode-uri($path)
     return
@@ -474,19 +503,30 @@ declare %private function config:doc-if-available($path as xs:string) as documen
 };
 
 declare function config:get-document($idOrName as xs:string) {
-    let $document :=
-        if ($config:address-by-id) then
-            root(collection($config:data-root)/id($idOrName))
-        else if (starts-with($idOrName, '/')) then
-            config:doc-if-available($idOrName)
-        else
-            config:doc-if-available($config:data-root || "/" || $idOrName)
-    return 
-        if (count($document)) then 
-            $document 
-        else 
-            (: if document not found, try to find it again in any way: by id, or by path in data-root or data-default  :)
-            head((collection($config:data-root)/id($idOrName), config:doc-if-available($idOrName), config:doc-if-available($config:data-root || "/" || $idOrName), config:doc-if-available($config:data-default || "/" || $idOrName)))
+    (: reject relative path segments to prevent escaping the document roots :)
+    if (tokenize($idOrName, "/") = "..") then
+        ()
+    else
+        let $document :=
+            if ($config:address-by-id) then
+                root(collection($config:data-root)/id($idOrName))
+            else if (starts-with($idOrName, '/')) then
+                config:doc-if-available($idOrName)
+            else
+                config:doc-if-available($config:data-root || "/" || $idOrName)
+        let $document := config:in-document-roots($document)
+        return
+            if (exists($document)) then
+                $document
+            else
+                (: if document not found, try to find it again: by id, or by path in data-root or data-default :)
+                head(
+                    config:in-document-roots((
+                        root(collection($config:data-root)/id($idOrName)),
+                        config:doc-if-available($config:data-root || "/" || $idOrName),
+                        config:doc-if-available($config:data-default || "/" || $idOrName)
+                    ))
+                )
 };
 
 (:~
