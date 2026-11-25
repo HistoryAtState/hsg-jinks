@@ -602,6 +602,9 @@ describe("hybrid search mode (semantic MVP)", () => {
 
     it("ticking the checkbox searches in hybrid mode, unticking goes back to keyword", () => {
         cy.visit("search?q=Kissinger&within=documents");
+        // The checkbox sits in the closed "Search options" disclosure, which
+        // opens by itself only once an option is on.
+        cy.get(".hsg-search-options summary").click();
         // USWDS draws the box on the label and hides the input itself.
         cy.get("label[for='mode-hybrid']").click();
         cy.get("#hsg-search button[type='submit']").click();

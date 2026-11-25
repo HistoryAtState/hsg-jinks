@@ -76,16 +76,20 @@ import module namespace menuapi="https://history.state.gov/api/menu" at "../menu
 
 import module namespace opdsapi="http://teipublisher.com/api/opds" at "../opds-catalog-api.xql";
 
-
+import module namespace lm="https://history.state.gov/ns/site/hsg/last-modified" at "../last-modified.xqm";
 
 declare option output:indent "no";
 
+(: page handlers are wrapped for Last-Modified and 304 Not Modified (OP#1471) :)
 let $lookup := function($name as xs:string) {
-    try {
-        function-lookup(xs:QName($name), 1)
-    } catch * {
-        ()
-    }
+    let $handler :=
+        try {
+            function-lookup(xs:QName($name), 1)
+        } catch * {
+            ()
+        }
+    return
+        if (exists($handler)) then lm:wrap($name, $handler) else ()
 }
 let $resp := roaster:route(
     (

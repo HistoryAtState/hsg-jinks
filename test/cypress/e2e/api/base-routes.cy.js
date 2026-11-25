@@ -77,12 +77,10 @@ describe("base profile routes", () => {
 });
 
 describe("top-level pages with their own routes", () => {
-    ["/", "/index.html"].forEach((url) => {
-        it(`GET ${url} serves the landing page`, () => {
-            send({ method: "GET", url }).then((r) => {
-                expect(r.status).to.eq(200);
-                expect(r.headers["content-type"]).to.contain("text/html");
-            });
+    it("GET / serves the landing page", () => {
+        send({ method: "GET", url: "/" }).then((r) => {
+            expect(r.status).to.eq(200);
+            expect(r.headers["content-type"]).to.contain("text/html");
         });
     });
 });

@@ -65,6 +65,30 @@ declare variable $srch:ft-query-options as map(*) := map {
     "filter-rewrite": "yes"
 };
 
+(:~ The stemmed copy of hsg-fulltext (English, Porter), searched when the
+ : reader ticks "match word forms". Every data package defines it beside
+ : hsg-fulltext; a collection whose installed config predates it simply
+ : contributes its exact matches. :)
+declare variable $srch:STEMMED_FIELD as xs:string := "hsg-fulltext-stemmed";
+
+(:~ The sensitive copies of hsg-fulltext, one per combination of the "match
+ : case" and "match punctuation" options: cased keeps case, punct keeps
+ : punctuation inside words (S/S, F-16), literal keeps both. :)
+declare variable $srch:CASED_FIELD as xs:string := "hsg-fulltext-cased";
+declare variable $srch:PUNCT_FIELD as xs:string := "hsg-fulltext-punct";
+declare variable $srch:LITERAL_FIELD as xs:string := "hsg-fulltext-literal";
+
+(:~ The field one search uses, from its match options. Word forms don't
+ : combine with either sensitivity (stemming lowercases and drops
+ : punctuation), so srch:read-params turns stem off when either is on. :)
+declare function srch:match-field($match as map(*)) as xs:string {
+    if ($match?case and $match?punct) then $srch:LITERAL_FIELD
+    else if ($match?case) then $srch:CASED_FIELD
+    else if ($match?punct) then $srch:PUNCT_FIELD
+    else if ($match?stem) then $srch:STEMMED_FIELD
+    else "hsg-fulltext"
+};
+
 (:~ Lucene chars not exposed as search features -- escaped so they search
  : literally rather than altering the query or raising a parse error. The
  : documented operators (" + - ( ) * ? ~, AND/OR/NOT) are intentionally absent. :)
@@ -79,6 +103,27 @@ declare variable $srch:SECTIONS as map(*) := map {
     "conferences": "conferences",
     "frus-history": ("frus-history-articles", "frus-history-documents", "frus-history-monograph"),
     "about": ("hac", "faq")
+};
+
+(:~ The searched collections and the hsg-publication values their indexes
+ : carry (each data package's collection.xconf). A collection none of whose
+ : publications is in scope cannot contribute a hit, so it is not resolved:
+ : collection() over frus-tei's 22k subcollections costs more than the
+ : Lucene lookup itself. :)
+declare variable $srch:COLLECTIONS as map(*) := map {
+    "/db/apps/other-publications": ("buildings", "education", "faq", "people", "short-history", "vietnam-guide", "views-from-the-embassy"),
+    "/db/apps/conferences": "conferences",
+    "/db/apps/hac": "hac",
+    $srch:FRUS_COL: "frus",
+    "/db/apps/frus-history/articles": "frus-history-articles",
+    "/db/apps/frus-history/documents": "frus-history-documents",
+    "/db/apps/frus-history/monograph": "frus-history-monograph",
+    "/db/apps/rdcr": "countries-articles",
+    "/db/apps/wwdai": "archives",
+    "/db/apps/pocom/people": "pocom",
+    "/db/apps/travels": "travels",
+    "/db/apps/visits": "visits",
+    "/db/apps/milestones": "milestones"
 };
 
 (:~ The 7 landing-page / filter-sidebar section checkboxes. :)
@@ -129,13 +174,24 @@ declare function srch:query-parses($query as xs:string?) as xs:boolean {
 };
 
 declare %private function srch:prepare-query($sections as xs:string*, $volumeIds as xs:string*,
-        $query as xs:string?, $rangeStart as xs:dateTime?, $rangeEnd as xs:dateTime?) as map(*) {
+        $query as xs:string?, $rangeStart as xs:dateTime?, $rangeEnd as xs:dateTime?, $match as map(*)) as map(*) {
     let $category := $sections[not(. = ("", "entire-site"))]
     let $publication :=
         for $section in $category
         return $srch:SECTIONS?($section)
     let $dateCapable := count($category) eq 1 and $category = "documents"
-    let $fulltextQuery := if (exists($query)) then "hsg-fulltext:(" || srch:escape-unsupported-characters($query) || ") " else ()
+    let $escaped := srch:escape-unsupported-characters($query)
+    (: Word forms: the stemmed field, or the exact one. The exact branch keeps
+       wildcard terms working, since a prefix such as negotiat* is not a
+       prefix of the stem "negoti", and it can only add exact matches. :)
+    let $field := srch:match-field($match)
+    let $fulltextQuery :=
+        if (empty($query)) then
+            ()
+        else if ($field eq $srch:STEMMED_FIELD) then
+            "(" || $srch:STEMMED_FIELD || ":(" || $escaped || ") OR hsg-fulltext:(" || $escaped || ")) "
+        else
+            $field || ":(" || $escaped || ") "
     (: lower-case: the index analyzer lower-cases the stored date strings
      : (the "T"), and eXist 7 dropped the AnalyzingQueryParser that used to
      : apply the same analysis to range endpoints on the query side; an
@@ -158,30 +214,56 @@ declare %private function srch:prepare-query($sections as xs:string*, $volumeIds
         "facets": map { "facets": $facets },
         "query-string": $queryString,
         (: the date clause on its own, for the vector leg's filter-query :)
-        "date-query": $dateQuery
+        "date-query": $dateQuery,
+        (: every collection for the entire site; for a section filter only
+           those indexing one of its publications, none for an unknown one :)
+        "collections":
+            if (empty($category)) then map:keys($srch:COLLECTIONS)
+            else map:keys($srch:COLLECTIONS)[$srch:COLLECTIONS(.) = $publication]
     }
 };
 
-declare %private function srch:query-sections($queryConfig as map(*)) as element()* {
+(:~ Resolves each collection in scope once, for both legs. The legs bind a
+ : value with let before the path: passed as a function parameter, or read
+ : as $docs($uri)//..., ft:query-vector falls back to one KNN search per
+ : document and returns every division. :)
+declare %private function srch:searched-collections($uris as xs:string*) as map(*) {
+    map:merge(for $uri in $uris return map:entry($uri, collection($uri)))
+};
+
+declare %private function srch:query-sections($queryConfig as map(*), $docs as map(*)) as element()* {
     let $queryString := $queryConfig?query-string
     let $queryOptions := map:merge(($srch:ft-query-options, $queryConfig?fields, $queryConfig?facets))
     (: frus omits ?fields, same limitation-driven exception hsg-shell carried for large result sets :)
     let $frusQueryOptions := map:merge(($srch:ft-query-options, $queryConfig?facets))
+    let $otherPublications := $docs("/db/apps/other-publications")
+    let $conferences := $docs("/db/apps/conferences")
+    let $hac := $docs("/db/apps/hac")
+    let $frus := $docs($srch:FRUS_COL)
+    let $frusHistoryArticles := $docs("/db/apps/frus-history/articles")
+    let $frusHistoryDocuments := $docs("/db/apps/frus-history/documents")
+    let $frusHistoryMonograph := $docs("/db/apps/frus-history/monograph")
+    let $rdcr := $docs("/db/apps/rdcr")
+    let $wwdai := $docs("/db/apps/wwdai")
+    let $pocom := $docs("/db/apps/pocom/people")
+    let $travels := $docs("/db/apps/travels")
+    let $visits := $docs("/db/apps/visits")
+    let $milestones := $docs("/db/apps/milestones")
     return (
-        collection("/db/apps/other-publications")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/other-publications")//tei:body[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/conferences")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/hac")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection($srch:FRUS_COL)//tei:div[ft:query(., $queryString, $frusQueryOptions)],
-        collection("/db/apps/frus-history/articles")//tei:body[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/frus-history/documents")//tei:body[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/frus-history/monograph")//tei:div[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/rdcr")//tei:body[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/wwdai")//tei:body[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/pocom/people")//persName[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/travels")//trips[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/visits")//visit[ft:query(., $queryString, $queryOptions)],
-        collection("/db/apps/milestones")//tei:div[ft:query(., $queryString, $queryOptions)]
+        $otherPublications//tei:div[ft:query(., $queryString, $queryOptions)],
+        $otherPublications//tei:body[ft:query(., $queryString, $queryOptions)],
+        $conferences//tei:div[ft:query(., $queryString, $queryOptions)],
+        $hac//tei:div[ft:query(., $queryString, $queryOptions)],
+        $frus//tei:div[ft:query(., $queryString, $frusQueryOptions)],
+        $frusHistoryArticles//tei:body[ft:query(., $queryString, $queryOptions)],
+        $frusHistoryDocuments//tei:body[ft:query(., $queryString, $queryOptions)],
+        $frusHistoryMonograph//tei:div[ft:query(., $queryString, $queryOptions)],
+        $rdcr//tei:body[ft:query(., $queryString, $queryOptions)],
+        $wwdai//tei:body[ft:query(., $queryString, $queryOptions)],
+        $pocom//persName[ft:query(., $queryString, $queryOptions)],
+        $travels//trips[ft:query(., $queryString, $queryOptions)],
+        $visits//visit[ft:query(., $queryString, $queryOptions)],
+        $milestones//tei:div[ft:query(., $queryString, $queryOptions)]
     )
 };
 
@@ -244,7 +326,7 @@ declare %private function srch:scored-vector-hits($nodes as element()*) as map(*
  : out, the vector leg ignored the range: a 1985-only search returned 50
  : nearest hits from any year. Collections without the frus-search-date
  : fields then contribute nothing, as on the keyword leg. :)
-declare %private function srch:query-vector-sections($queryConf as map(*), $q as xs:string) as element()* {
+declare %private function srch:query-vector-sections($queryConf as map(*), $q as xs:string, $docs as map(*)) as element()* {
     if (normalize-space($q) eq "") then
         ()
     else
@@ -256,21 +338,34 @@ declare %private function srch:query-vector-sections($queryConf as map(*), $q as
                 $queryConf?facets,
                 if (exists($dateFilter)) then map { "filter-query": $dateFilter } else ()
             ))
+            let $otherPublications := $docs("/db/apps/other-publications")
+            let $conferences := $docs("/db/apps/conferences")
+            let $hac := $docs("/db/apps/hac")
+            let $frus := $docs($srch:FRUS_COL)
+            let $frusHistoryArticles := $docs("/db/apps/frus-history/articles")
+            let $frusHistoryDocuments := $docs("/db/apps/frus-history/documents")
+            let $frusHistoryMonograph := $docs("/db/apps/frus-history/monograph")
+            let $rdcr := $docs("/db/apps/rdcr")
+            let $wwdai := $docs("/db/apps/wwdai")
+            let $pocom := $docs("/db/apps/pocom/people")
+            let $travels := $docs("/db/apps/travels")
+            let $visits := $docs("/db/apps/visits")
+            let $milestones := $docs("/db/apps/milestones")
             let $scored := (
-                try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/other-publications")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/conferences")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/hac")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection($srch:FRUS_COL)//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/frus-history/articles")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/frus-history/documents")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/frus-history/monograph")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/rdcr")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/wwdai")//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/pocom/people")//persName[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/travels")//trips[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/visits")//visit[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
-                try { srch:scored-vector-hits(collection("/db/apps/milestones")//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () }
+                try { srch:scored-vector-hits($otherPublications//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($otherPublications//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($conferences//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($hac//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($frus//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($frusHistoryArticles//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($frusHistoryDocuments//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($frusHistoryMonograph//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($rdcr//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($wwdai//tei:body[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($pocom//persName[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($travels//trips[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($visits//visit[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () },
+                try { srch:scored-vector-hits($milestones//tei:div[ft:query-vector(., $vec, $srch:VECTOR_K, $opts)]) } catch * { () }
             )
             let $ranked :=
                 for $row in $scored
@@ -325,12 +420,16 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
             $within
     let $modeParam := normalize-space(page:parameter($context, "mode", "keyword"))
     let $mode := if ($modeParam eq "hybrid") then "hybrid" else "keyword"
+    let $yes := function($name) { normalize-space(page:parameter($context, $name, "")) eq "yes" }
+    let $case := $yes("case")
+    let $punct := $yes("punct")
     return map {
         "q": $q, "within": $section, "volume-id": $volumeId,
         "start-date": $startDate, "end-date": $endDate,
         "start-time": $startTime, "end-time": $endTime,
         "sort-by": $sortBy, "start": $start, "per-page": $perPage,
-        "mode": $mode
+        "mode": $mode,
+        "match": map { "stem": $yes("stem") and not($case or $punct), "case": $case, "punct": $punct }
     }
 };
 
@@ -343,7 +442,7 @@ declare %private function srch:read-params($context as map(*)) as map(*) {
 declare %private function srch:results($context as map(*)) as map(*) {
     let $p := srch:read-params($context)
     let $normalized := string-join(
-        let $params := map { "q": $p?q, "within": $p?within, "volume-id": $p?("volume-id"), "start-date": $p?("start-date"), "end-date": $p?("end-date"), "start-time": $p?("start-time"), "end-time": $p?("end-time"), "sort-by": $p?("sort-by"), "mode": $p?mode }
+        let $params := map { "q": $p?q, "within": $p?within, "volume-id": $p?("volume-id"), "start-date": $p?("start-date"), "end-date": $p?("end-date"), "start-time": $p?("start-time"), "end-time": $p?("end-time"), "sort-by": $p?("sort-by"), "mode": $p?mode, "match": srch:match-field($p?match) }
         for $key in map:keys($params)
         let $val := $params($key) ! normalize-space(.)[. ne ""]
         order by $key
@@ -362,12 +461,13 @@ declare %private function srch:results($context as map(*)) as map(*) {
         else
             let $started := util:system-dateTime()
             let $range := srch:date-range($p?("start-date"), $p?("end-date"), $p?("start-time"), $p?("end-time"))
-            let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), $p?q, $range?start, $range?end)
+            let $queryConf := srch:prepare-query($p?within, $p?("volume-id"), $p?q, $range?start, $range?end, $p?match)
+            let $docs := srch:searched-collections($queryConf?collections)
             let $luceneHits :=
-                try { srch:query-sections($queryConf) } catch * { () }
+                try { srch:query-sections($queryConf, $docs) } catch * { () }
             let $vectorHits :=
                 if ($p?mode eq "hybrid" and exists($p?q)) then
-                    srch:query-vector-sections($queryConf, $p?q)
+                    srch:query-vector-sections($queryConf, $p?q, $docs)
                 else
                     ()
             (: RRF ranks the keyword leg by position, so it goes in by
@@ -465,7 +565,7 @@ declare %private function srch:meta-list($rows as element()*) as element(dl)? {
  : don't offer one (OP#1432, a business decision; the reference site didn't
  : show it either).
  :)
-declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
+declare %private function srch:frus-card($doc as element(tei:div), $match as map(*)) as map(*) {
     let $docId := $doc/@xml:id
     let $volId := root($doc)/tei:TEI/@xml:id
     (: the division subtype is a teiHeader bibl in this data model, not an
@@ -477,7 +577,15 @@ declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
     let $dateString := normalize-space(string-join($date//text()[not(./ancestor::tei:note)]))
     let $placeName := ($doc//tei:placeName)[1]
     let $placeNameString := normalize-space(string-join($placeName//text()[not(./ancestor::tei:note)]))
-    let $highlighted := ft:highlight-field-matches($doc, "hsg-fulltext")
+    (: The matches are on the field the search used. With word forms, that
+       is the stemmed field, except for a hit that only the exact branch
+       found (a wildcard term). :)
+    let $field := srch:match-field($match)
+    let $highlighted :=
+        if ($field eq $srch:STEMMED_FIELD) then
+            (ft:highlight-field-matches($doc, $field)[.//exist:match], ft:highlight-field-matches($doc, "hsg-fulltext"))[1]
+        else
+            ft:highlight-field-matches($doc, $field)
     let $snippets := srch:snippets(
         for $hit in subsequence($highlighted//exist:match, 1, 5)
         return kwic:get-summary($highlighted, $hit, <config width="40"/>)
@@ -504,7 +612,7 @@ declare %private function srch:frus-card($doc as element(tei:div)) as map(*) {
  : empty where a hit type has nothing to show. The href trusts the hsg-url Lucene field (module doc
  : above) except for the two element types with no such field.
  :)
-declare %private function srch:render-hit($hit as element()) as map(*) {
+declare %private function srch:render-hit($hit as element(), $match as map(*)) as map(*) {
     let $href := ft:field($hit, "hsg-url")
     let $card := function($title as xs:string, $rows as element()*) as map(*) {
         map { "title": $title, "href": $href, "tags": (), "summary": srch:meta-list($rows) }
@@ -521,7 +629,7 @@ declare %private function srch:render-hit($hit as element()) as map(*) {
                 return $card("Travels: " || string-join($hit/trip[1]/name, ", "), srch:meta-row("Matching Trips", $count))
             case element(tei:div) return
                 if (ft:field($hit, "hsg-publication") = "frus" or starts-with(base-uri($hit), $srch:FRUS_COL)) then
-                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit)))
+                    map:merge((map { "title": srch:frus-title($hit), "href": $href }, srch:frus-card($hit, $match)))
                 else
                     $card(
                         normalize-space(string-join(($hit/tei:head)[1]//text()[not(./ancestor::tei:note)])),
@@ -552,7 +660,7 @@ declare function srch:results-summary($context as map(*)) as element(p) {
                 Displaying {$r?start}&#8211;{$r?end} of <span class="search-count">{format-number($r?("hit-count"), "#,###")}</span> results
                 {
                     string-join((
-                        if (normalize-space($r?q) ne "") then ("for keyword &#8220;" || $r?q || "&#8221;") else (),
+                        if (normalize-space($r?q) ne "") then ("for keyword &#8220;" || $r?q || "&#8221;" || srch:match-phrase($r?match)) else (),
                         if ($r?within = "entire-site" or empty($r?within)) then "across the entire Office of the Historian website"
                         else "within " || string-join($r?within, ", "),
                         if (exists($r?("range-start")) and exists($r?("range-end"))) then
@@ -576,7 +684,7 @@ declare function srch:results-list($context as map(*)) as element(ul) {
         <ul class="usa-collection hsg-results">
         {
             for $hit in $r?hits
-            let $rendered := srch:render-hit($hit)
+            let $rendered := srch:render-hit($hit, $r?match)
             return
                 <li class="usa-collection__item">
                     <div class="usa-collection__body">
@@ -611,7 +719,8 @@ declare %private function srch:pagination-query-string($r as map(*), $start as x
         $r?("start-time")[. ne ""] ! ("start-time=" || .),
         $r?("end-time")[. ne ""] ! ("end-time=" || .),
         "sort-by=" || $r?("sort-by"),
-        if ($r?mode eq "hybrid") then "mode=hybrid" else ()
+        if ($r?mode eq "hybrid") then "mode=hybrid" else (),
+        ("stem", "case", "punct")[$r?match?(.)] ! (. || "=yes")
     ), "&amp;")
 };
 
@@ -682,6 +791,56 @@ declare function srch:mode-toggle($context as map(*)) as element(div) {
             </input>
             <label class="usa-checkbox__label" for="mode-hybrid">Use the new hybrid mode with semantic search</label>
         </div>
+};
+
+(:~ The match options, one checkbox each, ticked submits name=yes:
+ : word forms (stem), case and punctuation. All unticked, the default,
+ : matches words regardless of case and punctuation, exactly as written
+ : otherwise. Word forms give way to either sensitivity (srch:read-params). :)
+declare function srch:match-options($context as map(*)) as element(div)+ {
+    for $option in (
+        map { "name": "stem", "label": "Match word forms (negotiation also finds negotiations, negotiating)" },
+        map { "name": "case", "label": "Match case (Goa, not GOA)" },
+        map { "name": "punct", "label": "Match punctuation (S/S and F-16 as written)" }
+    )
+    let $id := "match-" || $option?name
+    return
+        <div class="usa-checkbox hsg-search-mode">
+            <input class="usa-checkbox__input" id="{$id}" type="checkbox" name="{$option?name}" value="yes" form="hsg-search">
+            { if (normalize-space(page:parameter($context, $option?name, "")) eq "yes") then attribute checked { "checked" } else () }
+            </input>
+            <label class="usa-checkbox__label" for="{$id}">{$option?label}</label>
+        </div>
+};
+
+(:~ The search options under the search field, in one disclosure: the
+ : hybrid mode and the three match options. Closed by default, so the search
+ : field stays uncluttered; open whenever an option is on, so a results page
+ : shows what was applied. :)
+declare function srch:search-options($context as map(*)) as element(details) {
+    let $on := ("mode", "stem", "case", "punct") ! normalize-space(page:parameter($context, ., ""))
+    return
+        <details class="hsg-search-options">
+            { if ($on = ("hybrid", "yes")) then attribute open { "open" } else () }
+            <summary class="hsg-search-options__summary">Search options</summary>
+            <fieldset class="usa-fieldset hsg-search-options__group">
+                <legend class="usa-sr-only">Search options</legend>
+                { srch:mode-toggle($context), srch:match-options($context) }
+            </fieldset>
+        </details>
+};
+
+(:~ The results summary's note on the match options, after the keyword. :)
+declare %private function srch:match-phrase($match as map(*)) as xs:string {
+    let $parts := (
+        if ($match?stem) then "its word forms" else (),
+        if ($match?case) then "matching case" else (),
+        if ($match?punct) then "matching punctuation" else ()
+    )
+    return
+        if (empty($parts)) then ""
+        else if ($match?stem) then " and " || string-join($parts, ", ")
+        else ", " || string-join($parts, " and ")
 };
 
 (:~ The section checkboxes of the sidebar, on the landing and the results

@@ -703,7 +703,7 @@
                 }
             }
         },
-        "/index.html": {
+        "/": {
             "get": {
                 "summary": "Retrieve the site landing page",
                 "operationId": "hsgapi:index",
