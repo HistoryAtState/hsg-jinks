@@ -383,16 +383,13 @@ declare %private function dh:principal-chain-end($principal as element(principal
  :)
 declare function dh:principal-position-officeholders($context as map(*), $position as element(principal-position)) as element(ol) {
     let $principals := $position/principals/principal
-    (: Pre-fetch once rather than letting each iteration below call
-       dh:person-doc (collection(...)/person[id = ...]) fresh: eXist 7's
-       query compiler doesn't hoist that collection() out of the loop the
-       way 6.4's did, so each of the ~70+ iterations was re-scanning the
-       whole 4000+-document /people collection from scratch (~280ms each,
-       measured flat regardless of cache state -- ruled out via direct
-       testing) instead of filtering one pre-fetched sequence (~30ms each) --
-       a 10x difference, enough to push /departmenthistory/people/secretaries
-       from sub-second to a ~20s timeout. :)
-    let $people := collection($dh:POCOM_COL || "/people")/person
+    (: One range-index lookup for all officeholders, keyed by id. Filtering all
+       4000+ people once per officeholder took ~3 s for secretary.xml. :)
+    let $ids := distinct-values($principals/person-id)
+    let $people := map:merge(
+        for $person in collection($dh:POCOM_COL || "/people")/person[id = $ids]
+        return map:entry(string($person/id), $person)
+    )
     return
         <ol class="usa-prose">
         {
@@ -400,7 +397,7 @@ declare function dh:principal-position-officeholders($context as map(*), $positi
             where not($p/@treatAsConsecutive = 'yes')
             let $following := subsequence($principals, $pos + 1)
             let $chain-end := dh:principal-chain-end($p, $following)
-            let $person := $people[id = $p/person-id]
+            let $person := $people(string($p/person-id))
             let $start-year := substring($p/started/date, 1, 4)
             let $end-date := normalize-space($chain-end/ended/date)
             let $end-year := if ($end-date != '') then substring($end-date, 1, 4) else 'present'
@@ -1239,12 +1236,13 @@ declare function dh:travels-secretary-office-holders($context as map(*)) as elem
 
 declare function dh:travels-destinations($context as map(*), $role as xs:string) as element(ul) {
     let $countries := collection(dh:travels-collection($role))//country
-    let $ids := distinct-values($countries/@id)
     return
         <ul class="usa-collection">
         {
-            for $id in $ids
-            let $label := normalize-space(($countries[@id = $id])[1])
+            (: grouped in one pass; the label is the first occurrence's :)
+            for $country in $countries
+            group by $id := string($country/@id)
+            let $label := normalize-space($country[1])
             order by $label
             return
                 <li class="usa-collection__item"><a href="{$context?context-path}/departmenthistory/travels/{$role}/{$id}">{$label}</a></li>
