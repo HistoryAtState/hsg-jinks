@@ -23,12 +23,11 @@ jobs:
 
       # The baseline is the image the app goes live with: eXist 7 with the
       # libraries and the HistoryAtState data packages baked into the database.
-      # The FRUS data, frus-tei, is installed further down. Port 8080 is what
-      # .devcontainer/init.sh and cypress.config.cjs expect. Pinned to the
-      # same digest as .devcontainer/Dockerfile.dev.
+      # It does not carry frus-tei, which is installed further down. Port 8080
+      # is what .devcontainer/init.sh and cypress.config.cjs expect.
       - name: Start the baseline image
         run: |
-          docker run -d --name exist -p 8080:8080 joewiz/hsg-project:v2@sha256:99cbf7e1bb1c37d28f4a0e815e3cc2614ad2c3b519312982134c450a68345930
+          docker run -d --name exist -p 8080:8080 joewiz/hsg-project:latest
           for i in $(seq 1 60); do
             code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/exist/rest/db || true)
             echo "attempt $i: HTTP $code"
@@ -49,16 +48,29 @@ jobs:
           npm ci
           npm install -g @existdb/xst@4.1.0
 
-      # The latest frus-tei release: the curated volume subset. Its indexes,
-      # including the vector index, are built while the package installs.
+      # The frus-tei release is the whole corpus, which takes hours to index.
+      # CI builds frus-tei's default xar instead: the curated volume subset
+      # listed in its build.xml. Only those volumes are checked out.
+      - name: Check out frus-tei
+        uses: actions/checkout@v4
+        with:
+          repository: HistoryAtState/frus-tei
+          path: frus-tei
+          filter: blob:none
+          sparse-checkout: resources
+
       - name: Install the FRUS data
+        working-directory: frus-tei
         env:
           EXISTDB_SERVER: http://localhost:8080/exist
           EXISTDB_USER: admin
           EXISTDB_PASS: ""
         run: |
-          curl -fsSL -o frus-tei.xar https://github.com/HistoryAtState/frus-tei/releases/latest/download/frus-tei.xar
-          xst package install frus-tei.xar
+          sed -n 's#.*<include name="\(data/[^/]*\)/\*\*" />.*#\1 .last-modified/\1#p' build.xml > volumes
+          [ -s volumes ]
+          xargs git sparse-checkout add < volumes
+          ant xar
+          xst package install build/frus-tei.xar
 
       # Same seed path as the devcontainer, but with the build the production
       # image ships (ant -Dproduction=true, README "Production Docker image"),
@@ -69,7 +81,7 @@ jobs:
         run: sh .devcontainer/init.sh
 
       - name: Check the app answers
-        run: curl -sf -o /dev/null http://localhost:8080/exist/apps/hsg-jinks/index.html
+        run: curl -sf -o /dev/null http://localhost:8080/exist/apps/hsg-jinks/
 
       - name: Run Cypress
         run: npx cypress run --config video=false --env PRODUCTION_BUILD=true
