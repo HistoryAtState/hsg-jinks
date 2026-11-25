@@ -38,7 +38,7 @@ describe("page <title> (OP#1333, reference parity)", () => {
         ["conferences/2007-detente", `Détente Conference - Conferences - ${SITE}`],
     ].forEach(([path, expected]) => {
         it(`/${path} is titled "${expected}"`, () => {
-            cy.visit(path === "" ? "index.html" : path);
+            cy.visit(`/${path}`);
             cy.title().should("eq", expected);
         });
     });

@@ -76,7 +76,7 @@ describe("primary navigation menu", () => {
     // data-i18n resolves labels client-side; wait for one known label before
     // asserting text so we never read the pre-i18n fallback (the raw item id).
     beforeEach(() => {
-        cy.visit("index.html");
+        cy.visit("/");
         cy.contains(".usa-nav__primary-item", "Historical Documents", { timeout: 15000 });
     });
 
