@@ -289,7 +289,9 @@ declare function hsgapi:view-interior($request as map(*)) {
     if (matches($divisionId, "^pg_")) then
         hsgapi:view-facsimile($request, $publicationId, $divisionId)
     else
-    let $doc := collection($config:data-default || "/" || $publicationId)/id($divisionId)
+    let $volume := $config:data-default || "/" || $publicationId
+    (: collection() raises FODC0002 for an unknown volume on eXist 7 :)
+    let $doc := (if (xmldb:collection-available($volume)) then collection($volume) else ())/id($divisionId)
         [not(self::tei:divGen)]
         [not(self::tei:pb)]
         (: The volume root marks where the printed TOC goes with
@@ -361,8 +363,10 @@ declare variable $hsgapi:LISTING-DIVISION-TYPES := ("chapter", "chapter-pending"
  : interior. A missing status fails closed, like hsg-shell.
  :)
 declare %private function hsgapi:volume-published($publicationId as xs:string) as xs:boolean {
-    doc($config:data-default || "/" || $publicationId || "/" || $publicationId || ".xml")
-        //tei:revisionDesc/@status = ("published", "partially-published")
+    let $volume := $config:data-default || "/" || $publicationId || "/" || $publicationId || ".xml"
+    return
+        doc-available($volume)
+        and doc($volume)//tei:revisionDesc/@status = ("published", "partially-published")
 };
 
 (:~
@@ -375,7 +379,8 @@ declare %private function hsgapi:volume-published($publicationId as xs:string) a
  :)
 declare %private function hsgapi:view-facsimile($request as map(*), $publicationId as xs:string, $divisionId as xs:string) {
     let $pbId := translate($divisionId, "_", "")
-    let $pb := (collection($config:data-default || "/" || $publicationId)/id($pbId))[self::tei:pb][1]
+    let $volume := $config:data-default || "/" || $publicationId
+    let $pb := ((if (xmldb:collection-available($volume)) then collection($volume) else ())/id($pbId))[self::tei:pb][1]
     let $image := if (exists($pb)) then global:iiif-facs-id((), $pb) else ()
     return
         if (empty($image)) then

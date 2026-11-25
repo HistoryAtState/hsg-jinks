@@ -1467,7 +1467,9 @@ declare function dh:visits-countries($context as map(*)) as element(ul) {
 };
 
 declare function dh:visits-by-year($year as xs:integer) as element(visit)* {
-    for $visit in doc(dh:visits-decade-file($year))/visits/visit[year-from-date(xs:date(start-date)) = $year]
+    let $file := dh:visits-decade-file($year)
+    (: doc() raises FODC0002 for a decade without a file on eXist 7 :)
+    for $visit in (if (doc-available($file)) then doc($file) else ())/visits/visit[year-from-date(xs:date(start-date)) = $year]
     order by $visit/start-date
     return $visit
 };
