@@ -27,6 +27,7 @@ declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace xi="http://www.w3.org/2001/XInclude";
 
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "../config.xqm";
+import module namespace volumes="https://history.state.gov/ns/frus-volumes" at "../frus-volumes.xqm";
 
 declare variable $status:SERIES-PREFIX := "Foreign Relations of the United States, ";
 
@@ -40,15 +41,17 @@ declare variable $status:SERIES-PREFIX := "Foreign Relations of the United State
 declare function status:report($context as map(*)) as element()* {
     let $this-year := xs:string(year-from-date(current-date()))
     let $last-year := xs:string(year-from-date(current-date()) - 1)
-    let $data := collection($config:data-default)
-    let $published-this-year := $data//tei:change[@status eq "published"][starts-with(@when, $this-year)]/root(.)/tei:TEI
-    let $published-last-year := $data//tei:change[@status eq "published"][starts-with(@when, $last-year)]/root(.)/tei:TEI
-    let $anticipated-this-year := $data//tei:change[@status eq "being-cleared"][starts-with(@to, $this-year)]/root(.)/tei:TEI
-    let $chapters-outstanding := $data//tei:revisionDesc[@status eq "partially-published"]/root(.)/tei:TEI
-    let $being-cleared := $data//tei:change[@status eq "being-cleared"]/root(.)/tei:TEI
-    let $being-researched := $data//tei:change[@status eq "being-researched"]/root(.)/tei:TEI
-    let $planned := $data//tei:change[@status eq "planned"]/root(.)/tei:TEI
-    let $being-digitized := $data//tei:revisionDesc[@status eq "being-digitized"]/root(.)/tei:TEI
+    (: Only the volume main files carry a revisionDesc (see frus-volumes.xqm). :)
+    let $revisions := volumes:roots()/tei:teiHeader//tei:revisionDesc
+    let $changes := $revisions//tei:change
+    let $published-this-year := $changes[@status eq "published"][starts-with(@when, $this-year)]/root(.)/tei:TEI
+    let $published-last-year := $changes[@status eq "published"][starts-with(@when, $last-year)]/root(.)/tei:TEI
+    let $anticipated-this-year := $changes[@status eq "being-cleared"][starts-with(@to, $this-year)]/root(.)/tei:TEI
+    let $chapters-outstanding := $revisions[@status eq "partially-published"]/root(.)/tei:TEI
+    let $being-cleared := $changes[@status eq "being-cleared"]/root(.)/tei:TEI
+    let $being-researched := $changes[@status eq "being-researched"]/root(.)/tei:TEI
+    let $planned := $changes[@status eq "planned"]/root(.)/tei:TEI
+    let $being-digitized := $revisions[@status eq "being-digitized"]/root(.)/tei:TEI
     return (
         if (exists($published-last-year)) then
             <div>
@@ -352,7 +355,8 @@ declare %private function status:short-title($vol as element(tei:TEI)) as xs:str
  : returns empty, which callers use as the reference's div-existence guard.
  :)
 declare %private function status:division($vol-id as xs:string, $div-id as xs:string) as element(tei:TEI)? {
-    (collection($config:data-default || "/" || $vol-id)
+    (: id() finds the few candidates without reading every file of the volume :)
+    (collection($config:data-default || "/" || $vol-id)/id($div-id)/root(.)
         /tei:TEI[tei:teiHeader//tei:bibl[@type eq "frus-division-id"] = $div-id])[1]
 };
 

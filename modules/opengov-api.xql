@@ -5,6 +5,7 @@ module namespace ogapi="http://teipublisher.com/api/open";
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors="http://e-editiones.org/roaster/errors";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
+import module namespace volumes="https://history.state.gov/ns/frus-volumes" at "frus-volumes.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
@@ -60,7 +61,8 @@ declare function ogapi:frus-metadata-page($request as map(*)) {
  : gracefully once real data provides them.
  :)
 declare %private function ogapi:published-volumes() as element(tei:TEI)* {
-    for $revisionDesc in collection($config:data-default)//tei:revisionDesc[@status = ("published", "partially-published")]
+    (: Only the volume main files carry a revisionDesc (see frus-volumes.xqm). :)
+    for $revisionDesc in volumes:roots()/tei:teiHeader//tei:revisionDesc[@status = ("published", "partially-published")]
     let $volume := $revisionDesc/root(.)/tei:TEI
     let $when := $revisionDesc/tei:change[@corresp eq "#" || $volume/@xml:id]/@when
     order by $when descending

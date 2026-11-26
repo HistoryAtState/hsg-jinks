@@ -265,6 +265,11 @@ declare function hsgapi:view($request as map(*)) {
                 ))),
                 map { "administration-id": $publicationId }
             )
+        (: Checked here: for a missing file jinks' config:get-document falls
+           back to an id() lookup across every FRUS file, about 2 s on the
+           full data. :)
+        else if (not(doc-available($config:data-default || "/" || $publicationId || "/" || $publicationId || ".xml"))) then
+            error($errors:NOT_FOUND, "no volume " || $publicationId)
         else
             vapi:view(map:put($request, "parameters", map:merge((
                 $request?parameters,
