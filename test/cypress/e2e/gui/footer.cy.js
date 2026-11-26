@@ -25,169 +25,177 @@ const VOLUME = "historicaldocuments/frus1981-88v05";
 // office's own social accounts); the secondary section keeps the policy row. Nothing of the USWDS example survives -- no
 // placeholder text, no dead javascript:void(0) links, no sign-up form.
 describe("footer content", () => {
-    beforeEach(() => cy.visit(`${VOLUME}/ch1`));
+    // The tests at the default viewport share one visit.
+    describe("at the default viewport", { testIsolation: false }, () => {
+        before(() => cy.visit(`${VOLUME}/ch1`));
 
-    it("has the three collapsible columns of the design", () => {
-        cy.get("footer.usa-footer .usa-footer__primary-link").then(($h) =>
-            expect([...$h].map((el) => el.textContent.trim())).to.deep.equal([
-                "Learn more",
-                "Topics",
-                "Contact",
-            ])
-        );
-        cy.get(
-            "footer.usa-footer .usa-footer__nav .usa-footer__contact.usa-footer__primary-content--collapsible"
-        ).should("exist");
-    });
-
-    it("puts the wordmark above the nav while the columns need the full width", () => {
-        cy.viewport(800, 900);
-        cy.get("footer.usa-footer .usa-footer__brand")
-            .then(($b) => $b[0].getBoundingClientRect())
-            .then((brand) => {
-                cy.get("footer.usa-footer .usa-footer__nav").then(($n) => {
-                    expect(brand.bottom).to.be.at.most($n[0].getBoundingClientRect().top);
-                });
-            });
-        cy.get("footer.usa-footer .usa-footer__primary-link").then(($h) => {
-            const tops = [...$h].map((el) => Math.round(el.getBoundingClientRect().top));
-            expect(new Set(tops).size, "all column headings on one row").to.equal(1);
-        });
-    });
-
-    it("puts the wordmark and agency beside the nav", () => {
-        cy.get("footer.usa-footer .usa-footer__primary-section .usa-footer__brand").within(() => {
-            cy.get(".usa-footer__logo-img").should("exist");
-            cy.get(".usa-footer__logo-heading").should("contain.text", "Office of the Historian");
-        });
-        cy.get("footer.usa-footer .usa-footer__brand")
-            .then(($b) => $b[0].getBoundingClientRect())
-            .then((brand) => {
-                cy.get("footer.usa-footer .usa-footer__nav").then(($n) => {
-                    const nav = $n[0].getBoundingClientRect();
-                    expect(brand.right).to.be.at.most(nav.left);
-                    expect(Math.abs(brand.top - nav.top)).to.be.below(40);
-                });
-            });
-        cy.get("footer.usa-footer .usa-footer__secondary-section .usa-footer__logo").should(
-            "not.exist"
-        );
-    });
-
-    it("carries the policy links in the bottom required-links row", () => {
-        cy.get("footer.usa-footer .usa-footer__required-links a").then(($a) =>
-            expect([...$a].map((el) => el.textContent.trim())).to.deep.equal([
-                "Accessibility Statement",
-                "Privacy Policy",
-                "External Link Policy",
-                "Copyright Information",
-                "Content Warning",
-            ])
-        );
-    });
-
-    it("carries the hsg-shell 'Learn more' links", () => {
-        cy.get("footer.usa-footer .usa-footer__primary-content")
-            .first()
-            .find("a")
-            .then(($a) =>
-                expect(
-                    [...$a].map((el) => [el.textContent.trim(), el.getAttribute("href")])
-                ).to.deep.equal([
-                    ["Home", "/exist/apps/hsg-jinks/"],
-                    ["Search", "/exist/apps/hsg-jinks/search"],
-                    ["About Us", "/exist/apps/hsg-jinks/about"],
-                    ["FAQ", "/exist/apps/hsg-jinks/about/faq"],
+        it("has the three collapsible columns of the design", () => {
+            cy.get("footer.usa-footer .usa-footer__primary-link").then(($h) =>
+                expect([...$h].map((el) => el.textContent.trim())).to.deep.equal([
+                    "Learn more",
+                    "Topics",
+                    "Contact",
                 ])
             );
-    });
-
-    it("sets the policy links off in the headings' colour", () => {
-        cy.get("footer.usa-footer .usa-footer__primary-link")
-            .first()
-            .then(($h) => {
-                const heading = $h.css("color");
-                cy.get("footer.usa-footer .usa-footer__required-links a").each(($a) =>
-                    expect($a.css("color")).to.equal(heading)
-                );
-            });
-    });
-
-    it("draws the policy row's rule like the one above the header's navigation", () => {
-        cy.viewport(1440, 900);
-        cy.get(".usa-header--extended .usa-nav").then(($nav) => {
-            const navBox = $nav[0].getBoundingClientRect();
-            cy.get("footer.usa-footer .usa-footer__secondary-section").should(($s) => {
-                const s = $s[0];
-                const box = s.getBoundingClientRect();
-                expect($s.css("border-top-style")).to.equal("solid");
-                expect($s.css("border-top-width")).to.equal($nav.css("border-top-width"));
-                expect($s.css("border-top-color")).to.equal($nav.css("border-top-color"));
-                expect(box.left).to.be.closeTo(navBox.left, 1);
-                expect(box.right).to.be.closeTo(navBox.right, 1);
-            });
+            cy.get(
+                "footer.usa-footer .usa-footer__nav .usa-footer__contact.usa-footer__primary-content--collapsible"
+            ).should("exist");
         });
-    });
 
-    it("links every topic within this app, department policies to state.gov", () => {
-        ["Historical Documents", "Department History", "Countries"].forEach((label) => {
-            cy.get("footer.usa-footer a")
-                .contains(label)
-                .should("have.attr", "href")
-                .and("match", /^\/exist\/apps\/hsg-jinks\//);
+        it("puts the wordmark and agency beside the nav", () => {
+            cy.get("footer.usa-footer .usa-footer__primary-section .usa-footer__brand").within(() => {
+                cy.get(".usa-footer__logo-img").should("exist");
+                cy.get(".usa-footer__logo-heading").should("contain.text", "Office of the Historian");
+            });
+            cy.get("footer.usa-footer .usa-footer__brand")
+                .then(($b) => $b[0].getBoundingClientRect())
+                .then((brand) => {
+                    cy.get("footer.usa-footer .usa-footer__nav").then(($n) => {
+                        const nav = $n[0].getBoundingClientRect();
+                        expect(brand.right).to.be.at.most(nav.left);
+                        expect(Math.abs(brand.top - nav.top)).to.be.below(40);
+                    });
+                });
+            cy.get("footer.usa-footer .usa-footer__secondary-section .usa-footer__logo").should(
+                "not.exist"
+            );
         });
-        cy.get("footer.usa-footer a")
-            .contains("Privacy Policy")
-            .should("have.attr", "href", "https://www.state.gov/privacy-policy/");
-    });
 
-    it("reaches the office through Contact Us and mail, not by phone (OP#1459)", () => {
-        cy.get("footer.usa-footer .usa-footer__contact .usa-footer__secondary-link > a").then(
-            ($a) =>
-                expect([...$a].map((el) => el.getAttribute("href"))).to.deep.equal([
-                    "/exist/apps/hsg-jinks/about/contact-us",
-                    "mailto:history@state.gov",
+        it("carries the policy links in the bottom required-links row", () => {
+            cy.get("footer.usa-footer .usa-footer__required-links a").then(($a) =>
+                expect([...$a].map((el) => el.textContent.trim())).to.deep.equal([
+                    "Accessibility Statement",
+                    "Privacy Policy",
+                    "External Link Policy",
+                    "Copyright Information",
+                    "Content Warning",
                 ])
-        );
-        cy.get('footer.usa-footer a[href^="tel:"]').should("not.exist");
-    });
-
-    it("links the office's own social accounts", () => {
-        cy.get("footer.usa-footer .usa-social-link").then(($a) =>
-            expect([...$a].map((el) => el.getAttribute("href"))).to.deep.equal([
-                "https://x.com/HistoryAtState",
-                "https://github.com/HistoryAtState",
-            ])
-        );
-    });
-
-    it("closes with the wordmark and the parent bureau", () => {
-        cy.get("footer.usa-footer .usa-footer__logo-img")
-            .should("have.attr", "alt")
-            .and("contain", "Office of the Historian");
-        cy.get("footer.usa-footer .usa-footer__agency-parent").should(
-            "contain.text",
-            "United States Department of State"
-        );
-    });
-
-    it("sits on the navy ground of the design", () => {
-        // The design's #173a57, snapped to the palette's primary-darkest (OP#1426).
-        cy.get("footer.usa-footer").should(
-            "have.css",
-            "background-color",
-            "rgb(17, 47, 78)"
-        );
-    });
-
-    it("has no leftover USWDS example scaffold", () => {
-        cy.get("footer.usa-footer").within(() => {
-            cy.get('a[href="javascript:void(0);"]').should("not.exist");
-            cy.get(".usa-sign-up").should("not.exist");
+            );
         });
-        cy.get("footer.usa-footer")
-            .invoke("text")
-            .should("not.match", /<Secondary link|<Topic>|<Name of Agency>/);
+
+        it("carries the hsg-shell 'Learn more' links", () => {
+            cy.get("footer.usa-footer .usa-footer__primary-content")
+                .first()
+                .find("a")
+                .then(($a) =>
+                    expect(
+                        [...$a].map((el) => [el.textContent.trim(), el.getAttribute("href")])
+                    ).to.deep.equal([
+                        ["Home", "/exist/apps/hsg-jinks/"],
+                        ["Search", "/exist/apps/hsg-jinks/search"],
+                        ["About Us", "/exist/apps/hsg-jinks/about"],
+                        ["FAQ", "/exist/apps/hsg-jinks/about/faq"],
+                    ])
+                );
+        });
+
+        it("sets the policy links off in the headings' colour", () => {
+            cy.get("footer.usa-footer .usa-footer__primary-link")
+                .first()
+                .then(($h) => {
+                    const heading = $h.css("color");
+                    cy.get("footer.usa-footer .usa-footer__required-links a").each(($a) =>
+                        expect($a.css("color")).to.equal(heading)
+                    );
+                });
+        });
+
+        it("links every topic within this app, department policies to state.gov", () => {
+            ["Historical Documents", "Department History", "Countries"].forEach((label) => {
+                cy.get("footer.usa-footer a")
+                    .contains(label)
+                    .should("have.attr", "href")
+                    .and("match", /^\/exist\/apps\/hsg-jinks\//);
+            });
+            cy.get("footer.usa-footer a")
+                .contains("Privacy Policy")
+                .should("have.attr", "href", "https://www.state.gov/privacy-policy/");
+        });
+
+        it("reaches the office through Contact Us and mail, not by phone (OP#1459)", () => {
+            cy.get("footer.usa-footer .usa-footer__contact .usa-footer__secondary-link > a").then(
+                ($a) =>
+                    expect([...$a].map((el) => el.getAttribute("href"))).to.deep.equal([
+                        "/exist/apps/hsg-jinks/about/contact-us",
+                        "mailto:history@state.gov",
+                    ])
+            );
+            cy.get('footer.usa-footer a[href^="tel:"]').should("not.exist");
+        });
+
+        it("links the office's own social accounts", () => {
+            cy.get("footer.usa-footer .usa-social-link").then(($a) =>
+                expect([...$a].map((el) => el.getAttribute("href"))).to.deep.equal([
+                    "https://x.com/HistoryAtState",
+                    "https://github.com/HistoryAtState",
+                ])
+            );
+        });
+
+        it("closes with the wordmark and the parent bureau", () => {
+            cy.get("footer.usa-footer .usa-footer__logo-img")
+                .should("have.attr", "alt")
+                .and("contain", "Office of the Historian");
+            cy.get("footer.usa-footer .usa-footer__agency-parent").should(
+                "contain.text",
+                "United States Department of State"
+            );
+        });
+
+        it("sits on the navy ground of the design", () => {
+            // The design's #173a57, snapped to the palette's primary-darkest (OP#1426).
+            cy.get("footer.usa-footer").should(
+                "have.css",
+                "background-color",
+                "rgb(17, 47, 78)"
+            );
+        });
+
+        it("has no leftover USWDS example scaffold", () => {
+            cy.get("footer.usa-footer").within(() => {
+                cy.get('a[href="javascript:void(0);"]').should("not.exist");
+                cy.get(".usa-sign-up").should("not.exist");
+            });
+            cy.get("footer.usa-footer")
+                .invoke("text")
+                .should("not.match", /<Secondary link|<Topic>|<Name of Agency>/);
+        });
+    });
+
+    // cy.viewport is reset before every test, so these load the page at their own width.
+    describe("at other widths", () => {
+        beforeEach(() => cy.visit(`${VOLUME}/ch1`));
+
+        it("puts the wordmark above the nav while the columns need the full width", () => {
+            cy.viewport(800, 900);
+            cy.get("footer.usa-footer .usa-footer__brand")
+                .then(($b) => $b[0].getBoundingClientRect())
+                .then((brand) => {
+                    cy.get("footer.usa-footer .usa-footer__nav").then(($n) => {
+                        expect(brand.bottom).to.be.at.most($n[0].getBoundingClientRect().top);
+                    });
+                });
+            cy.get("footer.usa-footer .usa-footer__primary-link").then(($h) => {
+                const tops = [...$h].map((el) => Math.round(el.getBoundingClientRect().top));
+                expect(new Set(tops).size, "all column headings on one row").to.equal(1);
+            });
+        });
+
+        it("draws the policy row's rule like the one above the header's navigation", () => {
+            cy.viewport(1440, 900);
+            cy.get(".usa-header--extended .usa-nav").then(($nav) => {
+                const navBox = $nav[0].getBoundingClientRect();
+                cy.get("footer.usa-footer .usa-footer__secondary-section").should(($s) => {
+                    const s = $s[0];
+                    const box = s.getBoundingClientRect();
+                    expect($s.css("border-top-style")).to.equal("solid");
+                    expect($s.css("border-top-width")).to.equal($nav.css("border-top-width"));
+                    expect($s.css("border-top-color")).to.equal($nav.css("border-top-color"));
+                    expect(box.left).to.be.closeTo(navBox.left, 1);
+                    expect(box.right).to.be.closeTo(navBox.right, 1);
+                });
+            });
+        });
     });
 });
 

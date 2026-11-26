@@ -13,8 +13,9 @@
 
 const volume = "historicaldocuments/frus1981-88v05";
 
-describe("volume landing shows all relevant data", () => {
-    beforeEach(() => cy.visit(volume));
+// The tests only read the page, so they share one visit.
+describe("volume landing shows all relevant data", { testIsolation: false }, () => {
+    before(() => cy.visit(volume));
 
     it("shows the complete volume title", () => {
         cy.get("main", { timeout: 15000 })
@@ -31,8 +32,9 @@ describe("volume landing shows all relevant data", () => {
     });
 });
 
-describe("compilation page shows all relevant data", () => {
-    beforeEach(() => cy.visit(`${volume}/comp`));
+// The tests only read the page, so they share one visit.
+describe("compilation page shows all relevant data", { testIsolation: false }, () => {
+    before(() => cy.visit(`${volume}/comp`));
 
     it("shows the compilation title and a Contents heading", () => {
         cy.get("main", { timeout: 15000 })
@@ -49,35 +51,40 @@ describe("compilation page shows all relevant data", () => {
 });
 
 describe("chapter page shows all relevant data", () => {
-    beforeEach(() => cy.visit(`${volume}/ch1`));
-
     it("lists all 50 documents, 30 per page (#1079)", () => {
+        cy.visit(`${volume}/ch1`);
         cy.get("main .hsg-frus__doc-entry", { timeout: 15000 }).should("have.length", 30);
         cy.visit(`${volume}/ch1?start=31`);
         cy.get("main .hsg-frus__doc-entry", { timeout: 15000 }).should("have.length", 20)
             .first().should("contain.text", "31.");
     });
 
-    it("gives each entry number, linked title, dateline and source note", () => {
-        cy.get("main .hsg-frus__doc-entry", { timeout: 15000 }).first().within(() => {
-            cy.contains("Letter From President Reagan to Soviet General Secretary Gorbachev")
-                .should("have.attr", "href").and("match", /\/d1$/);
-            cy.root().should("contain.text", "Washington")
-                .and("contain.text", "March 11, 1985")
-                .and("contain.text", "Source:")
-                .and("contain.text", "Reagan Library");
-        });
-    });
+    // The tests that only read the first page share one visit.
+    describe("first page", { testIsolation: false }, () => {
+        before(() => cy.visit(`${volume}/ch1`));
 
-    it("shows document summaries where the data carries them", () => {
-        // d2's summary, shown by the reference too.
-        cy.get("main", { timeout: 15000 })
-            .should("contain.text", "In a March 11 covering memorandum");
+        it("gives each entry number, linked title, dateline and source note", () => {
+            cy.get("main .hsg-frus__doc-entry", { timeout: 15000 }).first().within(() => {
+                cy.contains("Letter From President Reagan to Soviet General Secretary Gorbachev")
+                    .should("have.attr", "href").and("match", /\/d1$/);
+                cy.root().should("contain.text", "Washington")
+                    .and("contain.text", "March 11, 1985")
+                    .and("contain.text", "Source:")
+                    .and("contain.text", "Reagan Library");
+            });
+        });
+
+        it("shows document summaries where the data carries them", () => {
+            // d2's summary, shown by the reference too.
+            cy.get("main", { timeout: 15000 })
+                .should("contain.text", "In a March 11 covering memorandum");
+        });
     });
 });
 
-describe("document page shows all relevant data", () => {
-    beforeEach(() => cy.visit(`${volume}/d1`));
+// The tests only read the page, so they share one visit.
+describe("document page shows all relevant data", { testIsolation: false }, () => {
+    before(() => cy.visit(`${volume}/d1`));
 
     it("shows number, title, dateline and salutation", () => {
         // Two single-line phrases: contain.text is whitespace-sensitive

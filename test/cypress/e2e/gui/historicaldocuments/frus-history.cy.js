@@ -12,8 +12,9 @@
 
 const SECTION = "historicaldocuments/frus-history";
 
-describe("the FRUS History landing page", () => {
-    beforeEach(() => cy.visit(SECTION));
+// The tests share one visit.
+describe("the FRUS History landing page", { testIsolation: false }, () => {
+    before(() => cy.visit(SECTION));
 
     it("shows the monograph title, editors and edition info", () => {
         cy.get("main h1", { timeout: 15000 }).should(

@@ -7,35 +7,40 @@
 const CHAPTER = "historicaldocuments/frus1981-88v05/ch1";
 
 describe("division listing page", () => {
-    beforeEach(() => cy.visit(CHAPTER));
+    // Tests that only read the chapter page share one visit; the two that
+    // navigate elsewhere run on their own.
+    describe("the chapter page", { testIsolation: false }, () => {
+        before(() => cy.visit(CHAPTER));
 
-    it("links the volume title above the division title", () => {
-        cy.get(".hsg-frus__overline a")
-            .should("contain.text", "Foreign Relations of the United States, 1981–1988, Volume V")
-            .and("have.attr", "href").and("match", /\/historicaldocuments\/frus1981-88v05$/);
-        cy.get("h1.hsg-frus__division-title").should("contain.text", "Gorbachev");
-    });
-
-    it("has the volume table of contents but no right sidebar", () => {
-        cy.get("pb-page > aside.before .usa-sidenav").should("be.visible");
-        cy.get("pb-page > aside.after").should("not.be.visible");
-    });
-
-    it("pages the documents with USWDS pagination above and below the list", () => {
-        cy.get(".hsg-frus__pagination").should("have.length", 2);
-        cy.get(".hsg-frus__pagination").first().within(() => {
-            cy.get(".usa-pagination__button.usa-current").should("have.text", "1").and("have.attr", "aria-current", "page");
-            cy.get(".usa-pagination__next-page").should("have.attr", "href", "?start=31");
+        it("links the volume title above the division title", () => {
+            cy.get(".hsg-frus__overline a")
+                .should("contain.text", "Foreign Relations of the United States, 1981–1988, Volume V")
+                .and("have.attr", "href").and("match", /\/historicaldocuments\/frus1981-88v05$/);
+            cy.get("h1.hsg-frus__division-title").should("contain.text", "Gorbachev");
         });
-        // Both centred within the listing.
-        cy.get(".hsg-frus__pagination").each(($nav) => {
-            const nav = $nav[0].getBoundingClientRect();
-            const list = $nav.find(".usa-pagination__list")[0].getBoundingClientRect();
-            expect(list.left - nav.left).to.be.closeTo(nav.right - list.right, 2);
+
+        it("has the volume table of contents but no right sidebar", () => {
+            cy.get("pb-page > aside.before .usa-sidenav").should("be.visible");
+            cy.get("pb-page > aside.after").should("not.be.visible");
+        });
+
+        it("pages the documents with USWDS pagination above and below the list", () => {
+            cy.get(".hsg-frus__pagination").should("have.length", 2);
+            cy.get(".hsg-frus__pagination").first().within(() => {
+                cy.get(".usa-pagination__button.usa-current").should("have.text", "1").and("have.attr", "aria-current", "page");
+                cy.get(".usa-pagination__next-page").should("have.attr", "href", "?start=31");
+            });
+            // Both centred within the listing.
+            cy.get(".hsg-frus__pagination").each(($nav) => {
+                const nav = $nav[0].getBoundingClientRect();
+                const list = $nav.find(".usa-pagination__list")[0].getBoundingClientRect();
+                expect(list.left - nav.left).to.be.closeTo(nav.right - list.right, 2);
+            });
         });
     });
 
     it("keeps the page buttons in place when Previous or Next is missing", () => {
+        cy.visit(CHAPTER);
         const positions = () => cy.get(".hsg-frus__pagination").first().find(".usa-pagination__button")
             .then(($buttons) => [...$buttons].map((button) => Math.round(button.getBoundingClientRect().left)));
         cy.get(".hsg-frus__pagination").first().find(".hsg-pagination__placeholder")
@@ -66,26 +71,30 @@ describe("division listing page", () => {
         });
     });
 
-    it("gives each document a card with its title, source, location and date", () => {
-        cy.get(".hsg-frus__doc-entry").first().within(() => {
-            cy.get(".hsg-frus__doc-title a").should("have.attr", "href").and("match", /\/d1$/);
-            cy.get(".hsg-frus__doc-meta dt").then(($dts) => {
-                expect([...$dts].map((dt) => dt.textContent)).to.deep.equal(["Source", "Location", "Date"]);
-            });
-            cy.get(".hsg-frus__doc-meta").should("contain.text", "Washington").and("contain.text", "March 11, 1985");
-        });
-        cy.get(".hsg-frus__doc-entry").first().should("have.css", "background-color", "rgb(255, 255, 255)");
-    });
+    describe("the chapter page's document cards", { testIsolation: false }, () => {
+        before(() => cy.visit(CHAPTER));
 
-    it("links each document's first page scan", () => {
-        cy.get(".hsg-frus__doc-entry").first().find("a.hsg-frus__facsimile")
-            .should("contain.text", "Facsimile Page")
-            .invoke("attr", "href")
-            .then((href) => {
-                expect(href).to.match(/\/frus1981-88v05\/pg_\d+$/);
-                // Root-relative: cy.request would resolve it against baseUrl.
-                cy.location("origin").then((origin) => cy.request(origin + href)).its("status").should("eq", 200);
+        it("gives each document a card with its title, source, location and date", () => {
+            cy.get(".hsg-frus__doc-entry").first().within(() => {
+                cy.get(".hsg-frus__doc-title a").should("have.attr", "href").and("match", /\/d1$/);
+                cy.get(".hsg-frus__doc-meta dt").then(($dts) => {
+                    expect([...$dts].map((dt) => dt.textContent)).to.deep.equal(["Source", "Location", "Date"]);
+                });
+                cy.get(".hsg-frus__doc-meta").should("contain.text", "Washington").and("contain.text", "March 11, 1985");
             });
+            cy.get(".hsg-frus__doc-entry").first().should("have.css", "background-color", "rgb(255, 255, 255)");
+        });
+
+        it("links each document's first page scan", () => {
+            cy.get(".hsg-frus__doc-entry").first().find("a.hsg-frus__facsimile")
+                .should("contain.text", "Facsimile Page")
+                .invoke("attr", "href")
+                .then((href) => {
+                    expect(href).to.match(/\/frus1981-88v05\/pg_\d+$/);
+                    // Root-relative: cy.request would resolve it against baseUrl.
+                    cy.location("origin").then((origin) => cy.request(origin + href)).its("status").should("eq", 200);
+                });
+        });
     });
 });
 

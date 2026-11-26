@@ -19,9 +19,11 @@ const publishedModules = [
     { id: "terrorism-intro", year: "2002" },
 ];
 
-describe("education landing page", () => {
+// The tests share one visit.
+describe("education landing page", { testIsolation: false }, () => {
+    before(() => cy.visit("education"));
+
     it("shows the retirement notice and the abbreviated module list", () => {
-        cy.visit("education");
         cy.get(".usa-alert--error").should("contain.text", "Note to Readers")
             .and("contain.text", "no longer being maintained");
         cy.get("main ol li").should("have.length", publishedModules.length);
@@ -30,7 +32,6 @@ describe("education landing page", () => {
     });
 
     it("shows the site-wide About panel (5 links) and the Education panel (1 link), not the module list (PR #17 review)", () => {
-        cy.visit("education");
         cy.contains("aside h2", "About").next("ul.usa-sidenav").find("a").should("have.length", 5);
         cy.contains("aside h2", "About").next("ul.usa-sidenav").find("a").eq(0).should("have.text", "Contact Us");
         cy.contains("aside h2", "About").next("ul.usa-sidenav").find("a").eq(4).should("have.text", "Recent Publications");
@@ -41,9 +42,11 @@ describe("education landing page", () => {
     });
 });
 
-describe("curriculum modules listing", () => {
+// The tests share one visit.
+describe("curriculum modules listing", { testIsolation: false }, () => {
+    before(() => cy.visit("education/modules"));
+
     it("lists exactly the 7 published modules, year-descending, each with a title link, teaser, and availability line", () => {
-        cy.visit("education/modules");
         cy.get(".usa-alert--error").should("contain.text", "Note to Readers");
         cy.get(".usa-collection__item").should("have.length", publishedModules.length);
         cy.get(".usa-collection__item").each(($item, index) => {
@@ -54,7 +57,6 @@ describe("curriculum modules listing", () => {
     });
 
     it("shows the Education/Curriculum Modules sidebar heading pair and marks the section-nav link current (PR #17 review)", () => {
-        cy.visit("education/modules");
         cy.get("aside h2").should("have.length", 2).and("contain.text", "Education");
         cy.get("aside h3").should("have.text", "Curriculum Modules");
         cy.contains("aside h2 + ul a", "Curriculum Modules")
@@ -63,7 +65,6 @@ describe("curriculum modules listing", () => {
     });
 
     it("sidebar module order matches the main listing order (#1169 ordering-bug regression)", () => {
-        cy.visit("education/modules");
         cy.get(".usa-collection__heading a").then(($links) => {
             const listingOrder = [...$links].map((a) => a.getAttribute("href"));
             // The modules-list sidebar sits under its own "Curriculum Modules"

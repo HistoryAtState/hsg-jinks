@@ -12,8 +12,9 @@
 
 const PAGE = "historicaldocuments/status-of-the-series";
 
-describe("the status of the series page", () => {
-    beforeEach(() => cy.visit(PAGE));
+// The tests share one visit.
+describe("the status of the series page", { testIsolation: false }, () => {
+    before(() => cy.visit(PAGE));
 
     it("responds with 200", () => {
         cy.request(PAGE).its("status").should("eq", 200);

@@ -48,8 +48,9 @@ describe("sidebar table of contents", () => {
         cy.get("nav.toc .usa-current").should("not.exist");
     });
 
-    describe("shape", () => {
-        beforeEach(() => cy.visit(`${VOLUME}/ch1`));
+    // The shape tests only read the chapter page, so they share one visit.
+    describe("shape", { testIsolation: false }, () => {
+        before(() => cy.visit(`${VOLUME}/ch1`));
 
         it("lists front matter, the compilation and back matter at the top level", () => {
             cy.get("nav.toc > ul.usa-sidenav > li.usa-sidenav__item > a").then(($as) => {
@@ -124,80 +125,82 @@ describe("sidebar table of contents", () => {
         });
     });
 
-    it("every link resolves", () => {
-        // the TOC links into #519's retained URL space
-        cy.visit(`${VOLUME}/ch1`);
-        // The back-matter index is linked but not requested: rendering it is
-        // slow (OP#1470), and volume-front-back-matter.cy.js renders it once.
-        cy.get('nav.toc ul.usa-sidenav a[href$="/index"]').should("have.length", 1);
-        cy.get("nav.toc ul.usa-sidenav a:not([href$='/index'])").each(($a) => {
-            // resolve the root-relative href against the server origin: passing it
-            // to cy.request raw prefixes the full baseUrl (which already carries
-            // the context path), doubling it -- masked while error pages served
-            // HTTP 200, exposed by the OP#1309 status fix
-            cy.request(new URL($a.attr("href"), Cypress.config("baseUrl")).href)
-                .its("status").should("eq", 200);
-        });
-    });
+    // These tests only read the chapter page, so they share one visit.
+    describe("on the chapter page", { testIsolation: false }, () => {
+        before(() => cy.visit(`${VOLUME}/ch1`));
 
-    it("nested items are indented past their parent", () => {
-        // USWDS's own indent rule is dropped by browsers -- its selector puts a
-        // pseudo-element inside :not() -- so hsg-theme.css restores it. Without
-        // it the chapters render flush with their compilation.
-        cy.visit(`${VOLUME}/ch1`);
-        cy.get("nav.toc ul.usa-sidenav__sublist li a")
-            .first()
-            .should(($a) => {
-                expect(parseFloat(getComputedStyle($a[0]).paddingLeft)).to.be.greaterThan(0);
+        it("every link resolves", () => {
+            // the TOC links into #519's retained URL space
+            // The back-matter index is linked but not requested: rendering it is
+            // slow (OP#1470), and volume-front-back-matter.cy.js renders it once.
+            cy.get('nav.toc ul.usa-sidenav a[href$="/index"]').should("have.length", 1);
+            cy.get("nav.toc ul.usa-sidenav a:not([href$='/index'])").each(($a) => {
+                // resolve the root-relative href against the server origin: passing it
+                // to cy.request raw prefixes the full baseUrl (which already carries
+                // the context path), doubling it -- masked while error pages served
+                // HTTP 200, exposed by the OP#1309 status fix
+                cy.request(new URL($a.attr("href"), Cypress.config("baseUrl")).href)
+                    .its("status").should("eq", 200);
             });
-    });
+        });
 
-    describe("USWDS link chrome", () => {
-        // Same root cause as the indent fix above (pb-login::part(trigger)
-        // extends .usa-button, which pollutes every a:not(.usa-button) rule
-        // sitewide with an invalid :not() clause, so browsers drop it) -- but
-        // it also drops display/padding/hover/color for every sidenav link,
-        // not just the sublist indent. hsg-theme.css restores those too.
-        beforeEach(() => cy.visit(`${VOLUME}/ch1`));
-
-        it("gives top-level and nested links block display with padding", () => {
-            cy.get("nav.toc ul.usa-sidenav > li > a")
-                .first()
-                .should(($a) => {
-                    const style = getComputedStyle($a[0]);
-                    expect(style.display).to.eq("block");
-                    expect(parseFloat(style.paddingTop)).to.be.greaterThan(0);
-                    expect(parseFloat(style.paddingRight)).to.be.greaterThan(0);
-                    expect(parseFloat(style.paddingBottom)).to.be.greaterThan(0);
-                });
-
+        it("nested items are indented past their parent", () => {
+            // USWDS's own indent rule is dropped by browsers -- its selector puts a
+            // pseudo-element inside :not() -- so hsg-theme.css restores it. Without
+            // it the chapters render flush with their compilation.
             cy.get("nav.toc ul.usa-sidenav__sublist li a")
                 .first()
                 .should(($a) => {
-                    const style = getComputedStyle($a[0]);
-                    expect(style.display).to.eq("block");
-                    expect(parseFloat(style.paddingTop)).to.be.greaterThan(0);
+                    expect(parseFloat(getComputedStyle($a[0]).paddingLeft)).to.be.greaterThan(0);
                 });
         });
 
-        it("gives non-current links a muted color, distinct from the current page", () => {
-            cy.get("nav.toc a.usa-current").then(($current) => {
-                const currentColor = getComputedStyle($current[0]).color;
-                cy.get("nav.toc ul.usa-sidenav a:not(.usa-current)")
+        describe("USWDS link chrome", () => {
+            // Same root cause as the indent fix above (pb-login::part(trigger)
+            // extends .usa-button, which pollutes every a:not(.usa-button) rule
+            // sitewide with an invalid :not() clause, so browsers drop it) -- but
+            // it also drops display/padding/hover/color for every sidenav link,
+            // not just the sublist indent. hsg-theme.css restores those too.
+
+            it("gives top-level and nested links block display with padding", () => {
+                cy.get("nav.toc ul.usa-sidenav > li > a")
                     .first()
                     .should(($a) => {
-                        const color = getComputedStyle($a[0]).color;
-                        // default UA link blue/visited-purple, not the USWDS muted gray
-                        expect(color).not.to.eq("rgb(0, 0, 238)");
-                        expect(color).not.to.eq(currentColor);
+                        const style = getComputedStyle($a[0]);
+                        expect(style.display).to.eq("block");
+                        expect(parseFloat(style.paddingTop)).to.be.greaterThan(0);
+                        expect(parseFloat(style.paddingRight)).to.be.greaterThan(0);
+                        expect(parseFloat(style.paddingBottom)).to.be.greaterThan(0);
+                    });
+
+                cy.get("nav.toc ul.usa-sidenav__sublist li a")
+                    .first()
+                    .should(($a) => {
+                        const style = getComputedStyle($a[0]);
+                        expect(style.display).to.eq("block");
+                        expect(parseFloat(style.paddingTop)).to.be.greaterThan(0);
                     });
             });
-        });
 
-        it("keeps the current page bold (unaffected by the selector bug -- regression guard)", () => {
-            cy.get("nav.toc a.usa-current")
-                .first()
-                .should("have.css", "font-weight", "700");
+            it("gives non-current links a muted color, distinct from the current page", () => {
+                cy.get("nav.toc a.usa-current").then(($current) => {
+                    const currentColor = getComputedStyle($current[0]).color;
+                    cy.get("nav.toc ul.usa-sidenav a:not(.usa-current)")
+                        .first()
+                        .should(($a) => {
+                            const color = getComputedStyle($a[0]).color;
+                            // default UA link blue/visited-purple, not the USWDS muted gray
+                            expect(color).not.to.eq("rgb(0, 0, 238)");
+                            expect(color).not.to.eq(currentColor);
+                        });
+                });
+            });
+
+            it("keeps the current page bold (unaffected by the selector bug -- regression guard)", () => {
+                cy.get("nav.toc a.usa-current")
+                    .first()
+                    .should("have.css", "font-weight", "700");
+            });
         });
     });
 
@@ -205,10 +208,11 @@ describe("sidebar table of contents", () => {
     // them on the volume landing page. Here the distinction is the italic
     // alone: every sidebar link already carries the theme's muted grey (see
     // resources/css/hsg-theme.css), so a second grey would not read.
-    describe("unpublished chapters", () => {
+    // The tests only read the page, so they share one visit.
+    describe("unpublished chapters", { testIsolation: false }, () => {
         const PARTIAL = "historicaldocuments/frus1977-80v27/ch2";
 
-        beforeEach(() => cy.visit(PARTIAL));
+        before(() => cy.visit(PARTIAL));
 
         it("marks chapters with no published documents as pending", () => {
             cy.get("nav.toc .usa-sidenav__item.pending").should(

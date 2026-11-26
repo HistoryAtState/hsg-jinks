@@ -6,8 +6,9 @@
 // link is asserted as present even though its target 404s until OP#1303
 // lands, per the section's transitional link policy.
 
-describe("the pre-1861 page", () => {
-    beforeEach(() => cy.visit("historicaldocuments/pre-1861"));
+// The tests share one visit.
+describe("the pre-1861 page", { testIsolation: false }, () => {
+    before(() => cy.visit("historicaldocuments/pre-1861"));
 
     it("returns HTTP 200", () => {
         cy.request("historicaldocuments/pre-1861").its("status").should("eq", 200);

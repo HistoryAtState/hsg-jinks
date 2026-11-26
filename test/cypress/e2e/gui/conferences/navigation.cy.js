@@ -14,9 +14,11 @@ const SECTION = "conferences";
 const CONFERENCE = "conferences/2010-southeast-asia";
 const CONFERENCE_TITLE = "The American Experience in Southeast Asia, 1946-1975";
 
-describe("the section landing", () => {
+// The landing tests share one visit; the last one visits a conference itself.
+describe("the section landing", { testIsolation: false }, () => {
+    before(() => cy.visit(SECTION));
+
     it("lists every conference as a data-driven link with a date", () => {
-        cy.visit(SECTION);
         cy.get("main h1").should("contain.text", "Conferences");
         cy.get("main ol.usa-collection > li.usa-collection__item").should(
             "have.length",
@@ -31,7 +33,6 @@ describe("the section landing", () => {
     });
 
     it("matches the reference site's exact order, numbering, and text (hsg-shell pages/conferences/index.xml)", () => {
-        cy.visit(SECTION);
         // usa-collection sets display:flex on its <li>, which suppresses
         // native ::marker rendering regardless of list-style-type -- the
         // visible "1." etc. come from a CSS counter (hsg-theme.css,
@@ -73,7 +74,6 @@ describe("the section landing", () => {
     });
 
     it("lists the same 5 conferences in the sidebar", () => {
-        cy.visit(SECTION);
         cy.get("aside.before nav[aria-label='Side navigation'] li.usa-sidenav__item").should(
             "have.length",
             5,

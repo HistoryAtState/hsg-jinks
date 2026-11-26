@@ -72,10 +72,11 @@ const CATEGORIES = [
 
 const href = (url) => (url === "" ? `${PREFIX}/` : `${PREFIX}/${url}`);
 
-describe("primary navigation menu", () => {
-    // data-i18n resolves labels client-side; wait for one known label before
-    // asserting text so we never read the pre-i18n fallback (the raw item id).
-    beforeEach(() => {
+describe("primary navigation menu", { testIsolation: false }, () => {
+    // The tests read the home page and share one visit. data-i18n resolves
+    // labels client-side; wait for one known label before asserting text so
+    // we never read the pre-i18n fallback (the raw item id).
+    before(() => {
         cy.visit("/");
         cy.contains(".usa-nav__primary-item", "Historical Documents", { timeout: 15000 });
     });
@@ -137,14 +138,6 @@ describe("primary navigation menu", () => {
         });
     });
 
-    it("italicizes Foreign Relations in the breadcrumb, too", () => {
-        cy.visit("historicaldocuments/about-frus");
-        cy.get('nav[aria-label="breadcrumb"] ul:not(:empty) li')
-            .last()
-            .find("em", { timeout: 15000 })
-            .should("have.text", "Foreign Relations");
-    });
-
     it("renders no Admin or Download submenu (absent from hsg-shell's nav)", () => {
         cy.get("#submenu-admin").should("not.exist");
         cy.get("#submenu-download").should("not.exist");
@@ -168,18 +161,6 @@ describe("primary navigation menu", () => {
                 expect(btnRight, "More Resources button must not overlap About Us").to.be.at.most(aboutLeft + 0.5);
             });
         });
-    });
-
-    it("renders no Admin or Download submenu on a content page either", () => {
-        // The Admin submenu used to leak into every inline-rendered page, so
-        // assert on a content page too, not just the home page. (The Download
-        // submenu was only injected on document-context pages; FRUS volume
-        // pages currently 404 in the dev containers, so its absence is covered
-        // by the /menu fragment test and the template removal itself.)
-        cy.visit("milestones/1750-1775");
-        cy.contains(".usa-nav__primary-item", "Historical Documents", { timeout: 15000 });
-        cy.get("#submenu-admin").should("not.exist");
-        cy.get("#submenu-download").should("not.exist");
     });
 
     TOP_LINKS.forEach(({ label, url }) => {
@@ -213,6 +194,28 @@ describe("primary navigation menu", () => {
                 expect(text, `no German: ${de}`).not.to.contain(de)
             );
         });
+    });
+});
+
+describe("primary navigation menu on other pages", () => {
+    it("italicizes Foreign Relations in the breadcrumb, too", () => {
+        cy.visit("historicaldocuments/about-frus");
+        cy.get('nav[aria-label="breadcrumb"] ul:not(:empty) li')
+            .last()
+            .find("em", { timeout: 15000 })
+            .should("have.text", "Foreign Relations");
+    });
+
+    it("renders no Admin or Download submenu on a content page either", () => {
+        // The Admin submenu used to leak into every inline-rendered page, so
+        // assert on a content page too, not just the home page. (The Download
+        // submenu was only injected on document-context pages; FRUS volume
+        // pages currently 404 in the dev containers, so its absence is covered
+        // by the /menu fragment test and the template removal itself.)
+        cy.visit("milestones/1750-1775");
+        cy.contains(".usa-nav__primary-item", "Historical Documents", { timeout: 15000 });
+        cy.get("#submenu-admin").should("not.exist");
+        cy.get("#submenu-download").should("not.exist");
     });
 
     it("highlights the active category with usa-current", () => {

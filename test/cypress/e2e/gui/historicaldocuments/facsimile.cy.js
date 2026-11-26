@@ -19,8 +19,9 @@ const VOLUME = "frus1981-88v05";
 const VOLUME_TITLE_START = "Foreign Relations of the United States, 1981–1988, Volume V";
 const IIIF_BASE = "https://ci.history.state.gov/iiif/2/";
 
-describe("pg_* facsimile page", () => {
-    beforeEach(() => cy.visit(`historicaldocuments/${VOLUME}/pg_316`));
+// The tests only read the page, so they share one visit.
+describe("pg_* facsimile page", { testIsolation: false }, () => {
+    before(() => cy.visit(`historicaldocuments/${VOLUME}/pg_316`));
 
     it("shows the volume title as navigation heading", () => {
         cy.get("main h2.hsg-navigation-title")

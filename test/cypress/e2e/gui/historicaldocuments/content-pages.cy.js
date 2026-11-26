@@ -11,23 +11,24 @@ const CONTENT_PAGES = [
 ];
 
 describe("historical documents content pages", () => {
-    CONTENT_PAGES.forEach(([page, title]) => {
+    // Both tests of a page only read it, so they share one visit.
+    CONTENT_PAGES.forEach(([page, title]) => describe(page, { testIsolation: false }, () => {
+        before(() => cy.visit(`historicaldocuments/${page}`));
+
         it(`shows the title on ${page}`, () => {
-            cy.visit(`historicaldocuments/${page}`);
             cy.get("main h1", { timeout: 15000 }).should("have.length", 1).and("be.visible").and("contain.text", title);
         });
 
         it(`shows the Administrations panel on ${page}`, () => {
             // hsg:administrations-panel; the links themselves are listed in
             // about-frus.cy.js.
-            cy.visit(`historicaldocuments/${page}`);
             cy.get("aside.after", { timeout: 15000 }).within(() => {
                 cy.contains("h2", "Administrations").should("be.visible");
                 cy.get("li a").first().should("have.text", "Kennedy Administration");
                 cy.get("li a").last().should("have.text", "All Administrations");
             });
         });
-    });
+    }));
 
     it("still hides the duplicate head on a monograph section", () => {
         // about:monograph-section-content renders the head as the page h1;
