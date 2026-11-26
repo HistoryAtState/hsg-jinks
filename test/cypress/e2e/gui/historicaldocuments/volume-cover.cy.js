@@ -1,20 +1,20 @@
 // A volume landing is headed once, by the volume title, followed by the
 // cover whose alt text names the volume. Ported from hsg-shell's
 // historical-documents/volume/volume-cover.cy.js (OP#1466), on a volume of
-// the frus-data-jinks baseline instead of frus1951-54IranEd2.
+// the curated frus-tei volumes instead of frus1951-54IranEd2.
 // volume-landing.cy.js covers the cover URL on frus1981-88v05.
 
-const TITLE = "Foreign Relations of the United States, 1981–1988, Volume XLI, Global Issues II";
+const TITLE = "Foreign Relations of the United States, 1989–1992, Volume XXXI, START I, 1989–1991";
 
 // The tests only read the page, so they share one visit.
 describe("volume landing with a cover", { testIsolation: false }, () => {
-    before(() => cy.visit("historicaldocuments/frus1981-88v41"));
+    before(() => cy.visit("historicaldocuments/frus1989-92v31"));
 
     it("shows the cover image from the static bucket", () => {
         cy.get("main img.hsg-frus__cover").should(
             "have.attr",
             "src",
-            "https://static.history.state.gov/frus/frus1981-88v41/covers/frus1981-88v41.jpg",
+            "https://static.history.state.gov/frus/frus1989-92v31/covers/frus1989-92v31.jpg",
         );
     });
 
