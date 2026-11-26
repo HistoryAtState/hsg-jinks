@@ -4,35 +4,14 @@
 // least partially-published, like hsg-shell's select-section): a partially
 // published volume lists and serves its pending divisions, marked
 // li.pending (sidebar-toc.cy.js / volume-landing.cy.js cover that side).
-// frus1981-88v16 is 'being-cleared' (curated dev subset, OP#1320); if the
-// volume is not deployed the tests skip rather than fail.
+//
+// Only the published side is tested. Testing the gate needs an unpublished
+// volume that ships chapter files, and no data set here has one: the tests
+// used frus1981-88v16, which is now partially-published, and the curated
+// frus-tei subset's unpublished volumes (frus1981-88v37, frus1861-99Index)
+// have no chapter files.
 
-const VOLUME = "historicaldocuments/frus1981-88v16";
-
-describe("anticipated FRUS volume (frus1981-88v16)", () => {
-    let deployed = false;
-
-    before(() => {
-        cy.request({ url: VOLUME, failOnStatusCode: false }).then((r) => {
-            deployed = r.status === 200;
-        });
-    });
-
-    it("landing renders with no chapter links in its table of contents", function () {
-        if (!deployed) this.skip();
-        cy.visit(VOLUME);
-        cy.get("h1").should("contain.text", "South America");
-        cy.get(`a[href*="frus1981-88v16/ch"]`).should("not.exist");
-        cy.get("pb-page > aside.before").should("not.be.visible");
-    });
-
-    it("chapter routes 404 while the volume is in clearance", function () {
-        if (!deployed) this.skip();
-        cy.request({ url: `${VOLUME}/ch1`, failOnStatusCode: false })
-            .its("status")
-            .should("eq", 404);
-    });
-
+describe("chapter routes of FRUS volumes", () => {
     it("published volumes keep their chapters reachable", () => {
         cy.request("historicaldocuments/frus1981-88v05/ch1").its("status").should("eq", 200);
     });
