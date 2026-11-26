@@ -88,14 +88,41 @@ else
             "api-dba.xql"
         else 
             "api.xql"
+    let $method := request:get-method()
+    let $cors := (
+        <set-header xmlns="http://exist.sourceforge.net/NS/exist" name="Access-Control-Allow-Origin" value="{$allowOrigin}"/>,
+        if ($allowOrigin = "*") then () else <set-header xmlns="http://exist.sourceforge.net/NS/exist" name="Access-Control-Allow-Credentials" value="true"/>,
+        <set-header xmlns="http://exist.sourceforge.net/NS/exist" name="Access-Control-Allow-Headers" value="Content-Type, api_key, Authorization"/>,
+        <set-header xmlns="http://exist.sourceforge.net/NS/exist" name="Access-Control-Expose-Headers" value="pb-start, pb-total"/>
+    )
     return
-        <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
-            <forward url="{$exist:controller}/modules/lib/{$main}">
-                <set-header name="Access-Control-Allow-Origin" value="{$allowOrigin}"/>
-                { if ($allowOrigin = "*") then () else <set-header name="Access-Control-Allow-Credentials" value="true"/> }
-                <set-header name="Access-Control-Allow-Methods" value="GET, POST, DELETE, PUT, PATCH, OPTIONS"/>
-                <set-header name="Access-Control-Allow-Headers" value="Content-Type, api_key, Authorization"/>
-                <set-header name="Access-Control-Expose-Headers" value="pb-start, pb-total"/>
-                <set-header name="Cache-Control" value="no-cache"/>
-            </forward>
-        </dispatch>
+        (: OPTIONS lists the methods of the matched route (eeditiones/roaster#89).
+         : The XQuery servlet leaves OPTIONS to its default answer, so
+         : options.xql runs as a GET view, like HEAD below. :)
+        if ($method = "OPTIONS") then
+            <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+                <forward url="{$exist:controller}/modules/lib/noop.xql"/>
+                <view>
+                    <forward url="{$exist:controller}/modules/lib/options.xql" method="GET">{ $cors }</forward>
+                </view>
+            </dispatch>
+        (: Roaster answers HEAD with 405 (eeditiones/roaster#181). A view can
+         : change the method, so the router runs as a GET view and the
+         : servlet drops the body. :)
+        else if ($method = "HEAD") then
+            <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+                <forward url="{$exist:controller}/modules/lib/noop.xql"/>
+                <view>
+                    <forward url="{$exist:controller}/modules/lib/{$main}" method="GET">
+                        { $cors }
+                        <set-header name="Access-Control-Allow-Methods" value="GET, POST, DELETE, PUT, PATCH, OPTIONS"/>
+                    </forward>
+                </view>
+            </dispatch>
+        else
+            <dispatch xmlns="http://exist.sourceforge.net/NS/exist">
+                <forward url="{$exist:controller}/modules/lib/{$main}">
+                    { $cors }
+                    <set-header name="Access-Control-Allow-Methods" value="GET, POST, DELETE, PUT, PATCH, OPTIONS"/>
+                </forward>
+            </dispatch>
