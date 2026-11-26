@@ -34,10 +34,20 @@ describe("landing vs. results dispatch (OP#1184 AC)", () => {
 });
 
 describe("keyword search and refinement (OP#1184)", () => {
+    // Counts, not the first page: on the full FRUS data thousands of FRUS
+    // documents outrank every other section, so page one is all FRUS.
     it("searches across the entire site by default, mixing content types", () => {
-        cy.visit("search?q=cuba");
-        cy.contains(".usa-prose", "across the entire Office of the Historian website");
-        cy.get(".usa-collection__item a[href*='/departmenthistory/']").should("exist");
+        const count = () => cy.get(".search-count").invoke("text").then((t) => Number(t.replace(/,/g, "")));
+        cy.visit("search?q=cuba&within=documents");
+        count().then((documents) => {
+            cy.visit("search?q=cuba&within=department");
+            count().then((department) => {
+                expect(department).to.be.above(0);
+                cy.visit("search?q=cuba");
+                cy.contains(".usa-prose", "across the entire Office of the Historian website");
+                count().should("be.at.least", documents + department);
+            });
+        });
     });
 
     it("refines by section via the within filter", () => {
