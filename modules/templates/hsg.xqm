@@ -862,12 +862,19 @@ declare %private function hsg:volume-availability($root as element(tei:TEI)) as 
                 else
                     "(Published)"
         else
-            "(" ||
-            string-join(
-                for $word in tokenize(translate($status, '-', ' '), '\s+')
-                return upper-case(substring($word, 1, 1)) || substring($word, 2),
-                " ")
-            || ")"
+            "(" || hsg:production-stage-label($status) || ")"
+};
+
+(:~
+ : Display label of a revisionDesc status ("being-researched" → "Being
+ : Researched"). Matches the terms of the frus-production-stages taxonomy
+ : in hsg-shell's code table, which frus-tei does not carry.
+ :)
+declare function hsg:production-stage-label($status as xs:string) as xs:string {
+    string-join(
+        for $word in tokenize(translate($status, '-', ' '), '\s+')
+        return upper-case(substring($word, 1, 1)) || substring($word, 2),
+        " ")
 };
 
 (:~
@@ -913,8 +920,9 @@ declare %private function hsg:division-crumb-label($content as node()) as xs:str
 
 (:~
  : The data the volume landing page's markup (templates/pages/volume/
- : landing.html) is built from: the volume root, its id and title, and its
- : titleStmt and publicationStmt, resolved once. None without a volume.
+ : landing.html) is built from: the volume root, its id, title, revisionDesc
+ : status and "published" flag, and its titleStmt and publicationStmt,
+ : resolved once. None without a volume.
  :)
 declare function hsg:volume-landing($context as map(*)) as map(*)? {
     let $doc := $context?doc?content
@@ -925,8 +933,11 @@ declare function hsg:volume-landing($context as map(*)) as map(*)? {
            *_includes.xml; see hsg:resolve-include. :)
         let $header := $doc//tei:teiHeader
         let $titleStmt := hsg:resolve-include($header, 'titleStmt')
+        let $status := string(($header//tei:revisionDesc/@status)[1])
         return map {
             "doc": $doc,
+            "status": $status,
+            "published": $status = ("published", "partially-published"),
             "id": config:get-relpath($doc, $config:data-default) => tokenize("/") => head(),
             "title": normalize-space(($titleStmt/tei:title)[1]),
             "titleStmt": $titleStmt,
