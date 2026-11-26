@@ -44,15 +44,15 @@ describe('OPDS Catalog API', () => {
     // corpus does not guarantee a full YYYY-MM-DD -- frus1861 carries
     // when="1861" and frus1958-60v05mSupp has no matching tei:change at all.
     // An unguarded cast took the whole feed down with a 500, so assert the
-    // undated volumes are carried rather than fatal.
+    // undated volumes are carried rather than fatal. n is the size of the
+    // full catalog: the default of 10 truncates on the full FRUS data.
     it('serves every ebook volume, including ones with an imprecise or missing date', () => {
-      cy.request('/api/v1/catalog/recent').then((response) => {
-        expect(response.status).to.eq(200)
-        expect(response.headers['content-type']).to.contain('application/atom+xml;profile=opds-catalog;kind=acquisition')
-        const $recent = Cypress.$(parseAtom(response.body))
-        cy.request('/api/v1/catalog/all').then((all) => {
-          const $all = Cypress.$(parseAtom(all.body))
-          expect($recent.find('entry').length).to.eq($all.find('entry').length)
+      cy.request('/api/v1/catalog/all').then((all) => {
+        const total = Cypress.$(parseAtom(all.body)).find('entry').length
+        cy.request(`/api/v1/catalog/recent?n=${total}`).then((response) => {
+          expect(response.status).to.eq(200)
+          expect(response.headers['content-type']).to.contain('application/atom+xml;profile=opds-catalog;kind=acquisition')
+          expect(Cypress.$(parseAtom(response.body)).find('entry').length).to.eq(total)
         })
       })
     })
