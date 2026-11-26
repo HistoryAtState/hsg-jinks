@@ -4,6 +4,7 @@ module namespace opds="https://history.state.gov/ns/templates/opds-catalog";
 
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "../config.xqm";
 import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
+import module namespace ebooks="https://history.state.gov/ns/templates/frus-ebooks" at "frus-ebooks.xqm";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace atom="http://www.w3.org/2005/Atom";
@@ -28,9 +29,10 @@ declare variable $opds:FEED_AUTHOR_NAME := "Office of the Historian";
  : defined the same way hsg-shell's fh:volumes-with-ebooks() defines it:
  : carries an epub tei:relatedItem. mobi/pdf-only volumes (no epub) are not
  : considered ebook volumes by any route in this section, matching hsg-shell.
+ : The same volumes as the ebooks page lists, see frus-ebooks.xqm.
  :)
 declare function opds:ebook-volumes() as element(tei:TEI)* {
-    collection($config:data-root)//tei:relatedItem[@type eq "epub"]/root(.)/tei:TEI
+    ebooks:volumes-with-ebooks()
 };
 
 (:~ OPDS feed/entry ids and links must be absolute, since an e-reader client
@@ -206,9 +208,9 @@ declare function opds:tag-exists($tag as xs:string) as xs:boolean {
  : deduplicates a step's result, so multiple matching terms in the same
  : document collapse to the same TEI root and are counted once.
  :)
-declare %private function opds:tagged-volume-count($node as element()) as xs:integer {
+declare %private function opds:tagged-volume-count($node as element(), $volumes as element(tei:TEI)*) as xs:integer {
     count(
-        opds:ebook-volumes()//tei:keywords[@scheme eq "https://history.state.gov/tags"]
+        $volumes//tei:keywords[@scheme eq "https://history.state.gov/tags"]
             /tei:term[. = $node//id]/root(.)/tei:TEI
     )
 };
@@ -228,6 +230,7 @@ declare function opds:browse-feed($tag as xs:string?) as element(atom:feed) {
     let $feed-id := $base || '/browse' || (if ($tag) then '?tag=' || $tag else ())
     let $feed-title := if ($tag) then $node/label/string() else 'Keywords'
     let $sub-nodes := $node/(category | tag)
+    let $volumes := opds:ebook-volumes()
     let $nav-entries :=
         for $sub in $sub-nodes
         let $subId := $sub/id/string()
@@ -235,13 +238,13 @@ declare function opds:browse-feed($tag as xs:string?) as element(atom:feed) {
         let $descendantCount := count($sub/(descendant::category | descendant::tag))
         let $summary := string-join((
             if ($descendantCount gt 0) then $descendantCount || ' sub-topics' else (),
-            opds:tagged-volume-count($sub) || ' volumes'
+            opds:tagged-volume-count($sub, $volumes) || ' volumes'
         ), ', ')
         return
             opds:entry($subTitle, $subId, string(current-dateTime()), $summary, opds:navigation-link('subsection', $base || '/browse?tag=' || $subId, $subTitle))
     let $vol-entries :=
         if ($tag) then
-            let $tagged := opds:ebook-volumes()[.//tei:keywords[@scheme eq "https://history.state.gov/tags"]/tei:term = $tag]
+            let $tagged := $volumes[.//tei:keywords[@scheme eq "https://history.state.gov/tags"]/tei:term = $tag]
             let $sorted := for $vol in $tagged order by $vol/@xml:id return $vol
             return opds:ebook-entries($sorted)
         else
@@ -270,6 +273,7 @@ declare function opds:search-feed($q as xs:string?, $hits as element()*) as elem
     let $base := opds:base-url()
     let $feed-id := $base || '/search' || (if ($q) then '?q=' || $q else ())
     let $feed-title := if ($q) then 'Search ebooks for "' || $q || '"' else 'Search'
+    let $volumes := opds:ebook-volumes()
     let $entries :=
         for $tag in $hits
         let $title := $tag/label/string()
@@ -277,7 +281,7 @@ declare function opds:search-feed($q as xs:string?, $hits as element()*) as elem
         let $descendantCount := count($tag/(descendant::category | descendant::tag))
         let $summary := string-join((
             if ($descendantCount gt 0) then $descendantCount || ' sub-topics' else (),
-            opds:tagged-volume-count($tag) || ' volumes'
+            opds:tagged-volume-count($tag, $volumes) || ' volumes'
         ), ', ')
         order by $title
         return

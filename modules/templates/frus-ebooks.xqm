@@ -52,9 +52,14 @@ declare %private function ebooks:resolve-include($header as element()?, $name as
  : told apart from the volume's own ebook solely by @corresp pointing at
  : the volume id -- the same gate hsg:volume-ways-to-explore and
  : hsg-shell's fh:exists-epub apply.
+ :
+ : Only a volume's main file (<vol>/<vol>.xml) carries these, so only those
+ : files are opened. There is no index on relatedItem/@type, and searching
+ : every document took over a minute on the full FRUS data.
  :)
 declare function ebooks:volumes-with-ebooks() as element(tei:TEI)* {
-    for $vol in collection($config:data-default)//tei:relatedItem[@type eq "epub"]/root(.)/tei:TEI
+    for $vol-id in xmldb:get-child-collections($config:data-default)
+    let $vol := doc($config:data-default || "/" || $vol-id || "/" || $vol-id || ".xml")/tei:TEI
     where exists($vol/tei:teiHeader//tei:notesStmt/tei:relatedItem[@type eq "epub"][@corresp = "#" || $vol/@xml:id])
     return $vol
 };
