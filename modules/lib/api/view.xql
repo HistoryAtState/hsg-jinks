@@ -9,6 +9,7 @@ import module namespace tmpl="http://e-editiones.org/xquery/templates";
 import module namespace roaster="http://e-editiones.org/roaster";
 import module namespace pm-config="http://www.tei-c.org/tei-simple/pm-config" at "pm-config.xql";
 import module namespace page="http://teipublisher.com/ns/templates/page" at "../../templates/page.xqm";
+import module namespace pc="http://history.state.gov/ns/site/hsg/precompiled-templates" at "../../precompile.xqm";
 
 declare %private function vapi:get-template($config as map(*), $template as xs:string?) {
     if ($template) then
@@ -112,7 +113,7 @@ declare function vapi:view($request as map(*)) {
                 }
             ))
             return
-                tmpl:process($templateContent, $model, map {
+                pc:process($templateContent, $model, map {
                     "plainText": false(),
                     "resolver": vapi:resolver#1,
                     "modules": map {
@@ -152,7 +153,7 @@ declare function vapi:handle-error($error) {
             ()
     ))
     let $html :=
-        tmpl:process($template, $model, map {
+        pc:process($template, $model, map {
             "plainText": false(),
             "resolver": vapi:resolver#1,
             "modules": map {
@@ -217,7 +218,7 @@ declare function vapi:html($request as map(*), $extConfig as map(*)?) {
     ))
     let $context := map:merge(($config, vapi:load-context-data($config, $frontmatter)))
     return
-        tmpl:process($template, $context, map {
+        pc:process($template, $context, map {
             "plainText": false(),
             "resolver": vapi:resolver#1,
             "modules": map {
