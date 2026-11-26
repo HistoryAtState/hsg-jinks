@@ -640,6 +640,23 @@ describe("hybrid search mode (semantic MVP)", () => {
         cy.get("#mode-hybrid").should("be.checked");
     });
 
+    // The vector leg must work wherever this suite runs, CI included: the
+    // test server needs vector:embed and FRUS volumes indexed with
+    // embeddings. A word that occurs nowhere has no keyword hits, while a
+    // KNN search always returns its nearest neighbours, so only the vector
+    // leg can fill the hybrid results.
+    it("hybrid finds FRUS documents through the vector index alone", () => {
+        const q = "qwxzvbt";
+        cy.visit(`search?q=${q}&within=documents`);
+        cy.get(".usa-collection__item").should("not.exist");
+        cy.visit(`search?q=${q}&within=documents&mode=hybrid`);
+        cy.get(".usa-collection__heading a")
+            .should("have.length.at.least", 1)
+            .first()
+            .should("have.attr", "href")
+            .and("match", /\/historicaldocuments\/frus/);
+    });
+
     it("tips page documents Hybrid mode", () => {
         cy.visit("search/tips");
         cy.contains("h2", "Hybrid mode").should("exist");
