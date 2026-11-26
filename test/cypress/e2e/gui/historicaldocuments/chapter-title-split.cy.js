@@ -12,25 +12,27 @@ const datePart = "March 1985–July 1985";
 const subtitle = "“Now we have to begin everything anew”: Gorbachev’s Debut";
 
 describe("split chapter titles", () => {
-    it("breaks the line between date range and subtitle in the chapter heading", () => {
-        cy.visit(chapter);
-        cy.get("main h1.hsg-frus__division-title", { timeout: 15000 })
-            .should("contain.text", datePart)
-            .and("contain.text", subtitle)
-            .find("br").should("have.length", 1);
-    });
+    // The chapter page tests only read it, so they share one visit.
+    describe("on the chapter page", { testIsolation: false }, () => {
+        before(() => cy.visit(chapter));
 
-    it("separates date range and subtitle with a space in the breadcrumb", () => {
-        cy.visit(chapter);
-        cy.get("li.breadcrumb-current", { timeout: 15000 })
-            .should("have.text", `${datePart} ${subtitle}`);
-    });
+        it("breaks the line between date range and subtitle in the chapter heading", () => {
+            cy.get("main h1.hsg-frus__division-title", { timeout: 15000 })
+                .should("contain.text", datePart)
+                .and("contain.text", subtitle)
+                .find("br").should("have.length", 1);
+        });
 
-    it("breaks the line in the sidebar table of contents", () => {
-        cy.visit(chapter);
-        cy.get("aside a[aria-current='page']", { timeout: 15000 })
-            .should("contain.text", datePart)
-            .find("br").should("have.length", 1);
+        it("separates date range and subtitle with a space in the breadcrumb", () => {
+            cy.get("li.breadcrumb-current", { timeout: 15000 })
+                .should("have.text", `${datePart} ${subtitle}`);
+        });
+
+        it("breaks the line in the sidebar table of contents", () => {
+            cy.get("aside a[aria-current='page']", { timeout: 15000 })
+                .should("contain.text", datePart)
+                .find("br").should("have.length", 1);
+        });
     });
 
     it("breaks the line in the compilation's chapter list", () => {

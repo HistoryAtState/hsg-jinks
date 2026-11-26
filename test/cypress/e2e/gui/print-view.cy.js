@@ -22,13 +22,14 @@ const HIDDEN = {
     "mobile footer": "footer.mobile-footer",
 };
 
-describe("print view of a document page", () => {
-    beforeEach(() => {
+// The print tests share one visit and one media switch.
+describe("print view of a document page", { testIsolation: false }, () => {
+    before(() => {
         cy.visit("historicaldocuments/frus1981-88v05/d1");
         cy.then(() => setMedia("print"));
     });
 
-    afterEach(() => cy.then(() => setMedia("")));
+    after(() => cy.then(() => setMedia("")));
 
     for (const [label, selector] of Object.entries(HIDDEN)) {
         it(`hides the ${label}`, () => {

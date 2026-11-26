@@ -2,11 +2,14 @@
 // GUI tests for the HSG landing page (app-owned — skip-listed in config.json,
 // replaces the generated demo-landing spec)
 
-describe('HSG Landing Page', () => {
-  beforeEach(() => {
+// The read-only tests share one visit; the carousel tests resize the window.
+describe('HSG Landing Page', { testIsolation: false }, () => {
+  const visit = () => {
     cy.visit('/')
     cy.get('body').should('be.visible')
-  })
+  }
+
+  before(visit)
 
   describe('Structure', () => {
     it('loads without the error template', () => {
@@ -79,29 +82,33 @@ describe('HSG Landing Page', () => {
       })
     })
 
-    it('hides arrows and dots while every slide fits', () => {
-      cy.viewport(1280, 900)
-      withNews(() => {
-        cy.get('.hsg-carousel__slide').then(($slides) => {
-          if ($slides.length > 3) return
-          cy.get('.hsg-carousel').should('have.class', 'hsg-carousel--static')
-          cy.get('.hsg-carousel__arrows').should('not.be.visible')
-          cy.get('.hsg-carousel__dots').should('not.be.visible')
+    describe('carousel', { testIsolation: true }, () => {
+      beforeEach(visit)
+
+      it('hides arrows and dots while every slide fits', () => {
+        cy.viewport(1280, 900)
+        withNews(() => {
+          cy.get('.hsg-carousel__slide').then(($slides) => {
+            if ($slides.length > 3) return
+            cy.get('.hsg-carousel').should('have.class', 'hsg-carousel--static')
+            cy.get('.hsg-carousel__arrows').should('not.be.visible')
+            cy.get('.hsg-carousel__dots').should('not.be.visible')
+          })
         })
       })
-    })
 
-    it('scrolls one slide per arrow click on a phone', () => {
-      cy.viewport(390, 844)
-      withNews(() => {
-        cy.get('.hsg-carousel__slide').then(($slides) => {
-          if ($slides.length < 2) return
-          cy.get('.hsg-carousel').should('not.have.class', 'hsg-carousel--static')
-          cy.get('.hsg-carousel__prev').should('be.disabled')
-          cy.get('.hsg-carousel__dot').first().should('have.attr', 'aria-current', 'true')
-          cy.get('.hsg-carousel__next').click()
-          cy.get('.hsg-carousel__dot').eq(1).should('have.attr', 'aria-current', 'true')
-          cy.get('.hsg-carousel__prev').should('not.be.disabled')
+      it('scrolls one slide per arrow click on a phone', () => {
+        cy.viewport(390, 844)
+        withNews(() => {
+          cy.get('.hsg-carousel__slide').then(($slides) => {
+            if ($slides.length < 2) return
+            cy.get('.hsg-carousel').should('not.have.class', 'hsg-carousel--static')
+            cy.get('.hsg-carousel__prev').should('be.disabled')
+            cy.get('.hsg-carousel__dot').first().should('have.attr', 'aria-current', 'true')
+            cy.get('.hsg-carousel__next').click()
+            cy.get('.hsg-carousel__dot').eq(1).should('have.attr', 'aria-current', 'true')
+            cy.get('.hsg-carousel__prev').should('not.be.disabled')
+          })
         })
       })
     })

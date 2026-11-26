@@ -7,8 +7,9 @@
 // data held 2805 records, 5 regions, 81 subjects, and 10 Africa/Egypt
 // records. Fixed page chrome asserts exact values.
 
-describe("the serial-set landing page", () => {
-    beforeEach(() => cy.visit("historicaldocuments/pre-1861/serial-set"));
+// The tests of each page share one visit.
+describe("the serial-set landing page", { testIsolation: false }, () => {
+    before(() => cy.visit("historicaldocuments/pre-1861/serial-set"));
 
     it("returns HTTP 200", () => {
         cy.request("historicaldocuments/pre-1861/serial-set").its("status").should("eq", 200);
@@ -39,8 +40,8 @@ describe("the serial-set landing page", () => {
     });
 });
 
-describe("the serial-set full bibliography page", () => {
-    beforeEach(() => cy.visit("historicaldocuments/pre-1861/serial-set/all"));
+describe("the serial-set full bibliography page", { testIsolation: false }, () => {
+    before(() => cy.visit("historicaldocuments/pre-1861/serial-set/all"));
 
     it("returns HTTP 200", () => {
         cy.request("historicaldocuments/pre-1861/serial-set/all").its("status").should("eq", 200);
@@ -71,17 +72,19 @@ describe("the serial-set browse page", () => {
         cy.get("main table.usa-table tbody tr").should("have.length.at.least", 10);
     });
 
-    it("filters by region and subject, dropping both columns", () => {
-        cy.visit("historicaldocuments/pre-1861/serial-set/browse?region=Africa&subject=Egypt");
-        cy.get("main h1", { timeout: 15000 }).should("contain.text", "Egypt (Africa)");
-        cy.get("main table.usa-table thead th").should("have.length", 4);
-        cy.get("main table.usa-table tbody tr").should("have.length.at.least", 5);
-    });
+    describe("by region and subject", { testIsolation: false }, () => {
+        before(() => cy.visit("historicaldocuments/pre-1861/serial-set/browse?region=Africa&subject=Egypt"));
 
-    it("shows the region and subject as trailing breadcrumbs", () => {
-        cy.visit("historicaldocuments/pre-1861/serial-set/browse?region=Africa&subject=Egypt");
-        cy.get("nav[aria-label='breadcrumb'] a[href*='browse?region=Africa']", { timeout: 15000 })
-            .should("contain.text", "Africa");
-        cy.get("nav[aria-label='breadcrumb'] li[aria-current='page']").should("contain.text", "Egypt");
+        it("filters by region and subject, dropping both columns", () => {
+            cy.get("main h1", { timeout: 15000 }).should("contain.text", "Egypt (Africa)");
+            cy.get("main table.usa-table thead th").should("have.length", 4);
+            cy.get("main table.usa-table tbody tr").should("have.length.at.least", 5);
+        });
+
+        it("shows the region and subject as trailing breadcrumbs", () => {
+            cy.get("nav[aria-label='breadcrumb'] a[href*='browse?region=Africa']", { timeout: 15000 })
+                .should("contain.text", "Africa");
+            cy.get("nav[aria-label='breadcrumb'] li[aria-current='page']").should("contain.text", "Egypt");
+        });
     });
 });

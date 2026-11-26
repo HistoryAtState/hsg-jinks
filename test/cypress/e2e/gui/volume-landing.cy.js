@@ -9,8 +9,9 @@
 
 const VOLUME = "historicaldocuments/frus1981-88v05";
 
-describe("volume landing page", () => {
-    beforeEach(() => cy.visit(VOLUME));
+// The tests of each page share one visit.
+describe("volume landing page", { testIsolation: false }, () => {
+    before(() => cy.visit(VOLUME));
 
     it("puts the volume on a card with its administration tag above the title", () => {
         cy.get("main article.hsg-frus__landing").should("have.css", "background-color", "rgb(255, 255, 255)");
@@ -58,18 +59,6 @@ describe("volume landing page", () => {
         });
     });
 
-    it("shows the same TOC as its child pages", () => {
-        const hrefs = ($as) => [...$as].map((el) => el.getAttribute("href"));
-        cy.get("pb-page > aside.before .usa-sidenav a").then(($as) => {
-            const landing = hrefs($as);
-            expect(landing).to.have.length.at.least(10);
-            cy.visit(`${VOLUME}/ch1`);
-            cy.get("pb-page > aside.before .usa-sidenav a").then(($child) => {
-                expect(hrefs($child)).to.deep.equal(landing);
-            });
-        });
-    });
-
     it("has a 'Ways to Explore' panel with volume search and ebook downloads", () => {
         cy.get(".hsg-frus__ways-to-explore").within(() => {
             cy.get("h2").should("contain.text", "Ways to Explore");
@@ -89,6 +78,21 @@ describe("volume landing page", () => {
         cy.get("pb-page > aside.after .tags-panel .usa-in-page-nav__list li").should("have.length.at.least", 5);
         cy.get("pb-page > aside.after .hsg-frus__administrations").should("contain.text", "All Administrations");
     });
+
+    // Last: it goes on to a child page. Its own visit keeps a retry on the
+    // landing page.
+    it("shows the same TOC as its child pages", () => {
+        const hrefs = ($as) => [...$as].map((el) => el.getAttribute("href"));
+        cy.visit(VOLUME);
+        cy.get("pb-page > aside.before .usa-sidenav a").then(($as) => {
+            const landing = hrefs($as);
+            expect(landing).to.have.length.at.least(10);
+            cy.visit(`${VOLUME}/ch1`);
+            cy.get("pb-page > aside.before .usa-sidenav a").then(($child) => {
+                expect(hrefs($child)).to.deep.equal(landing);
+            });
+        });
+    });
 });
 
 // Regression: a microfiche supplement's notesStmt carries one relatedItem per
@@ -99,10 +103,10 @@ describe("volume landing page", () => {
 // the same gate hsg-shell's fh:exists-pdf and friends use.
 // Unpublished ("pending") chapters, which the reference site marks with
 // li.pending on this page: italic in the sidebar TOC.
-describe("volume landing page, unpublished chapters", () => {
+describe("volume landing page, unpublished chapters", { testIsolation: false }, () => {
     const PARTIAL = "historicaldocuments/frus1977-80v27";
 
-    beforeEach(() => cy.visit(PARTIAL));
+    before(() => cy.visit(PARTIAL));
 
     it("marks chapters with no published documents as pending", () => {
         cy.get("pb-page > aside.before .usa-sidenav__item.pending").should("have.length.at.least", 1);
@@ -116,10 +120,10 @@ describe("volume landing page, unpublished chapters", () => {
     });
 });
 
-describe("volume landing page for a microfiche supplement", () => {
+describe("volume landing page for a microfiche supplement", { testIsolation: false }, () => {
     const SUPPLEMENT = "historicaldocuments/frus1958-60v05mSupp";
 
-    beforeEach(() => cy.visit(SUPPLEMENT));
+    before(() => cy.visit(SUPPLEMENT));
 
     it("renders instead of erroring on the per-document relatedItems", () => {
         cy.get("main h1").should("contain.text", "Microfiche Supplement");

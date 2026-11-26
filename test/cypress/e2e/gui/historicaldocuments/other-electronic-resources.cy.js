@@ -4,8 +4,9 @@
 //
 // Purely static content, so exact assertions are fine here.
 
-describe("the other-electronic-resources page", () => {
-    beforeEach(() => cy.visit("historicaldocuments/other-electronic-resources"));
+// The tests share one visit.
+describe("the other-electronic-resources page", { testIsolation: false }, () => {
+    before(() => cy.visit("historicaldocuments/other-electronic-resources"));
 
     it("returns HTTP 200", () => {
         cy.request("historicaldocuments/other-electronic-resources").its("status").should("eq", 200);

@@ -51,8 +51,9 @@ const DOCS = [
 
 describe("document view", () => {
     DOCS.forEach(({ id, heading, dateline, footnotes }) => {
-        describe(id, () => {
-            beforeEach(() => cy.visit(`${VOLUME}/${id}`));
+        // The tests of each document share one visit.
+        describe(id, { testIsolation: false }, () => {
+            before(() => cy.visit(`${VOLUME}/${id}`));
 
             it("renders the document's number and title as the page's h1", () => {
                 cy.get("main h1")
@@ -132,11 +133,12 @@ describe("document view", () => {
         });
     });
 
-    describe("d96 (document with attachments)", () => {
+    describe("d96 (document with attachments)", { testIsolation: false }, () => {
         // The reference site renders attachments inline inside their parent and
         // 404s /d96-a1; the notes of all three parts share ONE consolidated list,
         // which is why the attachments' @n continue the parent's numbering.
-        beforeEach(() => cy.visit(`${VOLUME}/d96`));
+        // The tests share one visit.
+        before(() => cy.visit(`${VOLUME}/d96`));
 
         it("inlines both attachments under their encoded labels", () => {
             cy.get("main .attachment").should("have.length", 2);

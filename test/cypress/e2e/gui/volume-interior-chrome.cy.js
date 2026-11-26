@@ -10,59 +10,66 @@
 const VOLUME_TITLE =
     "Foreign Relations of the United States, 1958–1960, Volume V, Microfiche Supplement, American Republics";
 
+const SEC6 = "historicaldocuments/frus1958-60v05mSupp/sec6";
+
 describe("section page (sec6)", () => {
-    beforeEach(() => cy.visit("historicaldocuments/frus1958-60v05mSupp/sec6"));
+    // The tests that only read the page share one visit; the tooltip and
+    // link tests interact with it and run on their own.
+    describe("reading", { testIsolation: false }, () => {
+        before(() => cy.visit(SEC6));
 
-    it("shows the volume title as navigation heading", () => {
-        cy.get("main h2.hsg-navigation-title").should("have.text", VOLUME_TITLE);
-    });
-
-    it("has prev/next navigation to the neighboring sections", () => {
-        cy.get(".hsg-frus__pager-prev").should("have.attr", "href").and("match", /\/frus1958-60v05mSupp\/sec5$/);
-        cy.get(".hsg-frus__pager-next").should("have.attr", "href").and("match", /\/frus1958-60v05mSupp\/sec7$/);
-    });
-
-    it("renders page breaks as 'Page N' facsimile links, not bare numbers", () => {
-        // plain links to the pg_* facsimile pages since OP#1335
-        cy.get("main a.hsg-facs-link").first()
-            .should("contain.text", "Page 66")
-            .and("have.attr", "href", "pg_66");
-    });
-
-    it("lists the registers in one in-page navigation", () => {
-        cy.get("aside nav.usa-in-page-nav__nav").within(() => {
-            cy.get(".usa-in-page-nav__heading").should("contain.text", "On this page");
-            cy.get("ul.usa-in-page-nav__list").should("have.length", 2);
+        it("shows the volume title as navigation heading", () => {
+            cy.get("main h2.hsg-navigation-title").should("have.text", VOLUME_TITLE);
         });
-    });
 
-    it("leads the Persons list with a link to the register", () => {
-        cy.get(".hsg-frus__register-list").eq(0).within(() => {
-            cy.get(".usa-in-page-nav__item--primary").should("have.length", 1)
-                .and("contain.text", "Persons")
-                .find("a").should("have.attr", "href")
-                .and("match", /\/frus1958-60v05mSupp\/persons$/);
-            // 8 persName refs in sec6, plus the primary item; the supplement
-            // is frozen.
-            cy.get("li").should("have.length", 9);
-            cy.get("li").eq(1).find("a")
-                .should("contain.text", "Betancourt, Romulo")
-                .and("have.attr", "href").and("match", /\/persons#p_/);
+        it("has prev/next navigation to the neighboring sections", () => {
+            cy.get(".hsg-frus__pager-prev").should("have.attr", "href").and("match", /\/frus1958-60v05mSupp\/sec5$/);
+            cy.get(".hsg-frus__pager-next").should("have.attr", "href").and("match", /\/frus1958-60v05mSupp\/sec7$/);
         });
-    });
 
-    it("leads the Abbreviations & Terms list with a link to the register", () => {
-        cy.get(".hsg-frus__register-list").eq(1).within(() => {
-            cy.get(".usa-in-page-nav__item--primary").should("contain.text", "Abbreviations & Terms")
-                .find("a").should("have.attr", "href").and("match", /\/terms$/);
-            cy.get("li").should("have.length", 2);
-            cy.get("li").eq(1).should("contain.text", "OAS");
+        it("renders page breaks as 'Page N' facsimile links, not bare numbers", () => {
+            // plain links to the pg_* facsimile pages since OP#1335
+            cy.get("main a.hsg-facs-link").first()
+                .should("contain.text", "Page 66")
+                .and("have.attr", "href", "pg_66");
+        });
+
+        it("lists the registers in one in-page navigation", () => {
+            cy.get("aside nav.usa-in-page-nav__nav").within(() => {
+                cy.get(".usa-in-page-nav__heading").should("contain.text", "On this page");
+                cy.get("ul.usa-in-page-nav__list").should("have.length", 2);
+            });
+        });
+
+        it("leads the Persons list with a link to the register", () => {
+            cy.get(".hsg-frus__register-list").eq(0).within(() => {
+                cy.get(".usa-in-page-nav__item--primary").should("have.length", 1)
+                    .and("contain.text", "Persons")
+                    .find("a").should("have.attr", "href")
+                    .and("match", /\/frus1958-60v05mSupp\/persons$/);
+                // 8 persName refs in sec6, plus the primary item; the supplement
+                // is frozen.
+                cy.get("li").should("have.length", 9);
+                cy.get("li").eq(1).find("a")
+                    .should("contain.text", "Betancourt, Romulo")
+                    .and("have.attr", "href").and("match", /\/persons#p_/);
+            });
+        });
+
+        it("leads the Abbreviations & Terms list with a link to the register", () => {
+            cy.get(".hsg-frus__register-list").eq(1).within(() => {
+                cy.get(".usa-in-page-nav__item--primary").should("contain.text", "Abbreviations & Terms")
+                    .find("a").should("have.attr", "href").and("match", /\/terms$/);
+                cy.get("li").should("have.length", 2);
+                cy.get("li").eq(1).should("contain.text", "OAS");
+            });
         });
     });
 
     it("shows a register entry's description as a USWDS tooltip", () => {
         // The USWDS script moves the title into the tooltip body and wraps
         // the link; the body shows on hover.
+        cy.visit(SEC6);
         cy.contains(".hsg-frus__register-list a", "Betancourt, Romulo")
             .should("have.class", "usa-tooltip__trigger")
             .and("not.have.attr", "title");
@@ -75,6 +82,7 @@ describe("section page (sec6)", () => {
     it("keeps register links working", () => {
         // USWDS cancels clicks on usa-in-page-nav__link; register links must
         // not carry it.
+        cy.visit(SEC6);
         cy.get(".hsg-frus__register-list a.usa-in-page-nav__link").should("not.exist");
         cy.contains(".hsg-frus__register-list a", "Betancourt, Romulo").click();
         cy.location("pathname").should("match", /\/frus1958-60v05mSupp\/persons$/);
@@ -82,8 +90,9 @@ describe("section page (sec6)", () => {
     });
 });
 
-describe("document page (eta_d1) chrome", () => {
-    beforeEach(() => cy.visit("historicaldocuments/frus1958-60v05mSupp/eta_d1"));
+// The tests only read the page, so they share one visit.
+describe("document page (eta_d1) chrome", { testIsolation: false }, () => {
+    before(() => cy.visit("historicaldocuments/frus1958-60v05mSupp/eta_d1"));
 
     it("shows the volume title as navigation heading", () => {
         cy.get("main h2.hsg-navigation-title").should("have.text", VOLUME_TITLE);

@@ -7,8 +7,9 @@
 // per CLAUDE.md "Cypress assertions on data-package counts" (the dev
 // container has 6 volumes with ebooks plus the frus-history monograph).
 
-describe("the ebooks page", () => {
-    beforeEach(() => cy.visit("historicaldocuments/ebooks"));
+// The tests only read the page, so they share one visit.
+describe("the ebooks page", { testIsolation: false }, () => {
+    before(() => cy.visit("historicaldocuments/ebooks"));
 
     it("returns HTTP 200", () => {
         cy.request("historicaldocuments/ebooks").its("status").should("eq", 200);

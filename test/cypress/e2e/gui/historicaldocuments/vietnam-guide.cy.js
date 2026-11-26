@@ -6,8 +6,9 @@
 // package, rendered as a single page; text assertions target its fixed
 // headings rather than counts.
 
-describe("the vietnam-guide page", () => {
-    beforeEach(() => cy.visit("historicaldocuments/guide-to-sources-on-vietnam-1969-1975"));
+// The tests share one visit.
+describe("the vietnam-guide page", { testIsolation: false }, () => {
+    before(() => cy.visit("historicaldocuments/guide-to-sources-on-vietnam-1969-1975"));
 
     it("returns HTTP 200", () => {
         cy.request("historicaldocuments/guide-to-sources-on-vietnam-1969-1975")

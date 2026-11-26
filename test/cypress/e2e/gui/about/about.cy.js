@@ -7,9 +7,11 @@
 // baseUrl comes from CYPRESS_BASE_URL (this worktree's .env) -- see
 // cypress.config.cjs and README "Parallel worktrees".
 
-describe("About Us section landing page", () => {
+// The tests only read the page, so they share one visit.
+describe("About Us section landing page", { testIsolation: false }, () => {
+    before(() => cy.visit("about"));
+
     it("lists links to every about/* subsection", () => {
-        cy.visit("about");
         cy.get("main h1").should("contain.text", "About Us");
         // The section navigation uses the USWDS in-page navigation markup.
         cy.get("aside.before ul.usa-in-page-nav__list").should("exist");
@@ -22,7 +24,6 @@ describe("About Us section landing page", () => {
         // lists these 7 entries in this order, with no separate "Overview"
         // self-link -- confirmed live, not just against controller.xql's
         // route order.
-        cy.visit("about");
         cy.get("aside.before .usa-in-page-nav__list a").then(($links) => {
             const labels = [...$links].map((el) => el.textContent.trim());
             expect(labels).to.deep.equal([
@@ -108,18 +109,21 @@ describe("FAQ: accordion landing, section, prev/next, exact-division guard", () 
         cy.get("#faq-state-records").should("be.visible");
     });
 
-    it("shows the answer without repeating the question as a heading inside it", () => {
-        cy.visit("about/faq");
-        cy.get("#faq-state-records").within(() => {
-            cy.get("p").should("have.length.at.least", 1);
-            cy.get(".tei-head").should("not.exist");
-        });
-    });
+    // These two only read the landing page, so they share one visit.
+    describe("answers on the landing page", { testIsolation: false }, () => {
+        before(() => cy.visit("about/faq"));
 
-    it("resolves the $app link placeholders in the answers against the app root", () => {
-        cy.visit("about/faq");
-        cy.get(".hsg-faq a[href*='$app']").should("not.exist");
-        cy.get(".hsg-faq a[href$='/historicaldocuments/about-frus']").should("exist");
+        it("shows the answer without repeating the question as a heading inside it", () => {
+            cy.get("#faq-state-records").within(() => {
+                cy.get("p").should("have.length.at.least", 1);
+                cy.get(".tei-head").should("not.exist");
+            });
+        });
+
+        it("resolves the $app link placeholders in the answers against the app root", () => {
+            cy.get(".hsg-faq a[href*='$app']").should("not.exist");
+            cy.get(".hsg-faq a[href$='/historicaldocuments/about-frus']").should("exist");
+        });
     });
 
     it("interior page still opens and its sidebar marks the section current", () => {

@@ -6,8 +6,9 @@
 
 const TITLE = "Foreign Relations of the United States, 1981–1988, Volume XLI, Global Issues II";
 
-describe("volume landing with a cover", () => {
-    beforeEach(() => cy.visit("historicaldocuments/frus1981-88v41"));
+// The tests only read the page, so they share one visit.
+describe("volume landing with a cover", { testIsolation: false }, () => {
+    before(() => cy.visit("historicaldocuments/frus1981-88v41"));
 
     it("shows the cover image from the static bucket", () => {
         cy.get("main img.hsg-frus__cover").should(

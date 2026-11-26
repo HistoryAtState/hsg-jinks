@@ -9,8 +9,9 @@
 
 const SECTION = "historicaldocuments";
 
-describe("the administrations grid", () => {
-    beforeEach(() => cy.visit(SECTION));
+// The tests share one visit.
+describe("the administrations grid", { testIsolation: false }, () => {
+    before(() => cy.visit(SECTION));
 
     it("shows one card per presidency with portrait and coverage dates", () => {
         cy.get("main .hsg-admin-cards > li.usa-card").should("have.length.at.least", 25);
