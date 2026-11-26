@@ -65,7 +65,10 @@ describe("tag browse page: direct hits, dig-deeper, and empty states", () => {
         cy.contains("main h2", "Foreign Relations").parent().within(() => {
             cy.get("a").should("have.length.at.least", 1);
         });
-        cy.contains("main .usa-collection a", "Foreign Relations of the United States").click();
+        // The full FRUS data tags more than a dozen volumes; pick v05, which every data set has.
+        cy.get('main .usa-collection a[href$="/historicaldocuments/frus1981-88v05"]')
+            .should("contain.text", "Foreign Relations of the United States")
+            .click();
         cy.location("pathname").should("match", /\/historicaldocuments\/frus1981-88v05$/);
     });
 
