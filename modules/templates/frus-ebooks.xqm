@@ -15,7 +15,7 @@ module namespace ebooks="https://history.state.gov/ns/templates/frus-ebooks";
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 declare namespace xi="http://www.w3.org/2001/XInclude";
 
-import module namespace config="http://www.tei-c.org/tei-simple/config" at "../config.xqm";
+import module namespace volumes="https://history.state.gov/ns/frus-volumes" at "../frus-volumes.xqm";
 
 (:~
  : Database path of the frus-history monograph, published by the separately
@@ -53,13 +53,10 @@ declare %private function ebooks:resolve-include($header as element()?, $name as
  : the volume id -- the same gate hsg:volume-ways-to-explore and
  : hsg-shell's fh:exists-epub apply.
  :
- : Only a volume's main file (<vol>/<vol>.xml) carries these, so only those
- : files are opened. There is no index on relatedItem/@type, and searching
- : every document took over a minute on the full FRUS data.
+ : Only a volume's main file carries these (see frus-volumes.xqm).
  :)
 declare function ebooks:volumes-with-ebooks() as element(tei:TEI)* {
-    for $vol-id in xmldb:get-child-collections($config:data-default)
-    let $vol := doc($config:data-default || "/" || $vol-id || "/" || $vol-id || ".xml")/tei:TEI
+    for $vol in volumes:roots()
     where exists($vol/tei:teiHeader//tei:notesStmt/tei:relatedItem[@type eq "epub"][@corresp = "#" || $vol/@xml:id])
     return $vol
 };

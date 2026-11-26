@@ -4,8 +4,8 @@ module namespace tags="https://history.state.gov/ns/templates/tags";
 
 declare namespace tei="http://www.tei-c.org/ns/1.0";
 
-import module namespace config="http://www.tei-c.org/tei-simple/config" at "../config.xqm";
 import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg.xqm";
+import module namespace volumes="https://history.state.gov/ns/frus-volumes" at "../frus-volumes.xqm";
 
 (:~
  : Ported from hsg-shell's tags-html.xqm (not its %templates:wrap machinery,
@@ -24,21 +24,11 @@ import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "hsg
  :)
 declare variable $tags:SCHEME := "https://history.state.gov/tags";
 declare variable $tags:TAXONOMY_DOC := "/db/apps/hsg-jinks/data/tags/taxonomy.xml";
-(: The FRUS volumes collection: the config global (PR #32 review), not a
-   literal. :)
-declare variable $tags:FRUS_COL := $config:data-default;
 declare variable $tags:SECRETARY_BIOS_COL := "/db/apps/other-publications/secretary-bios";
 
-(:~
- : The tag keywords of the FRUS volumes. Only a volume's main file
- : (<vol>/<vol>.xml) carries them, so only those files are opened. There is
- : no index on keywords/@scheme, and searching every document took over a
- : minute per call on the full FRUS data.
- :)
+(:~ The tag keywords of the FRUS volumes, from their main files (see frus-volumes.xqm). :)
 declare %private function tags:frus-keywords() as element(tei:keywords)* {
-    for $vol-id in xmldb:get-child-collections($tags:FRUS_COL)
-    return doc($tags:FRUS_COL || "/" || $vol-id || "/" || $vol-id || ".xml")
-        /tei:TEI/tei:teiHeader//tei:keywords[@scheme eq $tags:SCHEME]
+    volumes:roots()/tei:teiHeader//tei:keywords[@scheme eq $tags:SCHEME]
 };
 
 (:~ The tag keywords of the Secretary of State biographies. :)
