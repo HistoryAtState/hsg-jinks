@@ -2,10 +2,12 @@
 // results; impossible date ranges return none. Ported from hsg-shell's
 // search/filter-results.cy.js (OP#1466).
 //
-// hsg-shell searched 1946; the frozen frus-data-jinks baseline has no FRUS
+// hsg-shell searched 1946; the curated frus-tei volumes have no FRUS
 // documents from then, so the date filters use 1985 (frus1981-88v05),
 // keeping each of hsg-shell's date forms. Its end-date-only case is left
 // out: an end date alone is ignored, on the reference site too (OP#1439).
+// A start date alone covers that one day; frus1981-88v05 document 37
+// (1985-05-29) mentions China.
 
 const validFilters = [
     ["entire-site", { within: "entire-site" }],
@@ -16,7 +18,7 @@ const validFilters = [
     ["documents+month", { within: "documents", "start-date": "1985-03", "end-date": "1985-06-30" }],
     ["documents+range", { within: "documents", "start-date": "1985-03-01", "end-date": "1985" }],
     ["documents+range-month", { within: "documents", "start-date": "1985-03-01", "end-date": "1985-06" }],
-    ["documents+start-only", { within: "documents", "start-date": "1985-03-30" }],
+    ["documents+start-only", { within: "documents", "start-date": "1985-05-29" }],
 ];
 
 const invalidFilters = [
