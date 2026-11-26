@@ -22,6 +22,7 @@
             [[ hsg:volume-card-tags($volume?doc, $context) ]]
             <h1>[[ $volume?title ]]</h1>
         </header>
+        [% if $volume?published %]
         <div class="hsg-frus__landing-intro">
             [[ hsg:volume-cover($volume?doc, $volume?id, $volume?title) ]]
             <div class="hsg-frus__landing-summary">
@@ -32,6 +33,13 @@
                 [[ hsg:volume-open-link($context) ]]
             </div>
         </div>
+        [% else %]
+        [# A volume not yet published shows its production stage instead of
+           cover, editors and publisher, as hsg-shell does. #]
+        <p class="hsg-frus__status-note"><strong>Note:</strong> As indicated on the
+            <a href="[[ $context?context-path ]]/historicaldocuments/status-of-the-series">Status of the Series</a>
+            page, the current status of this volume is “[[ hsg:production-stage-label($volume?status) ]].”</p>
+        [% endif %]
     </article>
     [% endif %]
     [% endlet %]
