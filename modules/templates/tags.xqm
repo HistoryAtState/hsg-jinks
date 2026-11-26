@@ -29,12 +29,21 @@ declare variable $tags:TAXONOMY_DOC := "/db/apps/hsg-jinks/data/tags/taxonomy.xm
 declare variable $tags:FRUS_COL := $config:data-default;
 declare variable $tags:SECRETARY_BIOS_COL := "/db/apps/other-publications/secretary-bios";
 
-(:~ Every tei:keywords element carrying this section's scheme, across both tagged collections. :)
-declare %private function tags:all-keywords() as element(tei:keywords)* {
-    (
-        collection($tags:FRUS_COL)//tei:keywords[@scheme eq $tags:SCHEME],
-        collection($tags:SECRETARY_BIOS_COL)//tei:keywords[@scheme eq $tags:SCHEME]
-    )
+(:~
+ : The tag keywords of the FRUS volumes. Only a volume's main file
+ : (<vol>/<vol>.xml) carries them, so only those files are opened. There is
+ : no index on keywords/@scheme, and searching every document took over a
+ : minute per call on the full FRUS data.
+ :)
+declare %private function tags:frus-keywords() as element(tei:keywords)* {
+    for $vol-id in xmldb:get-child-collections($tags:FRUS_COL)
+    return doc($tags:FRUS_COL || "/" || $vol-id || "/" || $vol-id || ".xml")
+        /tei:TEI/tei:teiHeader//tei:keywords[@scheme eq $tags:SCHEME]
+};
+
+(:~ The tag keywords of the Secretary of State biographies. :)
+declare %private function tags:secretary-keywords() as element(tei:keywords)* {
+    collection($tags:SECRETARY_BIOS_COL)//tei:keywords[@scheme eq $tags:SCHEME]
 };
 
 (:~ Resolve a taxonomy id to its tei:category element, or the empty sequence if unknown. :)
@@ -52,26 +61,15 @@ declare function tags:tag-count() as xs:integer {
     count(doc($tags:TAXONOMY_DOC)//tei:category)
 };
 
-(:~ Distinct FRUS volumes carrying at least one tag (landing-page count). :)
-declare function tags:tagged-frus-volume-count() as xs:integer {
-    count(distinct-values(collection($tags:FRUS_COL)//tei:keywords[@scheme eq $tags:SCHEME]/root(.)/tei:TEI/@xml:id))
-};
-
-(:~ Distinct Secretary biographies carrying at least one tag (landing-page count). :)
-declare function tags:tagged-secretary-count() as xs:integer {
-    count(distinct-values(collection($tags:SECRETARY_BIOS_COL)//tei:keywords[@scheme eq $tags:SCHEME]/root(.)/tei:TEI/@xml:id))
-};
-
-(:~ Total tag *assignments* (every tei:term, not distinct) across both collections -- landing-page count. :)
-declare function tags:total-tag-assignments() as xs:integer {
-    count(tags:all-keywords()/tei:term)
+(:~ How many distinct documents these keywords come from. :)
+declare %private function tags:document-count($keywords as element(tei:keywords)*) as xs:integer {
+    count(distinct-values($keywords/root(.)/tei:TEI/@xml:id))
 };
 
 (:~
  : Landing-page narrative (#1174), ported verbatim from the reference site's
  : /tags text (curly quotes and all) with the reference's hardcoded counts
- : replaced by tags:tag-count()/tagged-secretary-count()/
- : tagged-frus-volume-count()/total-tag-assignments() -- PR #19 review:
+ : replaced by live counts -- PR #19 review:
  : the first draft substituted a "usa-summary-box" + bullet list that matched
  : nothing on the reference site and dropped two of its three paragraphs
  : along with several inline links; this replaces that with the actual
@@ -80,6 +78,8 @@ declare function tags:total-tag-assignments() as xs:integer {
  :)
 declare function tags:landing-intro($context as map(*)) as element(p)+ {
     let $cp := $context?context-path
+    let $frus := tags:frus-keywords()
+    let $bios := tags:secretary-keywords()
     return (
         <p>The Office of the Historian&#x2019;s &#x201C;Subject Taxonomy of the History of U.S.
             Foreign Relations&#x201D; covers {tags:tag-count()}
@@ -87,25 +87,20 @@ declare function tags:landing-intro($context as map(*)) as element(p)+ {
             one of these sections, or view <a href="{$cp}/tags/all">the full
                 taxonomy</a>.</p>,
         <p>The taxonomy has been applied to a small but growing segment of the
-            resources on the Office of the Historian&#x2019;s website: {tags:tagged-secretary-count()}
+            resources on the Office of the Historian&#x2019;s website: {tags:document-count($bios)}
             <a href="{$cp}/departmenthistory/people/secretaries"> biographies of the
-                Secretaries of State</a> and {tags:tagged-frus-volume-count()} volumes from the <a href="{$cp}/historicaldocuments">
+                Secretaries of State</a> and {tags:document-count($frus)} volumes from the <a href="{$cp}/historicaldocuments">
                 <em>Foreign Relations of the United States</em>
             </a> series.</p>,
-        <p>With {format-number(tags:total-tag-assignments(), "#,###")} tags applied to
+        <p>With {format-number(count(($frus, $bios)/tei:term), "#,###")} tags applied to
             date, this growing resource exposes connections across the accumulated
             knowledge of the Office of the Historian.</p>
     )
 };
 
-(:~ FRUS volumes directly tagged with exactly this id (not descendant-inclusive). :)
-declare function tags:tagged-frus-volumes($tagId as xs:string) as element(tei:TEI)* {
-    collection($tags:FRUS_COL)//tei:keywords[@scheme eq $tags:SCHEME][tei:term = $tagId]/root(.)/tei:TEI
-};
-
-(:~ Secretary biographies directly tagged with exactly this id (not descendant-inclusive). :)
-declare function tags:tagged-secretaries($tagId as xs:string) as element(tei:TEI)* {
-    collection($tags:SECRETARY_BIOS_COL)//tei:keywords[@scheme eq $tags:SCHEME][tei:term = $tagId]/root(.)/tei:TEI
+(:~ The documents whose keywords name exactly this id (not descendant-inclusive). :)
+declare %private function tags:tagged($keywords as element(tei:keywords)*, $tagId as xs:string) as element(tei:TEI)* {
+    $keywords[tei:term = $tagId]/root(.)/tei:TEI
 };
 
 (:~ An entry's own id plus every descendant category/tag id -- the set a parent's hit-count aggregates over. :)
@@ -114,29 +109,24 @@ declare function tags:descendant-ids($entry as element(tei:category)) as xs:stri
 };
 
 (:~
- : Descendant-inclusive hit count: how many tag assignments (across both
- : collections) name this entry's own id or any id beneath it. Mirrors
- : hsg-shell's tags:descend hit-count computation.
+ : Descendant-inclusive hit count: how many of the tag assignments $terms
+ : name this entry's own id or any id beneath it. Mirrors hsg-shell's
+ : tags:descend hit-count computation.
+ :
+ : $terms is a materialized sequence filtered here, not a predicate chained
+ : onto a path over two unioned collection() results: eXist was observed
+ : to silently drop matches in that chained form.
  :)
-(:~
- : Materializes the term sequence into a variable before filtering rather
- : than chaining tags:all-keywords()/tei:term[predicate] in one path
- : expression -- eXist was observed to silently drop matches when the
- : predicate is chained directly onto a child step over a sequence unioned
- : from two different collection() calls (confirmed live: identical
- : predicate, only the intermediate-variable form returns correct counts).
- :)
-declare function tags:hit-count($entry as element(tei:category)) as xs:integer {
-    let $terms := tags:all-keywords()/tei:term
+declare function tags:hit-count($entry as element(tei:category), $terms as element(tei:term)*) as xs:integer {
     let $ids := tags:descendant-ids($entry)
     return count($terms[. = $ids])
 };
 
 (:~ Immediate child categories/tags with their own descendant-inclusive hit counts, for drill-down rendering. :)
-declare function tags:children-with-counts($entry as element(tei:category)) as map(*)* {
+declare function tags:children-with-counts($entry as element(tei:category), $terms as element(tei:term)*) as map(*)* {
     for $child in $entry/tei:category
     order by $child/tei:catDesc/tei:term
-    return map { "entry": $child, "count": tags:hit-count($child) }
+    return map { "entry": $child, "count": tags:hit-count($child, $terms) }
 };
 
 (:~
@@ -252,9 +242,12 @@ declare function tags:volume-tags-panel($context as map(*)) as element(nav)? {
 declare function tags:show-tag($context as map(*)) as element(div) {
     let $tagId := $context?request?parameters?tagId
     let $entry := tags:taxonomy-entry($tagId)
-    let $secretaries := tags:tagged-secretaries($tagId)
-    let $volumes := tags:tagged-frus-volumes($tagId)
-    let $children := tags:children-with-counts($entry)
+    let $frus := tags:frus-keywords()
+    let $bios := tags:secretary-keywords()
+    let $secretaries := tags:tagged($bios, $tagId)
+    let $volumes := tags:tagged($frus, $tagId)
+    let $terms := ($frus/tei:term, $bios/tei:term)
+    let $children := tags:children-with-counts($entry, $terms)
     return
         <div>
             <h1>{$entry/tei:catDesc/tei:term/string()}</h1>
