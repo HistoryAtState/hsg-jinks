@@ -5,7 +5,7 @@ ARG BUILD=local
 # (.devcontainer/docker-compose.yml, README "Pinned baseline") so this image
 # runs exactly the stack the Cypress suite is green against. Bump both files
 # together.
-ARG ROUTER_VERSION=1.12.2
+ARG ROUTER_VERSION=2.1.4
 ARG PUBLISHER_LIB_VERSION=6.1.0
 ARG JINKS_TEMPLATES_VERSION=1.4.2
 ARG CAROUSEL_VERSION=0.11.10
@@ -56,7 +56,8 @@ ARG ROUTER_VERSION
 ARG JINKS_TEMPLATES_VERSION
 ARG PUBLISHER_LIB_VERSION
 ARG CAROUSEL_VERSION
-ADD --chown=${USR:-root} https://exist-db.org/exist/apps/public-repo/public/roaster-${ROUTER_VERSION}.xar /exist/autodeploy/003.xar
+# roaster comes from its GitHub release: the eXist public repo stops at 2.1.1.
+ADD --chown=${USR:-root} https://github.com/eeditiones/roaster/releases/download/v${ROUTER_VERSION}/roaster-${ROUTER_VERSION}.xar /exist/autodeploy/003.xar
 ADD --chown=${USR:-root} https://exist-db.org/exist/apps/public-repo/public/jinks-templates-${JINKS_TEMPLATES_VERSION}.xar /exist/autodeploy/004.xar
 ADD --chown=${USR:-root} https://exist-db.org/exist/apps/public-repo/public/tei-publisher-lib-${PUBLISHER_LIB_VERSION}.xar /exist/autodeploy/005.xar
 ADD --chown=${USR:-root} https://github.com/HistoryAtState/carousel/releases/download/v${CAROUSEL_VERSION}/carousel.xar /exist/autodeploy/carousel.xar

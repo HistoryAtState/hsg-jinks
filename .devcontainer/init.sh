@@ -24,6 +24,10 @@ export EXISTDB_SERVER=http://localhost:8080/exist EXISTDB_USER=admin EXISTDB_PAS
 # content instead of failing loudly).
 xst run 'sm:add-group-member("tei","admin")' >/dev/null
 
+# The base image ships roaster 1.13.1; the app runs on 2.1.4, like the
+# production image. A plain install upgrades and is a no-op once installed.
+xst package install gh roaster v2.1.4 --owner eeditiones
+
 # PRODUCTION=true (CI) builds what the production image ships; see README
 # "Production Docker image".
 if [ "$PRODUCTION" = "true" ]; then

@@ -2,7 +2,7 @@
     <title>hsg-jinks</title>
     <dependency processor="http://exist-db.org" semver-min="6.2.0"/>
     
-        <dependency package="http://e-editiones.org/roaster" semver="1"/>
+        <dependency package="http://e-editiones.org/roaster" semver-min="1" semver-max="2"/>
      
         <dependency package="http://existsolutions.com/apps/tei-publisher-lib" semver-min="6.1" semver-max="6"/>
      

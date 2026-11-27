@@ -4,6 +4,7 @@ module namespace ogapi="http://teipublisher.com/api/open";
 
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors="http://e-editiones.org/roaster/errors";
+import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace volumes="https://history.state.gov/ns/frus-volumes" at "frus-volumes.xqm";
 
@@ -197,5 +198,5 @@ declare function ogapi:frus-metadata-feed($request as map(*)) {
  : render the landing page with a 200. Same pattern as devapi:not-found.
  :)
 declare function ogapi:not-found($request as map(*)) {
-    error($errors:NOT_FOUND, "no page " || $request?parameters?page || " under /open")
+    hsg-errors:handle(map { "code": $errors:NOT_FOUND, "description": "no page " || $request?parameters?page || " under /open" })
 };
