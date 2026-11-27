@@ -269,8 +269,8 @@ declare function about:recent-publications($context as map(*)) as element(sectio
                 return
                     if (empty($change) or not($change/@when castable as xs:date)) then ()
                     else
-                        let $title := normalize-space(($doc//tei:titleStmt/tei:title)[1])
-                        let $title := replace($title, '^Foreign Relations of the United States,\s*', '')
+                        (: the volume's titleStmt is xincluded (OP#1529) :)
+                        let $title := replace(hsg:publication-title($volumeId), '^Foreign Relations of the United States,\s*', '')
                         return map {
                             "volumeId": $volumeId,
                             "year": year-from-date(xs:date($change/@when)),

@@ -217,14 +217,23 @@ describe("Static pages: contact-us, the-historian, reports, content-warning", ()
 
 describe("Recent Publications: cross-collection FRUS listing", () => {
     it("renders the page even when no volume falls in the current/prior year window", () => {
-        // frus-data-jinks' baseline is one fixed sample volume with an old
-        // publication date, so this dev environment's list is legitimately
-        // empty -- this only checks the page itself renders without error,
-        // not a volume count (see CLAUDE.md "Cypress assertions on
-        // data-package counts": counts here depend on upstream data, not on
-        // this section's own code).
+        // Which volumes are listed depends on the data and on the current
+        // year, so no test here counts them (see CLAUDE.md "Cypress
+        // assertions on data-package counts").
         cy.visit("about/recent-publications");
         cy.get("main h1").should("contain.text", "Recent Publications");
+    });
+
+    it("gives every listed volume its title (OP#1529)", () => {
+        // Holds for any data, an empty list included.
+        cy.visit("about/recent-publications");
+        cy.get("main").then(($main) => {
+            const links = $main.find(".usa-collection__heading a").toArray();
+            links.forEach((link) => {
+                expect(link.textContent.trim(), link.getAttribute("href")).not.to.equal("");
+                expect(link.textContent, link.getAttribute("href")).not.to.match(/^Foreign Relations/);
+            });
+        });
     });
 });
 
