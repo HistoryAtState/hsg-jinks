@@ -53,6 +53,24 @@ describe("Unknown paths below fixed routes", () => {
     });
 });
 
+// Static files are served at the app root only (controller.xql): below any
+// path, every page address could be extended into an endless number of
+// addresses answering 200.
+describe("Static files below a page path", () => {
+    it("serves static files at the app root", () => {
+        cy.request("resources/css/components.css").its("status").should("eq", 200);
+        cy.request("resources/i18n/app/en.json").its("status").should("eq", 200);
+    });
+
+    ["about/resources/css/components.css", "historicaldocuments/about-frus/resources/i18n/app/en.json",
+        "x/y/transform/hsg-jinks.css", "countries/cuba/templates/layouts/base.html"].forEach((path) => {
+        it(`answers /${path} with 404`, () => {
+            cy.request({ url: path, failOnStatusCode: false, followRedirect: false })
+                .its("status").should("eq", 404);
+        });
+    });
+});
+
 describe("Trailing and repeated slashes", () => {
     const root = Cypress.config("baseUrl").replace(/\/$/, "");
     const appPath = new URL(root).pathname;
