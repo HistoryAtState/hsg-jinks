@@ -1,5 +1,7 @@
 const { defineConfig } = require('cypress');
 const glob = require('glob');
+const path = require('path');
+const fs = require('fs');
 
 module.exports = defineConfig({
   e2e: {
@@ -8,6 +10,17 @@ module.exports = defineConfig({
         findFiles({ pattern }) {
           // Use glob.sync to get the files synchronously
           return glob.sync(pattern, { nodir: true });
+        }
+      });
+      // Delete the previous run's JUnit reports. With mochaFile=...-[hash].xml
+      // every run writes new files next to the old ones, and a CI job that
+      // reuses its workspace would publish them all again.
+      on('before:run', () => {
+        const mochaFile = config.reporterOptions?.mochaFile;
+        if (!mochaFile) return;
+        const pattern = path.resolve(config.projectRoot, mochaFile).replace('[hash]', '*');
+        for (const file of glob.sync(pattern, { nodir: true })) {
+          fs.rmSync(file);
         }
       });
       return config;
