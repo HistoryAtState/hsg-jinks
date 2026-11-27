@@ -4,6 +4,7 @@ module namespace devapi="http://teipublisher.com/api/developer";
 
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors="http://e-editiones.org/roaster/errors";
+import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 
 (:~
  : The key roaster reads the status code from. Rebuilt here rather than
@@ -51,5 +52,5 @@ declare function devapi:catalog($request as map(*)) {
  : first since that literal route has higher specificity still.
  :)
 declare function devapi:not-found($request as map(*)) {
-    error($errors:NOT_FOUND, "no page " || $request?parameters?page || " under /developer")
+    hsg-errors:handle(map { "code": $errors:NOT_FOUND, "description": "no page " || $request?parameters?page || " under /developer" })
 };

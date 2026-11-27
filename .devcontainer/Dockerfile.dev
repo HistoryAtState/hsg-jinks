@@ -70,10 +70,13 @@ RUN ln -s /exist /usr/local/exist
 # whatever in autodeploy/ is not installed yet, in alphabetical order, so these
 # install on first boot, after the image's own packages.
 #
-# The jinks generator is built from main: we track jinks main. The zz- prefix
-# installs it after its dependencies (jinks-templates, tei-publisher-lib,
-# roaster, jwt).
-RUN git clone https://github.com/eeditiones/jinks.git \
+# The jinks generator is built from main: we track jinks main. Until
+# eeditiones/jinks#403 is merged, main requires roaster 1, so the generator is
+# built from that PR's branch, which accepts roaster 1 and 2 (init.sh installs
+# roaster 2.1.4). The zz- prefix installs it after its dependencies
+# (jinks-templates, tei-publisher-lib, roaster, jwt).
+ARG JINKS_REF=chore/roaster-2
+RUN git clone --branch ${JINKS_REF} https://github.com/eeditiones/jinks.git \
     && cd jinks \
     && ant \
     && cp build/*.xar /usr/local/exist/autodeploy/zz-jinks.xar

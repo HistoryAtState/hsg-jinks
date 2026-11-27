@@ -7,10 +7,16 @@ xquery version "3.1";
  :
  : Every section api module's x-error-handler wrapper delegates here, so the
  : status mapping and template choice live in one place: 404 for roaster's
- : NOT_FOUND, 400 for BAD_REQUEST (the search query guard, OP#1273), and the
- : friendly generic error page for any other error class (real 500s). The
- : 404/400/500 pages deliberately show no internals, like the reference.
- : Public error responses never include exception details.
+ : NOT_FOUND, 400 for BAD_REQUEST, and the friendly generic error page for any
+ : other error class (real 500s). A 400 gets the invalid-search page when its
+ : value is $hsg-errors:SEARCH (the search query guard, OP#1273), the generic
+ : invalid-request page otherwise. The 404/400/500 pages deliberately show no
+ : internals, like the reference. Public error responses never include
+ : exception details.
+ :
+ : Handlers that answer with an error page themselves (the catch-all routes,
+ : the search query guard) call hsg-errors:handle directly instead of raising:
+ : Roaster logs every raised error at ERROR level (eeditiones/roaster#183).
  :)
 module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors";
 
@@ -28,28 +34,34 @@ import module namespace roaster="http://e-editiones.org/roaster";
  :)
 declare namespace router="http://e-editiones.org/roaster/router";
 
+(:~ The error value marking a 400 from the search query guard. :)
+declare variable $hsg-errors:SEARCH := map { "page": "search" };
+
 declare function hsg-errors:handle($error as map(*)) {
-    (: FORG0001 is roaster's own parameters:cast-value failing on a query
-       parameter whose OpenAPI schema declares a numeric type (e.g. a
-       non-integer n) -- a client error, but not one of roaster's $errors:*
-       QNames. It gets the 400 status with the generic invalid-request page:
-       the 400 page's invalid-search copy would be wrong for it, and the
-       jinks-owned diagnostics page exposes internals. :)
+    (: Roaster 2.1 raises BAD_REQUEST for a query parameter it cannot cast to
+       its declared type (e.g. a non-integer n); Roaster 1 let the plain cast
+       error FORG0001 through. Both get the 400 status with the generic
+       invalid-request page: the jinks-owned diagnostics page exposes
+       internals. :)
     let $status :=
         if ($error?code eq $errors:NOT_FOUND) then 404
         else if ($error?code eq $errors:BAD_REQUEST) then 400
         else if (local-name-from-QName($error?code) eq "FORG0001") then 400
         else 500
+    let $file :=
+        if ($status = 404) then "error-404.html"
+        else if ($status = 400 and hsg-errors:is-search($error)) then "error-400.html"
+        else if ($status = 400) then "error-request.html"
+        (: a real 500 (an uncaught dynamic error, a bug elsewhere in the
+           app, ...): friendly page, not the diagnostic one -- end users
+           should not see a stack trace in production. :)
+        else "error-500.html"
     return
-        if ($error?code = ($errors:NOT_FOUND, $errors:BAD_REQUEST)) then
-            hsg-errors:render($error, "error-" || $status || ".html", $status)
-        else if ($status = 400) then
-            hsg-errors:render($error, "error-request.html", $status)
-        else
-            (: a real 500 (an uncaught dynamic error, a bug elsewhere in the
-               app, ...): friendly page, not the diagnostic one -- end users
-               should not see a stack trace in production. :)
-            hsg-errors:render($error, "error-500.html", $status)
+        hsg-errors:render($error, $file, $status)
+};
+
+declare %private function hsg-errors:is-search($error as map(*)) as xs:boolean {
+    $error?value instance of map(*) and $error?value?page = "search"
 };
 
 (:~

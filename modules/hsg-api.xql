@@ -5,6 +5,7 @@ module namespace hsgapi="http://teipublisher.com/api/hsg";
 import module namespace vapi="http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace errors="http://e-editiones.org/roaster/errors";
+import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 import module namespace hsg="https://history.state.gov/ns/templates/hsg" at "templates/hsg.xqm";
 import module namespace global="http://e-editiones.org/tei-publisher/odd-global" at "odd-global.xqm";
 
@@ -60,7 +61,7 @@ declare function hsgapi:index($request as map(*)) {
  : error, before any x-error-handler runs. This way they get the 404 page.
  :)
 declare function hsgapi:not-found($request as map(*)) {
-    error($errors:NOT_FOUND, "no page at /" || $request?parameters?path)
+    hsg-errors:handle(map { "code": $errors:NOT_FOUND, "description": "no page at /" || $request?parameters?path })
 };
 
 (:~

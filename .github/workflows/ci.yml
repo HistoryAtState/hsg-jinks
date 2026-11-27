@@ -78,14 +78,14 @@ jobs:
           ant xar
           xst package install build/frus-tei.xar
 
-      # The image ships Roaster 2; hsg-jinks still declares Roaster 1 until
-      # the Roaster 2 upgrade lands.
-      - name: Downgrade Roaster to 1.13.1
+      # The image ships Roaster 2.1.1; the app runs on 2.1.4, the version
+      # the production image installs.
+      - name: Install Roaster 2.1.4
         env:
           EXISTDB_SERVER: http://localhost:8080/exist
           EXISTDB_USER: admin
           EXISTDB_PASS: ""
-        run: xst package install gh roaster v1.13.1 --owner eeditiones
+        run: xst package install gh roaster v2.1.4 --owner eeditiones
 
       # Same seed path as the devcontainer, but with the build the production
       # image ships (ant -Dproduction=true, README "Production Docker image"),

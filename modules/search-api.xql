@@ -4,6 +4,7 @@ module namespace searchapi = "https://history.state.gov/api/search";
 
 import module namespace vapi = "http://teipublisher.com/api/view" at "lib/api/view.xql";
 import module namespace errors = "http://e-editiones.org/roaster/errors";
+import module namespace hsg-errors="https://history.state.gov/ns/site/hsg/errors" at "hsg-errors.xqm";
 import module namespace query-guard = "http://history.state.gov/ns/site/hsg/query-guard" at "query-guard.xqm";
 import module namespace srch = "https://history.state.gov/ns/templates/search" at "templates/search.xqm";
 
@@ -23,11 +24,12 @@ declare namespace router = "http://e-editiones.org/roaster/router";
  :)
 declare function searchapi:search($request as map(*)) {
     if (query-guard:check($request?parameters?q)) then
-        (: roaster's own 400 code: hsg-errors:handle maps it to the invalid-search page (OP#1273/#1309) :)
-        error($errors:BAD_REQUEST, "search query rejected by query guard")
+        (: answered, not raised: a raised error is logged at ERROR level; the
+           value selects the invalid-search page (OP#1273/#1309) :)
+        hsg-errors:handle(map { "code": $errors:BAD_REQUEST, "description": "search query rejected by query guard", "value": $hsg-errors:SEARCH })
     else if (not(srch:query-parses(string-join($request?parameters?q, " ")))) then
         (: malformed Lucene syntax, e.g. an unbalanced quote (OP#1273) :)
-        error($errors:BAD_REQUEST, "malformed search query syntax")
+        hsg-errors:handle(map { "code": $errors:BAD_REQUEST, "description": "malformed search query syntax", "value": $hsg-errors:SEARCH })
     else
         let $showResults :=
             some $name in ("q", "start-date", "end-date")
@@ -69,5 +71,5 @@ declare function searchapi:tips($request as map(*)) {
  : today for its own unrouted children (out of scope to fix there).
  :)
 declare function searchapi:not-found($request as map(*)) {
-    error($errors:NOT_FOUND, "no route below /search/" || $request?parameters?other)
+    hsg-errors:handle(map { "code": $errors:NOT_FOUND, "description": "no route below /search/" || $request?parameters?other })
 };
