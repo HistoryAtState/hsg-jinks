@@ -77,19 +77,23 @@ import module namespace menuapi="https://history.state.gov/api/menu" at "../menu
 import module namespace opdsapi="http://teipublisher.com/api/opds" at "../opds-catalog-api.xql";
 
 import module namespace lm="https://history.state.gov/ns/site/hsg/last-modified" at "../last-modified.xqm";
+import module namespace mw="https://history.state.gov/ns/site/hsg/middleware" at "../middleware.xqm";
 
 declare option output:indent "no";
 
-(: page handlers are wrapped for Last-Modified and 304 Not Modified (OP#1471) :)
+let $resolve := function($name as xs:string) {
+    try {
+        function-lookup(xs:QName($name), 1)
+    } catch * {
+        ()
+    }
+}
+(: every handler sends the answer a middleware put on the request instead
+   (middleware.xqm, OP#1527) :)
 let $lookup := function($name as xs:string) {
-    let $handler :=
-        try {
-            function-lookup(xs:QName($name), 1)
-        } catch * {
-            ()
-        }
+    let $handler := $resolve($name)
     return
-        if (exists($handler)) then lm:wrap($name, $handler) else ()
+        if (exists($handler)) then mw:wrap($handler, $resolve) else ()
 }
 let $resp := roaster:route(
     (

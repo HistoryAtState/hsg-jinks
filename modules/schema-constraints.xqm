@@ -7,27 +7,31 @@ xquery version "3.1";
  :
  : Runs after roaster's own parameter middlewares, so $request?parameters
  : holds the decoded, cast values. A path parameter that fails answers 404,
- : like an id that does not exist; a query parameter answers 400.
+ : like an id that does not exist; a query parameter answers 400. The answer
+ : goes through the shared middleware signal (mw:fail), so it is rendered by
+ : the route's error handler without being logged as an error.
  :)
 module namespace schema-constraints="https://history.state.gov/ns/site/hsg/schema-constraints";
 
 import module namespace errors="http://e-editiones.org/roaster/errors";
+import module namespace mw="https://history.state.gov/ns/site/hsg/middleware" at "middleware.xqm";
 
 declare function schema-constraints:use($request as map(*), $response as map(*)) as map(*)+ {
-    (: these FLWOR expressions return an empty sequence, if all parameters are valid :)
-    for $param in $request?config?parameters?*[?in = "path"]
-    let $violations := schema-constraints:check($request, $param)
-    where exists($violations)
-    return error($errors:NOT_FOUND, schema-constraints:message($param, $violations))
-    ,
-    for $param in $request?config?parameters?*[?in = "query"]
-    let $violations := schema-constraints:check($request, $param)
-    where exists($violations)
-    return error($errors:BAD_REQUEST, schema-constraints:message($param, $violations))
-    ,
-    (: continue with validated parameters :)
-    $request,
-    $response
+    let $failure := head((
+        for $param in $request?config?parameters?*[?in = "path"]
+        let $violations := schema-constraints:check($request, $param)
+        where exists($violations)
+        return map { "code": $errors:NOT_FOUND, "description": schema-constraints:message($param, $violations) }
+        ,
+        for $param in $request?config?parameters?*[?in = "query"]
+        let $violations := schema-constraints:check($request, $param)
+        where exists($violations)
+        return map { "code": $errors:BAD_REQUEST, "description": schema-constraints:message($param, $violations) }
+    ))
+    return (
+        if (exists($failure)) then mw:fail($request, $failure) else $request,
+        $response
+    )
 };
 
 (:~

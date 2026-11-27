@@ -3,10 +3,12 @@ xquery version "3.1";
 (:~
  : Last-Modified and 304 Not Modified for the page routes (OP#1471).
  :
- : modules/lib/api.xql wraps the handlers of the page routes with lm:wrap. A
- : wrapped route sends a Last-Modified date with every 200 and answers a
- : conditional request (If-Modified-Since) that is not older with 304, without
- : calling the handler.
+ : lm:use is a Roaster middleware (guarded by mw:guard in modules/lib/api.xql)
+ : for the page routes. It answers a conditional request (If-Modified-Since)
+ : that is not older with 304 through the shared middleware signal, without
+ : calling the handler, and otherwise adds a Last-Modified date to the
+ : response. Roaster merges that header into the handler's response; an error
+ : the handler raises is answered without it.
  :
  : The date is the same for every page: the latest of the app's own package
  : date and the package dates of all data packages the app reads. A page can
@@ -19,6 +21,7 @@ module namespace lm="https://history.state.gov/ns/site/hsg/last-modified";
 
 import module namespace config="http://www.tei-c.org/tei-simple/config" at "config.xqm";
 import module namespace roaster="http://e-editiones.org/roaster";
+import module namespace mw="https://history.state.gov/ns/site/hsg/middleware" at "middleware.xqm";
 
 declare namespace repo="http://exist-db.org/xquery/repo";
 declare namespace router="http://e-editiones.org/roaster/router";
@@ -37,44 +40,31 @@ declare variable $lm:PAGE_APIS := (
 
 declare variable $lm:EPOCH := xs:dateTime("1970-01-01T00:00:00Z");
 
-(: the key roaster reads a response map's status from; roaster.xqm does not re-export it :)
-declare variable $lm:RESPONSE_CODE := xs:QName("router:RESPONSE_CODE");
+(: the key roaster reads a response map's headers from; roaster.xqm does not re-export it :)
+declare variable $lm:RESPONSE_HEADERS := xs:QName("router:RESPONSE_HEADERS");
 
-(:~
- : The handler for $operationId, wrapped if the route serves a page.
- :)
-declare function lm:wrap($operationId as xs:string, $handler as function(*)) as function(*) {
-    if (lm:is-page-route($operationId)) then
-        function($request as map(*)) { lm:respond($request, $handler) }
-    else
-        $handler
+declare function lm:use($request as map(*), $response as map(*)) as map(*)+ {
+    let $lastModified :=
+        if (lm:is-page-route($request?config?operationId)) then lm:site-last-modified() else ()
+    let $since := lm:if-modified-since()
+    return
+        if (empty($lastModified)) then
+            ($request, $response)
+        else if (exists($since) and $lastModified le $since) then (
+            mw:answer($request, roaster:response(304, (), (), map { "Last-Modified": lm:http-date($lastModified) })),
+            $response
+        ) else (
+            $request,
+            map:put($response, $lm:RESPONSE_HEADERS, map:merge((
+                $response($lm:RESPONSE_HEADERS),
+                map { "Last-Modified": lm:http-date($lastModified) }
+            )))
+        )
 };
 
 declare function lm:is-page-route($operationId as xs:string) as xs:boolean {
     substring-before($operationId, ":") = $lm:PAGE_APIS
     and substring-after($operationId, ":") ne "not-found"
-};
-
-declare %private function lm:respond($request as map(*), $handler as function(*)) {
-    let $lastModified := lm:site-last-modified()
-    let $since := lm:if-modified-since()
-    return
-        if (exists($lastModified) and exists($since) and $lastModified le $since) then
-            roaster:response(304, (), (), map { "Last-Modified": lm:http-date($lastModified) })
-        else
-            let $response := $handler($request)
-            let $status :=
-                if ($response instance of map(*) and map:contains($response, $lm:RESPONSE_CODE)) then
-                    $response($lm:RESPONSE_CODE)
-                else
-                    200
-            let $_ :=
-                if (exists($lastModified) and $status eq 200) then
-                    response:set-header("Last-Modified", lm:http-date($lastModified))
-                else
-                    ()
-            return
-                $response
 };
 
 (:~
